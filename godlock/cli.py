@@ -47,7 +47,8 @@ def _build_parser() -> argparse.ArgumentParser:
         description=(
             "GodLock — ABAD stress-test and resilience engine "
             "(Collin Horton / Aziel the Revealer of the Sealed, 12 July 2026). "
-            "Core + receipts. Not an anonymity network."
+            "Core + receipts. Not an anonymity network. "
+            "Local UI: `godlock ui` at http://127.0.0.1:8080 (loopback only; not a VPN/proxy/Tor)."
         ),
     )
     parser.add_argument(
@@ -113,6 +114,13 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         from godlock.app import create_app
 
+        loopback = {"127.0.0.1", "localhost", "::1"}
+        if args.host not in loopback:
+            sys.stderr.write(
+                "GodLock binds loopback only (127.0.0.1). "
+                "Not a VPN, proxy, Zoom tether, or Tor hop.\n"
+            )
+            return 2
         engine = _engine(args)
         app = create_app(
             engine=engine,

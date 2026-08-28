@@ -64,3 +64,19 @@ def test_cli_ui_defaults() -> None:
     assert args.host == "127.0.0.1"
     assert args.port == 8080
     assert args.cmd in ("ui", "serve")
+
+
+def test_help_lists_ui_and_version() -> None:
+    from godlock.cli import _build_parser
+
+    text = _build_parser().format_help()
+    assert "ui" in text
+    assert "version" in text
+    assert "127.0.0.1:8080" in text or "godlock ui" in text
+
+
+def test_cli_ui_refuses_non_loopback(capsys) -> None:
+    assert main(["ui", "--host", "0.0.0.0"]) == 2
+    err = capsys.readouterr().err
+    assert "127.0.0.1" in err
+    assert "VPN" in err or "loopback" in err.lower()

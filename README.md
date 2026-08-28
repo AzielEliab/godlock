@@ -16,6 +16,19 @@ How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 **Forks are welcome and always allowed.**
 
+## Quick start
+
+```bash
+python -m venv .venv && source .venv/bin/activate && pip install -e ".[dev]"
+godlock ui
+```
+
+Open http://127.0.0.1:8080 (loopback only). No CDN, no telemetry. Not a VPN, proxy, Zoom tether, or Tor hop.
+
+Counted download: [https://godlock-download-tracker.vibelock.workers.dev/](https://godlock-download-tracker.vibelock.workers.dev/)
+
+
+
 ---
 
 ## This repo is not an anonymity network
@@ -64,6 +77,22 @@ Direct tarball (also counted): [godlock-0.1.0.tar.gz](https://godlock-download-t
 `godlock ui` serves a loopback dashboard at http://127.0.0.1:8080
 
 Binds to `127.0.0.1` only. Self-contained HTML (no CDN). `godlock serve` is the same process. FastAPI dashboard + JSON API.
+
+
+## iPhone & Android
+
+Flutter sources: [`mobile/`](mobile/). Application id `com.azieeliab.godlock`. Offline. No analytics. Dark matte / gold.
+
+On-device ABAD receipt dashboard. Banner: not an anonymity network; no IP hiding.
+
+```bash
+cd mobile
+flutter create --org com.azieeliab --project-name godlock .
+flutter pub get
+flutter run
+```
+
+The `android/` and `ios/` folders in this tree are skeleton READMEs until you run `flutter create .` (this machine has no Flutter SDK on PATH). Then open `android/` in Android Studio or `ios/Runner.xcworkspace` in Xcode. Not a store listing.
 
 ## What it does
 
@@ -187,6 +216,7 @@ docker/             Dockerfile
 k8s/                ClusterIP deployment
 workers/download-tracker/   Cloudflare Worker + wrangler.toml (undeployed)
 CONTRIBUTING.md     forks first-class; no real ghosting PRs
+mobile/              Flutter iPhone + Android (`flutter create .`)
 ```
 
 ---

@@ -41,19 +41,20 @@ front.
 
 ## Download
 
-**Hosted (Cloudflare Worker, counted across branches and forks):**
+**Counted download page (this project only, ticks automatically):**
 
-# → [https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz](https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz) ←
+# → [https://godlock-download-tracker.vibelock.workers.dev/](https://godlock-download-tracker.vibelock.workers.dev/) ←
 
-Direct file: [godlock-0.1.0.tar.gz](https://godlock-download-tracker.vibelock.workers.dev/godlock-0.1.0.tar.gz)
+The big button on that page is the download. The number next to it is
+**godlock only** — its own Worker and KV, not mixed with VibeLock or
+anything else. Clicking it increments the counter. Nobody reports
+anything. Forks that use the same link are counted too.
 
-- Tracker home: [https://godlock-download-tracker.vibelock.workers.dev/](https://godlock-download-tracker.vibelock.workers.dev/)
+Direct tarball (also counted): [godlock-0.1.0.tar.gz](https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz)
+
+- Live count JSON: [https://godlock-download-tracker.vibelock.workers.dev/count](https://godlock-download-tracker.vibelock.workers.dev/count)
 - Stats: [https://godlock-download-tracker.vibelock.workers.dev/stats](https://godlock-download-tracker.vibelock.workers.dev/stats)
 - GitHub releases: [https://github.com/AzielEliab/godlock/releases](https://github.com/AzielEliab/godlock/releases)
-
-Query params: `owner`, `repo` (`owner/repo` is accepted), `branch`,
-`fork` (`1` or `owner/repo`), `tag`, `asset`. Forks can POST `/event`
-so their downloads are counted separately. See the worker README.
 
 ---
 

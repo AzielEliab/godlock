@@ -221,6 +221,32 @@ mobile/              Flutter iPhone + Android (`flutter create .`)
 
 ---
 
+## Use with Grok, ChatGPT, Venice
+
+Live HTTPS runtime on the download-tracker Worker (does **not** increment the download counter):
+
+- OpenAPI 3.1: https://godlock-download-tracker.vibelock.workers.dev/openapi.json
+- Health: https://godlock-download-tracker.vibelock.workers.dev/v1/health
+- How to wire tools: https://godlock-download-tracker.vibelock.workers.dev/ai
+- MCP catalog: https://aziel-runtime.vibelock.workers.dev/mcp
+
+POST /v1/score {text} and POST /v1/submit {text} (ephemeral, no durable anonymity). Every response banners: NOT an anonymity network, no IP hiding, logical ABAD receipts only. Not a VPN/proxy/Tor.
+
+**ChatGPT Actions:** GPT Editor → Actions → Import from URL → `https://godlock-download-tracker.vibelock.workers.dev/openapi.json` (no auth).
+
+**Grok / xAI tools:** add an HTTP/OpenAPI tool pointing at `https://godlock-download-tracker.vibelock.workers.dev/openapi.json`.
+
+**Venice HTTP tools:** add an HTTP tool with method, URL, and JSON body from that spec. Start with GET `https://godlock-download-tracker.vibelock.workers.dev/v1/health`.
+
+```bash
+curl -sS -X POST https://godlock-download-tracker.vibelock.workers.dev/v1/score \
+  -H 'content-type: application/json' \
+  -d '{"text":"ABAD layers on phi and the Flower of Life"}'
+```
+
+GET `/download` still serves the gzip tarball and is counted.
+
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).

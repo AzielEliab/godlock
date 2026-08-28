@@ -1,0 +1,50 @@
+# Minimal honor of the paper's "can run in a cluster" note.
+# ClusterIP only. No hostNetwork. No privileged container.
+# The process listens on 0.0.0.0 inside the pod; the Service is ClusterIP,
+# so it is not a NodePort/LoadBalancer and not an anonymity network.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: godlock
+  labels:
+    app: godlock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: godlock
+  template:
+    metadata:
+      labels:
+        app: godlock
+    spec:
+      containers:
+        - name: godlock
+          image: godlock:0.1.0
+          args: ["serve", "--host", "0.0.0.0", "--port", "8080", "--data-dir", "/data"]
+          ports:
+            - containerPort: 8080
+              name: http
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65532
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: godlock
+spec:
+  type: ClusterIP
+  selector:
+    app: godlock
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

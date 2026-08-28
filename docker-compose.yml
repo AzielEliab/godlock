@@ -1,0 +1,15 @@
+services:
+  godlock:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      GODLOCK_HOME: /data
+    volumes:
+      - godlock-data:/data
+    restart: unless-stopped
+
+volumes:
+  godlock-data:

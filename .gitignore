@@ -1,0 +1,12 @@
+.venv
+.godlock
+dist
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+node_modules/
+.wrangler
+examples/_out
+workers/download-tracker/node_modules/
+workers/download-tracker/.wrangler/

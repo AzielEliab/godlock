@@ -1,0 +1,11 @@
+.venv
+.godlock
+.git
+.pytest_cache
+**/__pycache__
+*.egg-info
+dist
+.wrangler
+node_modules
+examples/_out
+tests

@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "godlock"
+version = "0.1.0"
+description = "Self-hosted stress-test and resilience engine for the ABAD framework (GodLock, 12 July 2026). Not an anonymity network."
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Collin Horton"},
+    {name = "Aziel Eliab"},
+]
+requires-python = ">=3.10"
+keywords = [
+    "abad",
+    "resilience",
+    "receipts",
+    "jeeves",
+    "lumen",
+    "miragegrid",
+    "stress-test",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Intended Audience :: Science/Research",
+]
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+    "cryptography>=42.0",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+godlock = "godlock.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/AzielEliab/godlock"
+Download = "https://github.com/AzielEliab/godlock/releases"
+Issues = "https://github.com/AzielEliab/godlock/issues"
+
+[tool.setuptools.packages.find]
+include = ["godlock*"]
+
+[tool.setuptools.package-data]
+godlock = ["templates/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"

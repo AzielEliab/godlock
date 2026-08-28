@@ -54,3 +54,13 @@ def test_cli_serve_defaults_loopback() -> None:
     assert args.host == DEFAULT_BIND_HOST
     assert args.host == "127.0.0.1"
     assert args.port == 8080
+
+
+def test_cli_ui_defaults() -> None:
+    from godlock.cli import _build_parser
+
+    args = _build_parser().parse_args(["ui"])
+    assert args.host == DEFAULT_BIND_HOST
+    assert args.host == "127.0.0.1"
+    assert args.port == 8080
+    assert args.cmd in ("ui", "serve")

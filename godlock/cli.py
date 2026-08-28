@@ -1,6 +1,7 @@
 """Command-line interface for GodLock.
 
     godlock serve --host 127.0.0.1 --port 8080
+    godlock ui    --host 127.0.0.1 --port 8080
     godlock submit --text "..." [--out receipt.json]
     godlock score --text "..."
     godlock merge --receipt ID --hardening "..."
@@ -71,7 +72,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    p_serve = sub.add_parser("serve", help="Run the localhost HTTP UI/API.")
+    p_serve = sub.add_parser("serve", aliases=["ui"], help="Run the localhost HTTP UI/API.")
     p_serve.add_argument("--host", default=DEFAULT_BIND_HOST, help="Bind host (default 127.0.0.1).")
     p_serve.add_argument("--port", type=int, default=DEFAULT_BIND_PORT, help="Bind port (default 8080).")
 
@@ -106,7 +107,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         sys.stdout.write(MOTTO + "\n")
         return 0
 
-    if args.cmd == "serve":
+    if args.cmd in ("serve", "ui"):
         # Local import so `godlock version` does not need uvicorn at import-check time.
         import uvicorn
 

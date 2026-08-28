@@ -58,6 +58,13 @@ Direct tarball (also counted): [godlock-0.1.0.tar.gz](https://godlock-download-t
 
 ---
 
+
+## Local UI
+
+`godlock ui` serves a loopback dashboard at http://127.0.0.1:8080
+
+Binds to `127.0.0.1` only. Self-contained HTML (no CDN). `godlock serve` is the same process. FastAPI dashboard + JSON API.
+
 ## What it does
 
 1. You submit a **counter-argument** (text) via CLI or HTTP.
@@ -101,6 +108,7 @@ Offline data dir: `./.godlock` (gitignored).
 
 ```bash
 godlock serve --host 127.0.0.1 --port 8080
+godlock ui             # localhost UI on 127.0.0.1:8080
 godlock submit --text "..." [--out receipt.json]
 godlock score --text "..."
 godlock merge --receipt ID --hardening "..."

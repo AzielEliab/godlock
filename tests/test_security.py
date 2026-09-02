@@ -61,3 +61,26 @@ def test_no_wipe_api() -> None:
     assert not hasattr(ReceiptStore, "wipe")
     assert not hasattr(ReceiptStore, "shred")
     assert not hasattr(ReceiptStore, "scorch")
+
+
+FORBIDDEN_IDENTITY = ("collin" + " horton", "reveal" + "er", "godlock" + ".az")
+SKIP_DIRS = {".venv", "node_modules", ".git", ".pytest_cache", "godlock.egg-info", "__pycache__", "dist"}
+
+
+def test_author_is_aziel_eliab_only() -> None:
+    from godlock.config import AUTHOR, HONEST_BANNER
+
+    assert AUTHOR == "Aziel Eliab"
+    assert "Not a VPN" in HONEST_BANNER
+    assert "ghost net" in HONEST_BANNER.lower()
+    repo = Path(__file__).resolve().parents[1]
+    for path in repo.rglob("*"):
+        if any(part in SKIP_DIRS or part == "tests" for part in path.parts):
+            continue
+        if not path.is_file():
+            continue
+        if path.suffix.lower() not in {".py", ".md", ".html", ".js", ".dart", ".json", ".toml", ".sh", ".txt"}:
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore").lower()
+        for needle in FORBIDDEN_IDENTITY:
+            assert needle not in text, f"{path} contains {needle!r}"

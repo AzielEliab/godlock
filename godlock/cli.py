@@ -7,7 +7,10 @@
     godlock merge --receipt ID --hardening "..."
     godlock rules
     godlock stats
+    godlock export --out FILE.json
+    godlock import --file FILE.json
     godlock export-lumen --receipt ID --out FILE.capsule
+    godlock doctor
     godlock version
 
 submit / stats / score work fully offline with ``./.godlock`` (gitignored).
@@ -45,10 +48,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="godlock",
         description=(
-            "GodLock — ABAD stress-test and resilience engine "
-            "(Aziel Eliab, 12 July 2026). "
-            "Core + receipts. Not an anonymity network. "
-            "Local UI: `godlock ui` at http://127.0.0.1:8080 (loopback only; not a VPN/proxy/Tor)."
+            "GodLock is a product name (ABAD stress-test and resilience engine). "
+            "Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab. "
+            "Local UI: `godlock ui` then open http://127.0.0.1:8080 "
+            "(this computer only)."
         ),
     )
     parser.add_argument(
@@ -95,7 +98,13 @@ def _build_parser() -> argparse.ArgumentParser:
     p_ex.add_argument("--receipt", required=True)
     p_ex.add_argument("--out", required=True, help="Output .capsule path.")
 
-    p_doc = sub.add_parser("doctor", help="Self-check: identity, loopback, score. No network.")
+    p_json_out = sub.add_parser("export", help="Save receipts as a JSON file.")
+    p_json_out.add_argument("--out", required=True, help="Output JSON path.")
+
+    p_json_in = sub.add_parser("import", help="Load a JSON file of tests or receipts.")
+    p_json_in.add_argument("--file", required=True, help="Input JSON path.")
+
+    p_doc = sub.add_parser("doctor", help="PASS/FAIL self-check. No network.")
     p_doc.add_argument("--json", action="store_true", dest="as_json", help="Print doctor results as JSON.")
     sub.add_parser("version", help="Print the GodLock version and exit.")
     return parser
@@ -164,6 +173,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.cmd == "stats":
         _print_json(engine.stats())
         return 0
+
+    if args.cmd == "export":
+        bundle = engine.export_json()
+        Path(args.out).write_text(
+            json.dumps(bundle, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        _print_json({"ok": True, "path": args.out, "receipts": len(bundle["receipts"])})
+        return 0
+
+    if args.cmd == "import":
+        raw = Path(args.file).read_text(encoding="utf-8")
+        result = engine.import_json(raw)
+        _print_json(result)
+        failed = result.get("failed") or []
+        return 1 if failed else 0
 
     if args.cmd == "export-lumen":
         info = engine.export_lumen(args.receipt, args.out)

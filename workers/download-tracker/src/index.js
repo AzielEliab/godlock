@@ -275,13 +275,13 @@ async function indexHtml(env) {
       <p class="count">${v}<span>Views</span></p>
       <p class="count">${n}<span>Downloads</span></p>
     </div>
-    <p class="kid"><strong>Two big buttons.</strong> Download saves the gzip (the Downloads number goes up). One-click install copies a Terminal command. After it finishes, type <code>godlock ui</code>.</p>
+    <p class="kid"><strong>Two big buttons.</strong> Download saves the gzip (the Downloads number goes up). One-click install copies a Terminal command. After it finishes, type <code>godlock ui</code>, open http://127.0.0.1:8080, and tap Record, Verify, Import JSON, or Export JSON.</p>
     <div class="btns">
       <a class="btn primary dl" href="/download?asset=${DEFAULT_ASSET}">Download</a>
       <button type="button" class="btn install" id="install-btn">One-click install</button>
     </div>
     <pre id="install-cmd">curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash</pre>
-    <p class="kid">Then run: <code>godlock ui</code> and open http://127.0.0.1:8080 (this computer only).</p>
+    <p class="kid">Then run: <code>godlock ui</code> and open http://127.0.0.1:8080 (this computer only). Tap Record, Verify, Import JSON, or Export JSON. <code>godlock doctor</code> prints PASS or FAIL.</p>
     <p class="meta">The download count ticks on the Download click. The Worker serves the gzip (HTTP 200). No 302 to GitHub. Forks using this same link are counted automatically. ${DEFAULT_ASSET} — ${n} counted.</p>
     <p class="iso">Isolated counter: Worker <code>godlock-download-tracker</code>, project <code>godlock</code>, KV <code>GODLOCK_DOWNLOADS</code>. Not mixed with any other product. /v1 does not increment downloads.</p>
     

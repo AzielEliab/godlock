@@ -160,6 +160,128 @@ class GodLockEngine:
             "receipt_count": len(recs),
         }
 
+    def export_json(self) -> dict[str, Any]:
+        """Plain JSON bundle for a kid Export button or a government study.
+
+        Does not include the Lumen key. Receipt hashes are unchanged.
+        """
+        from godlock import __version__
+        from godlock.config import AUTHOR, HONEST_BANNER
+
+        return {
+            "product": "godlock",
+            "version": __version__,
+            "author": AUTHOR,
+            "banner": HONEST_BANNER,
+            "stats": self.stats(),
+            "receipts": [r.as_dict() for r in self.receipts.all()],
+            "rules": [r.as_dict() for r in self.rules.all()],
+        }
+
+    def import_json(self, payload: Any) -> dict[str, Any]:
+        """Load a JSON file of tests (submit text) or receipts (verify + keep).
+
+        Tampered receipts FAIL and are not stored. Existing matching receipts
+        are skipped. This does not rewrite hashes.
+        """
+        receipts_raw, texts = _parse_import(payload)
+        if receipts_raw:
+            loaded: list[str] = []
+            skipped: list[str] = []
+            failed: list[dict[str, str]] = []
+            for raw in receipts_raw:
+                try:
+                    rec = Receipt(
+                        id=str(raw["id"]),
+                        timestamp=str(raw["timestamp"]),
+                        ingress_node=str(raw["ingress_node"]),
+                        egress_node=str(raw["egress_node"]),
+                        text=str(raw["text"]),
+                        hash=str(raw["hash"]),
+                    )
+                except (KeyError, TypeError) as exc:
+                    failed.append({"error": f"bad receipt: {exc}"})
+                    continue
+                if not rec.verify():
+                    failed.append({"id": rec.id, "error": "hash does not match — file was changed"})
+                    continue
+                try:
+                    existing = self.receipts.get(rec.id)
+                except KeyError:
+                    existing = None
+                if existing is not None:
+                    if existing == rec:
+                        skipped.append(rec.id)
+                        continue
+                    failed.append({"id": rec.id, "error": "same id, different data — not replaced"})
+                    continue
+                self.receipts.append(rec)
+                loaded.append(rec.id)
+            return {
+                "mode": "receipts",
+                "loaded": len(loaded),
+                "skipped": len(skipped),
+                "failed": failed,
+                "ids": loaded,
+            }
+
+        submitted: list[dict[str, Any]] = []
+        for text in texts:
+            t = (text or "").strip()
+            if not t:
+                continue
+            submitted.append(self.submit(t))
+        if not submitted:
+            raise ValueError("this JSON file has no tests")
+        return {
+            "mode": "texts",
+            "submitted": len(submitted),
+            "results": submitted,
+        }
+
+
+def _looks_like_receipt(item: dict[str, Any]) -> bool:
+    return all(
+        k in item for k in ("id", "timestamp", "ingress_node", "egress_node", "text", "hash")
+    )
+
+
+def _parse_import(payload: Any) -> tuple[list[dict[str, Any]], list[str]]:
+    if isinstance(payload, (bytes, bytearray)):
+        payload = payload.decode("utf-8")
+    if isinstance(payload, str):
+        payload = json.loads(payload)
+    receipts: list[dict[str, Any]] = []
+    texts: list[str] = []
+    if isinstance(payload, list):
+        for item in payload:
+            if isinstance(item, str):
+                texts.append(item)
+            elif isinstance(item, dict):
+                if _looks_like_receipt(item):
+                    receipts.append(item)
+                elif "text" in item:
+                    texts.append(str(item["text"]))
+        return receipts, texts
+    if not isinstance(payload, dict):
+        raise ValueError("JSON must be an object or a list")
+    if isinstance(payload.get("receipts"), list):
+        receipts.extend(r for r in payload["receipts"] if isinstance(r, dict))
+    rec_one = payload.get("receipt")
+    if isinstance(rec_one, dict) and _looks_like_receipt(rec_one):
+        receipts.append(rec_one)
+    if isinstance(payload.get("text"), str):
+        texts.append(payload["text"])
+    if isinstance(payload.get("texts"), list):
+        texts.extend(str(t) for t in payload["texts"])
+    if isinstance(payload.get("tests"), list):
+        for t in payload["tests"]:
+            if isinstance(t, str):
+                texts.append(t)
+            elif isinstance(t, dict) and "text" in t:
+                texts.append(str(t["text"]))
+    return receipts, texts
+
 
 def decrypt_exported_capsule(path: str | Path, key: bytes) -> dict[str, Any]:
     """Test/operator helper. Not served by the HTTP API."""

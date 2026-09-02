@@ -6,85 +6,132 @@
   <title>GodLock</title>
   <style>
     :root { color-scheme: dark; }
-    body { font-family: Georgia, serif; margin: 0; background: #111; color: #e8e0d0; }
-    main { max-width: 46rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
-    h1 { font-weight: 400; letter-spacing: 0.08em; }
-    .motto { font-style: italic; color: #c4b59a; }
-    .warn { border: 1px solid #8a5a2b; padding: 0.75rem 1rem; color: #f0d0a8; }
-    dl { display: grid; grid-template-columns: 11rem 1fr; gap: 0.35rem 1rem; }
-    dt { color: #9a8b74; }
-    form { margin: 1.5rem 0; }
-    textarea { width: 100%; min-height: 7rem; background: #1c1c1c; color: inherit; border: 1px solid #444; padding: 0.6rem; }
-    button { background: #3d2a16; color: #f3e6d0; border: 1px solid #8a5a2b; padding: 0.45rem 1rem; cursor: pointer; }
+    body { font-family: system-ui, sans-serif; margin: 0; background: #111; color: #e8e0d0; }
+    main { max-width: 40rem; margin: 0 auto; padding: 1.5rem 1.1rem 3rem; }
+    h1 { font-weight: 650; letter-spacing: 0.04em; margin: 0 0 .35rem; font-size: 2rem; }
+    .motto { color: #c4b59a; margin: 0 0 1rem; }
+    .warn { border: 1px solid #8a5a2b; background: #1a140c; padding: 0.85rem 1rem; color: #f0d0a8; border-radius: 10px; }
+    .nums { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin: 1.1rem 0; }
+    .num { border: 1px solid #333; border-radius: 10px; padding: .7rem .85rem; background: #191919; }
+    .num b { display: block; font-size: 1.8rem; }
+    .num span { color: #9a8b74; }
+    textarea { width: 100%; min-height: 7rem; background: #1c1c1c; color: inherit; border: 1px solid #444; padding: 0.75rem; box-sizing: border-box; font: inherit; border-radius: 10px; }
+    .btns { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: .85rem 0 1rem; }
+    @media (max-width: 520px) { .btns { grid-template-columns: 1fr; } }
+    button.btn, a.btn, label.btn { display: block; width: 100%; box-sizing: border-box; text-align: center; font: inherit; font-size: 1.2rem; font-weight: 750; padding: 1rem 1.1rem; border-radius: 12px; border: 1px solid #8a5a2b; cursor: pointer; text-decoration: none; color: #f3e6d0; background: #3d2a16; }
+    button.btn.primary { background: #c9a227; color: #14110a; border-color: #c9a227; }
+    a.btn { line-height: 1.2; }
+    .file { margin: 0 0 1rem; color: #9a8b74; }
+    .file input { display: block; margin-top: .35rem; width: 100%; }
+    .ok { border: 1px solid #2e6b45; background: #102016; color: #b7e4c7; padding: .85rem 1rem; border-radius: 10px; }
+    .bad { border: 1px solid #8a2b2b; background: #201010; color: #f0b8b8; padding: .85rem 1rem; border-radius: 10px; }
+    .card { border: 1px solid #333; border-radius: 10px; padding: .85rem 1rem; margin: 1rem 0; background: #191919; }
     code, .id { font-family: ui-monospace, monospace; font-size: 0.85rem; }
     ul { padding-left: 1.2rem; }
     a { color: #d4b483; }
     footer { margin-top: 2rem; font-size: 0.85rem; color: #8a8070; }
+    .checks { list-style: none; padding: 0; margin: .5rem 0 0; }
+    .checks li { margin: .2rem 0; font-weight: 650; }
   </style>
 </head>
 <body>
 <main>
   <h1>GodLock</h1>
   <p class="motto">{{ motto }}</p>
-  <p class="warn">
-    This process is the <strong>core + receipts engine</strong>.
-    It binds to <code>127.0.0.1</code> by default.
-    MirageGrid/Airlock are logical node names, not an anonymity network.
-    POST /merge has <strong>no auth</strong> because this is a localhost research tool.
-    Forks are welcome.
-  </p>
+  <p class="warn">{{ banner }}</p>
 
-  <h2>Public counters</h2>
-  <dl>
-    <dt>resilience counter</dt><dd>{{ counter }}</dd>
-    <dt>resilience score</dt><dd>{{ resilience_score }}</dd>
-    <dt>active rules</dt><dd>{{ rules }}</dd>
-    <dt>grid nodes</dt><dd>{{ grid_nodes }} logical</dd>
-  </dl>
+  <div class="nums">
+    <div class="num"><b>{{ counter }}</b><span>Tests</span></div>
+    <div class="num"><b>{{ resilience_score }}</b><span>Score</span></div>
+  </div>
 
-  <h2>Submit a counter-argument</h2>
-  <form method="post" action="/stress">
-    <textarea name="text" required placeholder="Record a stress test…"></textarea>
-    <p><button type="submit">Record</button></p>
+  {% if error %}
+  <p class="bad">{{ error }}</p>
+  {% endif %}
+
+  {% if doctor %}
+  <div class="{{ 'ok' if doctor.ok else 'bad' }}">
+    <p><strong>{{ doctor.verdict }}</strong> {% if doctor.ok %}All checks good.{% else %}Something is wrong.{% endif %}</p>
+    <ul class="checks">
+      {% for c in doctor.checks %}
+      <li>{{ c.verdict }} — {{ c.label }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if import_result %}
+  <div class="{{ 'bad' if import_result.failed else 'ok' }}">
+    {% if import_result.mode == 'texts' %}
+    <p>Saved {{ import_result.submitted }} test{% if import_result.submitted != 1 %}s{% endif %} from the file.</p>
+    {% else %}
+    <p>Checked the file.
+      {{ import_result.loaded }} PASS (kept),
+      {{ import_result.skipped }} already here,
+      {{ import_result.failed|length }} FAIL.</p>
+    {% if import_result.failed %}
+    <ul>
+      {% for f in import_result.failed %}
+      <li>FAIL {{ f.id or '' }} — {{ f.error }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <form id="record-form" method="post" action="/stress">
+    <textarea name="text" required placeholder="Type a test…"></textarea>
+  </form>
+
+  <div class="btns">
+    <button class="btn primary" type="submit" form="record-form">Record</button>
+    <a class="btn" href="/verify">Verify</a>
+    <button class="btn" type="button" id="import-btn">Import JSON</button>
+    <a class="btn" href="/export">Export JSON</a>
+  </div>
+  <form id="import-form" class="file" method="post" action="/import" enctype="multipart/form-data">
+    <label>JSON file
+      <input id="jsonfile" type="file" name="file" accept=".json,application/json" required>
+    </label>
   </form>
 
   {% if result %}
-  <h2>Last receipt</h2>
-  <p class="id">{{ result.receipt.id }}</p>
-  <p>ingress <code>{{ result.receipt.ingress_node }}</code> → egress <code>{{ result.receipt.egress_node }}</code></p>
-  <p>hash <code>{{ result.receipt.hash }}</code></p>
-  <p>Jeeves ({{ result.jeeves_analysis.model }}): {{ result.jeeves_analysis.suggested_hardening }}</p>
+  <div class="card">
+    <p><strong>Saved.</strong></p>
+    <p class="id">{{ result.receipt.id }}</p>
+    {% if result.jeeves_analysis and result.jeeves_analysis.suggested_hardening %}
+    <p>Tip: {{ result.jeeves_analysis.suggested_hardening }}</p>
+    {% endif %}
+  </div>
   {% endif %}
 
-  <h2>Recent receipt ids</h2>
-  <ul>
-    {% for rid in recent_ids %}
-    <li class="id">{{ rid }}</li>
-    {% else %}
-    <li>none yet</li>
-    {% endfor %}
-  </ul>
-
-  <h2>Active rules</h2>
-  <ul>
-    {% for rule in rule_list %}
-    <li>{{ rule.hardening }} <span class="id">(from {{ rule.receipt_id }})</span></li>
-    {% else %}
-    <li>none merged yet</li>
-    {% endfor %}
-  </ul>
-
-  <form method="post" action="/merge">
-    <p>Admin merge (no auth on localhost)</p>
-    <p><input name="receipt_id" placeholder="receipt id" required style="width:100%;background:#1c1c1c;color:inherit;border:1px solid #444;padding:0.4rem;"></p>
-    <p><textarea name="hardening" placeholder="hardening text (blank = use Jeeves suggestion)"></textarea></p>
-    <p><button type="submit">Merge</button></p>
-  </form>
+  <div class="card">
+    <p><strong>Recent tests</strong></p>
+    <ul>
+      {% for rid in recent_ids %}
+      <li class="id">{{ rid }}</li>
+      {% else %}
+      <li>none yet</li>
+      {% endfor %}
+    </ul>
+  </div>
 
   <footer>
-    Aziel Eliab · 12 July 2026 · Apache-2.0
-    · <a href="/stats">/stats</a> · <a href="/health">/health</a>
+    Aziel Eliab · this computer only · Apache-2.0
   </footer>
 </main>
+<script>
+  (function () {
+    var btn = document.getElementById("import-btn");
+    var inp = document.getElementById("jsonfile");
+    var form = document.getElementById("import-form");
+    if (!btn || !inp || !form) return;
+    btn.addEventListener("click", function () { inp.click(); });
+    inp.addEventListener("change", function () {
+      if (inp.files && inp.files.length) form.submit();
+    });
+  })();
+</script>
 </body>
 </html>

@@ -43,3 +43,8 @@ def test_fastapi_submit_stats_health() -> None:
     home = client.get("/")
     assert home.status_code == 200
     assert b"GodLock" in home.content
+    assert b"Aziel Eliab" in home.content
+    assert b"Import JSON" in home.content
+    assert b"Export JSON" in home.content
+    assert b"Verify" in home.content
+    assert b"Not a VPN" in home.content

@@ -148,9 +148,9 @@ class _DashboardPageState extends State<DashboardPage> {
             child: const Padding(
               padding: EdgeInsets.all(12),
               child: Text(
-                'NOT an anonymity network. This app does not hide IPs, speak Tor, '
-                'build proxy chains, or hop addresses. grid-NN values are in-process '
-                'identity strings — labels only.',
+                'GodLock is a product name (ABAD stress-test and resilience engine). '
+                'Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab. '
+                'grid-NN values are labels only — this app does not hide IPs.',
                 style: TextStyle(color: kIvory, height: 1.4),
               ),
             ),

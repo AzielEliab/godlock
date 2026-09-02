@@ -22,6 +22,11 @@ AUTHOR = "Aziel Eliab"
 PAPER_DATE = "12 July 2026"
 LICENSE_ID = "Apache-2.0"
 
+HONEST_BANNER = (
+    "GodLock is a product name (ABAD stress-test and resilience engine). "
+    "Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab."
+)
+
 DATA_DIR_NAME = ".godlock"
 LUMEN_KEY_FILENAME = "lumen.key"
 RECEIPTS_FILENAME = "receipts.jsonl"

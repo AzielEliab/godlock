@@ -72,6 +72,9 @@ def test_help_lists_ui_and_version() -> None:
     text = _build_parser().format_help()
     assert "ui" in text
     assert "version" in text
+    assert "doctor" in text
+    assert "import" in text
+    assert "export" in text
     assert "127.0.0.1:8080" in text or "godlock ui" in text
 
 

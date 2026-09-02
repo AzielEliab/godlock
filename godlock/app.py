@@ -7,15 +7,17 @@ in front. This repo is not an anonymity network.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.templating import Jinja2Templates
 
-from godlock.config import DEFAULT_BIND_HOST, DEFAULT_BIND_PORT, MOTTO
+from godlock.config import DEFAULT_BIND_HOST, DEFAULT_BIND_PORT, HONEST_BANNER, MOTTO
 from godlock.engine import GodLockEngine
+from godlock.receipts import ImmutableReceiptError
 
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATE_DIR))
@@ -33,22 +35,26 @@ def create_app(
     app = FastAPI(
         title="GodLock",
         version="0.1.0",
-        description=(
-            "ABAD stress-test and resilience engine. "
-            "Core + receipts. Not an anonymity network."
-        ),
+        description=HONEST_BANNER,
     )
     app.state.engine = eng
     app.state.bind_host = bind_host or DEFAULT_BIND_HOST
     app.state.bind_port = int(bind_port)
 
-    def _dashboard(request: Request, result: dict[str, Any] | None = None) -> HTMLResponse:
+    def _dashboard(
+        request: Request,
+        result: dict[str, Any] | None = None,
+        doctor: dict[str, Any] | None = None,
+        import_result: dict[str, Any] | None = None,
+        error: str | None = None,
+    ) -> HTMLResponse:
         stats = eng.stats()
         return templates.TemplateResponse(
             request,
             "dashboard.html",
             {
                 "motto": MOTTO,
+                "banner": HONEST_BANNER,
                 "counter": stats["counter"],
                 "resilience_score": stats["resilience_score"],
                 "rules": stats["rules"],
@@ -56,6 +62,9 @@ def create_app(
                 "recent_ids": stats["recent_receipt_ids"],
                 "rule_list": [r.as_dict() for r in eng.rules.all()],
                 "result": result,
+                "doctor": doctor,
+                "import_result": import_result,
+                "error": error,
             },
         )
 
@@ -70,11 +79,66 @@ def create_app(
             "bind_host": app.state.bind_host,
             "persist": eng.persist,
             "motto": MOTTO,
+            "banner": HONEST_BANNER,
+            "author": "Aziel Eliab",
         }
 
     @app.get("/stats")
     def stats() -> dict[str, Any]:
         return eng.stats()
+
+    @app.get("/doctor")
+    def doctor_json() -> dict[str, Any]:
+        from godlock.doctor import run
+
+        return run()
+
+    @app.get("/verify", response_class=HTMLResponse)
+    def verify(request: Request) -> HTMLResponse:
+        from godlock.doctor import run
+
+        return _dashboard(request, doctor=run())
+
+    @app.get("/export")
+    def export_json() -> Response:
+        bundle = eng.export_json()
+        body = json.dumps(bundle, indent=2, ensure_ascii=False) + "\n"
+        return Response(
+            content=body,
+            media_type="application/json; charset=utf-8",
+            headers={"Content-Disposition": 'attachment; filename="godlock.json"'},
+        )
+
+    @app.post("/import")
+    async def import_json(request: Request) -> Any:
+        ctype = (request.headers.get("content-type") or "").lower()
+        wants_html = "application/json" not in ctype
+        try:
+            if "multipart/form-data" in ctype:
+                form = await request.form()
+                upload = form.get("file")
+                if upload is None:
+                    raise ValueError("pick a JSON file")
+                raw = await upload.read() if hasattr(upload, "read") else str(upload or "")
+                if isinstance(raw, bytes):
+                    raw = raw.decode("utf-8")
+                payload = json.loads(raw)
+            else:
+                payload = await request.json()
+            result = eng.import_json(payload)
+        except json.JSONDecodeError:
+            msg = "that file is not JSON"
+            if wants_html:
+                return _dashboard(request, error=msg)
+            return JSONResponse({"error": msg}, status_code=400)
+        except (ValueError, ImmutableReceiptError, UnicodeDecodeError) as exc:
+            msg = str(exc) or "could not read that file"
+            if wants_html:
+                return _dashboard(request, error=msg)
+            return JSONResponse({"error": msg}, status_code=400)
+        if wants_html:
+            return _dashboard(request, import_result=result)
+        return result
 
     @app.post("/stress")
     async def stress(request: Request) -> Any:
@@ -90,6 +154,8 @@ def create_app(
         try:
             result = eng.submit(payload)
         except ValueError as exc:
+            if wants_html:
+                return _dashboard(request, error=str(exc))
             return JSONResponse({"error": str(exc)}, status_code=400)
         if wants_html:
             return _dashboard(request, result=result)

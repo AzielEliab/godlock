@@ -5,17 +5,19 @@ description: Use when calling GodLock hosted /v1 or installing the local package
 
 # GodLock
 
-GodLock is a product name (ABAD stress-test and resilience engine), not an identity label. Author: Aziel Eliab. Not a VPN. Not a ghost net. Not anonymity. Logical ABAD receipts only.
+GodLock is a product name (ABAD stress-test and resilience engine). Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab.
 
-**Identity:** Aziel Eliab. GodLock is a **product name**, not an identity label.
-
-**THIS IS:** a self-hosted stress-test and resilience engine for the ABAD framework (Aziel Sequence, φ/√2 convergences, Flower of Life geometry). Product name: GodLock.
-
-**THIS IS NOT:** an identity label, a VPN, a ghost net, IP hiding, or anonymity. Author is Aziel Eliab. GodLock is the product name only.
-
-Author: **Aziel Eliab**. Forks are welcome and always allowed. Apache-2.0.
+**Identity:** Aziel Eliab only. GodLock is a **product name**, not an identity label.
 
 Always send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.
+
+## How to use (3 steps)
+
+1. `curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash`
+2. `godlock ui`
+3. Open http://127.0.0.1:8080 and tap **Record**, **Verify**, **Import JSON**, or **Export JSON**.
+
+`godlock doctor` prints PASS or FAIL in plain words.
 
 ## Call these URLs
 
@@ -42,17 +44,8 @@ curl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v
 curl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/skill
 curl -s -A 'Mozilla/5.0' -X POST https://godlock-download-tracker.vibelock.workers.dev/v1/score \
   -H 'content-type: application/json' \
-  -d '{"note":"advisory ABAD score; not a VPN"}'
+  -d '{"text":"ABAD layers on phi"}'
 ```
-
-## Local (after one-click install)
-
-```bash
-curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash
-godlock ui
-```
-
-Then open http://127.0.0.1:8080 (loopback only).
 
 Counted download (gzip HTTP 200, no 302): https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz
 GitHub: https://github.com/AzielEliab/godlock

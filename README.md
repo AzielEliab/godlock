@@ -79,6 +79,16 @@ Live HTTPS runtime on the download-tracker Worker (does **not** increment the do
 
 POST `/v1/score` `{text}` and POST `/v1/submit` `{text}` (ephemeral, no durable anonymity). Every response banners: not a VPN, ghost net, or anonymity tool.
 
+## Cite this
+
+Aziel Eliab. GodLock. https://github.com/AzielEliab/godlock. https://godlock-download-tracker.vibelock.workers.dev.
+
+- Catalog: https://aziel-runtime.vibelock.workers.dev/
+- Worker homepage: https://godlock-download-tracker.vibelock.workers.dev/
+- Counted download (gzip HTTP 200, no 302): https://godlock-download-tracker.vibelock.workers.dev/download
+- GitHub: https://github.com/AzielEliab/godlock
+- Citation JSON: https://godlock-download-tracker.vibelock.workers.dev/cite.json
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).

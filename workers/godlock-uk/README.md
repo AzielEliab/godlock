@@ -1,24 +1,28 @@
-# GodLock.uk public board
+# GodLock.uk public HTTPS engine
 
-Worker `godlock-uk`. Public Q&A at https://godlock.uk (fallback `godlock-uk.vibelock.workers.dev`).
+Worker `godlock-uk`. Live at https://godlock.uk (fallback `godlock-uk.vibelock.workers.dev`).
 
-Anyone can view. Signup required to post. Posts, questions, replies, and reacts are append-only and hash-chained. Nobody can edit or delete past posts.
+One input. Submit a challenge (including intelligent-design / design-flaw attacks). The engine answers with the locked protocol: **Yes**, **No**, **Let's review**, or **Interesting**, then summary, long explanation, score change, residual uncertainty.
 
-**This is not a VPN, not a mesh, not a tunnel.** No Cloudflare Tunnel. No node mesh. Author: **Aziel Eliab**.
+Every submission is hash-chained into an append-only ledger. Isolated gibberish is stored but not scored and not shown on the public feed. High-effort intelligent-design challenges are never isolated.
+
+**This is a public HTTPS bootstrap surface. Mesh is not on this surface.** No Cloudflare Tunnel. No node mesh. Author: **Aziel Eliab**.
 
 GodLock is a product name, not an identity.
 
-Counted download of the localhost engine: https://godlock-download-tracker.vibelock.workers.dev/download
+Counted download: https://godlock-download-tracker.vibelock.workers.dev/download
+
+## Scoring
+
+Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go down after explicit weighing.
 
 ## Routes
 
-- `/` newest questions and posts, search
-- `/q/{id}` thread + replies
-- `/ask` composer
-- `/login` `/signup` (Show password)
-- `/archive` hash-chain head + recent receipts
-- `/verify` VERIFIED if the chain recomputes
-- `/receipt/{id}` ledger entries for one post
+- `/` engine (one screen)
+- `POST /submit` challenge (`text`); JSON unless `Accept: text/html` (then 303)
+- `POST /heartbeat` live-node ping
+- `/verify` walk the ledger
+- `/receipt/{id}` public if not isolated
 - `/health` JSON
 - `/robots.txt` `/sitemap.xml` `/cite.json` `/llms.txt`
 
@@ -26,11 +30,5 @@ Counted download of the localhost engine: https://godlock-download-tracker.vibel
 
 ```bash
 wrangler d1 execute godlock-uk --remote --file schema.sql
-wrangler deploy
-```
-
-Optional hidden operator (different Worker secret, never committed):
-
-```bash
-wrangler secret put MASTER_HASH_JSON
+wrangler deploy --keep-vars
 ```

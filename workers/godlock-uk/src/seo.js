@@ -2,11 +2,12 @@
 export const CANON_HOST = "https://godlock.uk";
 export const FALLBACK_HOST = "https://godlock-uk.vibelock.workers.dev";
 export const DOWNLOAD = "https://godlock-download-tracker.vibelock.workers.dev/download";
+export const DOWNLOAD_STATS = "https://godlock-download-tracker.vibelock.workers.dev/stats";
 export const GITHUB = "https://github.com/AzielEliab/godlock";
 export const CATALOG = "https://aziel-runtime.vibelock.workers.dev";
 export const SITE = "GodLock";
 export const AUTHOR = "Aziel Eliab";
-export const BANNER = "GodLock public board. Not a VPN, not a mesh, not a tunnel. Author Aziel Eliab.";
+export const BANNER = "Public HTTPS engine. Mesh is not on this surface. Author Aziel Eliab.";
 const Q = String.fromCharCode(34);
 
 function esc(s) {
@@ -26,36 +27,25 @@ function linkRel(rel, href, extra) {
 }
 
 export function defaultDescription(kind) {
-  if (kind === "verify") return "Verify the GodLock.uk hash-chained archive. Author Aziel Eliab.";
-  if (kind === "archive") return "Public hash-chain receipts for the GodLock.uk board. Author Aziel Eliab.";
-  if (kind === "ask") return "Ask a question on the GodLock public board. Author Aziel Eliab.";
-  if (kind === "thread") return "A GodLock.uk question or post with hash-chained replies. Author Aziel Eliab.";
-  if (kind === "login") return "Log in to post on GodLock.uk. Author Aziel Eliab.";
-  if (kind === "signup") return "Sign up to post on GodLock.uk. Author Aziel Eliab.";
-  return "GodLock public board by Aziel Eliab. Read, ask, and reply. Every post is hash-chained. Not a VPN, not a mesh, not a tunnel.";
+  if (kind === "verify") return "Verify the GodLock.uk hash-chained ledger. Author Aziel Eliab.";
+  if (kind === "receipt") return "A GodLock.uk receipt. Append-only. Author Aziel Eliab.";
+  return "GodLock public HTTPS stress-test engine by Aziel Eliab. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Not a mesh.";
 }
 
-function jsonLd(title, path, kind, description) {
+function jsonLd(title, path, description) {
   const url = CANON_HOST + (path || "/");
-  const org = { "@type": "Person", "name": AUTHOR, "url": CANON_HOST + "/" };
-  const website = { "@type": "WebSite", "name": SITE, "url": CANON_HOST + "/", "description": description, "author": org };
+  const org = { "@type": "Person", name: AUTHOR, url: CANON_HOST + "/" };
+  const website = { "@type": "WebSite", name: SITE, url: CANON_HOST + "/", description, author: org };
   const software = {
     "@type": "SoftwareApplication",
-    "name": SITE,
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "Web",
-    "url": CANON_HOST + "/",
-    "author": org,
-    "license": "https://www.apache.org/licenses/LICENSE-2.0",
+    name: SITE,
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Web",
+    url: CANON_HOST + "/",
+    author: org,
+    license: "https://www.apache.org/licenses/LICENSE-2.0",
   };
-  const board = {
-    "@type": "DiscussionForumPosting",
-    "headline": title,
-    "url": url,
-    "author": org,
-    "isAccessibleForFree": true,
-  };
-  return { "@context": "https://schema.org", "@graph": [website, software, board, org] };
+  return { "@context": "https://schema.org", "@graph": [website, software, org] };
 }
 
 export function headMeta(opts) {
@@ -64,7 +54,7 @@ export function headMeta(opts) {
   const kind = opts.kind || "";
   const description = opts.description || defaultDescription(kind);
   const url = CANON_HOST + path;
-  const ld = jsonLd(title, path, kind, description);
+  const ld = jsonLd(title, path, description);
   const ldOpen = "<" + "script type=" + Q + "application/ld+json" + Q + ">";
   const ldClose = "</" + "script>";
   return [
@@ -91,17 +81,11 @@ export function robotsTxt() {
   return [
     "User-agent: *",
     "Allow: /",
-    "Allow: /q/",
-    "Allow: /ask",
-    "Allow: /archive",
     "Allow: /verify",
     "Allow: /health",
     "Allow: /receipt/",
     "Allow: /cite.json",
     "Allow: /llms.txt",
-    "Allow: /login",
-    "Disallow: /logout",
-    "Disallow: /signup",
     "Sitemap: " + CANON_HOST + "/sitemap.xml",
     "",
   ].join("\n");
@@ -110,24 +94,19 @@ export function robotsTxt() {
 export async function sitemapXml(env) {
   const locs = [
     CANON_HOST + "/",
-    CANON_HOST + "/ask",
-    CANON_HOST + "/archive",
     CANON_HOST + "/verify",
     CANON_HOST + "/health",
     CANON_HOST + "/cite.json",
     CANON_HOST + "/llms.txt",
-    CANON_HOST + "/login",
     GITHUB,
     DOWNLOAD,
   ];
   try {
     const rows = (await env.DB.prepare(
-      "SELECT id FROM posts WHERE kind IN ('question','post') ORDER BY created_utc DESC LIMIT 200"
+      "SELECT id FROM receipts WHERE isolated=0 ORDER BY created_utc DESC LIMIT 200"
     ).all()).results || [];
-    for (const r of rows) locs.push(CANON_HOST + "/q/" + encodeURIComponent(r.id));
-  } catch {
-    /* empty db is fine */
-  }
+    for (const r of rows) locs.push(CANON_HOST + "/receipt/" + encodeURIComponent(r.id));
+  } catch { /* empty db is fine */ }
   const lastmod = new Date().toISOString().slice(0, 10);
   return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + locs.map((u) => "  <url><loc>" + u + "</loc><lastmod>" + lastmod + "</lastmod></url>").join("\n")
@@ -141,7 +120,6 @@ export function citeDoc() {
     site: CANON_HOST + "/",
     github: GITHUB,
     download: DOWNLOAD,
-    archive: CANON_HOST + "/archive",
     verify: CANON_HOST + "/verify",
     health: CANON_HOST + "/health",
     license: "Apache-2.0",
@@ -160,12 +138,6 @@ export function llmsDoc() {
     + "License: Apache-2.0\n\n"
     + BANNER + "\n\n"
     + "GodLock is a product name, not an identity. Identity is Aziel Eliab only.\n\n"
-    + "## Public HTML (User-Agent Mozilla/5.0)\n\n"
-    + "- Home: " + CANON_HOST + "/\n"
-    + "- Ask: " + CANON_HOST + "/ask\n"
-    + "- Archive: " + CANON_HOST + "/archive\n"
-    + "- Verify: " + CANON_HOST + "/verify\n"
-    + "- Health: " + CANON_HOST + "/health\n"
-    + "- Cite: " + CANON_HOST + "/cite.json\n\n"
-    + "Anyone can view. Signup is required to post. Posts are append-only and hash-chained.\n";
+    + "Public HTTPS stress-test engine. Submit a challenge. Answers open with Yes, No, Let's review, or Interesting.\n"
+    + "Intelligent-design disputes are processed under the same rules. Mesh is not on this surface.\n";
 }

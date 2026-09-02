@@ -1,41 +1,40 @@
 /**
- * GodLock.uk public board (Cloudflare Worker).
- * Hash-chained questions, posts, replies, reacts. Append-only.
- * Not a VPN, not a mesh, not a tunnel. No Cloudflare Tunnel.
- * Author: Aziel Eliab.
+ * GodLock.uk public HTTPS stress-test engine (Cloudflare Worker).
+ * One input. Locked protocol. Append-only hash-chained receipts.
+ * Not a forum, not a mesh, not a tunnel. Author: Aziel Eliab.
  */
 import { randomBytes } from "node:crypto";
-import { handleAuth, getSession, html, json, corsHeaders } from "./auth.js";
-import { page, homeBody, askBody, threadBody, archiveBody, verifyBody, receiptBody } from "./ui.js";
-import { appendLedger, verifyLedger, recentLedger, ledgerEntriesForId, sha256hex, canonicalJson, ZERO } from "./ledger.js";
-import { robotsTxt, sitemapXml, citeDoc, llmsDoc, BANNER, CANON_HOST, DOWNLOAD, GITHUB, AUTHOR } from "./seo.js";
+import { json, html, corsHeaders, wantsJson, readCookie } from "./http.js";
+import { page, homeBody, verifyBody, receiptBody } from "./ui.js";
+import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
+import { robotsTxt, sitemapXml, citeDoc, llmsDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR } from "./seo.js";
+import {
+  START, shouldIsolate, answerChallenge, clampScore, residualOf, hashReceipt,
+} from "./engine.js";
 
-const TITLE_MAX = 200;
-const BODY_MAX = 20000;
+const TEXT_MAX = 8000;
+const NODE_COOKIE = "godlock_node";
+const HEARTBEAT_MS = 90 * 1000;
 
 async function ensureSchema(env) {
   if (!env || !env.DB) return;
   await env.DB.batch([
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS users (
-      id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL COLLATE NOCASE,
-      salt_b64 TEXT NOT NULL, hash_b64 TEXT NOT NULL,
-      n INTEGER NOT NULL, r INTEGER NOT NULL, p INTEGER NOT NULL, dklen INTEGER NOT NULL,
-      created_utc TEXT NOT NULL)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS sessions (
-      token TEXT PRIMARY KEY, user_id TEXT NOT NULL, username TEXT NOT NULL, expires_utc TEXT NOT NULL)`),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS posts (
-      id TEXT PRIMARY KEY, kind TEXT NOT NULL CHECK (kind IN ('question','post','reply')),
-      parent_id TEXT, title TEXT NOT NULL DEFAULT '', body TEXT NOT NULL,
-      created_by TEXT NOT NULL, created_utc TEXT NOT NULL, content_sha256 TEXT NOT NULL)`),
-    env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_posts_kind_created ON posts(kind, created_utc)"),
-    env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_posts_parent ON posts(parent_id)"),
-    env.DB.prepare(`CREATE TABLE IF NOT EXISTS interactions (
-      id TEXT PRIMARY KEY, kind TEXT NOT NULL, target_id TEXT NOT NULL, created_by TEXT,
-      created_utc TEXT NOT NULL, payload_json TEXT NOT NULL DEFAULT '{}', content_sha256 TEXT NOT NULL)`),
-    env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_interactions_target ON interactions(target_id, kind)"),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS receipts (
+      id TEXT PRIMARY KEY, created_utc TEXT NOT NULL, text_sha256 TEXT NOT NULL,
+      label TEXT NOT NULL, summary TEXT NOT NULL, explanation TEXT NOT NULL,
+      score_before REAL NOT NULL, score_after REAL NOT NULL, residual REAL NOT NULL,
+      isolated INTEGER NOT NULL DEFAULT 0, content_sha256 TEXT NOT NULL)`),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_receipts_created ON receipts(created_utc)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_receipts_public ON receipts(isolated, created_utc)"),
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS ledger (
       sequence INTEGER PRIMARY KEY, timestamp_utc TEXT NOT NULL, action TEXT NOT NULL,
       payload_json TEXT NOT NULL, previous_hash TEXT NOT NULL, entry_hash TEXT NOT NULL)`),
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)"),
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS heartbeats (session_id TEXT PRIMARY KEY, last_utc TEXT NOT NULL)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_heartbeats_last ON heartbeats(last_utc)"),
+    env.DB.prepare("INSERT OR IGNORE INTO metadata(key, value) VALUES ('current_score', '50')"),
+    env.DB.prepare("INSERT OR IGNORE INTO metadata(key, value) VALUES ('views', '0')"),
+    env.DB.prepare("INSERT OR IGNORE INTO metadata(key, value) VALUES ('uses', '0')"),
   ]);
 }
 
@@ -43,65 +42,232 @@ function newId() {
   return randomBytes(12).toString("hex");
 }
 
-function clip(s, n) {
-  return String(s || "").trim().slice(0, n);
+async function metaGet(env, key, fallback) {
+  try {
+    const row = await env.DB.prepare("SELECT value FROM metadata WHERE key=?").bind(key).first();
+    if (row && row.value != null && row.value !== "") return row.value;
+  } catch { /* first run */ }
+  return fallback;
 }
 
-async function listThreads(env, q) {
-  const query = String(q || "").trim();
-  const like = "%" + query.replace(/%/g, "") + "%";
-  const sql = `SELECT p.id, p.kind, p.title, p.body, p.created_by, p.created_utc, p.content_sha256,
-    (SELECT COUNT(*) FROM posts r WHERE r.parent_id = p.id) AS reply_count,
-    (SELECT COUNT(*) FROM interactions i WHERE i.target_id = p.id AND i.kind = 'react') AS react_count
-    FROM posts p
-    WHERE p.kind IN ('question','post')
-    ${query ? "AND (p.title LIKE ? OR p.body LIKE ? OR p.created_by LIKE ?)" : ""}
-    ORDER BY p.created_utc DESC LIMIT 100`;
-  const stmt = env.DB.prepare(sql);
-  const res = query ? await stmt.bind(like, like, like).all() : await stmt.all();
-  return res.results || [];
+async function metaSet(env, key, value) {
+  await env.DB.prepare(
+    "INSERT INTO metadata(key, value) VALUES(?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  ).bind(key, String(value)).run();
 }
 
-async function getPost(env, id) {
-  return env.DB.prepare("SELECT * FROM posts WHERE id=?").bind(id).first();
+async function metaBump(env, key) {
+  const cur = parseInt(await metaGet(env, key, "0"), 10) || 0;
+  const next = cur + 1;
+  await metaSet(env, key, String(next));
+  return next;
 }
 
-async function getReplies(env, parentId) {
+async function currentScore(env) {
+  const raw = await metaGet(env, "current_score", String(START));
+  const n = parseFloat(raw);
+  return clampScore(Number.isFinite(n) ? n : START);
+}
+
+function sessionIdFrom(request, cookieId) {
+  if (cookieId && /^[A-Za-z0-9_-]{8,64}$/.test(cookieId)) return cookieId;
+  const ua = request.headers.get("User-Agent") || "";
+  const ip = request.headers.get("CF-Connecting-IP") || request.headers.get("X-Forwarded-For") || "";
+  return sha256hex(ua + "|" + ip).slice(0, 24);
+}
+
+function nodeCookieHeader(id) {
+  return NODE_COOKIE + "=" + id + "; Path=/; Secure; SameSite=Lax; Max-Age=31536000";
+}
+
+async function touchHeartbeat(env, request, cookieId) {
+  const id = sessionIdFrom(request, cookieId);
+  const now = new Date().toISOString();
+  const cutoff = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+  try {
+    await env.DB.prepare(
+      "INSERT INTO heartbeats(session_id, last_utc) VALUES(?, ?) ON CONFLICT(session_id) DO UPDATE SET last_utc=excluded.last_utc"
+    ).bind(id, now).run();
+    await env.DB.prepare("DELETE FROM heartbeats WHERE last_utc < ?").bind(cutoff).run();
+  } catch { /* ignore heartbeat errors */ }
+  return id;
+}
+
+async function liveNodes(env) {
+  const since = new Date(Date.now() - HEARTBEAT_MS).toISOString();
+  try {
+    const row = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM heartbeats WHERE last_utc >= ?"
+    ).bind(since).first();
+    return Number(row && row.n) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+async function fetchDownloads(env) {
+  try {
+    const r = await fetch(DOWNLOAD_STATS, { headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" } });
+    if (r.ok) {
+      const j = await r.json();
+      const n = Number(j && (j.total != null ? j.total : (j.downloads != null ? j.downloads : j.count)));
+      if (Number.isFinite(n)) {
+        try { await metaSet(env, "downloads_cache", String(n)); } catch { /* ignore */ }
+        return n;
+      }
+    }
+  } catch { /* tracker optional */ }
+  try {
+    const cached = parseInt(await metaGet(env, "downloads_cache", ""), 10);
+    if (Number.isFinite(cached) && cached > 0) return cached;
+  } catch { /* ignore */ }
+  const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
+  const uses = parseInt(await metaGet(env, "uses", "0"), 10) || 0;
+  return views + uses;
+}
+
+async function publicReceipts(env, limit) {
+  const n = Math.min(Math.max(Number(limit) || 24, 1), 100);
   const res = await env.DB.prepare(
-    "SELECT * FROM posts WHERE parent_id=? AND kind='reply' ORDER BY created_utc ASC"
-  ).bind(parentId).all();
+    "SELECT id, created_utc, text_sha256, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256 FROM receipts WHERE isolated=0 ORDER BY created_utc DESC LIMIT ?"
+  ).bind(n).all();
   return res.results || [];
 }
 
-async function reactCount(env, id) {
-  const row = await env.DB.prepare(
-    "SELECT COUNT(*) AS n FROM interactions WHERE target_id=? AND kind='react'"
-  ).bind(id).first();
-  return row && row.n != null ? Number(row.n) : 0;
+async function getReceipt(env, id) {
+  return env.DB.prepare("SELECT * FROM receipts WHERE id=?").bind(id).first();
+}
+
+async function gatherStats(env) {
+  const score = await currentScore(env);
+  const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
+  const uses = parseInt(await metaGet(env, "uses", "0"), 10) || 0;
+  const [nodes, downloads] = await Promise.all([liveNodes(env), fetchDownloads(env)]);
+  return {
+    live_nodes: nodes,
+    views,
+    uses,
+    downloads,
+    current_score: score,
+    residual: residualOf(score),
+  };
+}
+
+async function readChallengeText(request) {
+  const ct = (request.headers.get("Content-Type") || "").toLowerCase();
+  if (ct.includes("application/json")) {
+    const body = await request.json().catch(() => ({}));
+    return String((body && (body.text || body.challenge || body.body)) || "").slice(0, TEXT_MAX);
+  }
+  const form = await request.formData().catch(() => null);
+  if (form) return String(form.get("text") || form.get("challenge") || form.get("body") || "").slice(0, TEXT_MAX);
+  const raw = await request.text().catch(() => "");
+  return String(raw || "").slice(0, TEXT_MAX);
+}
+
+function publicPayload(row) {
+  return {
+    id: row.id,
+    created_utc: row.created_utc,
+    label: row.label,
+    summary: row.summary,
+    explanation: row.explanation,
+    score_before: row.score_before,
+    score_after: row.score_after,
+    residual: row.residual,
+    text_sha256: row.text_sha256,
+    content_sha256: row.content_sha256,
+    isolated: Number(row.isolated) ? 1 : 0,
+  };
+}
+
+async function processSubmit(env, text) {
+  const created_utc = new Date().toISOString();
+  const id = newId();
+  const text_sha256 = sha256hex(text);
+  const isolated = shouldIsolate(text) ? 1 : 0;
+  const score_before = await currentScore(env);
+
+  if (isolated) {
+    const row = {
+      id,
+      created_utc,
+      text_sha256,
+      label: "Isolated",
+      summary: "Isolated locally. Not scored. Not shown on the public feed.",
+      explanation: "",
+      score_before,
+      score_after: score_before,
+      residual: residualOf(score_before),
+      isolated: 1,
+    };
+    row.content_sha256 = hashReceipt(row);
+    await env.DB.prepare(
+      "INSERT INTO receipts(id, created_utc, text_sha256, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
+    ).bind(id, created_utc, text_sha256, row.label, row.summary, row.explanation, row.score_before, row.score_after, row.residual, 1, row.content_sha256).run();
+    await appendLedger(env, "ISOLATE", { receipt_id: id, text_sha256, content_sha256: row.content_sha256 });
+    return { ...row, isolated: true };
+  }
+
+  const prior = await publicReceipts(env, 8);
+  const answered = await answerChallenge(env, text, score_before, prior);
+  const score_after = clampScore(score_before + Number(answered.score_delta || 0));
+  const residual = residualOf(score_after);
+  const row = {
+    id,
+    created_utc,
+    text_sha256,
+    label: answered.label,
+    summary: answered.summary,
+    explanation: answered.explanation,
+    score_before,
+    score_after,
+    residual,
+    isolated: 0,
+  };
+  row.content_sha256 = hashReceipt(row);
+  await env.DB.prepare(
+    "INSERT INTO receipts(id, created_utc, text_sha256, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
+  ).bind(id, created_utc, text_sha256, row.label, row.summary, row.explanation, score_before, score_after, residual, 0, row.content_sha256).run();
+  await appendLedger(env, "SUBMIT", {
+    receipt_id: id,
+    label: row.label,
+    text_sha256,
+    content_sha256: row.content_sha256,
+    score_before,
+    score_after,
+    residual,
+  });
+  await appendLedger(env, "SCORE", {
+    receipt_id: id,
+    score_before,
+    score_after,
+    residual,
+    delta: Math.round((score_after - score_before) * 10) / 10,
+    weighing: answered.weighing || "",
+  });
+  if (score_after !== score_before) await metaSet(env, "current_score", String(score_after));
+  await metaBump(env, "uses");
+  return row;
 }
 
 async function healthPayload(env) {
-  const counts = {};
+  const extra = {};
   try {
-    const u = await env.DB.prepare("SELECT COUNT(*) AS n FROM users").first();
-    const p = await env.DB.prepare("SELECT COUNT(*) AS n FROM posts").first();
-    const q = await env.DB.prepare("SELECT COUNT(*) AS n FROM posts WHERE kind='question'").first();
-    const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM posts WHERE kind='reply'").first();
-    const i = await env.DB.prepare("SELECT COUNT(*) AS n FROM interactions").first();
+    const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM receipts").first();
+    const p = await env.DB.prepare("SELECT COUNT(*) AS n FROM receipts WHERE isolated=0").first();
     const l = await env.DB.prepare("SELECT COUNT(*) AS n FROM ledger").first();
-    counts.users = Number(u && u.n) || 0;
-    counts.posts = Number(p && p.n) || 0;
-    counts.questions = Number(q && q.n) || 0;
-    counts.replies = Number(r && r.n) || 0;
-    counts.interactions = Number(i && i.n) || 0;
-    counts.ledger_entries = Number(l && l.n) || 0;
-    counts.d1 = "ok";
+    extra.receipts = Number(r && r.n) || 0;
+    extra.public_receipts = Number(p && p.n) || 0;
+    extra.ledger_entries = Number(l && l.n) || 0;
+    extra.d1 = "ok";
   } catch (err) {
-    counts.d1 = "error";
-    counts.error = String(err && err.message ? err.message : err);
+    extra.d1 = "error";
+    extra.error = String(err && err.message ? err.message : err);
   }
+  const stats = extra.d1 === "ok" ? await gatherStats(env) : {};
   return {
-    ok: counts.d1 === "ok",
+    ok: extra.d1 === "ok",
     product: "GodLock",
     site: "godlock.uk",
     author: AUTHOR,
@@ -109,86 +275,15 @@ async function healthPayload(env) {
     limitation: BANNER,
     download: DOWNLOAD,
     github: GITHUB,
-    canonical: CANON_HOST,
-    ...counts,
+    ...stats,
+    ...extra,
   };
 }
 
-async function createPost(env, { signed, kind, title, body, parent_id }) {
-  const k = kind === "reply" ? "reply" : kind === "post" ? "post" : "question";
-  const t = clip(title, TITLE_MAX);
-  const b = clip(body, BODY_MAX);
-  if (!b) {
-    const err = new Error("Body is required.");
-    err.status = 400;
-    throw err;
-  }
-  if (k !== "reply" && !t) {
-    const err = new Error("Title is required.");
-    err.status = 400;
-    throw err;
-  }
-  let parent = parent_id || null;
-  if (k === "reply") {
-    if (!parent) {
-      const err = new Error("Reply needs a parent.");
-      err.status = 400;
-      throw err;
-    }
-    const root = await getPost(env, parent);
-    if (!root) {
-      const err = new Error("Parent not found.");
-      err.status = 404;
-      throw err;
-    }
-    if (root.kind === "reply" && root.parent_id) parent = root.parent_id;
-  } else {
-    parent = null;
-  }
-  const id = newId();
-  const created_utc = new Date().toISOString();
-  const created_by = signed.username;
-  const content = { kind: k, parent_id: parent, title: t, body: b, created_by, created_utc };
-  const content_sha256 = sha256hex(canonicalJson(content));
-  await env.DB.prepare(
-    "INSERT INTO posts(id,kind,parent_id,title,body,created_by,created_utc,content_sha256) VALUES(?,?,?,?,?,?,?,?)"
-  ).bind(id, k, parent, t, b, created_by, created_utc, content_sha256).run();
-  const action = k === "reply" ? "REPLY" : k === "question" ? "QUESTION" : "POST";
-  await appendLedger(env, action, {
-    post_id: id,
-    kind: k,
-    parent_id: parent,
-    title: t,
-    body: b,
-    created_by,
-    content_sha256,
-  });
-  return { id, kind: k, parent_id: parent };
-}
-
-async function createReact(env, { signed, targetId }) {
-  const post = await getPost(env, targetId);
-  if (!post) {
-    const err = new Error("Target not found.");
-    err.status = 404;
-    throw err;
-  }
-  const id = newId();
-  const created_utc = new Date().toISOString();
-  const payload = { emoji: "up" };
-  const content_sha256 = sha256hex(canonicalJson({ kind: "react", target_id: targetId, created_by: signed.username, created_utc, payload }));
-  await env.DB.prepare(
-    "INSERT INTO interactions(id,kind,target_id,created_by,created_utc,payload_json,content_sha256) VALUES(?,?,?,?,?,?,?)"
-  ).bind(id, "react", targetId, signed.username, created_utc, canonicalJson(payload), content_sha256).run();
-  await appendLedger(env, "INTERACT", {
-    interaction_id: id,
-    kind: "react",
-    target_id: targetId,
-    created_by: signed.username,
-    payload,
-    content_sha256,
-  });
-  return { id, target_id: post.parent_id || post.id };
+function extraHeadersFor(nodeId, more) {
+  const h = { ...(more || {}) };
+  if (nodeId) h["Set-Cookie"] = nodeCookieHeader(nodeId);
+  return h;
 }
 
 export default {
@@ -201,6 +296,8 @@ export default {
 
     try {
       await ensureSchema(env);
+      const cookieId = readCookie(request, NODE_COOKIE);
+      const nodeId = await touchHeartbeat(env, request, cookieId || newId());
 
       if (path === "/robots.txt") {
         return new Response(robotsTxt(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
@@ -209,25 +306,20 @@ export default {
         const xml = await sitemapXml(env);
         return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", ...corsHeaders() } });
       }
-      if (path === "/cite.json") {
-        return json(citeDoc());
-      }
+      if (path === "/cite.json") return json(citeDoc());
       if (path === "/llms.txt") {
         return new Response(llmsDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
-      if (path === "/health") {
-        return json(await healthPayload(env));
+      if (path === "/health") return json(await healthPayload(env));
+
+      if (path === "/heartbeat" && request.method === "POST") {
+        const n = await liveNodes(env);
+        return json({ ok: true, live_nodes: n }, 200, extraHeadersFor(nodeId));
       }
-
-      const authRes = await handleAuth(request, url, env);
-      if (authRes) return authRes;
-
-      const signed = await getSession(env, request);
 
       if (path === "/verify") {
         const report = await verifyLedger(env);
-        const accept = (request.headers.get("Accept") || "").toLowerCase();
-        if (url.searchParams.get("format") === "json" || accept.includes("application/json") && !accept.includes("text/html")) {
+        if (wantsJson(request, url)) {
           return json({
             ok: report.ok,
             status: report.ok ? "VERIFIED" : "VERIFICATION FAILED",
@@ -237,98 +329,66 @@ export default {
             ledger_entries: report.entries,
             ledger_head: report.ledger_head,
             errors: report.errors,
-            genesis: ZERO,
             verified_utc: new Date().toISOString(),
           });
         }
-        return html(page("Verify", verifyBody({ report }), { signed, path: "/verify", kind: "verify" }));
-      }
-
-      if (path === "/archive") {
-        const report = await verifyLedger(env);
-        const recent = await recentLedger(env, 20);
-        return html(page("Archive", archiveBody({ report, recent }), { signed, path: "/archive", kind: "archive" }));
+        return html(page("Verify", verifyBody({ report }), { path: "/verify", kind: "verify" }), {
+          extraHeaders: extraHeadersFor(nodeId),
+        });
       }
 
       if (path.startsWith("/receipt/")) {
         const id = decodeURIComponent(path.slice("/receipt/".length));
-        const post = await getPost(env, id);
+        const row = await getReceipt(env, id);
+        if (!row || Number(row.isolated)) {
+          if (wantsJson(request, url)) return json({ ok: false, error: "not found" }, 404);
+          return html(page("Receipt", receiptBody({ id, row: null, entries: [] }), { path: "/receipt/" + id, kind: "receipt" }), { status: 404 });
+        }
         const entries = await ledgerEntriesForId(env, id);
-        return html(page("Receipt", receiptBody({ id, post, entries }), { signed, path: "/receipt/" + id, kind: "archive" }));
+        if (wantsJson(request, url)) return json({ ok: true, receipt: publicPayload(row), ledger: entries });
+        return html(page("Receipt", receiptBody({ id, row, entries }), { path: "/receipt/" + id, kind: "receipt" }));
       }
 
-      if (path === "/ask" && request.method === "GET") {
-        return html(page("Ask", askBody({ signed }), { signed, path: "/ask", kind: "ask" }));
-      }
-      if (path === "/ask" && request.method === "POST") {
-        if (!signed) {
-          return html(page("Ask", askBody({ signed: null }), { signed: null, path: "/ask", kind: "ask" }), { status: 401 });
-        }
-        const form = await request.formData();
-        try {
-          const created = await createPost(env, {
-            signed,
-            kind: String(form.get("kind") || "question"),
-            title: form.get("title"),
-            body: form.get("body"),
-          });
-          return new Response(null, { status: 303, headers: { Location: "/q/" + created.id } });
-        } catch (err) {
-          return html(page("Ask", askBody({ signed, error: err.message || "Could not publish." }), { signed, path: "/ask", kind: "ask" }), { status: err.status || 400 });
-        }
-      }
-
-      if (path.startsWith("/react/") && request.method === "POST") {
-        if (!signed) return json({ error: "login required" }, 401);
-        const targetId = decodeURIComponent(path.slice("/react/".length));
-        try {
-          const created = await createReact(env, { signed, targetId });
-          return new Response(null, { status: 303, headers: { Location: "/q/" + created.target_id } });
-        } catch (err) {
-          return json({ error: err.message || "react failed" }, err.status || 400);
-        }
-      }
-
-      if (path.startsWith("/q/")) {
-        const id = decodeURIComponent(path.slice("/q/".length));
-        const post = await getPost(env, id);
-        if (request.method === "POST") {
-          if (!signed) {
-            return html(page("Sign in", askBody({ signed: null }), { signed: null, path: "/login", kind: "login" }), { status: 401 });
+      if ((path === "/submit" || path === "/") && request.method === "POST") {
+        const text = await readChallengeText(request);
+        const row = await processSubmit(env, text);
+        if (wantsJson(request, url)) {
+          if (row.isolated === true || row.isolated === 1) {
+            return json({ ok: true, isolated: true, id: row.id, text_sha256: row.text_sha256 }, 200, extraHeadersFor(nodeId));
           }
-          const form = await request.formData();
-          try {
-            await createPost(env, {
-              signed,
-              kind: "reply",
-              title: "",
-              body: form.get("body"),
-              parent_id: id,
-            });
-            return new Response(null, { status: 303, headers: { Location: "/q/" + id } });
-          } catch (err) {
-            const replies = post ? await getReplies(env, post.id) : [];
-            const reacts = post ? await reactCount(env, post.id) : 0;
-            return html(page("Question", threadBody({ post, replies, reacts, signed, error: err.message }), { signed, path: "/q/" + id, kind: "thread" }), { status: err.status || 400 });
-          }
+          return json({ ok: true, isolated: false, ...publicPayload(row), weighing: undefined }, 200, extraHeadersFor(nodeId));
         }
-        if (!post) {
-          return html(page("Not found", threadBody({ post: null }), { signed, path: "/q/" + id, kind: "thread" }), { status: 404 });
-        }
-        const root = post.kind === "reply" && post.parent_id ? await getPost(env, post.parent_id) : post;
-        const thread = root || post;
-        const replies = await getReplies(env, thread.id);
-        const reacts = await reactCount(env, thread.id);
-        return html(page(thread.title || "Thread", threadBody({ post: thread, replies, reacts, signed }), { signed, path: "/q/" + thread.id, kind: "thread" }));
+        const loc = (row.isolated === true || row.isolated === 1) ? "/" : "/?r=" + encodeURIComponent(row.id);
+        return new Response(null, {
+          status: 303,
+          headers: { Location: loc, ...corsHeaders(), ...extraHeadersFor(nodeId) },
+        });
       }
 
       if (path === "/" && request.method === "GET") {
-        const q = url.searchParams.get("q") || "";
-        const rows = await listThreads(env, q);
-        return html(page("Home", homeBody({ q, rows, signed }), { signed, path: "/", kind: "home" }));
+        await metaBump(env, "views");
+        const stats = await gatherStats(env);
+        const rid = url.searchParams.get("r") || "";
+        let latest = null;
+        if (rid) {
+          const row = await getReceipt(env, rid);
+          if (row && !Number(row.isolated)) latest = row;
+        }
+        const prior = await publicReceipts(env, 24);
+        const priorFiltered = latest ? prior.filter((p) => p.id !== latest.id) : prior;
+        if (wantsJson(request, url)) {
+          return json({ ok: true, stats, latest: latest ? publicPayload(latest) : null, receipts: priorFiltered.map(publicPayload) });
+        }
+        return html(page("GodLock", homeBody({ stats, latest, prior: priorFiltered }), { path: "/", kind: "home" }), {
+          extraHeaders: extraHeadersFor(nodeId),
+        });
       }
 
-      return html(page("Not found", `<div class="card"><h2>Not found</h2><p><a href="/">Back home</a></p></div>`, { signed, path }), { status: 404 });
+      if (path === "/ask" || path === "/login" || path === "/signup" || path === "/archive" || path.startsWith("/q/")) {
+        return new Response(null, { status: 303, headers: { Location: "/", ...corsHeaders() } });
+      }
+
+      return html(page("Not found", `<div class="card"><h2>Not found</h2><p><a href="/">Back</a></p></div>`, { path }), { status: 404 });
     } catch (err) {
       return json({ ok: false, error: String(err && err.message ? err.message : err), author: AUTHOR, banner: BANNER }, 500);
     }

@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "godlock-uk",
-  "description": "GodLock public board (godlock.uk). Hash-chained Q&A. Author Aziel Eliab.",
+  "description": "GodLock.uk public HTTPS stress-test engine. Hash-chained receipts. Author Aziel Eliab.",
   "license": "Apache-2.0",
   "dependencies": {
     "wrangler": "^4.127.1"

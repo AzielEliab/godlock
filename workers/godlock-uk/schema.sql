@@ -1,51 +1,23 @@
--- GodLock.uk public board. Append-only. Author: Aziel Eliab.
--- NEVER UPDATE or DELETE posts or ledger rows.
+-- GodLock.uk public HTTPS stress-test engine. Append-only.
+-- Author: Aziel Eliab.
+-- NEVER UPDATE or DELETE receipts or ledger rows (metadata + heartbeats excepted).
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS receipts (
   id TEXT PRIMARY KEY,
-  username TEXT UNIQUE NOT NULL COLLATE NOCASE,
-  salt_b64 TEXT NOT NULL,
-  hash_b64 TEXT NOT NULL,
-  n INTEGER NOT NULL,
-  r INTEGER NOT NULL,
-  p INTEGER NOT NULL,
-  dklen INTEGER NOT NULL,
-  created_utc TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS sessions (
-  token TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  username TEXT NOT NULL,
-  expires_utc TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS posts (
-  id TEXT PRIMARY KEY,
-  kind TEXT NOT NULL CHECK (kind IN ('question','post','reply')),
-  parent_id TEXT,
-  title TEXT NOT NULL DEFAULT '',
-  body TEXT NOT NULL,
-  created_by TEXT NOT NULL,
   created_utc TEXT NOT NULL,
+  text_sha256 TEXT NOT NULL,
+  label TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  explanation TEXT NOT NULL,
+  score_before REAL NOT NULL,
+  score_after REAL NOT NULL,
+  residual REAL NOT NULL,
+  isolated INTEGER NOT NULL DEFAULT 0,
   content_sha256 TEXT NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_posts_kind_created ON posts(kind, created_utc);
-CREATE INDEX IF NOT EXISTS idx_posts_parent ON posts(parent_id);
-CREATE INDEX IF NOT EXISTS idx_posts_created ON posts(created_utc);
-
-CREATE TABLE IF NOT EXISTS interactions (
-  id TEXT PRIMARY KEY,
-  kind TEXT NOT NULL,
-  target_id TEXT NOT NULL,
-  created_by TEXT,
-  created_utc TEXT NOT NULL,
-  payload_json TEXT NOT NULL DEFAULT '{}',
-  content_sha256 TEXT NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_interactions_target ON interactions(target_id, kind);
+CREATE INDEX IF NOT EXISTS idx_receipts_created ON receipts(created_utc);
+CREATE INDEX IF NOT EXISTS idx_receipts_public ON receipts(isolated, created_utc);
 
 CREATE TABLE IF NOT EXISTS ledger (
   sequence INTEGER PRIMARY KEY,
@@ -55,3 +27,19 @@ CREATE TABLE IF NOT EXISTS ledger (
   previous_hash TEXT NOT NULL,
   entry_hash TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS metadata (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS heartbeats (
+  session_id TEXT PRIMARY KEY,
+  last_utc TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_heartbeats_last ON heartbeats(last_utc);
+
+INSERT OR IGNORE INTO metadata(key, value) VALUES ('current_score', '50');
+INSERT OR IGNORE INTO metadata(key, value) VALUES ('views', '0');
+INSERT OR IGNORE INTO metadata(key, value) VALUES ('uses', '0');

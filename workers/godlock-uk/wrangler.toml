@@ -5,17 +5,18 @@ compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 account_id = "ac575a9b822bea2bed97d0ab73aed238"
 
-# Optional later: wrangler secret put MASTER_HASH_JSON
 # Do not put usernames, passwords, or hashes in this file.
+
+[ai]
+binding = "AI"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "godlock-uk"
 database_id = "a499ef56-ad02-4431-a3e4-e23f96f500f0"
 
-# Custom domain bind 2026-09-02: zone not in this account
-# wrangler code 10082 cannot infer zone for godlock.uk.
-# Uncomment after the zone is in account ac575a9b822bea2bed97d0ab73aed238.
+# Zone godlock.uk is not in this Cloudflare account (API 10082).
+# Apex https://godlock.uk is proxied to this origin separately.
 # [[routes]]
 # pattern = "godlock.uk"
 # custom_domain = true

@@ -75,6 +75,8 @@ function aiHowTo(base) {
 }
 
 const PRODUCT = "godlock";
+const SKILL_MARKDOWN = "---\nname: GodLock\ndescription: Use when calling GodLock hosted /v1 or installing the local package. Author Aziel Eliab.\n---\n\n# GodLock\n\nGodLock is a product name (ABAD stress-test and resilience engine), not an identity label. Author: Aziel Eliab. Not a VPN. Not a ghost net. Not anonymity. Logical ABAD receipts only.\n\n**Identity:** Aziel Eliab. GodLock is a **product name**, not an identity label.\n\n**THIS IS:** a self-hosted stress-test and resilience engine for the ABAD framework (Aziel Sequence, \u03c6/\u221a2 convergences, Flower of Life geometry). Product name: GodLock.\n\n**THIS IS NOT:** an identity label, a VPN, a ghost net, IP hiding, or anonymity. Author is Aziel Eliab. GodLock is the product name only.\n\nAuthor: **Aziel Eliab**. Forks are welcome and always allowed. Apache-2.0.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## Call these URLs\n\n- Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| POST | `/v1/score` | ABAD engagement score. Advisory. Not a VPN. |\n| POST | `/v1/submit` | Ephemeral logical receipt. Not anonymity. |\n\nGrok: import OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' -X POST https://godlock-download-tracker.vibelock.workers.dev/v1/score \\\n  -H 'content-type: application/json' \\\n  -d '{\"note\":\"advisory ABAD score; not a VPN\"}'\n```\n\n## Local (after one-click install)\n\n```bash\ncurl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash\ngodlock ui\n```\n\nThen open http://127.0.0.1:8080 (loopback only).\n\nCounted download (gzip HTTP 200, no 302): https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/godlock\n";
+
 const VERSION = "0.1.0";
 const BASE = "https://godlock-download-tracker.vibelock.workers.dev";
 const BANNER = "NOT an anonymity network. No IP hiding. Logical ABAD receipts only. Not a VPN, proxy, or Tor hop.";
@@ -252,6 +254,19 @@ export async function handleRuntime(request, url, env) {
   if (path === "/v1/health" && request.method === "GET") {
     return runtimeJson(withBanner({ ok: true, product: PRODUCT, version: VERSION }));
   }
+
+  if (path === "/v1/skill" && request.method === "GET") {
+    return new Response(SKILL_MARKDOWN, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Cache-Control": "private, no-store",
+        "X-KV-Increment": "false",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  }
+
   if (path === "/openapi.json" && request.method === "GET") return runtimeJson(openapiDoc());
   if (path === "/ai" && request.method === "GET") {
     return runtimeJson(withBanner({

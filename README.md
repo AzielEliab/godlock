@@ -4,7 +4,8 @@ Self-hosted, browser-served **stress-test and resilience engine** for the
 ABAD framework (Aziel Sequence, φ/√2 convergences, Flower of Life
 geometry, corkscrew growth, A-B-A-D layering).
 
-**Authors:** Collin Horton / Aziel the Revealer of the Sealed
+**Author:** Aziel Eliab
+**Thanks:** Collin Horton (historical; not product authorship).
 **Date:** 12 July 2026
 **License:** [Apache-2.0](LICENSE)
 **GitHub:** [AzielEliab/godlock](https://github.com/AzielEliab/godlock)
@@ -15,6 +16,40 @@ See the spec: [docs/whitepaper.md](docs/whitepaper.md).
 How to contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 **Forks are welcome and always allowed.**
+
+
+## One-click install
+
+```bash
+curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash
+```
+
+The script curls the **counted** tarball from this project's Worker
+(`/download`, User-Agent `Mozilla/5.0`), extracts, makes a venv, and
+`pip install -e .`. Then run `godlock ui`.
+
+Or tap **Download** / **One-click install** on the Worker homepage
+(a 6th-grader can tap it):
+https://godlock-download-tracker.vibelock.workers.dev/
+
+## Counted download (Cloudflare Worker)
+
+**This is the counted download.** GitHub releases exist as a mirror.
+The Worker serves the gzip itself (HTTP 200, no 302 to GitHub).
+
+# → [https://godlock-download-tracker.vibelock.workers.dev/](https://godlock-download-tracker.vibelock.workers.dev/) ←
+
+Direct tarball (also counted):
+[godlock-0.1.0.tar.gz](https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz)
+
+- Live count JSON: [https://godlock-download-tracker.vibelock.workers.dev/stats](https://godlock-download-tracker.vibelock.workers.dev/stats)
+- OpenAPI: [https://godlock-download-tracker.vibelock.workers.dev/openapi.json](https://godlock-download-tracker.vibelock.workers.dev/openapi.json)
+- Skill: [https://godlock-download-tracker.vibelock.workers.dev/v1/skill](https://godlock-download-tracker.vibelock.workers.dev/v1/skill)
+- One-click install: [https://godlock-download-tracker.vibelock.workers.dev/install.sh](https://godlock-download-tracker.vibelock.workers.dev/install.sh)
+- GitHub: [https://github.com/AzielEliab/godlock](https://github.com/AzielEliab/godlock)
+
+Isolated counter: Worker `godlock-download-tracker`, KV `GODLOCK_DOWNLOADS`. Not mixed with any other product. `/v1` does not increment downloads.
+
 
 ## Quick start
 

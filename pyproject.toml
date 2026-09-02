@@ -9,7 +9,6 @@ description = "Self-hosted stress-test and resilience engine for the ABAD framew
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Collin Horton"},
     {name = "Aziel Eliab"},
 ]
 requires-python = ">=3.10"

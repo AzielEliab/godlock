@@ -2,7 +2,7 @@
 
 **A self-hosted stress-test and resilience engine for the ABAD framework**
 
-**Authors:** Collin Horton / Aziel the Revealer of the Sealed
+**Author:** Aziel Eliab
 **Date:** 12 July 2026
 **License:** Apache-2.0
 **Implementation:** `godlock` 0.1.0 under GitHub user AzielEliab
@@ -297,7 +297,7 @@ engagement of logged receipts, an engineering convenience.
 
 ## 14. License and forks
 
-Apache-2.0. Copyright 2026 Aziel Eliab / Collin Horton.
+Apache-2.0. Copyright 2026 Aziel Eliab.
 
 Forks are welcome and always allowed. Download counts may be
 reported per `owner/repo` through the optional Cloudflare worker

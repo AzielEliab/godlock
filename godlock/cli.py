@@ -46,7 +46,7 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="godlock",
         description=(
             "GodLock — ABAD stress-test and resilience engine "
-            "(Collin Horton / Aziel the Revealer of the Sealed, 12 July 2026). "
+            "(Aziel Eliab, 12 July 2026). "
             "Core + receipts. Not an anonymity network. "
             "Local UI: `godlock ui` at http://127.0.0.1:8080 (loopback only; not a VPN/proxy/Tor)."
         ),
@@ -95,6 +95,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p_ex.add_argument("--receipt", required=True)
     p_ex.add_argument("--out", required=True, help="Output .capsule path.")
 
+    p_doc = sub.add_parser("doctor", help="Self-check: identity, loopback, score. No network.")
+    p_doc.add_argument("--json", action="store_true", dest="as_json", help="Print doctor results as JSON.")
     sub.add_parser("version", help="Print the GodLock version and exit.")
     return parser
 
@@ -107,6 +109,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         sys.stdout.write(f"godlock {__version__}\n")
         sys.stdout.write(MOTTO + "\n")
         return 0
+
+    if args.cmd == "doctor":
+        from godlock.doctor import doctor_cli
+
+        return doctor_cli(as_json=args.as_json)
 
     if args.cmd in ("serve", "ui"):
         # Local import so `godlock version` does not need uvicorn at import-check time.

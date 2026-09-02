@@ -5,7 +5,6 @@ ABAD framework (Aziel Sequence, φ/√2 convergences, Flower of Life
 geometry, corkscrew growth, A-B-A-D layering).
 
 **Author:** Aziel Eliab
-**Thanks:** Collin Horton (historical; not product authorship).
 **Date:** 12 July 2026
 **License:** [Apache-2.0](LICENSE)
 **GitHub:** [AzielEliab/godlock](https://github.com/AzielEliab/godlock)

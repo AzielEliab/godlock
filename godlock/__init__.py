@@ -1,7 +1,6 @@
 """GodLock: stress-test and resilience engine for the ABAD framework.
 
 July 12 2026 whitepaper implementation by Aziel Eliab.
-Historical thanks: Collin Horton (not product authorship).
 
 GodLock does not argue. It records, analyzes, hardens, and grows.
 

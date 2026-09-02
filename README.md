@@ -71,6 +71,9 @@ Flutter sources: [`mobile/`](mobile/). Application id `com.azieeliab.godlock`. O
 
 ## Use with Grok, ChatGPT, Venice
 
+- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
+- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`
+
 Live HTTPS runtime on the download-tracker Worker (does **not** increment the download counter). Always send `User-Agent: Mozilla/5.0`.
 
 - OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json

@@ -49,3 +49,18 @@ curl -s -A 'Mozilla/5.0' -X POST https://godlock-download-tracker.vibelock.worke
 
 Counted download (gzip HTTP 200, no 302): https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz
 GitHub: https://github.com/AzielEliab/godlock
+
+## Catalog + local UI
+
+Author: **Aziel Eliab**. Honest scope: Offline ABAD / hardening score. Not a VPN and not an anonymity network. GodLock is a product name.
+
+- Catalog product: https://aziel-runtime.vibelock.workers.dev/p/godlock/
+- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
+- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`
+- This Worker skill: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`
+- This Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json
+- Sample payload: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/example`
+
+Local UI: **Import JSON file** (`type=file`) and **Export JSON**. Then `godlock doctor`.
+
+Grok: import catalog or Worker OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.

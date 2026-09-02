@@ -25,6 +25,10 @@ That's it. This computer only.
 
 A localhost tool that records a test, saves an honest receipt (id, time, text, SHA-256), and can save or load a JSON file. Governments and kids can both read the file. Receipts are not rewritten. This process is **not** a VPN, proxy, Tor hop, or hiding net.
 
+Public board (read, ask, reply; hash-chained archive; not a VPN, mesh, or tunnel):
+https://godlock.uk
+https://godlock-uk.vibelock.workers.dev
+
 Counted download (gzip HTTP 200, no 302):
 https://godlock-download-tracker.vibelock.workers.dev/
 
@@ -88,6 +92,7 @@ Aziel Eliab. GodLock. https://github.com/AzielEliab/godlock. https://godlock-dow
 
 - Catalog: https://aziel-runtime.vibelock.workers.dev/
 - Worker homepage: https://godlock-download-tracker.vibelock.workers.dev/
+- Public board: https://godlock.uk (https://godlock-uk.vibelock.workers.dev)
 - Counted download (gzip HTTP 200, no 302): https://godlock-download-tracker.vibelock.workers.dev/download
 - GitHub: https://github.com/AzielEliab/godlock
 - Citation JSON: https://godlock-download-tracker.vibelock.workers.dev/cite.json

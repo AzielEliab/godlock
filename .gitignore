@@ -10,3 +10,5 @@ node_modules/
 examples/_out
 workers/download-tracker/node_modules/
 workers/download-tracker/.wrangler/
+workers/godlock-uk/node_modules/
+workers/godlock-uk/.wrangler/

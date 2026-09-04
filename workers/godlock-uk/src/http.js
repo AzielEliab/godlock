@@ -8,17 +8,34 @@ export function corsHeaders() {
   };
 }
 
+export function cacheHeaders() {
+  return {
+    "Cache-Control": "no-store, no-cache, must-revalidate",
+    Pragma: "no-cache",
+  };
+}
+
 export function json(body, status = 200, extraHeaders) {
   return new Response(JSON.stringify(body, null, 2), {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8", ...corsHeaders(), ...(extraHeaders || {}) },
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      ...corsHeaders(),
+      ...cacheHeaders(),
+      ...(extraHeaders || {}),
+    },
   });
 }
 
 export function html(pageBody, { status = 200, extraHeaders } = {}) {
   return new Response(pageBody, {
     status,
-    headers: { "Content-Type": "text/html; charset=utf-8", ...corsHeaders(), ...(extraHeaders || {}) },
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      ...corsHeaders(),
+      ...cacheHeaders(),
+      ...(extraHeaders || {}),
+    },
   });
 }
 

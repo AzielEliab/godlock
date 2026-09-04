@@ -1,4 +1,6 @@
 /** Crawl/index metadata for GodLock.uk. Author: Aziel Eliab. */
+import { hideInternalDetermination } from "./publicCopy.js";
+
 export const CANON_HOST = "https://godlock.uk";
 export const FALLBACK_HOST = "https://godlock-uk.vibelock.workers.dev";
 export const DOWNLOAD = "https://godlock-download-tracker.vibelock.workers.dev/download";
@@ -27,9 +29,9 @@ function linkRel(rel, href, extra) {
 }
 
 export function defaultDescription(kind) {
-  if (kind === "verify") return "Verify the GodLock.uk hash-chained ledger. Author Aziel Eliab.";
-  if (kind === "receipt") return "A GodLock.uk receipt. Append-only. Author Aziel Eliab.";
-  return "GodLock public HTTPS stress-test engine by Aziel Eliab. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Not a mesh.";
+  if (kind === "verify") return hideInternalDetermination("Verify the GodLock.uk hash-chained ledger. Author Aziel Eliab.");
+  if (kind === "receipt") return hideInternalDetermination("A GodLock.uk receipt. Append-only. Author Aziel Eliab.");
+  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Not a mesh.");
 }
 
 function jsonLd(title, path, description) {
@@ -52,7 +54,7 @@ export function headMeta(opts) {
   const title = opts.title || SITE;
   const path = opts.path || "/";
   const kind = opts.kind || "";
-  const description = opts.description || defaultDescription(kind);
+  const description = hideInternalDetermination(opts.description || defaultDescription(kind));
   const url = CANON_HOST + path;
   const ld = jsonLd(title, path, description);
   const ldOpen = "<" + "script type=" + Q + "application/ld+json" + Q + ">";
@@ -124,7 +126,7 @@ export function citeDoc() {
     health: CANON_HOST + "/health",
     license: "Apache-2.0",
     catalog: CATALOG + "/",
-    limitation: BANNER,
+    limitation: hideInternalDetermination(BANNER),
     how_to_cite: "Eliab, Aziel. (2026). GodLock [Software]. Apache-2.0. " + CANON_HOST + "/",
   };
 }
@@ -136,7 +138,7 @@ export function llmsDoc() {
     + "GitHub: " + GITHUB + "\n"
     + "Download: " + DOWNLOAD + "\n"
     + "License: Apache-2.0\n\n"
-    + BANNER + "\n\n"
+    + hideInternalDetermination(BANNER) + "\n\n"
     + "GodLock is a product name, not an identity. Identity is Aziel Eliab only.\n\n"
     + "Public HTTPS stress-test engine. Submit a challenge. Answers open with Yes, No, Let's review, or Interesting.\n"
     + "Intelligent-design disputes are processed under the same rules. Mesh is not on this surface.\n";

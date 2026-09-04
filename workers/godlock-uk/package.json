@@ -3,6 +3,10 @@
   "name": "godlock-uk",
   "description": "GodLock.uk public HTTPS stress-test engine. Hash-chained receipts. Author Aziel Eliab.",
   "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test presence.test.mjs"
+  },
   "dependencies": {
     "wrangler": "^4.127.1"
   }

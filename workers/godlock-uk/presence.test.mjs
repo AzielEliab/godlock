@@ -4,9 +4,10 @@ import {
   PRESENCE_TTL_MS,
   PRESENCE_CLEANUP_MS,
   liveNodeCountFromDb,
-  submissionCountFromRows,
+  usesCountFromLedger,
   presenceCutoff,
 } from "./src/presence.js";
+import { hideInternalDetermination } from "./src/publicCopy.js";
 
 describe("liveNodeCountFromDb", () => {
   it("returns the D1 count when heartbeats are visible", () => {
@@ -25,22 +26,20 @@ describe("liveNodeCountFromDb", () => {
   });
 });
 
-describe("submissionCountFromRows", () => {
-  it("prefers receipts over wiped metadata uses", () => {
-    assert.equal(submissionCountFromRows({ receipts: 7, ledgerSubmits: 0, uses: 0 }), 7);
+describe("usesCountFromLedger", () => {
+  it("counts ledger SUBMIT and ISOLATE only", () => {
+    assert.equal(usesCountFromLedger({ ledgerSubmits: 7 }), 7);
+    assert.equal(usesCountFromLedger({ ledgerSubmits: "2" }), 2);
   });
 
-  it("falls back to ledger SUBMIT/ISOLATE when receipts were wiped", () => {
-    assert.equal(submissionCountFromRows({ receipts: 0, ledgerSubmits: 4, uses: 0 }), 4);
+  it("is 0 when nothing is on the receipt ledger", () => {
+    assert.equal(usesCountFromLedger({ ledgerSubmits: 0 }), 0);
+    assert.equal(usesCountFromLedger({}), 0);
+    assert.equal(usesCountFromLedger({ ledgerSubmits: null }), 0);
   });
 
-  it("falls back to uses only when receipts and ledger are empty", () => {
-    assert.equal(submissionCountFromRows({ receipts: 0, ledgerSubmits: 0, uses: 2 }), 2);
-    assert.equal(submissionCountFromRows({ receipts: 0, ledgerSubmits: 0, uses: 0 }), 0);
-  });
-
-  it("counts isolated receipts (receipts includes isolated rows)", () => {
-    assert.equal(submissionCountFromRows({ receipts: 2, ledgerSubmits: 2, uses: 1 }), 2);
+  it("does not use receipts or metadata as a substitute for the ledger", () => {
+    assert.equal(usesCountFromLedger({ ledgerSubmits: 0, receipts: 9, uses: 9 }), 0);
   });
 });
 
@@ -53,5 +52,14 @@ describe("presenceCutoff", () => {
     assert.equal(c.sinceMs, now - PRESENCE_TTL_MS);
     assert.equal(c.cleanupMs, now - PRESENCE_CLEANUP_MS);
     assert.equal(c.sinceIso, "2026-09-04T12:55:00.000Z");
+  });
+});
+
+describe("hideInternalDetermination", () => {
+  it("strips empirical-limit / foundational determination copy from public text", () => {
+    const leaked = "Weighing framework: Empirical Knowledge and the Limits of Observation (Aziel Eliab). Submit a challenge.";
+    assert.equal(hideInternalDetermination(leaked), "Submit a challenge.");
+    assert.equal(hideInternalDetermination("foundational determination is hidden"), "is hidden");
+    assert.match(hideInternalDetermination("Public HTTPS engine. Author Aziel Eliab."), /Aziel Eliab/);
   });
 });

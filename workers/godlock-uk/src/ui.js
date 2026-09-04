@@ -3,6 +3,7 @@
  * Not a forum. Author: Aziel Eliab.
  */
 import { headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST } from "./seo.js";
+import { hideInternalDetermination } from "./publicCopy.js";
 
 export const CSS = `
 :root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f}
@@ -64,7 +65,7 @@ function when(iso) {
 }
 
 function publicText(s, fallback) {
-  const t = String(s == null ? "" : s).trim();
+  const t = hideInternalDetermination(String(s == null ? "" : s).trim());
   if (!t || t === "[object Object]") return fallback || "Receipt recorded under the locked protocol.";
   return t;
 }
@@ -81,7 +82,7 @@ export function page(title, body, { path, kind, extraHeaders } = {}) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(title)} — GodLock</title>${headMeta({ title, path: path || "/", kind })}<style>${CSS}</style></head><body><div class="wrap">
 <div class="brandrow"><div class="brand">GodLock</div><span class="pill">HTTPS engine</span></div>
 <p class="author">Author Aziel Eliab</p>
-<div class="banner">${esc(BANNER)}</div>
+<div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
 ${body}
 <footer>Aziel Eliab · GodLock is a product name · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a></footer>
 </div>
@@ -110,12 +111,11 @@ ${body}
   function applyStats(j){
     if(!j)return;
     var live=document.getElementById("stat-live-nodes");
-    var sub=document.getElementById("stat-submissions");
+    var usesEl=document.getElementById("stat-uses");
     var views=document.getElementById("stat-views");
     var dl=document.getElementById("stat-downloads");
     if(live&&j.live_nodes!=null)live.textContent=String(j.live_nodes);
-    var submissions=j.submissions!=null?j.submissions:j.uses;
-    if(sub&&submissions!=null)sub.textContent=String(submissions);
+    if(usesEl&&j.uses!=null)usesEl.textContent=String(j.uses);
     if(views&&j.views!=null)views.textContent=String(j.views);
     if(dl&&j.downloads!=null)dl.textContent=String(j.downloads);
   }
@@ -139,7 +139,7 @@ export function homeBody({ stats, latest, prior, error }) {
   const s = stats || {};
   const live = s.live_nodes != null ? s.live_nodes : 0;
   const views = s.views != null ? s.views : 0;
-  const submissions = s.submissions != null ? s.submissions : (s.uses != null ? s.uses : 0);
+  const uses = s.uses != null ? s.uses : 0;
   const downloads = s.downloads != null ? s.downloads : 0;
   const score = s.current_score != null ? s.current_score : 50;
   const residual = s.residual != null ? s.residual : 50;
@@ -155,7 +155,7 @@ export function homeBody({ stats, latest, prior, error }) {
 <div class="stats">
   <div class="stat"><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
   <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
-  <div class="stat"><b id="stat-submissions">${esc(submissions)}</b><span>Submissions</span></div>
+  <div class="stat"><b id="stat-uses">${esc(uses)}</b><span>Uses</span></div>
   <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>
 </div>
 <div class="scorebox">

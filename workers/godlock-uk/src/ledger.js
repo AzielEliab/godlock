@@ -6,6 +6,7 @@
  * Author: Aziel Eliab.
  */
 import { createHash } from "node:crypto";
+import { hideInternalDetermination } from "./publicCopy.js";
 
 export const ZERO = "0".repeat(64);
 
@@ -136,6 +137,10 @@ function publicEntry(row) {
   delete safe.hash_b64;
   delete safe.password;
   delete safe.token;
+  delete safe.weighing;
+  for (const k of Object.keys(safe)) {
+    if (typeof safe[k] === "string") safe[k] = hideInternalDetermination(safe[k]);
+  }
   return {
     sequence: row.sequence,
     timestamp_utc: row.timestamp_utc,

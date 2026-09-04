@@ -14,9 +14,10 @@ import {
 import {
   PRESENCE_TTL_MS,
   liveNodeCountFromDb,
-  submissionCountFromRows,
+  usesCountFromLedger,
   presenceCutoff,
 } from "./presence.js";
+import { hideInternalDetermination, publicSafeFields } from "./publicCopy.js";
 
 const TEXT_MAX = 8000;
 const NODE_COOKIE = "godlock_node";
@@ -116,7 +117,7 @@ async function touchHeartbeat(env, request, cookieId) {
   return { id, wrote };
 }
 
-async function liveNodes(env, { wrote } = {}) {
+async function liveNodes(env, { wrote, visiting } = {}) {
   const cut = presenceCutoff();
   try {
     const row = await env.DB.prepare(
@@ -124,28 +125,21 @@ async function liveNodes(env, { wrote } = {}) {
        WHERE (last_ms IS NOT NULL AND last_ms >= ?)
           OR ((last_ms IS NULL OR last_ms = 0) AND last_utc >= ?)`
     ).bind(cut.sinceMs, cut.sinceIso).first();
-    return liveNodeCountFromDb(row && row.n, wrote);
+    return liveNodeCountFromDb(row && row.n, !!(wrote || visiting));
   } catch {
-    return liveNodeCountFromDb(0, wrote);
+    return liveNodeCountFromDb(0, !!(wrote || visiting));
   }
 }
 
-async function submissionCount(env, usesFallback) {
-  let receipts = 0;
-  let ledgerSubmits = 0;
+async function usesCount(env) {
   try {
-    const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM receipts").first();
-    receipts = Number(r && r.n) || 0;
-  } catch { /* receipts table may be missing on first boot */ }
-  if (receipts <= 0) {
-    try {
-      const l = await env.DB.prepare(
-        "SELECT COUNT(*) AS n FROM ledger WHERE action IN ('SUBMIT', 'ISOLATE')"
-      ).first();
-      ledgerSubmits = Number(l && l.n) || 0;
-    } catch { /* ledger optional */ }
+    const l = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM ledger WHERE action IN ('SUBMIT', 'ISOLATE')"
+    ).first();
+    return usesCountFromLedger({ ledgerSubmits: l && l.n });
+  } catch {
+    return 0;
   }
-  return submissionCountFromRows({ receipts, ledgerSubmits, uses: usesFallback });
 }
 
 async function fetchDownloads(env) {
@@ -181,20 +175,18 @@ async function getReceipt(env, id) {
   return env.DB.prepare("SELECT * FROM receipts WHERE id=?").bind(id).first();
 }
 
-async function gatherStats(env, { wrote } = {}) {
+async function gatherStats(env, { wrote, visiting } = {}) {
   const score = await currentScore(env);
   const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
-  const uses = parseInt(await metaGet(env, "uses", "0"), 10) || 0;
-  const [nodes, downloads, submissions] = await Promise.all([
-    liveNodes(env, { wrote }),
+  const [nodes, downloads, uses] = await Promise.all([
+    liveNodes(env, { wrote, visiting }),
     fetchDownloads(env),
-    submissionCount(env, uses),
+    usesCount(env),
   ]);
   return {
     live_nodes: nodes,
     views,
     uses,
-    submissions,
     downloads,
     current_score: score,
     residual: residualOf(score),
@@ -215,18 +207,19 @@ async function readChallengeText(request) {
 }
 
 function publicPayload(row) {
+  const safe = publicSafeFields(row);
   return {
-    id: row.id,
-    created_utc: row.created_utc,
-    label: row.label,
-    summary: row.summary,
-    explanation: row.explanation,
-    score_before: row.score_before,
-    score_after: row.score_after,
-    residual: row.residual,
-    text_sha256: row.text_sha256,
-    content_sha256: row.content_sha256,
-    isolated: Number(row.isolated) ? 1 : 0,
+    id: safe.id,
+    created_utc: safe.created_utc,
+    label: safe.label,
+    summary: hideInternalDetermination(safe.summary),
+    explanation: hideInternalDetermination(safe.explanation),
+    score_before: safe.score_before,
+    score_after: safe.score_after,
+    residual: safe.residual,
+    text_sha256: safe.text_sha256,
+    content_sha256: safe.content_sha256,
+    isolated: Number(safe.isolated) ? 1 : 0,
   };
 }
 
@@ -250,6 +243,8 @@ async function processSubmit(env, text) {
       residual: residualOf(score_before),
       isolated: 1,
     };
+    row.summary = hideInternalDetermination(row.summary);
+    row.explanation = hideInternalDetermination(row.explanation);
     row.content_sha256 = hashReceipt(row);
     await env.DB.prepare(
       "INSERT INTO receipts(id, created_utc, text_sha256, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
@@ -267,8 +262,8 @@ async function processSubmit(env, text) {
     created_utc,
     text_sha256,
     label: answered.label,
-    summary: answered.summary,
-    explanation: answered.explanation,
+    summary: hideInternalDetermination(answered.summary),
+    explanation: hideInternalDetermination(answered.explanation),
     score_before,
     score_after,
     residual,
@@ -293,10 +288,8 @@ async function processSubmit(env, text) {
     score_after,
     residual,
     delta: Math.round((score_after - score_before) * 10) / 10,
-    weighing: answered.weighing || "",
   });
   if (score_after !== score_before) await metaSet(env, "current_score", String(score_after));
-  await metaBump(env, "uses");
   return row;
 }
 
@@ -320,8 +313,8 @@ async function healthPayload(env, { wrote } = {}) {
     product: "GodLock",
     site: "godlock.uk",
     author: AUTHOR,
-    banner: BANNER,
-    limitation: BANNER,
+    banner: hideInternalDetermination(BANNER),
+    limitation: hideInternalDetermination(BANNER),
     download: DOWNLOAD,
     github: GITHUB,
     ...stats,
@@ -379,7 +372,7 @@ export default {
         return json({
           ok: true,
           live_nodes: stats.live_nodes,
-          submissions: stats.submissions,
+          uses: stats.uses,
         }, 200, extraHeadersFor(nodeId));
       }
 
@@ -428,7 +421,7 @@ export default {
           if (row.isolated === true || row.isolated === 1) {
             return json({ ok: true, isolated: true, id: row.id, text_sha256: row.text_sha256, stats }, 200, extraHeadersFor(nodeId));
           }
-          return json({ ok: true, isolated: false, ...publicPayload(row), stats, weighing: undefined }, 200, extraHeadersFor(nodeId));
+          return json({ ok: true, isolated: false, ...publicPayload(row), stats }, 200, extraHeadersFor(nodeId));
         }
         const loc = (row.isolated === true || row.isolated === 1) ? "/" : "/?r=" + encodeURIComponent(row.id);
         return new Response(null, {
@@ -439,7 +432,7 @@ export default {
 
       if (path === "/" && request.method === "GET") {
         await metaBump(env, "views");
-        const stats = await gatherStats(env, { wrote });
+        const stats = await gatherStats(env, { wrote, visiting: true });
         const rid = url.searchParams.get("r") || "";
         let latest = null;
         if (rid) {

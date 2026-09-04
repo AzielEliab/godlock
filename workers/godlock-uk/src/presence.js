@@ -1,8 +1,8 @@
 /**
- * Heartbeat presence + submission tally helpers.
+ * Heartbeat presence + Uses tally helpers.
  * Live Nodes = distinct sessions with a heartbeat inside PRESENCE_TTL_MS.
- * Submissions = receipts (fallback: ledger SUBMIT/ISOLATE, then metadata uses).
- * Author: Aziel Eliab.
+ * Uses = ledger SUBMIT + ISOLATE only (real submissions on the receipt ledger).
+ * Heartbeats and page views do not increment Uses. Author: Aziel Eliab.
  */
 
 export const PRESENCE_TTL_MS = 5 * 60 * 1000;
@@ -15,13 +15,11 @@ export function liveNodeCountFromDb(dbCount, justTouched) {
   return count;
 }
 
-export function submissionCountFromRows({ receipts, ledgerSubmits, uses } = {}) {
-  const r = Number(receipts);
-  if (Number.isFinite(r) && r > 0) return r;
+/** Uses = ledgered submissions only. Receipts or metadata without ledger rows do not count. */
+export function usesCountFromLedger({ ledgerSubmits } = {}) {
   const l = Number(ledgerSubmits);
-  if (Number.isFinite(l) && l > 0) return l;
-  const u = Number(uses);
-  return Number.isFinite(u) && u > 0 ? u : 0;
+  if (!Number.isFinite(l) || l < 0) return 0;
+  return l;
 }
 
 export function presenceCutoff(nowMs = Date.now()) {

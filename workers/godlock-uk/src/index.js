@@ -11,10 +11,16 @@ import { robotsTxt, sitemapXml, citeDoc, llmsDoc, BANNER, DOWNLOAD, DOWNLOAD_STA
 import {
   START, shouldIsolate, answerChallenge, clampScore, residualOf, hashReceipt,
 } from "./engine.js";
+import {
+  PRESENCE_TTL_MS,
+  liveNodeCountFromDb,
+  usesCountFromLedger,
+  presenceCutoff,
+} from "./presence.js";
+import { hideInternalDetermination, publicSafeFields } from "./publicCopy.js";
 
 const TEXT_MAX = 8000;
 const NODE_COOKIE = "godlock_node";
-const HEARTBEAT_MS = 90 * 1000;
 
 async function ensureSchema(env) {
   if (!env || !env.DB) return;
@@ -30,12 +36,18 @@ async function ensureSchema(env) {
       sequence INTEGER PRIMARY KEY, timestamp_utc TEXT NOT NULL, action TEXT NOT NULL,
       payload_json TEXT NOT NULL, previous_hash TEXT NOT NULL, entry_hash TEXT NOT NULL)`),
     env.DB.prepare("CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)"),
-    env.DB.prepare("CREATE TABLE IF NOT EXISTS heartbeats (session_id TEXT PRIMARY KEY, last_utc TEXT NOT NULL)"),
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS heartbeats (session_id TEXT PRIMARY KEY, last_utc TEXT NOT NULL, last_ms INTEGER)"),
     env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_heartbeats_last ON heartbeats(last_utc)"),
     env.DB.prepare("INSERT OR IGNORE INTO metadata(key, value) VALUES ('current_score', '50')"),
     env.DB.prepare("INSERT OR IGNORE INTO metadata(key, value) VALUES ('views', '0')"),
     env.DB.prepare("INSERT OR IGNORE INTO metadata(key, value) VALUES ('uses', '0')"),
   ]);
+  try {
+    await env.DB.prepare("ALTER TABLE heartbeats ADD COLUMN last_ms INTEGER").run();
+  } catch { /* column already present */ }
+  try {
+    await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_heartbeats_last_ms ON heartbeats(last_ms)").run();
+  } catch { /* index or column not ready */ }
 }
 
 function newId() {
@@ -82,24 +94,49 @@ function nodeCookieHeader(id) {
 
 async function touchHeartbeat(env, request, cookieId) {
   const id = sessionIdFrom(request, cookieId);
-  const now = new Date().toISOString();
-  const cutoff = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+  const nowMs = Date.now();
+  const now = new Date(nowMs).toISOString();
+  const cut = presenceCutoff(nowMs);
+  let wrote = false;
   try {
     await env.DB.prepare(
-      "INSERT INTO heartbeats(session_id, last_utc) VALUES(?, ?) ON CONFLICT(session_id) DO UPDATE SET last_utc=excluded.last_utc"
-    ).bind(id, now).run();
-    await env.DB.prepare("DELETE FROM heartbeats WHERE last_utc < ?").bind(cutoff).run();
-  } catch { /* ignore heartbeat errors */ }
-  return id;
+      "INSERT INTO heartbeats(session_id, last_utc, last_ms) VALUES(?, ?, ?) ON CONFLICT(session_id) DO UPDATE SET last_utc=excluded.last_utc, last_ms=excluded.last_ms"
+    ).bind(id, now, nowMs).run();
+    wrote = true;
+    await env.DB.prepare(
+      "DELETE FROM heartbeats WHERE (last_ms IS NOT NULL AND last_ms < ?) OR ((last_ms IS NULL OR last_ms = 0) AND last_utc < ?)"
+    ).bind(cut.cleanupMs, cut.cleanupIso).run();
+  } catch {
+    try {
+      await env.DB.prepare(
+        "INSERT INTO heartbeats(session_id, last_utc) VALUES(?, ?) ON CONFLICT(session_id) DO UPDATE SET last_utc=excluded.last_utc"
+      ).bind(id, now).run();
+      wrote = true;
+    } catch { /* ignore heartbeat errors so the page still renders */ }
+  }
+  return { id, wrote };
 }
 
-async function liveNodes(env) {
-  const since = new Date(Date.now() - HEARTBEAT_MS).toISOString();
+async function liveNodes(env, { wrote, visiting } = {}) {
+  const cut = presenceCutoff();
   try {
     const row = await env.DB.prepare(
-      "SELECT COUNT(*) AS n FROM heartbeats WHERE last_utc >= ?"
-    ).bind(since).first();
-    return Number(row && row.n) || 0;
+      `SELECT COUNT(*) AS n FROM heartbeats
+       WHERE (last_ms IS NOT NULL AND last_ms >= ?)
+          OR ((last_ms IS NULL OR last_ms = 0) AND last_utc >= ?)`
+    ).bind(cut.sinceMs, cut.sinceIso).first();
+    return liveNodeCountFromDb(row && row.n, !!(wrote || visiting));
+  } catch {
+    return liveNodeCountFromDb(0, !!(wrote || visiting));
+  }
+}
+
+async function usesCount(env) {
+  try {
+    const l = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM ledger WHERE action IN ('SUBMIT', 'ISOLATE')"
+    ).first();
+    return usesCountFromLedger({ ledgerSubmits: l && l.n });
   } catch {
     return 0;
   }
@@ -138,11 +175,14 @@ async function getReceipt(env, id) {
   return env.DB.prepare("SELECT * FROM receipts WHERE id=?").bind(id).first();
 }
 
-async function gatherStats(env) {
+async function gatherStats(env, { wrote, visiting } = {}) {
   const score = await currentScore(env);
   const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
-  const uses = parseInt(await metaGet(env, "uses", "0"), 10) || 0;
-  const [nodes, downloads] = await Promise.all([liveNodes(env), fetchDownloads(env)]);
+  const [nodes, downloads, uses] = await Promise.all([
+    liveNodes(env, { wrote, visiting }),
+    fetchDownloads(env),
+    usesCount(env),
+  ]);
   return {
     live_nodes: nodes,
     views,
@@ -150,6 +190,7 @@ async function gatherStats(env) {
     downloads,
     current_score: score,
     residual: residualOf(score),
+    presence_ttl_ms: PRESENCE_TTL_MS,
   };
 }
 
@@ -166,18 +207,19 @@ async function readChallengeText(request) {
 }
 
 function publicPayload(row) {
+  const safe = publicSafeFields(row);
   return {
-    id: row.id,
-    created_utc: row.created_utc,
-    label: row.label,
-    summary: row.summary,
-    explanation: row.explanation,
-    score_before: row.score_before,
-    score_after: row.score_after,
-    residual: row.residual,
-    text_sha256: row.text_sha256,
-    content_sha256: row.content_sha256,
-    isolated: Number(row.isolated) ? 1 : 0,
+    id: safe.id,
+    created_utc: safe.created_utc,
+    label: safe.label,
+    summary: hideInternalDetermination(safe.summary),
+    explanation: hideInternalDetermination(safe.explanation),
+    score_before: safe.score_before,
+    score_after: safe.score_after,
+    residual: safe.residual,
+    text_sha256: safe.text_sha256,
+    content_sha256: safe.content_sha256,
+    isolated: Number(safe.isolated) ? 1 : 0,
   };
 }
 
@@ -201,6 +243,8 @@ async function processSubmit(env, text) {
       residual: residualOf(score_before),
       isolated: 1,
     };
+    row.summary = hideInternalDetermination(row.summary);
+    row.explanation = hideInternalDetermination(row.explanation);
     row.content_sha256 = hashReceipt(row);
     await env.DB.prepare(
       "INSERT INTO receipts(id, created_utc, text_sha256, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
@@ -218,8 +262,8 @@ async function processSubmit(env, text) {
     created_utc,
     text_sha256,
     label: answered.label,
-    summary: answered.summary,
-    explanation: answered.explanation,
+    summary: hideInternalDetermination(answered.summary),
+    explanation: hideInternalDetermination(answered.explanation),
     score_before,
     score_after,
     residual,
@@ -244,14 +288,12 @@ async function processSubmit(env, text) {
     score_after,
     residual,
     delta: Math.round((score_after - score_before) * 10) / 10,
-    weighing: answered.weighing || "",
   });
   if (score_after !== score_before) await metaSet(env, "current_score", String(score_after));
-  await metaBump(env, "uses");
   return row;
 }
 
-async function healthPayload(env) {
+async function healthPayload(env, { wrote } = {}) {
   const extra = {};
   try {
     const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM receipts").first();
@@ -265,14 +307,14 @@ async function healthPayload(env) {
     extra.d1 = "error";
     extra.error = String(err && err.message ? err.message : err);
   }
-  const stats = extra.d1 === "ok" ? await gatherStats(env) : {};
+  const stats = extra.d1 === "ok" ? await gatherStats(env, { wrote }) : {};
   return {
     ok: extra.d1 === "ok",
     product: "GodLock",
     site: "godlock.uk",
     author: AUTHOR,
-    banner: BANNER,
-    limitation: BANNER,
+    banner: hideInternalDetermination(BANNER),
+    limitation: hideInternalDetermination(BANNER),
     download: DOWNLOAD,
     github: GITHUB,
     ...stats,
@@ -297,7 +339,9 @@ export default {
     try {
       await ensureSchema(env);
       const cookieId = readCookie(request, NODE_COOKIE);
-      const nodeId = await touchHeartbeat(env, request, cookieId || newId());
+      const hb = await touchHeartbeat(env, request, cookieId || newId());
+      const nodeId = hb.id;
+      const wrote = hb.wrote;
 
       if (path === "/robots.txt") {
         return new Response(robotsTxt(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
@@ -310,11 +354,31 @@ export default {
       if (path === "/llms.txt") {
         return new Response(llmsDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
-      if (path === "/health") return json(await healthPayload(env));
+      if (path === "/health") return json(await healthPayload(env, { wrote }));
+
+      if (path === "/stats") {
+        const stats = await gatherStats(env, { wrote });
+        return json({
+          ok: true,
+          product: "GodLock",
+          site: "godlock.uk",
+          author: AUTHOR,
+          ...stats,
+        }, 200, extraHeadersFor(nodeId));
+      }
+
+      if (path === "/count") {
+        const stats = await gatherStats(env, { wrote });
+        return json({
+          ok: true,
+          live_nodes: stats.live_nodes,
+          uses: stats.uses,
+        }, 200, extraHeadersFor(nodeId));
+      }
 
       if (path === "/heartbeat" && request.method === "POST") {
-        const n = await liveNodes(env);
-        return json({ ok: true, live_nodes: n }, 200, extraHeadersFor(nodeId));
+        const stats = await gatherStats(env, { wrote });
+        return json({ ok: true, ...stats }, 200, extraHeadersFor(nodeId));
       }
 
       if (path === "/verify") {
@@ -352,11 +416,12 @@ export default {
       if ((path === "/submit" || path === "/") && request.method === "POST") {
         const text = await readChallengeText(request);
         const row = await processSubmit(env, text);
+        const stats = await gatherStats(env, { wrote });
         if (wantsJson(request, url)) {
           if (row.isolated === true || row.isolated === 1) {
-            return json({ ok: true, isolated: true, id: row.id, text_sha256: row.text_sha256 }, 200, extraHeadersFor(nodeId));
+            return json({ ok: true, isolated: true, id: row.id, text_sha256: row.text_sha256, stats }, 200, extraHeadersFor(nodeId));
           }
-          return json({ ok: true, isolated: false, ...publicPayload(row), weighing: undefined }, 200, extraHeadersFor(nodeId));
+          return json({ ok: true, isolated: false, ...publicPayload(row), stats }, 200, extraHeadersFor(nodeId));
         }
         const loc = (row.isolated === true || row.isolated === 1) ? "/" : "/?r=" + encodeURIComponent(row.id);
         return new Response(null, {
@@ -367,7 +432,7 @@ export default {
 
       if (path === "/" && request.method === "GET") {
         await metaBump(env, "views");
-        const stats = await gatherStats(env);
+        const stats = await gatherStats(env, { wrote, visiting: true });
         const rid = url.searchParams.get("r") || "";
         let latest = null;
         if (rid) {

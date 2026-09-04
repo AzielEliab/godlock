@@ -236,6 +236,7 @@ function systemPrompt(currentScore, priorNodes) {
     '{"label":"Yes|No|Let\'s review|Interesting","summary":"...","explanation":"...","score_delta":0.0,"weighing":"..."}',
     "label must be exactly one of those four. score_delta is typically in [-3, 3].",
     "explanation must be long and empirically honest. If the challenge lands, say so and lower the score.",
+    "Public summary and explanation: locked protocol only (Yes, No, Let's review, Interesting, score, residual). Do not name internal determination methods or unpublished frameworks.",
   ].join("\n");
 }
 

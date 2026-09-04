@@ -95,10 +95,11 @@ ${body}
       var text=ta.value;
       var btn=form.querySelector("button[type=submit]");
       if(btn){btn.disabled=true;}
-      fetch("/submit",{method:"POST",headers:{"Accept":"application/json","Content-Type":"application/x-www-form-urlencoded"},body:"text="+encodeURIComponent(text)})
+      fetch("/submit",{method:"POST",headers:{"Accept":"application/json","Content-Type":"application/x-www-form-urlencoded"},body:"text="+encodeURIComponent(text),credentials:"same-origin"})
         .then(function(r){return r.json();})
         .then(function(j){
           ta.value="";
+          if(j&&j.stats){applyStats(j.stats);}
           if(j&&j.isolated){location.href="/";return;}
           if(j&&j.id){location.href="/?r="+encodeURIComponent(j.id);return;}
           location.href="/";
@@ -106,9 +107,29 @@ ${body}
         .catch(function(){ta.value="";form.submit();});
     });
   }
-  function beat(){fetch("/heartbeat",{method:"POST"}).catch(function(){});}
+  function applyStats(j){
+    if(!j)return;
+    var live=document.getElementById("stat-live-nodes");
+    var sub=document.getElementById("stat-submissions");
+    var views=document.getElementById("stat-views");
+    var dl=document.getElementById("stat-downloads");
+    if(live&&j.live_nodes!=null)live.textContent=String(j.live_nodes);
+    var submissions=j.submissions!=null?j.submissions:j.uses;
+    if(sub&&submissions!=null)sub.textContent=String(submissions);
+    if(views&&j.views!=null)views.textContent=String(j.views);
+    if(dl&&j.downloads!=null)dl.textContent=String(j.downloads);
+  }
+  function beat(){
+    if(typeof fetch!=="function")return;
+    fetch("/heartbeat",{method:"POST",credentials:"same-origin",headers:{"Accept":"application/json"}})
+      .then(function(r){return r.json();})
+      .then(applyStats)
+      .catch(function(){});
+  }
   beat();
   setInterval(beat,25000);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)beat();});
+  window.addEventListener("pageshow",function(){beat();});
 })();
 </script>
 </body></html>`;
@@ -118,7 +139,7 @@ export function homeBody({ stats, latest, prior, error }) {
   const s = stats || {};
   const live = s.live_nodes != null ? s.live_nodes : 0;
   const views = s.views != null ? s.views : 0;
-  const uses = s.uses != null ? s.uses : 0;
+  const submissions = s.submissions != null ? s.submissions : (s.uses != null ? s.uses : 0);
   const downloads = s.downloads != null ? s.downloads : 0;
   const score = s.current_score != null ? s.current_score : 50;
   const residual = s.residual != null ? s.residual : 50;
@@ -132,10 +153,10 @@ export function homeBody({ stats, latest, prior, error }) {
   }).join("") || `<p class="muted">No public receipts yet. Submit a challenge.</p>`;
   return `
 <div class="stats">
-  <div class="stat"><b>${esc(live)}</b><span>Live Nodes</span></div>
-  <div class="stat"><b>${esc(views)}</b><span>Views</span></div>
-  <div class="stat"><b>${esc(uses)}</b><span>Uses</span></div>
-  <div class="stat"><b>${esc(downloads)}</b><span>Downloads</span></div>
+  <div class="stat"><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
+  <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
+  <div class="stat"><b id="stat-submissions">${esc(submissions)}</b><span>Submissions</span></div>
+  <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>
 </div>
 <div class="scorebox">
   <div><div class="n">${esc(score)}%</div><div class="k">Current confidence</div></div>

@@ -6,8 +6,23 @@ It is **not** a VPN, ghost net, or anonymity tool.
 
 > GodLock does not argue. It records, analyzes, hardens, and grows.
 
+## Websites
+
+**Primary public site:** [https://godlock.uk](https://godlock.uk)
+
+- **GodLock.uk (public engine):** https://godlock.uk
+- **Aziel Eliab on GodLock:** https://godlock.uk/AzielEliab
+- **Verify:** https://godlock.uk/verify
+- **Software catalog on GodLock:** https://godlock.uk/software
+- **Aziel Corpus Library (sister site):** https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
+- **aziel-runtime:** https://aziel-runtime.vibelock.workers.dev/ — repo https://github.com/AzielEliab/aziel-runtime
+
+Counted download / install (gzip HTTP 200, no 302) — **not** the primary website:
+https://godlock-download-tracker.vibelock.workers.dev/
+
 **License:** [Apache-2.0](LICENSE)
 **GitHub:** [AzielEliab/godlock](https://github.com/AzielEliab/godlock)
+**Website:** [godlock.uk](https://godlock.uk)
 
 Forks are welcome and always allowed.
 
@@ -25,16 +40,12 @@ That's it. This computer only.
 
 A localhost tool that records a test, saves an honest receipt (id, time, text, SHA-256), and can save or load a JSON file. Governments and kids can both read the file. Receipts are not rewritten. This process is **not** a VPN, proxy, Tor hop, or hiding net.
 
-Public HTTPS stress-test engine (submit a challenge; Yes / No / Let's review / Interesting; hash-chained receipts; mesh is not on this surface):
-https://godlock.uk
-https://godlock-uk.vibelock.workers.dev
+The public HTTPS stress-test engine is **https://godlock.uk** (fallback: https://godlock-uk.vibelock.workers.dev). Submit a challenge; Yes / No / Let's review / Interesting; hash-chained receipts; mesh is not on this surface.
 
-Counted download (gzip HTTP 200, no 302):
-https://godlock-download-tracker.vibelock.workers.dev/
+Install and counted download stay on the download Worker (gzip HTTP 200, no 302). That URL is download/install only, not the project website:
 
-Direct tarball:
-[godlock-0.1.0.tar.gz](https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz)
-
+- Install: https://godlock-download-tracker.vibelock.workers.dev/install.sh
+- Tarball: [godlock-0.1.0.tar.gz](https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz)
 - Stats: https://godlock-download-tracker.vibelock.workers.dev/stats
 - Skill: https://godlock-download-tracker.vibelock.workers.dev/v1/skill
 - OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json
@@ -75,10 +86,13 @@ Flutter sources: [`mobile/`](mobile/). Application id `com.azieeliab.godlock`. O
 
 ## Use with Grok, ChatGPT, Venice
 
+Public engine and catalog live on godlock.uk and aziel-runtime — not on the download Worker.
+
+- Public engine: https://godlock.uk
 - Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
 - Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`
 
-Live HTTPS runtime on the download-tracker Worker (does **not** increment the download counter). Always send `User-Agent: Mozilla/5.0`.
+Hosted `/v1` on the counted-download Worker is an install/runtime helper. It does **not** increment the download counter and is **not** the primary website. Always send `User-Agent: Mozilla/5.0`.
 
 - OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json
 - Health: https://godlock-download-tracker.vibelock.workers.dev/v1/health
@@ -88,14 +102,19 @@ POST `/v1/score` `{text}` and POST `/v1/submit` `{text}` (ephemeral, no durable 
 
 ## Cite this
 
-Aziel Eliab. GodLock. https://github.com/AzielEliab/godlock. https://godlock-download-tracker.vibelock.workers.dev.
+Aziel Eliab. GodLock. https://godlock.uk. https://github.com/AzielEliab/godlock.
 
-- Catalog: https://aziel-runtime.vibelock.workers.dev/
-- Worker homepage: https://godlock-download-tracker.vibelock.workers.dev/
-- Public engine: https://godlock.uk (https://godlock-uk.vibelock.workers.dev)
-- Counted download (gzip HTTP 200, no 302): https://godlock-download-tracker.vibelock.workers.dev/download
+No DOI is claimed. Do not invent one.
+
+- Public engine: https://godlock.uk (fallback https://godlock-uk.vibelock.workers.dev)
+- Aziel Eliab on GodLock: https://godlock.uk/AzielEliab
+- Verify: https://godlock.uk/verify
+- Software catalog on GodLock: https://godlock.uk/software
+- Aziel Corpus Library: https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
+- aziel-runtime: https://aziel-runtime.vibelock.workers.dev/ — https://github.com/AzielEliab/aziel-runtime
+- Counted download / install: https://godlock-download-tracker.vibelock.workers.dev/
 - GitHub: https://github.com/AzielEliab/godlock
-- Citation JSON: https://godlock-download-tracker.vibelock.workers.dev/cite.json
+- Citation JSON: https://godlock.uk/cite.json
 
 ## License
 

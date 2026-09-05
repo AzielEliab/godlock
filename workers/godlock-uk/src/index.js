@@ -13,8 +13,9 @@ import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
-  permanentIdentityRedirect,
+  PUBLIC_RUNTIME, permanentIdentityRedirect,
 } from "./seo.js";
+import { fetchCatalogProducts, softwareSuite, publicProduct, catalogSlugList } from "./catalog.js";
 import {
   START, shouldIsolate, answerChallenge, clampScore, residualOf, hashReceipt,
 } from "./engine.js";
@@ -329,18 +330,6 @@ async function healthPayload(env, { wrote } = {}) {
   };
 }
 
-async function fetchCatalogProducts() {
-  try {
-    const r = await fetch(CATALOG + "/v1/catalog.json", {
-      headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" },
-    });
-    if (!r.ok) return [];
-    const j = await r.json();
-    return Array.isArray(j && j.products) ? j.products : [];
-  } catch {
-    return [];
-  }
-}
 
 function extraHeadersFor(nodeId, more) {
   const h = { ...(more || {}) };
@@ -382,7 +371,12 @@ export default {
         const xml = await sitemapXml(env);
         return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", ...corsHeaders() } });
       }
-      if (path === "/cite.json") return json(citeDoc());
+      if (path === "/cite.json") {
+        return json({
+          ...citeDoc(),
+          software_slugs: ["aziel-runtime"].concat(catalogSlugList()),
+        });
+      }
       if (path === "/llms.txt") {
         return new Response(llmsDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
@@ -464,25 +458,24 @@ export default {
       }
 
       if (path === SOFTWARE_PATH) {
-        const products = await fetchCatalogProducts();
+        const fetched = await fetchCatalogProducts(env);
+        const products = softwareSuite(fetched.products);
         if (wantsJson(request, url)) {
           return json({
             ok: true,
             product: "GodLock",
             author: AUTHOR,
+            identity: AUTHOR,
             path: SOFTWARE_PATH,
-            catalog: CATALOG + "/v1/catalog.json",
-            products: products.map((p) => ({
-              slug: p.slug,
-              name: p.name,
-              version: p.version,
-              one_line: p.one_line,
-              github: p.github,
-              download: p.download,
-            })),
+            catalog: PUBLIC_RUNTIME + "/v1/catalog.json",
+            catalog_origin: CATALOG + "/v1/catalog.json",
+            source: fetched.source,
+            product_count: products.filter((p) => p.slug !== "aziel-runtime").length,
+            suite_count: products.length,
+            products: products.map(publicProduct).filter(Boolean),
           }, 200, extraHeadersFor(nodeId));
         }
-        return html(page("Software", softwareBody({ products }), { path: SOFTWARE_PATH, kind: "software" }), {
+        return html(page("Software", softwareBody({ products: fetched.products }), { path: SOFTWARE_PATH, kind: "software" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

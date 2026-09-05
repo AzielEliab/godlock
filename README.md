@@ -13,7 +13,7 @@ It is **not** a VPN, ghost net, or anonymity tool.
 - **GodLock.uk (public engine):** https://godlock.uk
 - **Aziel Eliab on GodLock:** https://godlock.uk/AzielEliab
 - **Verify:** https://godlock.uk/verify
-- **Software catalog on GodLock:** https://godlock.uk/software
+- **Software catalog on GodLock:** https://godlock.uk/software — full aziel-runtime suite (27 engines + aziel-runtime / FragGate)
 - **Runtime (FragGate door):** https://godlock.uk/runtime — same-origin proxy of aziel-runtime 1.6.2
 - **Aziel Corpus Library (sister site):** https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
 - **aziel-runtime:** https://aziel-runtime.vibelock.workers.dev/ — repo https://github.com/AzielEliab/aziel-runtime

@@ -3,7 +3,7 @@
  * Not a forum. Author: Aziel Eliab.
  */
 import {
-  headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY, LIBRARY_AZIEL,
+  headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH,
 } from "./seo.js";
 import { hideInternalDetermination } from "./publicCopy.js";
@@ -114,7 +114,7 @@ export function topNav(path) {
     { href: SOFTWARE_PATH, label: "Software" },
     { href: "/verify", label: "Verify" },
     { href: AZIEL_ELIAB_PATH, label: "Aziel Eliab", aziel: true },
-    { href: AZIEL_CORPUS_PATH, label: "Aziel Corpus Library", aziel: true },
+    { href: LIBRARY_AZIEL, label: "Aziel Corpus Library", aziel: true },
   ];
   return `<nav class="nav2">${items.map((it, i) => {
     const current = here === it.href;
@@ -273,38 +273,6 @@ ${paras}
 
 export function azielEliabText() {
   return AZIEL_MANIFESTO.join("\n\n") + "\n\n" + AZIEL_SIGNATURE + "\n";
-}
-
-export const CORPUS_OPENING = [
-  "Researcher. Builder. AI. A one-man dev team. Just a man. Who? Does not matter. What matters is the record.",
-  "I do not ask you to believe a name. I ask you to read a record. This library is the public MASTER of the work: hashed receipts, timed files, and software that can be opened without taking the speaker on faith. If the files hold, the name was never the point.",
-];
-
-export const CORPUS_OPENING_SIGN = "\u2014 Aziel Elroi Eliab";
-
-export const CORPUS_ABOUT = [
-  "If not me, then who holds the record when names get stripped and the files get sealed? I didn\u2019t ask for the seat. The work was already sitting there undone. I build receipts so truth has a place to live that isn\u2019t someone else\u2019s story.",
-  "Carry the torch: I don\u2019t own the flame. I keep it lit long enough for the next hands to find it. If the record is local, timed, and hashed, the work can outlive me. That is the point.",
-  "Truth that cannot be corrected is just a private religion. So the work stays public, chained for review, not a pulpit. Later papers bury earlier ones as confidence hardens. I am not always right. That is not a confession. It is the method.",
-];
-
-export function azielCorpusLibraryBody() {
-  return `<section class="about-aziel" id="aziel-corpus-library"><h1>About Aziel</h1>
-<div class="card about-prose">
-<p>${esc(CORPUS_OPENING[0])}</p>
-<p>${esc(CORPUS_OPENING[1])}</p>
-<p class="about-sign">${esc(CORPUS_OPENING_SIGN)}</p>
-<p>${esc(CORPUS_ABOUT[0])}</p>
-<p>${esc(CORPUS_ABOUT[1])}</p>
-<p>${esc(CORPUS_ABOUT[2])}</p>
-<p><strong>Aziel Library</strong> (royal purple) is the operator collection of Aziel Eliab\u2019s own papers and software notes. <strong>Corpus</strong> is the public Lamb Lens shelf \u2014 anyone may browse; signed-in accounts file there. The two shelves share the same scoring and hash-chain rules; they are not the same collection.</p>
-<p>The software suite is listed on <a href="${esc(LIBRARY + "/software")}">Software</a> and invoked from <a href="${esc(LIBRARY + "/runtime")}">Runtime</a> (aziel-runtime catalog). How records are scored \u2014 triad SPRE \u00d7 CLCE \u00d7 PhysLing, and ZionPattern as a separate public reading \u2014 is on <a href="${esc(LIBRARY + "/how-its-scored")}">How it\u2019s scored</a>. Source: <a href="https://github.com/AzielEliab/aziel-corpus">github.com/AzielEliab/aziel-corpus</a>.</p>
-<p>I am here for the record, not the applause. If not me, then who. If not now, the seal holds. I carry the torch by leaving receipts. When the work can stand without my name on it, I am done.</p>
-<p>I am temporary. The truth is not.</p>
-<p class="about-sign"><strong>${esc(AZIEL_SIGNATURE)}</strong></p>
-</div>
-<p class="actions"><a class="button" href="${esc(LIBRARY + "/")}">Open the library</a> <a class="button ghost" href="${esc(LIBRARY_AZIEL)}">Aziel Eliab \u2014 Digital Library</a></p>
-</section>`;
 }
 
 export function softwareBody({ products } = {}) {

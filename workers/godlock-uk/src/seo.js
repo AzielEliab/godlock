@@ -55,11 +55,6 @@ export function defaultDescription(kind) {
       "Aziel Eliab on GodLock: a debate with no record becomes a pulpit. Receipt, intelligent design stress-test. Identity is Aziel Eliab only.",
     );
   }
-  if (kind === "corpus") {
-    return hideInternalDetermination(
-      "Aziel Corpus Library on GodLock — About Aziel Eliab and the public MASTER digital library. Primary credit Aziel Eliab.",
-    );
-  }
   if (kind === "software") {
     return hideInternalDetermination(
       "Downloadable Aziel Eliab software from the live aziel-runtime catalog. GodLock.uk is not a mesh. Author Aziel Eliab.",
@@ -70,11 +65,10 @@ export function defaultDescription(kind) {
 
 function defaultKeywords(kind) {
   if (kind === "aziel") return "Aziel Eliab, GodLock, receipt, intelligent design stress-test";
-  if (kind === "corpus") return "Aziel Eliab, Aziel Corpus Library, Aziel Digital Library, GodLock";
   return "";
 }
 
-function jsonLd(title, path, description, kind) {
+function jsonLd(_title, _path, description, kind) {
   const person = personNode();
   const website = { "@type": "WebSite", name: SITE, url: CANON_HOST + "/", description, author: person };
   const software = {
@@ -93,21 +87,6 @@ function jsonLd(title, path, description, kind) {
       name: AUTHOR,
       url: CANON_HOST + AZIEL_ELIAB_PATH,
       mainEntity: { "@id": person["@id"] },
-    });
-  }
-  if (kind === "corpus") {
-    graph.push({
-      "@type": "WebPage",
-      name: title,
-      url: CANON_HOST + AZIEL_CORPUS_PATH,
-      about: { "@id": person["@id"] },
-    });
-    graph.push({
-      "@type": "DigitalLibrary",
-      name: "Aziel Digital Library",
-      url: LIBRARY + "/",
-      sameAs: [LIBRARY + "/", LIBRARY + "/AzielEliab"],
-      creator: { "@id": person["@id"] },
     });
   }
   return { "@context": "https://schema.org", "@graph": graph };
@@ -161,8 +140,8 @@ export function permanentIdentityRedirect(path) {
   if (p === "/about" || p === "/aboutme" || (compact === "azieleliab" && p !== AZIEL_ELIAB_PATH)) {
     return AZIEL_ELIAB_PATH;
   }
-  if (compact === "azielcorpuslibrary" && p !== AZIEL_CORPUS_PATH) {
-    return AZIEL_CORPUS_PATH;
+  if (compact === "azielcorpuslibrary") {
+    return LIBRARY_AZIEL;
   }
   return "";
 }
@@ -244,7 +223,6 @@ export const PUBLIC_ALLOW = [
   "/verify",
   "/software",
   "/AzielEliab",
-  "/AzielCorpusLibrary",
   "/cite.json",
   "/llms.txt",
   "/ai.txt",
@@ -264,7 +242,6 @@ export async function sitemapXml(env) {
     CANON_HOST + "/verify",
     CANON_HOST + SOFTWARE_PATH,
     CANON_HOST + AZIEL_ELIAB_PATH,
-    CANON_HOST + AZIEL_CORPUS_PATH,
     CANON_HOST + "/health",
     CANON_HOST + "/cite.json",
     CANON_HOST + "/llms.txt",
@@ -297,7 +274,7 @@ export function citeDoc() {
     verify: CANON_HOST + "/verify",
     software: CANON_HOST + SOFTWARE_PATH,
     aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,
-    aziel_corpus_library: CANON_HOST + AZIEL_CORPUS_PATH,
+    aziel_corpus_library: LIBRARY_AZIEL,
     library: LIBRARY + "/",
     library_aziel_eliab: LIBRARY_AZIEL,
     health: CANON_HOST + "/health",
@@ -320,7 +297,7 @@ export function llmsDoc() {
     + hideInternalDetermination(BANNER) + "\n\n"
     + "GodLock is a product name, not an identity. Identity is Aziel Eliab only.\n"
     + "Aziel Eliab: " + CANON_HOST + AZIEL_ELIAB_PATH + "\n"
-    + "Aziel Corpus Library: " + CANON_HOST + AZIEL_CORPUS_PATH + "\n"
+    + "Aziel Corpus Library: " + LIBRARY_AZIEL + "\n"
     + "Digital Library identity: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n\n"

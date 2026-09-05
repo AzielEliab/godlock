@@ -4,7 +4,8 @@
  */
 import {
   headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
-  AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH, AI_CLIENTS_SENTENCE,
+  AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH, RUNTIME_PATH, PUBLIC_RUNTIME,
+  AI_CLIENTS_SENTENCE, RUNTIME_VERSION, LIBRARY_RUNTIME,
 } from "./seo.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 
@@ -96,7 +97,18 @@ function pillClass(label) {
   return "review";
 }
 
-export { AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH };
+export { AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH, RUNTIME_PATH };
+
+export function navItems() {
+  return [
+    { href: "/", label: "Engine" },
+    { href: SOFTWARE_PATH, label: "Software" },
+    { href: RUNTIME_PATH, label: "Runtime" },
+    { href: "/verify", label: "Verify" },
+    { href: AZIEL_ELIAB_PATH, label: "Aziel Eliab", aziel: true },
+    { href: LIBRARY_AZIEL, label: "Aziel Corpus Library", aziel: true },
+  ];
+}
 
 export const AZIEL_MANIFESTO = [
   "I made this because a debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion. Intelligent design was never the point by itself. The point was whether a claim could stand in the open, be answered, and leave something behind that was not just my voice.",
@@ -109,13 +121,7 @@ export const AZIEL_SIGNATURE = "— Aziel Eliab";
 
 export function topNav(path) {
   const here = String(path || "/");
-  const items = [
-    { href: "/", label: "Engine" },
-    { href: SOFTWARE_PATH, label: "Software" },
-    { href: "/verify", label: "Verify" },
-    { href: AZIEL_ELIAB_PATH, label: "Aziel Eliab", aziel: true },
-    { href: LIBRARY_AZIEL, label: "Aziel Corpus Library", aziel: true },
-  ];
+  const items = navItems();
   return `<nav class="nav2">${items.map((it, i) => {
     const current = here === it.href;
     const cls = [it.aziel ? "aziel" : "", current ? "current" : ""].filter(Boolean).join(" ");
@@ -133,7 +139,7 @@ export function page(title, body, { path, kind, extraHeaders } = {}) {
 ${topNav(p)}
 <div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
 ${body}
-<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Software</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a></footer>
+<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Software</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a></footer>
 </div>
 <script>
 (function(){
@@ -220,6 +226,7 @@ ${err}
     <button type="submit">Submit</button>
     <a class="button ghost" href="/verify">Verify</a>
     <a class="button ghost" href="${esc(SOFTWARE_PATH)}">Software</a>
+    <a class="button" href="${esc(RUNTIME_PATH)}">Runtime</a>
     <a class="button ghost" href="${esc(DOWNLOAD)}">Download</a>
   </div>
 </form>
@@ -292,7 +299,13 @@ export function softwareBody({ products } = {}) {
     return `<article class="soft-card${feat ? " featured" : ""}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(p.name || slug)}</h3><div class="soft-meta">${ver}</div><p>${esc(p.one_line || "")}</p><p class="soft-links">${links}</p></article>`;
   }).join("");
   const n = list.length;
-  return `<p class="muted">Aziel Eliab products from the live <a href="${esc(CATALOG + "/v1/catalog.json")}">aziel-runtime catalog</a>. ${esc(AI_CLIENTS_SENTENCE)} GodLock.uk is not a mesh. Counted downloads stay on each product Worker.${n ? " " + esc(n) + " downloadable products." : ""}</p>
+  return `<div class="card"><h2>Runtime</h2>
+<p>Invoke Aziel Eliab software through the same-origin FragGate door (${esc(RUNTIME_VERSION)}). OpenAPI and MCP live at <a href="${esc(RUNTIME_PATH)}">${esc(PUBLIC_RUNTIME)}</a>. Related: <a href="${esc(LIBRARY_RUNTIME)}">library /runtime</a> · <a href="${esc(CATALOG + "/")}">origin catalog</a>.</p>
+<p class="actions"><a class="button" href="${esc(RUNTIME_PATH)}">Invoke via Runtime</a>
+<a class="button ghost" href="${esc(RUNTIME_PATH + "/openapi.json")}">OpenAPI</a>
+<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>
+<a class="button ghost" href="${esc(RUNTIME_PATH + "/v1/skill")}">Skill</a></p></div>
+<p class="muted">Aziel Eliab products from the live <a href="${esc(CATALOG + "/v1/catalog.json")}">aziel-runtime catalog</a>. ${esc(AI_CLIENTS_SENTENCE)} GodLock.uk is not a mesh. Counted downloads stay on each product Worker.${n ? " " + esc(n) + " downloadable products." : ""}</p>
 <div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
 }
 

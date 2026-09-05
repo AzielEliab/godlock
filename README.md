@@ -14,6 +14,7 @@ It is **not** a VPN, ghost net, or anonymity tool.
 - **Aziel Eliab on GodLock:** https://godlock.uk/AzielEliab
 - **Verify:** https://godlock.uk/verify
 - **Software catalog on GodLock:** https://godlock.uk/software
+- **Runtime (FragGate door):** https://godlock.uk/runtime — same-origin proxy of aziel-runtime 1.6.2
 - **Aziel Corpus Library (sister site):** https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
 - **aziel-runtime:** https://aziel-runtime.vibelock.workers.dev/ — repo https://github.com/AzielEliab/aziel-runtime
 
@@ -91,8 +92,9 @@ Public engine and catalog live on godlock.uk and aziel-runtime — not on the do
 Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
 
 - Public engine: https://godlock.uk
-- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
-- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`
+- Runtime door: https://godlock.uk/runtime
+- Catalog OpenAPI: https://godlock.uk/runtime/openapi.json
+- Catalog MCP: `POST https://godlock.uk/runtime/mcp`
 
 Hosted `/v1` on the counted-download Worker is an install/runtime helper. It does **not** increment the download counter and is **not** the primary website. Always send `User-Agent: Mozilla/5.0`.
 
@@ -112,6 +114,7 @@ No DOI is claimed. Do not invent one.
 - Aziel Eliab on GodLock: https://godlock.uk/AzielEliab
 - Verify: https://godlock.uk/verify
 - Software catalog on GodLock: https://godlock.uk/software
+- Runtime door: https://godlock.uk/runtime (library https://www.azielcorpuslibrary.net/runtime · origin https://aziel-runtime.vibelock.workers.dev/)
 - Aziel Corpus Library: https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
 - aziel-runtime: https://aziel-runtime.vibelock.workers.dev/ — https://github.com/AzielEliab/aziel-runtime
 - Counted download / install: https://godlock-download-tracker.vibelock.workers.dev/

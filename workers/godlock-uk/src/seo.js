@@ -86,7 +86,7 @@ export function defaultDescription(kind) {
   }
   if (kind === "software") {
     return hideInternalDetermination(
-      "Downloadable Aziel Eliab software from the live aziel-runtime catalog. Invoke via Runtime at " + PUBLIC_RUNTIME + " (FragGate " + RUNTIME_VERSION + "). " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
+      "Full Aziel Eliab software suite on GodLock.uk: every aziel-runtime catalog engine (27) plus aziel-runtime / FragGate. Download, GitHub, and Invoke via Runtime at " + PUBLIC_RUNTIME + " (FragGate " + RUNTIME_VERSION + "). Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
     );
   }
   if (kind === "runtime") {
@@ -327,6 +327,8 @@ export async function sitemapXml(env) {
     CANON_HOST + "/",
     CANON_HOST + "/verify",
     CANON_HOST + SOFTWARE_PATH,
+    CANON_HOST + SOFTWARE_PATH + "#aziel-runtime",
+    CANON_HOST + SOFTWARE_PATH + "#godlock",
     PUBLIC_RUNTIME,
     PUBLIC_RUNTIME + "/v1/runtime.json",
     PUBLIC_RUNTIME + "/openapi.json",
@@ -368,6 +370,9 @@ export function citeDoc() {
     download: DOWNLOAD,
     verify: CANON_HOST + "/verify",
     software: CANON_HOST + SOFTWARE_PATH,
+    software_catalog: PUBLIC_RUNTIME + "/v1/catalog.json",
+    software_suite: "Full aziel-runtime catalog (27 engines) plus aziel-runtime / FragGate. Same completeness as the Digital Library Software hub.",
+    software_product_count: 27,
     runtime: PUBLIC_RUNTIME,
     runtime_health: PUBLIC_RUNTIME + "/v1/health",
     runtime_manifest: PUBLIC_RUNTIME + "/v1/runtime.json",
@@ -412,7 +417,10 @@ export function llmsDoc() {
     + "Aziel Corpus Library: " + LIBRARY_AZIEL + "\n"
     + "Digital Library identity: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
-    + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n\n"
+    + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n"
+    + "Software lists the full aziel-runtime catalog (27 engines + aziel-runtime / FragGate), matching Digital Library Software completeness. GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
+    + "Catalog JSON: " + PUBLIC_RUNTIME + "/v1/catalog.json\n"
+    + "Origin catalog: " + CATALOG + "/v1/catalog.json\n\n"
     + "## Runtime (FragGate door)\n\n"
     + "GodLock → Runtime. Same-origin Aziel Eliab Runtime " + RUNTIME_VERSION + " on GodLock.uk. One door — discover, route, refuse. Kernel: " + FRAGGATE_KERNEL + " (FG-0.1).\n"
     + "Door: " + PUBLIC_RUNTIME + "\n"

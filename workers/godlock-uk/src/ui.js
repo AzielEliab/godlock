@@ -5,9 +5,10 @@
 import {
   headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH, RUNTIME_PATH, PUBLIC_RUNTIME,
-  AI_CLIENTS_SENTENCE, RUNTIME_VERSION, LIBRARY_RUNTIME,
+  AI_CLIENTS_SENTENCE, RUNTIME_VERSION, LIBRARY_RUNTIME, FRAGGATE_KERNEL, GITHUB_RUNTIME,
 } from "./seo.js";
 import { hideInternalDetermination } from "./publicCopy.js";
+import { softwareSuite, invokeHref } from "./catalog.js";
 
 export const CSS = `
 :root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
@@ -284,28 +285,38 @@ export function azielEliabText() {
 }
 
 export function softwareBody({ products } = {}) {
-  const list = Array.isArray(products) ? products : [];
-  const featured = new Set(["godlock", "azieltether"]);
+  const list = softwareSuite(products);
+  const featured = new Set(["godlock", "aziel-runtime", "azieltether"]);
+  const catalogN = list.filter((p) => p.slug !== "aziel-runtime").length;
+  const jumps = list.map((p) => `<a href="#${esc(p.slug)}">${esc(p.slug)}</a>`).join(" · ");
   const cards = list.map((p) => {
     const slug = String(p.slug || "");
     const feat = featured.has(slug);
     const ver = p.version ? `<span class="pill">v${esc(p.version)}</span>` : "";
+    const kernel = p.kernel
+      ? `<a class="button ghost" href="${esc(p.kernel)}">FragGate</a>`
+      : "";
     const links = [
       p.download ? `<a class="button" href="${esc(p.download)}">Download</a>` : "",
       p.github ? `<a class="button ghost" href="${esc(p.github)}">GitHub</a>` : "",
-      p.skill ? `<a class="button ghost" href="${esc(p.skill)}">Skill</a>` : "",
-      slug ? `<a class="button ghost" href="${esc(CATALOG + "/p/" + slug)}">Catalog</a>` : "",
-    ].filter(Boolean).join("");
-    return `<article class="soft-card${feat ? " featured" : ""}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(p.name || slug)}</h3><div class="soft-meta">${ver}</div><p>${esc(p.one_line || "")}</p><p class="soft-links">${links}</p></article>`;
+      `<a class="button ghost" href="${esc(invokeHref(p))}">Invoke via Runtime</a>`,
+      kernel,
+    ].filter(Boolean).join(" ");
+    return `<article class="soft-card${feat ? " featured" : ""}" id="${esc(slug)}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(p.name || slug)}</h3><div class="soft-meta">${ver}</div><p>${esc(hideInternalDetermination(p.one_line || ""))}</p><p class="soft-links">${links}</p></article>`;
   }).join("");
-  const n = list.length;
+  const countLine = catalogN
+    ? ` ${esc(catalogN)} catalog engines plus aziel-runtime / FragGate.`
+    : "";
   return `<div class="card"><h2>Runtime</h2>
-<p>Invoke Aziel Eliab software through the same-origin FragGate door (${esc(RUNTIME_VERSION)}). OpenAPI and MCP live at <a href="${esc(RUNTIME_PATH)}">${esc(PUBLIC_RUNTIME)}</a>. Related: <a href="${esc(LIBRARY_RUNTIME)}">library /runtime</a> · <a href="${esc(CATALOG + "/")}">origin catalog</a>.</p>
+<p>Invoke Aziel Eliab software through the same-origin FragGate door (${esc(RUNTIME_VERSION)}). OpenAPI and MCP live at <a href="${esc(RUNTIME_PATH)}">${esc(PUBLIC_RUNTIME)}</a>. Related: <a href="${esc(LIBRARY_RUNTIME)}">library /runtime</a> · <a href="${esc(CATALOG + "/")}">origin catalog</a> · kernel <a href="${esc(FRAGGATE_KERNEL)}">FragGate</a>.</p>
 <p class="actions"><a class="button" href="${esc(RUNTIME_PATH)}">Invoke via Runtime</a>
 <a class="button ghost" href="${esc(RUNTIME_PATH + "/openapi.json")}">OpenAPI</a>
 <a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>
-<a class="button ghost" href="${esc(RUNTIME_PATH + "/v1/skill")}">Skill</a></p></div>
-<p class="muted">Aziel Eliab products from the live <a href="${esc(CATALOG + "/v1/catalog.json")}">aziel-runtime catalog</a>. ${esc(AI_CLIENTS_SENTENCE)} GodLock.uk is not a mesh. Counted downloads stay on each product Worker.${n ? " " + esc(n) + " downloadable products." : ""}</p>
+<a class="button ghost" href="${esc(RUNTIME_PATH + "/v1/skill")}">Skill</a>
+<a class="button ghost" href="${esc(GITHUB_RUNTIME)}">aziel-runtime</a>
+<a class="button ghost" href="${esc(FRAGGATE_KERNEL)}">FragGate</a></p></div>
+<p class="muted">Full Aziel Eliab suite from the <a href="${esc(RUNTIME_PATH + "/v1/catalog.json")}">same-origin catalog</a> (also <a href="${esc(CATALOG + "/v1/catalog.json")}">aziel-runtime catalog.json</a>), matching Digital Library Software completeness. ${esc(AI_CLIENTS_SENTENCE)} GodLock.uk is not a mesh. Counted downloads stay on each product Worker.${countLine} Identity is Aziel Eliab only.</p>
+<p class="muted">Suite: ${jumps}</p>
 <div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
 }
 

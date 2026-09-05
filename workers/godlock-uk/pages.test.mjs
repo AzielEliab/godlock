@@ -34,6 +34,14 @@ import {
   AI_CLIENTS_SENTENCE,
 } from "./src/seo.js";
 import worker from "./src/index.js";
+import {
+  CATALOG_FALLBACK_PRODUCTS,
+  CATALOG_SLUGS,
+  CATALOG_PRODUCT_COUNT,
+  RUNTIME_CARD,
+  fetchCatalogProducts,
+  softwareSuite,
+} from "./src/catalog.js";
 
 function mockEnv() {
   const stmt = {
@@ -368,5 +376,110 @@ describe("Aziel Eliab routes", () => {
       assert.equal(res.status, 308, path);
       assert.equal(res.headers.get("Location"), "https://www.azielcorpuslibrary.net/AzielEliab", path);
     }
+  });
+});
+
+function softCardIds(html) {
+  return [...String(html).matchAll(/<article class="soft-card[^"]*" id="([^"]+)"/g)].map((m) => m[1]);
+}
+
+describe("Software page hosts the full aziel-runtime catalog", () => {
+  it("keeps a 27-engine snapshot plus the aziel-runtime / FragGate card", () => {
+    assert.equal(CATALOG_PRODUCT_COUNT, 27);
+    assert.equal(CATALOG_SLUGS.length, 27);
+    assert.ok(CATALOG_SLUGS.includes("godlock"));
+    assert.ok(!CATALOG_SLUGS.includes("aziel-runtime"));
+    assert.equal(RUNTIME_CARD.slug, "aziel-runtime");
+    assert.match(RUNTIME_CARD.one_line, /FragGate/);
+    const suite = softwareSuite(CATALOG_FALLBACK_PRODUCTS);
+    assert.ok(suite.length >= CATALOG_PRODUCT_COUNT);
+    assert.equal(suite[0].slug, "aziel-runtime");
+    for (const slug of CATALOG_SLUGS) {
+      assert.ok(suite.some((p) => p.slug === slug), slug);
+    }
+  });
+
+  it("renders ≥ catalog product cards with Download, GitHub, and Invoke via Runtime", () => {
+    const html = softwareBody({ products: CATALOG_FALLBACK_PRODUCTS });
+    const ids = softCardIds(html);
+    assert.ok(ids.length >= CATALOG_PRODUCT_COUNT, "cards " + ids.length);
+    assert.ok(ids.includes("aziel-runtime"));
+    assert.ok(ids.includes("godlock"));
+    for (const slug of CATALOG_SLUGS) {
+      assert.ok(ids.includes(slug), slug);
+      assert.match(html, new RegExp('id="' + slug + '"'));
+    }
+    assert.match(html, /href="\/runtime">Invoke via Runtime<\/a>/);
+    assert.match(html, /href="\/runtime\/v1\/pull\/godlock">Invoke via Runtime<\/a>/);
+    assert.match(html, /href="https:\/\/godlock-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
+    assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/godlock">GitHub<\/a>/);
+    assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/fraggate">FragGate<\/a>/);
+    assert.match(html, /Full Aziel Eliab suite/);
+    assert.match(topNav("/software"), /href="\/runtime">Runtime<\/a>/);
+    assert.doesNotMatch(html, /Specified Fit|INTERNAL_CRITERIA|bootstrap lock/i);
+    const invented = ids.filter((id) => id !== "aziel-runtime" && !CATALOG_SLUGS.includes(id));
+    assert.deepEqual(invented, []);
+  });
+
+  it("falls back to the snapshot when live catalog fetch fails", async () => {
+    const fetched = await fetchCatalogProducts({}, {
+      fetch: async () => {
+        throw new Error("offline");
+      },
+    });
+    assert.equal(fetched.source, "fallback");
+    assert.equal(fetched.products.length, CATALOG_PRODUCT_COUNT);
+    assert.deepEqual(fetched.products.map((p) => p.slug), CATALOG_SLUGS);
+  });
+
+  it("prefers the AZIEL_RUNTIME service binding over HTTPS", async () => {
+    const env = {
+      ...mockEnv(),
+      AZIEL_RUNTIME: {
+        async fetch() {
+          return new Response(JSON.stringify({
+            products: CATALOG_FALLBACK_PRODUCTS.map((p) => ({ ...p, one_line: "bound " + p.slug })),
+          }), { headers: { "Content-Type": "application/json" } });
+        },
+      },
+    };
+    const fetched = await fetchCatalogProducts(env, {
+      fetch: async () => {
+        throw new Error("should not hit HTTPS");
+      },
+    });
+    assert.equal(fetched.source, "service-binding");
+    assert.equal(fetched.products.length, CATALOG_PRODUCT_COUNT);
+    assert.equal(fetched.products.find((p) => p.slug === "godlock").one_line, "bound godlock");
+  });
+
+  it("serves the full suite from GET /software even when origin fetch is empty", async () => {
+    const res = await worker.fetch(new Request("https://godlock.uk/software"), mockEnv());
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    const ids = softCardIds(html);
+    assert.ok(ids.length >= CATALOG_PRODUCT_COUNT, "live-or-fallback cards " + ids.length);
+    for (const slug of CATALOG_SLUGS) assert.ok(ids.includes(slug), slug);
+    assert.ok(ids.includes("aziel-runtime"));
+    assert.match(html, /<title>Software — GodLock<\/title>/);
+    assert.match(html, /href="\/runtime">Runtime<\/a>/);
+    assert.match(html, /Invoke via Runtime/);
+    assert.match(html, /every aziel-runtime catalog engine \(27\) plus aziel-runtime \/ FragGate/);
+    assert.doesNotMatch(html, /Catalog unavailable/);
+    assert.doesNotMatch(html, /Specified Fit|INTERNAL_CRITERIA/i);
+    const jsonRes = await worker.fetch(new Request("https://godlock.uk/software?format=json"), mockEnv());
+    const body = await jsonRes.json();
+    assert.equal(body.author, "Aziel Eliab");
+    assert.ok(body.product_count >= CATALOG_PRODUCT_COUNT);
+    assert.ok(body.suite_count >= CATALOG_PRODUCT_COUNT);
+    assert.ok(body.products.some((p) => p.slug === "godlock" && p.invoke === "/runtime/v1/pull/godlock"));
+    assert.ok(body.products.some((p) => p.slug === "aziel-runtime" && p.invoke === "/runtime"));
+    const cite = await (await worker.fetch(new Request("https://godlock.uk/cite.json"), mockEnv())).json();
+    assert.ok(cite.software_slugs.includes("godlock"));
+    assert.ok(cite.software_slugs.includes("aziel-runtime"));
+    assert.ok(cite.software_slugs.length >= CATALOG_PRODUCT_COUNT);
+    const llms = llmsDoc();
+    assert.match(llms, /Software lists the full aziel-runtime catalog/);
+    assert.match(defaultDescription("software"), /27\) plus aziel-runtime \/ FragGate/);
   });
 });

@@ -5,7 +5,7 @@
  */
 import { randomBytes } from "node:crypto";
 import { json, html, corsHeaders, wantsJson, readCookie } from "./http.js";
-import { page, homeBody, verifyBody, receiptBody } from "./ui.js";
+import { page, homeBody, verifyBody, receiptBody, azielEliabBody, azielEliabText, AZIEL_ELIAB_PATH } from "./ui.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import { robotsTxt, sitemapXml, citeDoc, llmsDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR } from "./seo.js";
 import {
@@ -397,6 +397,31 @@ export default {
           });
         }
         return html(page("Verify", verifyBody({ report }), { path: "/verify", kind: "verify" }), {
+          extraHeaders: extraHeadersFor(nodeId),
+        });
+      }
+
+      if (path === "/aziel-eliab") {
+        return new Response(null, {
+          status: 303,
+          headers: { Location: AZIEL_ELIAB_PATH, ...corsHeaders(), ...extraHeadersFor(nodeId) },
+        });
+      }
+
+      if (path === AZIEL_ELIAB_PATH) {
+        if (wantsJson(request, url)) {
+          return json({
+            ok: true,
+            product: "GodLock",
+            site: "godlock.uk",
+            author: AUTHOR,
+            title: "Aziel Eliab",
+            path: AZIEL_ELIAB_PATH,
+            identity: AUTHOR,
+            text: azielEliabText(),
+          }, 200, extraHeadersFor(nodeId));
+        }
+        return html(page("Aziel Eliab", azielEliabBody(), { path: AZIEL_ELIAB_PATH, kind: "aziel" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

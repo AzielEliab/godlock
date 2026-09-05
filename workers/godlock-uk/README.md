@@ -24,6 +24,7 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 - `GET /stats` JSON: `live_nodes`, `uses`, views, downloads, score (site counters; not the download-tracker)
 - `GET /count` JSON: `{ live_nodes, uses }` (site presence + ledger-backed Uses; not downloads)
 - `/verify` walk the ledger
+- `/AzielEliab` public identity page (Aziel Eliab only); `/aziel-eliab` redirects here
 - `/receipt/{id}` public if not isolated
 - `/health` JSON
 - `/robots.txt` `/sitemap.xml` `/cite.json` `/llms.txt`

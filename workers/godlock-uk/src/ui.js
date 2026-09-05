@@ -6,13 +6,20 @@ import { headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST } from "./seo.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 
 export const CSS = `
-:root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f}
+:root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
 *{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--ink)}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;line-height:1.5}
 .wrap{max-width:720px;margin:auto;padding:24px 18px 80px}
 .brandrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px}
 .brand{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.nav2{margin:0 0 14px;font-size:14px}
+.nav2 .sep{color:var(--muted);margin:0 8px}
+.nav2 a.aziel,.nav2 a.aziel:visited{color:var(--royal);font-weight:700}
+.nav2 a.aziel:hover{color:var(--royal-deep)}
+.about-aziel,.about-aziel p,.about-prose,.about-sign{color:var(--royal)}
+.about-aziel h1,.about-aziel h2{color:var(--royal)}
+.about-sign{font-weight:700;margin-top:18px}
 .pill{border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;background:#2a241c;color:var(--ink);border:1px solid var(--line)}
 .pill.yes{background:#14261c;color:var(--yes);border-color:#2e6b45}
 .pill.no{background:#2a1414;color:var(--no);border-color:#8a2b2b}
@@ -78,10 +85,39 @@ function pillClass(label) {
   return "review";
 }
 
+export const AZIEL_ELIAB_PATH = "/AzielEliab";
+
+export const AZIEL_MANIFESTO = [
+  "I made this because a debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion. Intelligent design was never the point by itself. The point was whether a claim could stand in the open, be answered, and leave something behind that was not just my voice.",
+  "Questions over answers, or the mouth outruns the mind. Document over declare, or speech becomes a throne. Formality before familiarity, or warmth is mistaken for proof. Trust is an output. It is grown from a chain you can audit, not granted at the door. I am not always right. That is not a confession. It is the method.",
+  "A claim that cannot be scored is a sermon wearing work clothes. Intelligent design and design-flaw sit at the same table. No creed inherits a private lane. Later readings bury earlier ones as the evidence hardens. The receipt is the argument that survives the speaker.",
+  "All paths lead home. Morality over legality: a statute can bless a harm and still be called law. Law keeps order. Morality keeps the soul from calling order holy. Let us pray there is a God. If there is, the record is how we stay correctable before Him. If there is not, the record is how we stay correctable before each other.",
+];
+
+export const AZIEL_SIGNATURE = "— Aziel Eliab";
+
+export function topNav(path) {
+  const here = String(path || "/");
+  const items = [
+    { href: "/", label: "Engine" },
+    { href: "/verify", label: "Verify" },
+    { href: AZIEL_ELIAB_PATH, label: "Aziel Eliab", aziel: true },
+  ];
+  return `<nav class="nav2">${items.map((it, i) => {
+    const current = here === it.href;
+    const cls = [it.aziel ? "aziel" : "", current ? "current" : ""].filter(Boolean).join(" ");
+    const attrs = (cls ? ` class="${cls}"` : "") + (current ? ' aria-current="page"' : "");
+    const link = `<a href="${esc(it.href)}"${attrs}>${esc(it.label)}</a>`;
+    return i ? `<span class="sep">|</span>${link}` : link;
+  }).join("")}</nav>`;
+}
+
 export function page(title, body, { path, kind, extraHeaders } = {}) {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(title)} — GodLock</title>${headMeta({ title, path: path || "/", kind })}<style>${CSS}</style></head><body><div class="wrap">
+  const p = path || "/";
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(title)} — GodLock</title>${headMeta({ title, path: p, kind })}<style>${CSS}</style></head><body><div class="wrap">
 <div class="brandrow"><div class="brand">GodLock</div><span class="pill">HTTPS engine</span></div>
 <p class="author">Author Aziel Eliab</p>
+${topNav(p)}
 <div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
 ${body}
 <footer>Aziel Eliab · GodLock is a product name · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a></footer>
@@ -210,6 +246,18 @@ export function verifyBody({ report }) {
     verified_utc: new Date().toISOString(),
   };
   return `<div class="card"><h2 class="${cls}">${title}</h2><p class="muted">The ledger is walked. Each entry_hash is recomputed from canonical JSON (sorted keys, comma-colon separators) without the stored hash. Isolated submissions stay in the archive and are omitted from the public feed.</p><pre class="verify">${esc(JSON.stringify(safe, null, 2))}</pre><p class="actions"><a class="button" href="/">Back</a></p></div>`;
+}
+
+export function azielEliabBody() {
+  const paras = AZIEL_MANIFESTO.map((p) => `<p>${esc(p)}</p>`).join("\n");
+  return `<section class="about-aziel"><div class="card about-prose">
+${paras}
+<p class="about-sign">${esc(AZIEL_SIGNATURE)}</p>
+</div></section>`;
+}
+
+export function azielEliabText() {
+  return AZIEL_MANIFESTO.join("\n\n") + "\n\n" + AZIEL_SIGNATURE + "\n";
 }
 
 export function receiptBody({ id, row, entries }) {

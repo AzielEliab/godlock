@@ -31,6 +31,7 @@ function linkRel(rel, href, extra) {
 export function defaultDescription(kind) {
   if (kind === "verify") return hideInternalDetermination("Verify the GodLock.uk hash-chained ledger. Author Aziel Eliab.");
   if (kind === "receipt") return hideInternalDetermination("A GodLock.uk receipt. Append-only. Author Aziel Eliab.");
+  if (kind === "aziel") return hideInternalDetermination("Aziel Eliab on GodLock: a debate with no record becomes a pulpit. Identity is Aziel Eliab only.");
   return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Not a mesh.");
 }
 
@@ -84,6 +85,7 @@ export function robotsTxt() {
     "User-agent: *",
     "Allow: /",
     "Allow: /verify",
+    "Allow: /AzielEliab",
     "Allow: /health",
     "Allow: /receipt/",
     "Allow: /cite.json",
@@ -97,6 +99,7 @@ export async function sitemapXml(env) {
   const locs = [
     CANON_HOST + "/",
     CANON_HOST + "/verify",
+    CANON_HOST + "/AzielEliab",
     CANON_HOST + "/health",
     CANON_HOST + "/cite.json",
     CANON_HOST + "/llms.txt",
@@ -123,6 +126,7 @@ export function citeDoc() {
     github: GITHUB,
     download: DOWNLOAD,
     verify: CANON_HOST + "/verify",
+    aziel_eliab: CANON_HOST + "/AzielEliab",
     health: CANON_HOST + "/health",
     license: "Apache-2.0",
     catalog: CATALOG + "/",
@@ -139,7 +143,8 @@ export function llmsDoc() {
     + "Download: " + DOWNLOAD + "\n"
     + "License: Apache-2.0\n\n"
     + hideInternalDetermination(BANNER) + "\n\n"
-    + "GodLock is a product name, not an identity. Identity is Aziel Eliab only.\n\n"
+    + "GodLock is a product name, not an identity. Identity is Aziel Eliab only.\n"
+    + "Aziel Eliab: " + CANON_HOST + "/AzielEliab\n\n"
     + "Public HTTPS stress-test engine. Submit a challenge. Answers open with Yes, No, Let's review, or Interesting.\n"
     + "Intelligent-design disputes are processed under the same rules. Mesh is not on this surface.\n";
 }

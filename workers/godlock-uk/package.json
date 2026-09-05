@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
-    "test": "node --test presence.test.mjs"
+    "test": "node --test presence.test.mjs pages.test.mjs"
   },
   "dependencies": {
     "wrangler": "^4.127.1"

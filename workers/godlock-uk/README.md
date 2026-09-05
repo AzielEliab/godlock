@@ -37,7 +37,7 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 
 **Uses** = `COUNT(*)` of receipt-ledger rows with action `SUBMIT` or `ISOLATE` only. That is a real submission that went through `POST /submit` and was hash-chained. Heartbeats, page views, and downloads do not increment Uses. A receipt with no ledger row does not count. Isolated submissions count because they are ledgered (`ISOLATE`). `SCORE` rows do not count.
 
-Foundational / empirical-limit determination stays internal. It is stripped from public HTML, receipt copy, and scrapeable metadata.
+Foundational / empirical-limit determination stays internal. It is stripped from public HTML, receipt copy, and scrapeable metadata. Operator notes under `internal/` are not a public route.
 
 HTML/JSON for these routes is `Cache-Control: no-store` so a proxy cannot freeze the numbers at 0.
 

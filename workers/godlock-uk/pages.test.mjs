@@ -135,8 +135,47 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /User-agent: ClaudeBot\nAllow: \//);
     assert.match(robots, /User-agent: PerplexityBot\nAllow: \//);
     assert.match(robots, /User-agent: bingbot\nAllow: \//);
+    assert.match(robots, /User-agent: FacebookBot\nAllow: \//);
+    assert.match(robots, /User-agent: facebookexternalhit\nAllow: \//);
+    assert.match(robots, /User-agent: Meta-ExternalAds\nAllow: \//);
+    assert.match(robots, /User-agent: TikTokSpider\nAllow: \//);
+    assert.match(robots, /User-agent: Baiduspider\nAllow: \//);
+    assert.match(robots, /User-agent: YandexBot\nAllow: \//);
+    assert.match(robots, /User-agent: NeevaBot\nAllow: \//);
+    assert.equal(new Set(AI_CRAWLER_AGENTS).size, AI_CRAWLER_AGENTS.length);
+    for (const agent of [
+      "FacebookBot",
+      "facebookexternalhit",
+      "Meta-ExternalAds",
+      "TikTokSpider",
+      "Baiduspider",
+      "Baiduspider-render",
+      "Baiduspider-ai",
+      "YandexBot",
+      "PanguBot",
+      "Kangaroo Bot",
+      "Cotoyogi",
+      "aiHitBot",
+      "webzio-extended",
+      "ICC-Crawler",
+      "DataForSeoBot",
+      "AwarioBot",
+      "AwarioSmartBot",
+      "AwarioRssBot",
+      "Sentibot",
+      "peer39_crawler",
+      "Seekr",
+      "Meltwater",
+      "TurnitinBot",
+      "Factset_spyderbot",
+      "NeevaBot",
+    ]) {
+      assert.ok(AI_CRAWLER_AGENTS.includes(agent), agent);
+    }
     for (const agent of AI_CRAWLER_AGENTS) {
-      assert.ok(robots.includes("User-agent: " + agent + "\nAllow: /"), agent);
+      const block = "User-agent: " + agent + "\nAllow: /";
+      assert.ok(robots.includes(block), agent);
+      assert.equal(robots.split(block).length - 1, 1, "deduped " + agent);
     }
     const xml = await sitemapXml({});
     assert.ok(xml.includes(CANON_HOST + "/AzielEliab"));

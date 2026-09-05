@@ -176,6 +176,9 @@ describe("Aziel Corpus Library page", () => {
     assert.ok(html.includes(CORPUS_OPENING[1]));
     assert.ok(html.includes(CORPUS_OPENING_SIGN));
     assert.ok(html.includes(CORPUS_ABOUT[0]));
+    assert.ok(html.includes("Carry the torch"));
+    assert.ok(html.includes("Aziel Library"));
+    assert.ok(html.includes("I am temporary. The truth is not."));
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/">Open the library<\/a>/);
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/software"/);
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/runtime"/);

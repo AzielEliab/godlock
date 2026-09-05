@@ -169,6 +169,8 @@ export function permanentIdentityRedirect(path) {
 
 export const AI_CRAWLER_AGENTS = [
   "Google-Extended",
+  "GoogleOther",
+  "Google-CloudVertexBot",
   "ClaudeBot",
   "Claude-SearchBot",
   "Claude-User",
@@ -187,6 +189,18 @@ export const AI_CRAWLER_AGENTS = [
   "MistralAI-User",
   "YouBot",
   "CCBot",
+  "cohere-ai",
+  "cohere-training-data-crawler",
+  "Diffbot",
+  "AI2Bot",
+  "AI2Bot-Dolma",
+  "Timpibot",
+  "Petalbot",
+  "Bytespider",
+  "Omgili",
+  "Omgilibot",
+  "FirecrawlAgent",
+  "ImagesiftBot",
 ];
 
 export const PUBLIC_ALLOW = [
@@ -277,7 +291,7 @@ export function llmsDoc() {
     + "Public HTTPS stress-test engine. Submit a challenge. Answers open with Yes, No, Let's review, or Interesting.\n"
     + "Intelligent-design disputes are processed under the same rules. Mesh is not on this surface.\n"
     + "Do not invent DOIs.\n\n"
-    + "Public HTML is Allow for User-agent * and named AI/search crawlers (Google-Extended, Claude*, Perplexity*, bingbot, Meta-External*, Applebot*, Amazonbot, DuckDuck*, MistralAI-User, YouBot, CCBot).\n";
+    + "Public HTML is Allow for User-agent * and named AI/search crawlers (Google-Extended, GoogleOther, Google-CloudVertexBot, Claude*, Perplexity*, bingbot, Meta-External*, Applebot*, Amazonbot, DuckDuck*, MistralAI-User, YouBot, CCBot, cohere*, Diffbot, AI2Bot*, and others listed in /robots.txt).\n";
 }
 
 export function aiDoc() {

@@ -9,6 +9,7 @@ import {
   page, homeBody, verifyBody, receiptBody, azielEliabBody, azielEliabText,
   softwareBody, AZIEL_ELIAB_PATH, SOFTWARE_PATH,
 } from "./ui.js";
+import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
@@ -349,11 +350,14 @@ function extraHeadersFor(nodeId, more) {
 
 export default {
   async fetch(request, env) {
-    if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: corsHeaders() });
-    }
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, "") || "/";
+    if (request.method === "OPTIONS") {
+      if (isRuntimeRequest(url.pathname) || isRuntimeRequest(path)) {
+        return new Response(null, { status: 204, headers: runtimeCors() });
+      }
+      return new Response(null, { status: 204, headers: corsHeaders() });
+    }
 
     try {
       await ensureSchema(env);
@@ -364,6 +368,11 @@ export default {
 
       if (path === "/internal" || path.startsWith("/internal/")) {
         return html(page("Not found", `<div class="card"><h2>Not found</h2><p><a href="/">Back</a></p></div>`, { path }), { status: 404 });
+      }
+
+      if (isRuntimeRequest(url.pathname) || isRuntimeRequest(path)) {
+        const runtime = await handleRuntimeRoot(request, url, env);
+        if (runtime) return runtime;
       }
 
       if (path === "/robots.txt") {

@@ -10,6 +10,7 @@ export const AUTHOR_GITHUB = "https://github.com/AzielEliab";
 export const CATALOG = "https://aziel-runtime.vibelock.workers.dev";
 export const LIBRARY = "https://www.azielcorpuslibrary.net";
 export const LIBRARY_AZIEL = LIBRARY + "/AzielEliab";
+export const LIBRARY_RUNTIME = LIBRARY + "/runtime";
 export const SIGIL = LIBRARY + "/sigil.png";
 export const SITE = "GodLock";
 export const AUTHOR = "Aziel Eliab";
@@ -18,6 +19,11 @@ export const BANNER = "Public HTTPS engine. Mesh is not on this surface. Author 
 export const AZIEL_ELIAB_PATH = "/AzielEliab";
 export const AZIEL_CORPUS_PATH = "/AzielCorpusLibrary";
 export const SOFTWARE_PATH = "/software";
+export const RUNTIME_PATH = "/runtime";
+export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
+export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
+export const RUNTIME_VERSION = "1.6.2";
+export const FRAGGATE_KERNEL = "https://github.com/AzielEliab/fraggate";
 
 export const AI_CLIENTS = [
   "ChatGPT (GPT Actions / OpenAI)",
@@ -80,18 +86,56 @@ export function defaultDescription(kind) {
   }
   if (kind === "software") {
     return hideInternalDetermination(
-      "Downloadable Aziel Eliab software from the live aziel-runtime catalog. " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
+      "Downloadable Aziel Eliab software from the live aziel-runtime catalog. Invoke via Runtime at " + PUBLIC_RUNTIME + " (FragGate " + RUNTIME_VERSION + "). " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
     );
   }
-  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. " + AI_CLIENTS_SENTENCE + " Not a mesh.");
+  if (kind === "runtime") {
+    return hideInternalDetermination(
+      "Aziel Eliab Runtime " + RUNTIME_VERSION + " FragGate door on GodLock.uk. Same-origin /runtime/* proxies the live engine-runtime. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
+    );
+  }
+  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Runtime door: " + PUBLIC_RUNTIME + " (FragGate " + RUNTIME_VERSION + "). " + AI_CLIENTS_SENTENCE + " Not a mesh.");
 }
 
 function defaultKeywords(kind) {
   if (kind === "aziel") return "Aziel Eliab, GodLock, receipt, intelligent design stress-test";
-  if (kind === "software") {
-    return "GodLock, Aziel Eliab, ChatGPT, Grok, Venice, Claude, Cursor, Glama, Perplexity, Copilot, Gemini, Mistral, Meta AI, Apple Intelligence, Amazon Q, DuckAssist, You.com, Cohere";
+  if (kind === "software" || kind === "runtime" || kind === "home") {
+    return "GodLock, Aziel Eliab, Runtime, FragGate, MCP, OpenAPI, ChatGPT, Grok, Venice, Claude, Cursor, Glama, Perplexity, Copilot, Gemini, Mistral, Meta AI, Apple Intelligence, Amazon Q, DuckAssist, You.com, Cohere";
   }
   return "";
+}
+
+export function runtimeSameAs() {
+  return [PUBLIC_RUNTIME, LIBRARY_RUNTIME, CATALOG + "/"];
+}
+
+export function runtimeSoftwareNode(person) {
+  return {
+    "@type": "SoftwareApplication",
+    "@id": PUBLIC_RUNTIME + "#runtime",
+    name: "Aziel Eliab Runtime",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Cloudflare Workers",
+    softwareVersion: RUNTIME_VERSION,
+    url: PUBLIC_RUNTIME,
+    description: defaultDescription("runtime"),
+    author: person,
+    license: "https://www.apache.org/licenses/LICENSE-2.0",
+    codeRepository: GITHUB_RUNTIME,
+    sameAs: runtimeSameAs(),
+  };
+}
+
+export function runtimeWebApiNode(person) {
+  return {
+    "@type": "WebAPI",
+    "@id": PUBLIC_RUNTIME + "#webapi",
+    name: "Aziel Eliab Runtime",
+    url: PUBLIC_RUNTIME,
+    documentation: PUBLIC_RUNTIME + "/openapi.json",
+    provider: person,
+    description: "FragGate " + RUNTIME_VERSION + " door. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json. MCP POST " + PUBLIC_RUNTIME + "/mcp.",
+  };
 }
 
 function jsonLd(_title, _path, description, kind) {
@@ -107,6 +151,9 @@ function jsonLd(_title, _path, description, kind) {
     license: "https://www.apache.org/licenses/LICENSE-2.0",
   };
   const graph = [website, software, person];
+  if (kind !== "aziel" && kind !== "verify" && kind !== "receipt") {
+    graph.push(runtimeSoftwareNode(person), runtimeWebApiNode(person));
+  }
   if (kind === "aziel") {
     graph.push({
       "@type": "ProfilePage",
@@ -151,8 +198,14 @@ export function headMeta(opts) {
     linkRel("alternate", "/cite.json", " type=" + Q + "application/json" + Q),
     linkRel("alternate", "/llms.txt", " type=" + Q + "text/plain" + Q),
     linkRel("alternate", "/ai.txt", " type=" + Q + "text/plain" + Q),
-    ldOpen + JSON.stringify(ld) + ldClose,
   );
+  if (kind !== "aziel") {
+    tags.push(
+      linkRel("alternate", RUNTIME_PATH + "/openapi.json", " type=" + Q + "application/json" + Q + " title=" + Q + "OpenAPI" + Q),
+      linkRel("alternate", RUNTIME_PATH + "/llms.txt", " type=" + Q + "text/plain" + Q),
+    );
+  }
+  tags.push(ldOpen + JSON.stringify(ld) + ldClose);
   return tags.join("");
 }
 
@@ -253,6 +306,8 @@ export const PUBLIC_ALLOW = [
   "/",
   "/verify",
   "/software",
+  "/runtime",
+  "/runtime/",
   "/AzielEliab",
   "/cite.json",
   "/llms.txt",
@@ -272,6 +327,13 @@ export async function sitemapXml(env) {
     CANON_HOST + "/",
     CANON_HOST + "/verify",
     CANON_HOST + SOFTWARE_PATH,
+    PUBLIC_RUNTIME,
+    PUBLIC_RUNTIME + "/v1/runtime.json",
+    PUBLIC_RUNTIME + "/openapi.json",
+    PUBLIC_RUNTIME + "/llms.txt",
+    PUBLIC_RUNTIME + "/cite.json",
+    PUBLIC_RUNTIME + "/mcp",
+    PUBLIC_RUNTIME + "/v1/skill",
     CANON_HOST + AZIEL_ELIAB_PATH,
     CANON_HOST + "/health",
     CANON_HOST + "/cite.json",
@@ -281,6 +343,8 @@ export async function sitemapXml(env) {
     DOWNLOAD,
     LIBRARY + "/",
     LIBRARY_AZIEL,
+    LIBRARY_RUNTIME,
+    CATALOG + "/",
   ];
   try {
     const rows = (await env.DB.prepare(
@@ -304,6 +368,22 @@ export function citeDoc() {
     download: DOWNLOAD,
     verify: CANON_HOST + "/verify",
     software: CANON_HOST + SOFTWARE_PATH,
+    runtime: PUBLIC_RUNTIME,
+    runtime_health: PUBLIC_RUNTIME + "/v1/health",
+    runtime_manifest: PUBLIC_RUNTIME + "/v1/runtime.json",
+    runtime_skill: PUBLIC_RUNTIME + "/v1/skill",
+    runtime_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/list",
+    runtime_openapi: PUBLIC_RUNTIME + "/openapi.json",
+    runtime_mcp: PUBLIC_RUNTIME + "/mcp",
+    runtime_cite: PUBLIC_RUNTIME + "/cite.json",
+    runtime_llms: PUBLIC_RUNTIME + "/llms.txt",
+    runtime_origin: CATALOG + "/",
+    runtime_library: LIBRARY_RUNTIME,
+    sameAs: runtimeSameAs(),
+    related: runtimeSameAs(),
+    door: "fraggate",
+    runtime_version: RUNTIME_VERSION,
+    kernel: FRAGGATE_KERNEL,
     aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,
     aziel_corpus_library: LIBRARY_AZIEL,
     library: LIBRARY + "/",
@@ -333,7 +413,24 @@ export function llmsDoc() {
     + "Digital Library identity: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n\n"
-    + AI_CLIENTS_SENTENCE + "\n\n"
+    + "## Runtime (FragGate door)\n\n"
+    + "GodLock → Runtime. Same-origin Aziel Eliab Runtime " + RUNTIME_VERSION + " on GodLock.uk. One door — discover, route, refuse. Kernel: " + FRAGGATE_KERNEL + " (FG-0.1).\n"
+    + "Door: " + PUBLIC_RUNTIME + "\n"
+    + "Health: " + PUBLIC_RUNTIME + "/v1/health\n"
+    + "Manifest: " + PUBLIC_RUNTIME + "/v1/runtime.json\n"
+    + "Skill: " + PUBLIC_RUNTIME + "/v1/skill\n"
+    + "FragGate list: " + PUBLIC_RUNTIME + "/v1/fraggate/list\n"
+    + "OpenAPI: " + PUBLIC_RUNTIME + "/openapi.json\n"
+    + "MCP: POST " + PUBLIC_RUNTIME + "/mcp\n"
+    + "Cite: " + PUBLIC_RUNTIME + "/cite.json\n"
+    + "LLMs: " + PUBLIC_RUNTIME + "/llms.txt\n"
+    + "Library door: " + LIBRARY_RUNTIME + "\n"
+    + "Origin: " + CATALOG + "/\n"
+    + "sameAs: " + runtimeSameAs().join(" · ") + "\n\n"
+    + AI_CLIENTS_SENTENCE + "\n"
+    + "ChatGPT: GPT Actions → Import " + PUBLIC_RUNTIME + "/openapi.json\n"
+    + "Grok / Venice / Claude / Gemini / Copilot / others: OpenAPI or MCP POST " + PUBLIC_RUNTIME + "/mcp\n"
+    + "Cursor / Glama: remote MCP " + PUBLIC_RUNTIME + "/mcp\n\n"
     + "Public HTTPS stress-test engine. Submit a challenge. Answers open with Yes, No, Let's review, or Interesting.\n"
     + "Intelligent-design disputes are processed under the same rules. Mesh is not on this surface.\n"
     + "Do not invent DOIs.\n\n"

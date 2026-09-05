@@ -167,22 +167,45 @@ export function permanentIdentityRedirect(path) {
   return "";
 }
 
+export const AI_CRAWLER_AGENTS = [
+  "Google-Extended",
+  "ClaudeBot",
+  "Claude-SearchBot",
+  "Claude-User",
+  "anthropic-ai",
+  "PerplexityBot",
+  "Perplexity-User",
+  "bingbot",
+  "Meta-ExternalAgent",
+  "Meta-ExternalFetcher",
+  "Meta-WebIndexer",
+  "Applebot",
+  "Applebot-Extended",
+  "Amazonbot",
+  "DuckDuckBot",
+  "DuckAssistBot",
+  "MistralAI-User",
+  "YouBot",
+  "CCBot",
+];
+
+export const PUBLIC_ALLOW = [
+  "/",
+  "/verify",
+  "/software",
+  "/AzielEliab",
+  "/AzielCorpusLibrary",
+  "/cite.json",
+  "/llms.txt",
+  "/ai.txt",
+  "/receipt/",
+  "/health",
+];
+
 export function robotsTxt() {
-  return [
-    "User-agent: *",
-    "Allow: /",
-    "Allow: /verify",
-    "Allow: /software",
-    "Allow: /AzielEliab",
-    "Allow: /AzielCorpusLibrary",
-    "Allow: /health",
-    "Allow: /receipt/",
-    "Allow: /cite.json",
-    "Allow: /llms.txt",
-    "Allow: /ai.txt",
-    "Sitemap: " + CANON_HOST + "/sitemap.xml",
-    "",
-  ].join("\n");
+  const star = ["User-agent: *"].concat(PUBLIC_ALLOW.map((p) => "Allow: " + p));
+  const bots = AI_CRAWLER_AGENTS.flatMap((agent) => ["", "User-agent: " + agent, "Allow: /"]);
+  return star.concat(bots).concat(["", "Sitemap: " + CANON_HOST + "/sitemap.xml", ""]).join("\n");
 }
 
 export async function sitemapXml(env) {
@@ -253,7 +276,8 @@ export function llmsDoc() {
     + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n\n"
     + "Public HTTPS stress-test engine. Submit a challenge. Answers open with Yes, No, Let's review, or Interesting.\n"
     + "Intelligent-design disputes are processed under the same rules. Mesh is not on this surface.\n"
-    + "Do not invent DOIs.\n";
+    + "Do not invent DOIs.\n\n"
+    + "Public HTML is Allow for User-agent * and named AI/search crawlers (Google-Extended, Claude*, Perplexity*, bingbot, Meta-External*, Applebot*, Amazonbot, DuckDuck*, MistralAI-User, YouBot, CCBot).\n";
 }
 
 export function aiDoc() {

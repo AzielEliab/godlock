@@ -7,6 +7,8 @@ import {
   AZIEL_MANIFESTO,
   AZIEL_SIGNATURE,
   CORPUS_ABOUT,
+  CORPUS_OPENING,
+  CORPUS_OPENING_SIGN,
   azielEliabBody,
   azielEliabText,
   azielCorpusLibraryBody,
@@ -28,6 +30,7 @@ import {
   LIBRARY_AZIEL,
   AUTHOR_GITHUB,
   GITHUB,
+  AI_CRAWLER_AGENTS,
 } from "./src/seo.js";
 import worker from "./src/index.js";
 
@@ -128,6 +131,13 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/AzielCorpusLibrary/);
     assert.match(robots, /Allow: \/software/);
     assert.match(robots, /Allow: \/ai\.txt/);
+    assert.match(robots, /User-agent: Google-Extended\nAllow: \//);
+    assert.match(robots, /User-agent: ClaudeBot\nAllow: \//);
+    assert.match(robots, /User-agent: PerplexityBot\nAllow: \//);
+    assert.match(robots, /User-agent: bingbot\nAllow: \//);
+    for (const agent of AI_CRAWLER_AGENTS) {
+      assert.ok(robots.includes("User-agent: " + agent + "\nAllow: /"), agent);
+    }
     const xml = await sitemapXml({});
     assert.ok(xml.includes(CANON_HOST + "/AzielEliab"));
     assert.ok(xml.includes(CANON_HOST + "/AzielCorpusLibrary"));
@@ -160,6 +170,11 @@ describe("Aziel Corpus Library page", () => {
       kind: "corpus",
     });
     assert.match(html, /<h1>About Aziel<\/h1>/);
+    assert.ok(html.includes("Who? Does not matter."));
+    assert.doesNotMatch(html, /Who does not matter\./);
+    assert.ok(html.includes(CORPUS_OPENING[0]));
+    assert.ok(html.includes(CORPUS_OPENING[1]));
+    assert.ok(html.includes(CORPUS_OPENING_SIGN));
     assert.ok(html.includes(CORPUS_ABOUT[0]));
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/">Open the library<\/a>/);
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/software"/);

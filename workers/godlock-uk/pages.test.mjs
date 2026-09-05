@@ -6,12 +6,8 @@ import {
   SOFTWARE_PATH,
   AZIEL_MANIFESTO,
   AZIEL_SIGNATURE,
-  CORPUS_ABOUT,
-  CORPUS_OPENING,
-  CORPUS_OPENING_SIGN,
   azielEliabBody,
   azielEliabText,
-  azielCorpusLibraryBody,
   page,
   topNav,
   CSS,
@@ -87,7 +83,7 @@ describe("Aziel Eliab page chrome", () => {
     );
     assert.match(
       nav,
-      /href="\/verify"[^>]*>Verify<\/a><span class="sep">\|<\/span><a href="\/AzielEliab" class="aziel">Aziel Eliab<\/a><span class="sep">\|<\/span><a href="\/AzielCorpusLibrary" class="aziel">Aziel Corpus Library<\/a>/,
+      /href="\/verify"[^>]*>Verify<\/a><span class="sep">\|<\/span><a href="\/AzielEliab" class="aziel">Aziel Eliab<\/a><span class="sep">\|<\/span><a href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab" class="aziel">Aziel Corpus Library<\/a>/,
     );
     assert.match(CSS, /--royal:#6b3fa0/);
     assert.match(CSS, /--royal-deep:#4a2870/);
@@ -128,7 +124,7 @@ describe("Aziel Eliab SEO surfaces", () => {
   it("lists identity and library pages in robots, sitemap, cite, llms, and ai", async () => {
     const robots = robotsTxt();
     assert.match(robots, /Allow: \/AzielEliab/);
-    assert.match(robots, /Allow: \/AzielCorpusLibrary/);
+    assert.doesNotMatch(robots, /Allow: \/AzielCorpusLibrary/);
     assert.match(robots, /Allow: \/software/);
     assert.match(robots, /Allow: \/ai\.txt/);
     assert.match(robots, /User-agent: Google-Extended\nAllow: \//);
@@ -179,15 +175,17 @@ describe("Aziel Eliab SEO surfaces", () => {
     }
     const xml = await sitemapXml({});
     assert.ok(xml.includes(CANON_HOST + "/AzielEliab"));
-    assert.ok(xml.includes(CANON_HOST + "/AzielCorpusLibrary"));
+    assert.ok(!xml.includes(CANON_HOST + "/AzielCorpusLibrary"));
+    assert.ok(xml.includes(LIBRARY_AZIEL));
     const cite = citeDoc();
     assert.equal(cite.aziel_eliab, CANON_HOST + "/AzielEliab");
-    assert.equal(cite.aziel_corpus_library, CANON_HOST + "/AzielCorpusLibrary");
+    assert.equal(cite.aziel_corpus_library, LIBRARY_AZIEL);
     assert.equal(cite.library_aziel_eliab, LIBRARY_AZIEL);
     assert.equal(cite.author, "Aziel Eliab");
     const llms = llmsDoc();
     assert.match(llms, /Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
-    assert.match(llms, /Aziel Corpus Library: https:\/\/godlock\.uk\/AzielCorpusLibrary/);
+    assert.match(llms, /Aziel Corpus Library: https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab/);
+    assert.doesNotMatch(llms, /Aziel Corpus Library: https:\/\/godlock\.uk\/AzielCorpusLibrary/);
     assert.equal(aiDoc(), llmsDoc());
   });
 
@@ -197,33 +195,28 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(permanentIdentityRedirect("/about"), "/AzielEliab");
     assert.equal(permanentIdentityRedirect("/aboutme"), "/AzielEliab");
     assert.equal(permanentIdentityRedirect("/AzielEliab"), "");
-    assert.equal(permanentIdentityRedirect("/aziel-corpus-library"), "/AzielCorpusLibrary");
-    assert.equal(permanentIdentityRedirect("/AzielCorpusLibrary"), "");
+    assert.equal(permanentIdentityRedirect("/aziel-corpus-library"), LIBRARY_AZIEL);
+    assert.equal(permanentIdentityRedirect("/AzielCorpusLibrary"), LIBRARY_AZIEL);
+    assert.equal(permanentIdentityRedirect("/AzielCorpusLibrary/"), LIBRARY_AZIEL);
   });
 });
 
-describe("Aziel Corpus Library page", () => {
-  it("mirrors the live About Aziel card and links the library home", () => {
-    const html = page("Aziel Corpus Library", azielCorpusLibraryBody(), {
-      path: AZIEL_CORPUS_PATH,
-      kind: "corpus",
-    });
-    assert.match(html, /<h1>About Aziel<\/h1>/);
-    assert.ok(html.includes("Who? Does not matter."));
-    assert.doesNotMatch(html, /Who does not matter\./);
-    assert.ok(html.includes(CORPUS_OPENING[0]));
-    assert.ok(html.includes(CORPUS_OPENING[1]));
-    assert.ok(html.includes(CORPUS_OPENING_SIGN));
-    assert.ok(html.includes(CORPUS_ABOUT[0]));
-    assert.ok(html.includes("Carry the torch"));
-    assert.ok(html.includes("Aziel Library"));
-    assert.ok(html.includes("I am temporary. The truth is not."));
-    assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/">Open the library<\/a>/);
-    assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/software"/);
-    assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/runtime"/);
-    assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/how-its-scored"/);
-    const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
-    assert.ok(ld["@graph"].some((n) => n["@type"] === "DigitalLibrary"));
+describe("Aziel Corpus Library off-site", () => {
+  it("points the nav tab at the live library identity URL", () => {
+    const nav = topNav("/");
+    assert.match(nav, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab" class="aziel">Aziel Corpus Library<\/a>/);
+    assert.doesNotMatch(nav, /href="\/AzielCorpusLibrary"/);
+    assert.match(nav, /href="\/AzielEliab" class="aziel">Aziel Eliab<\/a>/);
+  });
+
+  it("serves that absolute library href from the homepage", async () => {
+    const res = await worker.fetch(new Request("https://godlock.uk/"), mockEnv());
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab" class="aziel">Aziel Corpus Library<\/a>/);
+    assert.match(html, /href="\/AzielEliab" class="aziel">Aziel Eliab<\/a>/);
+    assert.doesNotMatch(html, /<h1>About Aziel<\/h1>/);
+    assert.doesNotMatch(html, /Who\? Does not matter\./);
   });
 });
 
@@ -253,11 +246,20 @@ describe("Aziel Eliab routes", () => {
     assert.ok(body.text.includes("The receipt is the argument that survives the speaker."));
   });
 
-  it("serves Aziel Corpus Library", async () => {
+  it("308s /AzielCorpusLibrary off-site to the live library", async () => {
     const res = await worker.fetch(new Request("https://godlock.uk/AzielCorpusLibrary"), mockEnv());
-    assert.equal(res.status, 200);
+    assert.equal(res.status, 308);
+    assert.equal(res.headers.get("Location"), "https://www.azielcorpuslibrary.net/AzielEliab");
     const html = await res.text();
-    assert.match(html, /<title>Aziel Corpus Library — GodLock<\/title>/);
-    assert.match(html, /About Aziel/);
+    assert.doesNotMatch(html, /<title>Aziel Corpus Library — GodLock<\/title>/);
+    assert.doesNotMatch(html, /<h1>About Aziel<\/h1>/);
+  });
+
+  it("308s /AzielCorpusLibrary/ and kebab aliases off-site", async () => {
+    for (const path of ["/AzielCorpusLibrary/", "/aziel-corpus-library", "/azielcorpuslibrary"]) {
+      const res = await worker.fetch(new Request("https://godlock.uk" + path), mockEnv());
+      assert.equal(res.status, 308, path);
+      assert.equal(res.headers.get("Location"), "https://www.azielcorpuslibrary.net/AzielEliab", path);
+    }
   });
 });

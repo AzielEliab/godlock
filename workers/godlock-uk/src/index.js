@@ -5,9 +5,15 @@
  */
 import { randomBytes } from "node:crypto";
 import { json, html, corsHeaders, wantsJson, readCookie } from "./http.js";
-import { page, homeBody, verifyBody, receiptBody, azielEliabBody, azielEliabText, AZIEL_ELIAB_PATH } from "./ui.js";
+import {
+  page, homeBody, verifyBody, receiptBody, azielEliabBody, azielEliabText,
+  azielCorpusLibraryBody, softwareBody, AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH,
+} from "./ui.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
-import { robotsTxt, sitemapXml, citeDoc, llmsDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR } from "./seo.js";
+import {
+  robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
+  permanentIdentityRedirect,
+} from "./seo.js";
 import {
   START, shouldIsolate, answerChallenge, clampScore, residualOf, hashReceipt,
 } from "./engine.js";
@@ -322,6 +328,19 @@ async function healthPayload(env, { wrote } = {}) {
   };
 }
 
+async function fetchCatalogProducts() {
+  try {
+    const r = await fetch(CATALOG + "/v1/catalog.json", {
+      headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" },
+    });
+    if (!r.ok) return [];
+    const j = await r.json();
+    return Array.isArray(j && j.products) ? j.products : [];
+  } catch {
+    return [];
+  }
+}
+
 function extraHeadersFor(nodeId, more) {
   const h = { ...(more || {}) };
   if (nodeId) h["Set-Cookie"] = nodeCookieHeader(nodeId);
@@ -353,6 +372,17 @@ export default {
       if (path === "/cite.json") return json(citeDoc());
       if (path === "/llms.txt") {
         return new Response(llmsDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+      }
+      if (path === "/ai.txt") {
+        return new Response(aiDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+      }
+
+      const identityTo = permanentIdentityRedirect(path);
+      if (identityTo) {
+        return new Response(null, {
+          status: 308,
+          headers: { Location: identityTo, ...corsHeaders(), ...extraHeadersFor(nodeId) },
+        });
       }
       if (path === "/health") return json(await healthPayload(env, { wrote }));
 
@@ -401,13 +431,6 @@ export default {
         });
       }
 
-      if (path === "/aziel-eliab") {
-        return new Response(null, {
-          status: 303,
-          headers: { Location: AZIEL_ELIAB_PATH, ...corsHeaders(), ...extraHeadersFor(nodeId) },
-        });
-      }
-
       if (path === AZIEL_ELIAB_PATH) {
         if (wantsJson(request, url)) {
           return json({
@@ -418,10 +441,52 @@ export default {
             title: "Aziel Eliab",
             path: AZIEL_ELIAB_PATH,
             identity: AUTHOR,
+            library: "https://www.azielcorpuslibrary.net/AzielEliab",
             text: azielEliabText(),
           }, 200, extraHeadersFor(nodeId));
         }
         return html(page("Aziel Eliab", azielEliabBody(), { path: AZIEL_ELIAB_PATH, kind: "aziel" }), {
+          extraHeaders: extraHeadersFor(nodeId),
+        });
+      }
+
+      if (path === AZIEL_CORPUS_PATH) {
+        if (wantsJson(request, url)) {
+          return json({
+            ok: true,
+            product: "GodLock",
+            site: "godlock.uk",
+            author: AUTHOR,
+            title: "Aziel Corpus Library",
+            path: AZIEL_CORPUS_PATH,
+            library: "https://www.azielcorpuslibrary.net/",
+          }, 200, extraHeadersFor(nodeId));
+        }
+        return html(page("Aziel Corpus Library", azielCorpusLibraryBody(), { path: AZIEL_CORPUS_PATH, kind: "corpus" }), {
+          extraHeaders: extraHeadersFor(nodeId),
+        });
+      }
+
+      if (path === SOFTWARE_PATH) {
+        const products = await fetchCatalogProducts();
+        if (wantsJson(request, url)) {
+          return json({
+            ok: true,
+            product: "GodLock",
+            author: AUTHOR,
+            path: SOFTWARE_PATH,
+            catalog: CATALOG + "/v1/catalog.json",
+            products: products.map((p) => ({
+              slug: p.slug,
+              name: p.name,
+              version: p.version,
+              one_line: p.one_line,
+              github: p.github,
+              download: p.download,
+            })),
+          }, 200, extraHeadersFor(nodeId));
+        }
+        return html(page("Software", softwareBody({ products }), { path: SOFTWARE_PATH, kind: "software" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

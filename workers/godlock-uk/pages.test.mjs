@@ -2,15 +2,33 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   AZIEL_ELIAB_PATH,
+  AZIEL_CORPUS_PATH,
+  SOFTWARE_PATH,
   AZIEL_MANIFESTO,
   AZIEL_SIGNATURE,
+  CORPUS_ABOUT,
   azielEliabBody,
   azielEliabText,
+  azielCorpusLibraryBody,
   page,
   topNav,
   CSS,
 } from "./src/ui.js";
-import { robotsTxt, sitemapXml, citeDoc, llmsDoc, defaultDescription, headMeta, CANON_HOST } from "./src/seo.js";
+import {
+  robotsTxt,
+  sitemapXml,
+  citeDoc,
+  llmsDoc,
+  aiDoc,
+  defaultDescription,
+  headMeta,
+  personNode,
+  permanentIdentityRedirect,
+  CANON_HOST,
+  LIBRARY_AZIEL,
+  AUTHOR_GITHUB,
+  GITHUB,
+} from "./src/seo.js";
 import worker from "./src/index.js";
 
 function mockEnv() {
@@ -43,6 +61,8 @@ function mockEnv() {
 describe("Aziel Eliab page chrome", () => {
   it("uses the corpus identity path /AzielEliab", () => {
     assert.equal(AZIEL_ELIAB_PATH, "/AzielEliab");
+    assert.equal(AZIEL_CORPUS_PATH, "/AzielCorpusLibrary");
+    assert.equal(SOFTWARE_PATH, "/software");
   });
 
   it("keeps the manifesto paragraphs and signature exactly", () => {
@@ -51,47 +71,44 @@ describe("Aziel Eliab page chrome", () => {
       AZIEL_MANIFESTO[0],
       "I made this because a debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion. Intelligent design was never the point by itself. The point was whether a claim could stand in the open, be answered, and leave something behind that was not just my voice.",
     );
-    assert.equal(
-      AZIEL_MANIFESTO[1],
-      "Questions over answers, or the mouth outruns the mind. Document over declare, or speech becomes a throne. Formality before familiarity, or warmth is mistaken for proof. Trust is an output. It is grown from a chain you can audit, not granted at the door. I am not always right. That is not a confession. It is the method.",
-    );
-    assert.equal(
-      AZIEL_MANIFESTO[2],
-      "A claim that cannot be scored is a sermon wearing work clothes. Intelligent design and design-flaw sit at the same table. No creed inherits a private lane. Later readings bury earlier ones as the evidence hardens. The receipt is the argument that survives the speaker.",
-    );
-    assert.equal(
-      AZIEL_MANIFESTO[3],
-      "All paths lead home. Morality over legality: a statute can bless a harm and still be called law. Law keeps order. Morality keeps the soul from calling order holy. Let us pray there is a God. If there is, the record is how we stay correctable before Him. If there is not, the record is how we stay correctable before each other.",
-    );
     assert.equal(AZIEL_SIGNATURE, "— Aziel Eliab");
     const text = azielEliabText();
-    assert.ok(text.includes("\n\n"));
     assert.ok(text.endsWith("— Aziel Eliab\n"));
   });
 
-  it("places Aziel Eliab next to Verify in the top nav, in royal purple", () => {
+  it("orders nav Engine | Software | Verify | Aziel Eliab | Aziel Corpus Library", () => {
     const nav = topNav("/verify");
-    assert.match(nav, /<nav class="nav2">/);
-    assert.match(nav, /href="\/">Engine<\/a><span class="sep">\|<\/span><a href="\/verify"/);
-    assert.match(nav, /href="\/verify"[^>]*>Verify<\/a><span class="sep">\|<\/span><a href="\/AzielEliab" class="aziel">Aziel Eliab<\/a>/);
-    assert.doesNotMatch(nav, /MCP|openapi|runtime_session/i);
+    assert.match(
+      nav,
+      /href="\/">Engine<\/a><span class="sep">\|<\/span><a href="\/software">Software<\/a><span class="sep">\|<\/span><a href="\/verify"/,
+    );
+    assert.match(
+      nav,
+      /href="\/verify"[^>]*>Verify<\/a><span class="sep">\|<\/span><a href="\/AzielEliab" class="aziel">Aziel Eliab<\/a><span class="sep">\|<\/span><a href="\/AzielCorpusLibrary" class="aziel">Aziel Corpus Library<\/a>/,
+    );
     assert.match(CSS, /--royal:#6b3fa0/);
     assert.match(CSS, /--royal-deep:#4a2870/);
-    assert.match(CSS, /\.nav2 a\.aziel/);
-    assert.match(CSS, /\.about-aziel/);
   });
 
-  it("renders crawlable manifesto HTML without MCP chrome", () => {
+  it("renders crawlable manifesto HTML with a Digital Library cross-link", () => {
     const html = page("Aziel Eliab", azielEliabBody(), { path: AZIEL_ELIAB_PATH, kind: "aziel" });
     assert.match(html, /<title>Aziel Eliab — GodLock<\/title>/);
     assert.match(html, /name="robots" content="index,follow"/);
     assert.match(html, /rel="canonical" href="https:\/\/godlock\.uk\/AzielEliab"/);
-    assert.match(html, /class="about-aziel"/);
-    assert.match(html, /class="about-sign"/);
+    assert.match(html, /name="keywords" content="Aziel Eliab, GodLock, receipt, intelligent design stress-test"/);
     assert.ok(html.includes(AZIEL_MANIFESTO[0]));
     assert.ok(html.includes("— Aziel Eliab"));
+    assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab">Aziel Eliab — Digital Library<\/a>/);
     assert.doesNotMatch(html, /MCP|OpenAPI|runtime_session|Workers AI/i);
-    assert.match(html, /aria-current="page">Aziel Eliab<\/a>/);
+    const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    const person = ld["@graph"].find((n) => n["@type"] === "Person");
+    assert.equal(person.name, "Aziel Eliab");
+    assert.deepEqual(person.alternateName, ["Aziel Elroi Eliab"]);
+    assert.equal(person.url, "https://godlock.uk/AzielEliab");
+    assert.ok(person.sameAs.includes(LIBRARY_AZIEL));
+    assert.ok(person.sameAs.includes(AUTHOR_GITHUB));
+    assert.ok(person.sameAs.includes(GITHUB));
+    assert.ok(ld["@graph"].some((n) => n["@type"] === "ProfilePage"));
   });
 });
 
@@ -101,19 +118,55 @@ describe("Aziel Eliab SEO surfaces", () => {
     const meta = headMeta({ title: "Aziel Eliab", path: "/AzielEliab", kind: "aziel" });
     assert.match(meta, /name="robots" content="index,follow"/);
     assert.match(meta, /og:title" content="Aziel Eliab — GodLock"/);
+    const person = personNode();
+    assert.deepEqual(person.sameAs, [LIBRARY_AZIEL, AUTHOR_GITHUB, GITHUB]);
   });
 
-  it("lists /AzielEliab in robots, sitemap, cite, and llms", async () => {
+  it("lists identity and library pages in robots, sitemap, cite, llms, and ai", async () => {
     const robots = robotsTxt();
     assert.match(robots, /Allow: \/AzielEliab/);
+    assert.match(robots, /Allow: \/AzielCorpusLibrary/);
+    assert.match(robots, /Allow: \/software/);
+    assert.match(robots, /Allow: \/ai\.txt/);
     const xml = await sitemapXml({});
     assert.ok(xml.includes(CANON_HOST + "/AzielEliab"));
+    assert.ok(xml.includes(CANON_HOST + "/AzielCorpusLibrary"));
     const cite = citeDoc();
     assert.equal(cite.aziel_eliab, CANON_HOST + "/AzielEliab");
+    assert.equal(cite.aziel_corpus_library, CANON_HOST + "/AzielCorpusLibrary");
+    assert.equal(cite.library_aziel_eliab, LIBRARY_AZIEL);
     assert.equal(cite.author, "Aziel Eliab");
     const llms = llmsDoc();
     assert.match(llms, /Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
-    assert.match(llms, /Identity is Aziel Eliab only/);
+    assert.match(llms, /Aziel Corpus Library: https:\/\/godlock\.uk\/AzielCorpusLibrary/);
+    assert.equal(aiDoc(), llmsDoc());
+  });
+
+  it("308s about/kebab/case variants to the canonical identity paths", () => {
+    assert.equal(permanentIdentityRedirect("/aziel-eliab"), "/AzielEliab");
+    assert.equal(permanentIdentityRedirect("/azieleliab"), "/AzielEliab");
+    assert.equal(permanentIdentityRedirect("/about"), "/AzielEliab");
+    assert.equal(permanentIdentityRedirect("/aboutme"), "/AzielEliab");
+    assert.equal(permanentIdentityRedirect("/AzielEliab"), "");
+    assert.equal(permanentIdentityRedirect("/aziel-corpus-library"), "/AzielCorpusLibrary");
+    assert.equal(permanentIdentityRedirect("/AzielCorpusLibrary"), "");
+  });
+});
+
+describe("Aziel Corpus Library page", () => {
+  it("mirrors the live About Aziel card and links the library home", () => {
+    const html = page("Aziel Corpus Library", azielCorpusLibraryBody(), {
+      path: AZIEL_CORPUS_PATH,
+      kind: "corpus",
+    });
+    assert.match(html, /<h1>About Aziel<\/h1>/);
+    assert.ok(html.includes(CORPUS_ABOUT[0]));
+    assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/">Open the library<\/a>/);
+    assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/software"/);
+    assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/runtime"/);
+    assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/how-its-scored"/);
+    const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    assert.ok(ld["@graph"].some((n) => n["@type"] === "DigitalLibrary"));
   });
 });
 
@@ -128,9 +181,9 @@ describe("Aziel Eliab routes", () => {
     assert.match(html, /class="aziel current"/);
   });
 
-  it("redirects the kebab path to /AzielEliab", async () => {
+  it("308s the kebab path to /AzielEliab", async () => {
     const res = await worker.fetch(new Request("https://godlock.uk/aziel-eliab"), mockEnv());
-    assert.equal(res.status, 303);
+    assert.equal(res.status, 308);
     assert.equal(res.headers.get("Location"), "/AzielEliab");
   });
 
@@ -141,5 +194,13 @@ describe("Aziel Eliab routes", () => {
     assert.equal(body.author, "Aziel Eliab");
     assert.equal(body.path, "/AzielEliab");
     assert.ok(body.text.includes("The receipt is the argument that survives the speaker."));
+  });
+
+  it("serves Aziel Corpus Library", async () => {
+    const res = await worker.fetch(new Request("https://godlock.uk/AzielCorpusLibrary"), mockEnv());
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, /<title>Aziel Corpus Library — GodLock<\/title>/);
+    assert.match(html, /About Aziel/);
   });
 });

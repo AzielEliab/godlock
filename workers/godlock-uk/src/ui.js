@@ -2,7 +2,10 @@
  * GodLock.uk one-screen HTTPS engine. Paper/dark-clean. Phone-first.
  * Not a forum. Author: Aziel Eliab.
  */
-import { headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST } from "./seo.js";
+import {
+  headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY, LIBRARY_AZIEL,
+  AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH,
+} from "./seo.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 
 export const CSS = `
@@ -19,7 +22,15 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;lin
 .nav2 a.aziel:hover{color:var(--royal-deep)}
 .about-aziel,.about-aziel p,.about-prose,.about-sign{color:var(--royal)}
 .about-aziel h1,.about-aziel h2{color:var(--royal)}
+.about-aziel a{color:var(--royal)}
+.about-aziel a:hover{color:var(--gold)}
 .about-sign{font-weight:700;margin-top:18px}
+.soft-grid{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 18px}
+.soft-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.soft-card h3{margin:0 0 6px;font-size:18px}
+.soft-meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}
+.soft-links{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 0}
+.soft-card.featured{border-color:var(--gold)}
 .pill{border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;background:#2a241c;color:var(--ink);border:1px solid var(--line)}
 .pill.yes{background:#14261c;color:var(--yes);border-color:#2e6b45}
 .pill.no{background:#2a1414;color:var(--no);border-color:#8a2b2b}
@@ -85,7 +96,7 @@ function pillClass(label) {
   return "review";
 }
 
-export const AZIEL_ELIAB_PATH = "/AzielEliab";
+export { AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH };
 
 export const AZIEL_MANIFESTO = [
   "I made this because a debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion. Intelligent design was never the point by itself. The point was whether a claim could stand in the open, be answered, and leave something behind that was not just my voice.",
@@ -100,8 +111,10 @@ export function topNav(path) {
   const here = String(path || "/");
   const items = [
     { href: "/", label: "Engine" },
+    { href: SOFTWARE_PATH, label: "Software" },
     { href: "/verify", label: "Verify" },
     { href: AZIEL_ELIAB_PATH, label: "Aziel Eliab", aziel: true },
+    { href: AZIEL_CORPUS_PATH, label: "Aziel Corpus Library", aziel: true },
   ];
   return `<nav class="nav2">${items.map((it, i) => {
     const current = here === it.href;
@@ -120,7 +133,7 @@ export function page(title, body, { path, kind, extraHeaders } = {}) {
 ${topNav(p)}
 <div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
 ${body}
-<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a></footer>
+<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Software</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a></footer>
 </div>
 <script>
 (function(){
@@ -205,6 +218,7 @@ ${err}
   <div class="actions">
     <button type="submit">Submit</button>
     <a class="button ghost" href="/verify">Verify</a>
+    <a class="button ghost" href="${esc(SOFTWARE_PATH)}">Software</a>
     <a class="button ghost" href="${esc(DOWNLOAD)}">Download</a>
   </div>
 </form>
@@ -250,14 +264,59 @@ export function verifyBody({ report }) {
 
 export function azielEliabBody() {
   const paras = AZIEL_MANIFESTO.map((p) => `<p>${esc(p)}</p>`).join("\n");
-  return `<section class="about-aziel"><div class="card about-prose">
+  return `<section class="about-aziel" id="aziel-eliab"><div class="card about-prose">
 ${paras}
 <p class="about-sign">${esc(AZIEL_SIGNATURE)}</p>
+<p><a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a></p>
 </div></section>`;
 }
 
 export function azielEliabText() {
   return AZIEL_MANIFESTO.join("\n\n") + "\n\n" + AZIEL_SIGNATURE + "\n";
+}
+
+export const CORPUS_ABOUT = [
+  "Aziel Eliab is a researcher and builder. This library is the public MASTER of that work: hashed receipts, timed files, and software that can be reviewed without asking anyone to take a name on faith. The same person is also known as Aziel Elroi Eliab; primary credit stays Aziel Eliab.",
+  "If not me, then who holds the record when names get stripped and the files get sealed? I didn\u2019t ask for the seat. The work was already sitting there undone. I build receipts so truth has a place to live that isn\u2019t someone else\u2019s story.",
+  "Carry the torch: I don\u2019t own the flame. I keep it lit long enough for the next hands to find it. If the record is local, timed, and hashed, the work can outlive me. That is the point.",
+  "Truth that cannot be corrected is just a private religion. So the work stays public, chained for review, not a pulpit. Later papers bury earlier ones as confidence hardens. I am not always right. That is not a confession. It is the method.",
+];
+
+export function azielCorpusLibraryBody() {
+  return `<section class="about-aziel" id="aziel-corpus-library"><h1>About Aziel</h1>
+<div class="card about-prose">
+<p>${esc(CORPUS_ABOUT[0])}</p>
+<p>${esc(CORPUS_ABOUT[1])}</p>
+<p>${esc(CORPUS_ABOUT[2])}</p>
+<p>${esc(CORPUS_ABOUT[3])}</p>
+<p><strong>Aziel Library</strong> (royal purple) is the operator collection of Aziel Eliab\u2019s own papers and software notes. <strong>Corpus</strong> is the public Lamb Lens shelf \u2014 anyone may browse; signed-in accounts file there. The two shelves share the same scoring and hash-chain rules; they are not the same collection.</p>
+<p>The software suite is listed on <a href="${esc(LIBRARY + "/software")}">Software</a> and invoked from <a href="${esc(LIBRARY + "/runtime")}">Runtime</a> (aziel-runtime catalog). How records are scored \u2014 triad SPRE \u00d7 CLCE \u00d7 PhysLing, and ZionPattern as a separate public reading \u2014 is on <a href="${esc(LIBRARY + "/how-its-scored")}">How it\u2019s scored</a>. Source: <a href="https://github.com/AzielEliab/aziel-corpus">github.com/AzielEliab/aziel-corpus</a>.</p>
+<p>I am here for the record, not the applause. If not me, then who. If not now, the seal holds. I carry the torch by leaving receipts. When the work can stand without my name on it, I am done.</p>
+<p>I am temporary. The truth is not.</p>
+<p class="about-sign"><strong>${esc(AZIEL_SIGNATURE)}</strong></p>
+</div>
+<p class="actions"><a class="button" href="${esc(LIBRARY + "/")}">Open the library</a> <a class="button ghost" href="${esc(LIBRARY_AZIEL)}">Aziel Eliab \u2014 Digital Library</a></p>
+</section>`;
+}
+
+export function softwareBody({ products } = {}) {
+  const list = Array.isArray(products) ? products : [];
+  const featured = new Set(["godlock", "azieltether"]);
+  const cards = list.map((p) => {
+    const slug = String(p.slug || "");
+    const feat = featured.has(slug);
+    const ver = p.version ? `<span class="pill">v${esc(p.version)}</span>` : "";
+    const links = [
+      p.download ? `<a class="button" href="${esc(p.download)}">Download</a>` : "",
+      p.github ? `<a class="button ghost" href="${esc(p.github)}">GitHub</a>` : "",
+      p.skill ? `<a class="button ghost" href="${esc(p.skill)}">Skill</a>` : "",
+      slug ? `<a class="button ghost" href="${esc(CATALOG + "/p/" + slug)}">Catalog</a>` : "",
+    ].filter(Boolean).join("");
+    return `<article class="soft-card${feat ? " featured" : ""}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(p.name || slug)}</h3><div class="soft-meta">${ver}</div><p>${esc(p.one_line || "")}</p><p class="soft-links">${links}</p></article>`;
+  }).join("");
+  const n = list.length;
+  return `<p class="muted">Aziel Eliab products from the live <a href="${esc(CATALOG + "/v1/catalog.json")}">aziel-runtime catalog</a>. GodLock.uk is not a mesh. Counted downloads stay on each product Worker.${n ? " " + esc(n) + " downloadable products." : ""}</p>
+<div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
 }
 
 export function receiptBody({ id, row, entries }) {

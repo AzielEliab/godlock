@@ -62,4 +62,14 @@ describe("hideInternalDetermination", () => {
     assert.equal(hideInternalDetermination("foundational determination is hidden"), "is hidden");
     assert.match(hideInternalDetermination("Public HTTPS engine. Author Aziel Eliab."), /Aziel Eliab/);
   });
+
+  it("strips specified-fit method labels and bootstrap jargon from public text", () => {
+    assert.equal(hideInternalDetermination("INTERNAL_CRITERIA says submit a challenge."), "says submit a challenge.");
+    assert.equal(hideInternalDetermination("Specified Fit, Not Pretty Spirals is hidden"), "is hidden");
+    assert.equal(hideInternalDetermination("The specified-fit brief stays internal."), "The stays internal.");
+    assert.equal(hideInternalDetermination("bootstrap lock as engine jargon"), "as engine jargon");
+    assert.equal(hideInternalDetermination("ABAD framework used as determination"), "used as determination");
+    assert.equal(hideInternalDetermination("weighing internals: do not publish"), "do not publish");
+    assert.match(hideInternalDetermination("Submit a challenge about specified complexity."), /specified complexity/);
+  });
 });

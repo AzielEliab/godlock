@@ -211,7 +211,7 @@ export function homeBody({ stats, latest, prior, error }) {
   <div><div class="n">${esc(score)}%</div><div class="k">Current confidence</div></div>
   <div><div class="n">${esc(residual)}%</div><div class="k">Residual uncertainty</div></div>
 </div>
-<p class="muted">Answers open with Yes, No, Let's review, or Interesting. Intelligent-design disputes are processed under the same rules. Score floor 33.3 · ceiling 99.7.</p>
+<p class="muted">Answers open with Yes, No, Let's review, or Interesting. Intelligent-design disputes are processed under the same rules. Score floor 33.3 · ceiling 99.7. GodLock records a receipt. It does not sermonize.</p>
 ${err}
 <form class="challenge" id="challenge-form" method="post" action="/submit">
   <textarea id="challenge" name="text" maxlength="8000" placeholder="Submit a challenge. Intelligent-design disputes are processed under the same rules."></textarea>

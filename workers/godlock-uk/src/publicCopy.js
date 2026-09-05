@@ -1,16 +1,25 @@
 /**
- * Strip hidden foundational / empirical-limit determination copy from
- * public HTML, receipts, and scrapeable metadata. Backend may still
- * use those methods internally. Author: Aziel Eliab.
+ * Strip hidden determination-method labels from public HTML, receipts,
+ * and scrapeable metadata. Backend may still use those methods internally.
+ * Engagement tokens that appear in a user's own challenge quote are not
+ * rewritten here (this runs on engine summary/explanation). Author: Aziel Eliab.
  */
 
 const HIDDEN = [
   /weighing framework\s*:?\s*/gi,
+  /weighing internals?\s*:?\s*/gi,
   /empirical knowledge and the limits of observation(?:\s*\(\s*aziel eliab\s*\))?/gi,
   /the limits of observation/gi,
   /limits of observation/gi,
   /foundational determination/gi,
   /empirical[- ]limits?(?:\s+of\s+observation)?/gi,
+  /INTERNAL_CRITERIA/gi,
+  /internal criteria/gi,
+  /specified fit,\s*not pretty spirals/gi,
+  /specified[- ]fit(?:\s+brief)?/gi,
+  /bootstrap lock/gi,
+  /ABAD framework/gi,
+  /unpublished frameworks?/gi,
 ];
 
 export function hideInternalDetermination(text) {

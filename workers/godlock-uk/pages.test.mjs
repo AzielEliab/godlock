@@ -201,6 +201,27 @@ describe("Aziel Eliab SEO surfaces", () => {
   });
 });
 
+describe("homepage stays a natural argument surface", () => {
+  it("does not publish specified-fit machinery or a paste-block", async () => {
+    const res = await worker.fetch(new Request("https://godlock.uk/"), mockEnv());
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, /Answers open with Yes, No, Let's review, or Interesting/);
+    assert.match(html, /GodLock records a receipt\. It does not sermonize/);
+    assert.doesNotMatch(html, /INTERNAL_CRITERIA|Specified Fit|bootstrap lock|paste-block|how the argument works/i);
+    assert.doesNotMatch(html, /Functionally specified digital information joined to a translation system/);
+  });
+
+  it("does not serve the internal operator brief", async () => {
+    for (const path of ["/internal", "/internal/", "/internal/SPECIFIED_FIT.md"]) {
+      const res = await worker.fetch(new Request("https://godlock.uk" + path), mockEnv());
+      assert.equal(res.status, 404, path);
+      const html = await res.text();
+      assert.doesNotMatch(html, /Steel claim|INTERNAL_CRITERIA|Specified Fit, Not Pretty Spirals/);
+    }
+  });
+});
+
 describe("Aziel Corpus Library off-site", () => {
   it("points the nav tab at the live library identity URL", () => {
     const nav = topNav("/");

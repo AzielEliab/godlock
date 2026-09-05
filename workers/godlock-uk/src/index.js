@@ -362,6 +362,10 @@ export default {
       const nodeId = hb.id;
       const wrote = hb.wrote;
 
+      if (path === "/internal" || path.startsWith("/internal/")) {
+        return html(page("Not found", `<div class="card"><h2>Not found</h2><p><a href="/">Back</a></p></div>`, { path }), { status: 404 });
+      }
+
       if (path === "/robots.txt") {
         return new Response(robotsTxt(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }

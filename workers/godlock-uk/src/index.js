@@ -7,7 +7,7 @@ import { randomBytes } from "node:crypto";
 import { json, html, corsHeaders, wantsJson, readCookie } from "./http.js";
 import {
   page, homeBody, verifyBody, receiptBody, azielEliabBody, azielEliabText,
-  azielCorpusLibraryBody, softwareBody, AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH,
+  softwareBody, AZIEL_ELIAB_PATH, SOFTWARE_PATH,
 } from "./ui.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
@@ -446,23 +446,6 @@ export default {
           }, 200, extraHeadersFor(nodeId));
         }
         return html(page("Aziel Eliab", azielEliabBody(), { path: AZIEL_ELIAB_PATH, kind: "aziel" }), {
-          extraHeaders: extraHeadersFor(nodeId),
-        });
-      }
-
-      if (path === AZIEL_CORPUS_PATH) {
-        if (wantsJson(request, url)) {
-          return json({
-            ok: true,
-            product: "GodLock",
-            site: "godlock.uk",
-            author: AUTHOR,
-            title: "Aziel Corpus Library",
-            path: AZIEL_CORPUS_PATH,
-            library: "https://www.azielcorpuslibrary.net/",
-          }, 200, extraHeadersFor(nodeId));
-        }
-        return html(page("Aziel Corpus Library", azielCorpusLibraryBody(), { path: AZIEL_CORPUS_PATH, kind: "corpus" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

@@ -39,8 +39,10 @@ import {
   CATALOG_SLUGS,
   CATALOG_PRODUCT_COUNT,
   RUNTIME_CARD,
+  BINDING_CATALOG_URLS,
   fetchCatalogProducts,
   softwareSuite,
+  productsFromCatalogDoc,
 } from "./src/catalog.js";
 
 function mockEnv() {
@@ -383,6 +385,10 @@ function softCardIds(html) {
   return [...String(html).matchAll(/<article class="soft-card[^"]*" id="([^"]+)"/g)].map((m) => m[1]);
 }
 
+function softCardH3s(html) {
+  return [...String(html).matchAll(/<article class="soft-card[\s\S]*?<h3>([^<]+)<\/h3>/g)].map((m) => m[1]);
+}
+
 describe("Software page hosts the full aziel-runtime catalog", () => {
   it("keeps a 27-engine snapshot plus the aziel-runtime / FragGate card", () => {
     assert.equal(CATALOG_PRODUCT_COUNT, 27);
@@ -402,7 +408,11 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
   it("renders ≥ catalog product cards with Download, GitHub, and Invoke via Runtime", () => {
     const html = softwareBody({ products: CATALOG_FALLBACK_PRODUCTS });
     const ids = softCardIds(html);
+    const names = softCardH3s(html);
     assert.ok(ids.length >= CATALOG_PRODUCT_COUNT, "cards " + ids.length);
+    assert.ok(names.length >= CATALOG_PRODUCT_COUNT, "h3 " + names.length);
+    assert.ok(names.includes("GodLock"));
+    assert.ok(names.includes("Aziel Eliab Runtime"));
     assert.ok(ids.includes("aziel-runtime"));
     assert.ok(ids.includes("godlock"));
     for (const slug of CATALOG_SLUGS) {
@@ -432,25 +442,62 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.deepEqual(fetched.products.map((p) => p.slug), CATALOG_SLUGS);
   });
 
+  it("parses products or an alternate catalog list", () => {
+    const fromCatalog = productsFromCatalogDoc({
+      catalog: CATALOG_FALLBACK_PRODUCTS.map((p) => ({ slug: p.slug, name: p.name })),
+    });
+    assert.equal(fromCatalog.length, CATALOG_PRODUCT_COUNT);
+    assert.ok(fromCatalog.some((p) => p.slug === "godlock" && p.name === "GodLock"));
+    const fromProducts = productsFromCatalogDoc({ products: CATALOG_FALLBACK_PRODUCTS });
+    assert.equal(fromProducts.length, CATALOG_PRODUCT_COUNT);
+  });
+
   it("prefers the AZIEL_RUNTIME service binding over HTTPS", async () => {
+    const urls = [];
+    let httpsHits = 0;
     const env = {
       ...mockEnv(),
       AZIEL_RUNTIME: {
-        async fetch() {
+        async fetch(req) {
+          urls.push(String(req && req.url));
           return new Response(JSON.stringify({
-            products: CATALOG_FALLBACK_PRODUCTS.map((p) => ({ ...p, one_line: "bound " + p.slug })),
+            catalog: CATALOG_FALLBACK_PRODUCTS.map((p) => ({ ...p, one_line: "bound " + p.slug })),
           }), { headers: { "Content-Type": "application/json" } });
         },
       },
     };
     const fetched = await fetchCatalogProducts(env, {
       fetch: async () => {
+        httpsHits += 1;
         throw new Error("should not hit HTTPS");
       },
     });
     assert.equal(fetched.source, "service-binding");
+    assert.equal(httpsHits, 0);
+    assert.ok(urls.includes("https://aziel-runtime/v1/catalog.json"));
+    assert.deepEqual(BINDING_CATALOG_URLS[0], "https://aziel-runtime/v1/catalog.json");
     assert.equal(fetched.products.length, CATALOG_PRODUCT_COUNT);
     assert.equal(fetched.products.find((p) => p.slug === "godlock").one_line, "bound godlock");
+  });
+
+  it("does not use HTTPS when the service binding is present but empty", async () => {
+    let httpsHits = 0;
+    const fetched = await fetchCatalogProducts({
+      ...mockEnv(),
+      AZIEL_RUNTIME: {
+        async fetch() {
+          return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
+        },
+      },
+    }, {
+      fetch: async () => {
+        httpsHits += 1;
+        throw new Error("binding present — skip HTTPS");
+      },
+    });
+    assert.equal(httpsHits, 0);
+    assert.equal(fetched.source, "fallback");
+    assert.equal(fetched.products.length, CATALOG_PRODUCT_COUNT);
   });
 
   it("serves the full suite from GET /software even when origin fetch is empty", async () => {
@@ -458,7 +505,10 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(res.status, 200);
     const html = await res.text();
     const ids = softCardIds(html);
+    const names = softCardH3s(html);
     assert.ok(ids.length >= CATALOG_PRODUCT_COUNT, "live-or-fallback cards " + ids.length);
+    assert.ok(names.length >= 27, "soft-card h3 names " + names.length);
+    assert.ok(names.includes("GodLock"));
     for (const slug of CATALOG_SLUGS) assert.ok(ids.includes(slug), slug);
     assert.ok(ids.includes("aziel-runtime"));
     assert.match(html, /<title>Software — GodLock<\/title>/);

@@ -15,6 +15,11 @@ export const CATALOG_JSON_PATH = "/v1/catalog.json";
 export const CATALOG_ORIGIN_URL = CATALOG + CATALOG_JSON_PATH;
 export const CATALOG_LIBRARY_URL = LIBRARY + "/runtime" + CATALOG_JSON_PATH;
 export const CATALOG_PUBLIC_URL = RUNTIME_PATH + CATALOG_JSON_PATH;
+/** In-process service-binding dest (Worker name), then the same origin URL runtimeRoot uses. */
+export const BINDING_CATALOG_URLS = [
+  "https://aziel-runtime" + CATALOG_JSON_PATH,
+  CATALOG_ORIGIN_URL,
+];
 
 const UA = { "User-Agent": "Mozilla/5.0", Accept: "application/json" };
 
@@ -124,11 +129,41 @@ function mergeLiveOverFallback(live) {
   return out;
 }
 
+function asProductList(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (typeof value === "object") return Object.values(value);
+  return [];
+}
+
+export function productsFromCatalogDoc(body) {
+  if (!body || typeof body !== "object") return [];
+  const buckets = [
+    asProductList(body.products),
+    asProductList(body.catalog),
+    asProductList(body.items),
+    asProductList(body.software),
+  ];
+  if (Array.isArray(body.true_engine_slugs)) {
+    buckets.push(body.true_engine_slugs.map((slug) => ({ slug })));
+  }
+  const out = [];
+  const seen = new Set();
+  for (const list of buckets) {
+    for (const raw of list) {
+      const p = compactProduct(typeof raw === "string" ? { slug: raw } : raw);
+      if (!p || seen.has(p.slug) || p.slug === "aziel-runtime") continue;
+      seen.add(p.slug);
+      out.push(p);
+    }
+  }
+  return out;
+}
+
 async function productsFromResponse(res) {
   if (!res || !res.ok) return [];
   const body = await res.json().catch(() => null);
-  const list = body && Array.isArray(body.products) ? body.products : [];
-  return list.map(compactProduct).filter(Boolean);
+  return productsFromCatalogDoc(body);
 }
 
 async function fetchJson(fetcher, url, ms) {
@@ -146,15 +181,19 @@ async function fetchJson(fetcher, url, ms) {
 export async function fetchCatalogProducts(env, deps = {}) {
   const httpFetch = deps.fetch || globalThis.fetch;
   const timeoutMs = deps.timeoutMs != null ? deps.timeoutMs : 4000;
+  const hasBinding = !!(env && env.AZIEL_RUNTIME && typeof env.AZIEL_RUNTIME.fetch === "function");
 
-  if (env && env.AZIEL_RUNTIME && typeof env.AZIEL_RUNTIME.fetch === "function") {
-    try {
-      const res = await env.AZIEL_RUNTIME.fetch(new Request(CATALOG_ORIGIN_URL, { headers: UA }));
-      const live = await productsFromResponse(res);
-      if (live.length) {
-        return { products: mergeLiveOverFallback(live), source: "service-binding" };
-      }
-    } catch { /* fall through */ }
+  if (hasBinding) {
+    for (const url of BINDING_CATALOG_URLS) {
+      try {
+        const res = await env.AZIEL_RUNTIME.fetch(new Request(url, { method: "GET", headers: UA }));
+        const live = await productsFromResponse(res);
+        if (live.length) {
+          return { products: mergeLiveOverFallback(live), source: "service-binding" };
+        }
+      } catch { /* try next binding dest */ }
+    }
+    return { products: CATALOG_FALLBACK_PRODUCTS.map((p) => ({ ...p })), source: "fallback" };
   }
 
   for (const [source, url] of [["origin", CATALOG_ORIGIN_URL], ["library", CATALOG_LIBRARY_URL]]) {

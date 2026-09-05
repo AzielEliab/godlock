@@ -35,7 +35,7 @@ Ops (do **not** increment downloads or views):
 | POST | `/v1/score` | ABAD engagement score. Advisory. Not a VPN. |
 | POST | `/v1/submit` | Ephemeral logical receipt. Not anonymity. |
 
-Grok: import OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. ChatGPT: GPT Actions. Grok: import OpenAPI as a custom tool. Venice: HTTP tools. Claude: OpenAPI / custom connector. Cursor and Glama: MCP. Others: the same OpenAPI or MCP catalog.
 
 ## Example
 
@@ -63,4 +63,4 @@ Author: **Aziel Eliab**. Honest scope: Offline ABAD / hardening score. Not a VPN
 
 Local UI: **Import JSON file** (`type=file`) and **Export JSON**. Then `godlock doctor`.
 
-Grok: import catalog or Worker OpenAPI as a custom tool. ChatGPT: GPT Actions. Venice: HTTP tools.
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import catalog or Worker OpenAPI as GPT Actions, a Grok custom tool, Claude/Gemini/Copilot/Mistral/Meta/Cohere/Amazon Q/Perplexity HTTP or OpenAPI tools, Venice HTTP tools, or Cursor/Glama MCP.

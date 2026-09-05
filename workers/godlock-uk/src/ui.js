@@ -4,7 +4,7 @@
  */
 import {
   headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
-  AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH,
+  AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH, AI_CLIENTS_SENTENCE,
 } from "./seo.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 
@@ -212,6 +212,7 @@ export function homeBody({ stats, latest, prior, error }) {
   <div><div class="n">${esc(residual)}%</div><div class="k">Residual uncertainty</div></div>
 </div>
 <p class="muted">Answers open with Yes, No, Let's review, or Interesting. Intelligent-design disputes are processed under the same rules. Score floor 33.3 · ceiling 99.7. GodLock records a receipt. It does not sermonize.</p>
+<p class="muted">${esc(AI_CLIENTS_SENTENCE)}</p>
 ${err}
 <form class="challenge" id="challenge-form" method="post" action="/submit">
   <textarea id="challenge" name="text" maxlength="8000" placeholder="Submit a challenge. Intelligent-design disputes are processed under the same rules."></textarea>
@@ -291,7 +292,7 @@ export function softwareBody({ products } = {}) {
     return `<article class="soft-card${feat ? " featured" : ""}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(p.name || slug)}</h3><div class="soft-meta">${ver}</div><p>${esc(p.one_line || "")}</p><p class="soft-links">${links}</p></article>`;
   }).join("");
   const n = list.length;
-  return `<p class="muted">Aziel Eliab products from the live <a href="${esc(CATALOG + "/v1/catalog.json")}">aziel-runtime catalog</a>. GodLock.uk is not a mesh. Counted downloads stay on each product Worker.${n ? " " + esc(n) + " downloadable products." : ""}</p>
+  return `<p class="muted">Aziel Eliab products from the live <a href="${esc(CATALOG + "/v1/catalog.json")}">aziel-runtime catalog</a>. ${esc(AI_CLIENTS_SENTENCE)} GodLock.uk is not a mesh. Counted downloads stay on each product Worker.${n ? " " + esc(n) + " downloadable products." : ""}</p>
 <div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
 }
 

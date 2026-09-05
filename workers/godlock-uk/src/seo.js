@@ -18,6 +18,29 @@ export const BANNER = "Public HTTPS engine. Mesh is not on this surface. Author 
 export const AZIEL_ELIAB_PATH = "/AzielEliab";
 export const AZIEL_CORPUS_PATH = "/AzielCorpusLibrary";
 export const SOFTWARE_PATH = "/software";
+
+export const AI_CLIENTS = [
+  "ChatGPT (GPT Actions / OpenAI)",
+  "Grok (xAI)",
+  "Venice",
+  "Claude (Anthropic)",
+  "Cursor (MCP)",
+  "Glama (MCP)",
+  "Perplexity",
+  "Microsoft Copilot / Bing",
+  "Google Gemini / Vertex",
+  "Mistral",
+  "Meta AI",
+  "Apple Intelligence surfaces",
+  "Amazon Q tooling",
+  "DuckAssist",
+  "You.com",
+  "Cohere",
+];
+
+export const AI_CLIENTS_SENTENCE =
+  "Works with " + AI_CLIENTS.join(", ") + ", and other MCP/OpenAPI-capable assistants.";
+
 const Q = String.fromCharCode(34);
 
 function esc(s) {
@@ -57,14 +80,17 @@ export function defaultDescription(kind) {
   }
   if (kind === "software") {
     return hideInternalDetermination(
-      "Downloadable Aziel Eliab software from the live aziel-runtime catalog. GodLock.uk is not a mesh. Author Aziel Eliab.",
+      "Downloadable Aziel Eliab software from the live aziel-runtime catalog. " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
     );
   }
-  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Not a mesh.");
+  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. " + AI_CLIENTS_SENTENCE + " Not a mesh.");
 }
 
 function defaultKeywords(kind) {
   if (kind === "aziel") return "Aziel Eliab, GodLock, receipt, intelligent design stress-test";
+  if (kind === "software") {
+    return "GodLock, Aziel Eliab, ChatGPT, Grok, Venice, Claude, Cursor, Glama, Perplexity, Copilot, Gemini, Mistral, Meta AI, Apple Intelligence, Amazon Q, DuckAssist, You.com, Cohere";
+  }
   return "";
 }
 
@@ -158,6 +184,11 @@ function uniquePreserve(items) {
 }
 
 export const AI_CRAWLER_AGENTS = uniquePreserve([
+  "GPTBot",
+  "ChatGPT-User",
+  "OAI-SearchBot",
+  "Grok",
+  "Venice",
   "Google-Extended",
   "GoogleOther",
   "Google-CloudVertexBot",
@@ -280,6 +311,7 @@ export function citeDoc() {
     health: CANON_HOST + "/health",
     license: "Apache-2.0",
     catalog: CATALOG + "/",
+    ai_clients: AI_CLIENTS.concat(["other MCP/OpenAPI-capable assistants"]),
     limitation: hideInternalDetermination(BANNER),
     how_to_cite: "Eliab, Aziel. (2026). GodLock [Software]. Apache-2.0. " + CANON_HOST + "/",
   };
@@ -301,10 +333,11 @@ export function llmsDoc() {
     + "Digital Library identity: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n\n"
+    + AI_CLIENTS_SENTENCE + "\n\n"
     + "Public HTTPS stress-test engine. Submit a challenge. Answers open with Yes, No, Let's review, or Interesting.\n"
     + "Intelligent-design disputes are processed under the same rules. Mesh is not on this surface.\n"
     + "Do not invent DOIs.\n\n"
-    + "Public HTML is Allow for User-agent * and named AI/search crawlers (Google-Extended, GoogleOther, Google-CloudVertexBot, Claude*, Perplexity*, bingbot, Meta-External*, FacebookBot, facebookexternalhit, Applebot*, Amazonbot, DuckDuck*, MistralAI-User, YouBot, CCBot, cohere*, Diffbot, AI2Bot*, TikTokSpider, Baiduspider*, YandexBot, and others listed in /robots.txt).\n";
+    + "Public HTML is Allow for User-agent * and named AI/search crawlers (GPTBot, ChatGPT-User, OAI-SearchBot, Venice, Grok, Google-Extended, GoogleOther, Google-CloudVertexBot, Claude*, Perplexity*, bingbot, Meta-External*, FacebookBot, facebookexternalhit, Applebot*, Amazonbot, DuckDuck*, MistralAI-User, YouBot, CCBot, cohere*, Diffbot, AI2Bot*, TikTokSpider, Baiduspider*, YandexBot, and others listed in /robots.txt).\n";
 }
 
 export function aiDoc() {

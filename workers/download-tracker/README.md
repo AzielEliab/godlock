@@ -93,15 +93,17 @@ curl -X POST https://godlock-download-tracker.vibelock.workers.dev/event \
 
 All responses include `Access-Control-Allow-Origin: *`.
 
-## Use with Grok, ChatGPT, Venice
+## Use with major AI clients
 
 This Worker also hosts the product runtime API (CORS `*`). `/v1` routes do **not** increment `DOWNLOADS`.
+
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
 
 | Method | Path | Notes |
 |--------|------|-------|
 | GET | `/v1/health` | Liveness |
 | GET | `/openapi.json` | OpenAPI 3.1 |
-| GET | `/ai` | ChatGPT Actions, Grok/xAI tools, Venice HTTP tools; MCP catalog |
+| GET | `/ai` | OpenAPI/MCP how-to for ChatGPT, Grok, Venice, Claude, Cursor, Glama, Perplexity, Copilot/Bing, Gemini/Vertex, Mistral, Meta AI, Apple Intelligence, Amazon Q, DuckAssist, You.com, Cohere, and other assistants |
 
-See the product README section **Use with Grok, ChatGPT, Venice**.
+See the product README section **Use with major AI clients**.
 OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json

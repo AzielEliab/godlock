@@ -11,6 +11,8 @@ import {
   page,
   topNav,
   CSS,
+  softwareBody,
+  homeBody,
 } from "./src/ui.js";
 import {
   robotsTxt,
@@ -27,6 +29,8 @@ import {
   AUTHOR_GITHUB,
   GITHUB,
   AI_CRAWLER_AGENTS,
+  AI_CLIENTS,
+  AI_CLIENTS_SENTENCE,
 } from "./src/seo.js";
 import worker from "./src/index.js";
 
@@ -127,6 +131,11 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.doesNotMatch(robots, /Allow: \/AzielCorpusLibrary/);
     assert.match(robots, /Allow: \/software/);
     assert.match(robots, /Allow: \/ai\.txt/);
+    assert.match(robots, /User-agent: GPTBot\nAllow: \//);
+    assert.match(robots, /User-agent: ChatGPT-User\nAllow: \//);
+    assert.match(robots, /User-agent: OAI-SearchBot\nAllow: \//);
+    assert.match(robots, /User-agent: Grok\nAllow: \//);
+    assert.match(robots, /User-agent: Venice\nAllow: \//);
     assert.match(robots, /User-agent: Google-Extended\nAllow: \//);
     assert.match(robots, /User-agent: ClaudeBot\nAllow: \//);
     assert.match(robots, /User-agent: PerplexityBot\nAllow: \//);
@@ -140,6 +149,11 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /User-agent: NeevaBot\nAllow: \//);
     assert.equal(new Set(AI_CRAWLER_AGENTS).size, AI_CRAWLER_AGENTS.length);
     for (const agent of [
+      "GPTBot",
+      "ChatGPT-User",
+      "OAI-SearchBot",
+      "Grok",
+      "Venice",
       "FacebookBot",
       "facebookexternalhit",
       "Meta-ExternalAds",
@@ -182,10 +196,21 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.aziel_corpus_library, LIBRARY_AZIEL);
     assert.equal(cite.library_aziel_eliab, LIBRARY_AZIEL);
     assert.equal(cite.author, "Aziel Eliab");
+    assert.ok(cite.ai_clients.includes("ChatGPT (GPT Actions / OpenAI)"));
+    assert.ok(cite.ai_clients.includes("Grok (xAI)"));
+    assert.ok(cite.ai_clients.includes("Venice"));
+    assert.ok(cite.ai_clients.includes("Claude (Anthropic)"));
+    assert.ok(cite.ai_clients.includes("Cursor (MCP)"));
+    assert.ok(cite.ai_clients.includes("other MCP/OpenAPI-capable assistants"));
+    assert.ok(cite.ai_clients.length >= 16);
     const llms = llmsDoc();
     assert.match(llms, /Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
     assert.match(llms, /Aziel Corpus Library: https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab/);
     assert.doesNotMatch(llms, /Aziel Corpus Library: https:\/\/godlock\.uk\/AzielCorpusLibrary/);
+    assert.match(llms, /Works with ChatGPT \(GPT Actions \/ OpenAI\), Grok \(xAI\), Venice, Claude \(Anthropic\)/);
+    assert.match(llms, /Cursor \(MCP\), Glama \(MCP\), Perplexity, Microsoft Copilot \/ Bing, Google Gemini \/ Vertex/);
+    assert.match(llms, /GPTBot, ChatGPT-User, OAI-SearchBot, Venice, Grok, Google-Extended/);
+    assert.doesNotMatch(llms, /Use with Grok, ChatGPT, Venice/);
     assert.equal(aiDoc(), llmsDoc());
   });
 
@@ -208,6 +233,10 @@ describe("homepage stays a natural argument surface", () => {
     const html = await res.text();
     assert.match(html, /Answers open with Yes, No, Let's review, or Interesting/);
     assert.match(html, /GodLock records a receipt\. It does not sermonize/);
+    assert.match(html, /Works with ChatGPT \(GPT Actions \/ OpenAI\), Grok \(xAI\), Venice, Claude \(Anthropic\)/);
+    assert.match(html, /Cursor \(MCP\), Glama \(MCP\), Perplexity/);
+    assert.match(html, /other MCP\/OpenAPI-capable assistants/);
+    assert.doesNotMatch(html, /Use with Grok, ChatGPT, Venice/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|Specified Fit|bootstrap lock|paste-block|how the argument works/i);
     assert.doesNotMatch(html, /Functionally specified digital information joined to a translation system/);
   });
@@ -219,6 +248,38 @@ describe("homepage stays a natural argument surface", () => {
       const html = await res.text();
       assert.doesNotMatch(html, /Steel claim|INTERNAL_CRITERIA|Specified Fit, Not Pretty Spirals/);
     }
+  });
+});
+
+describe("major AI client list", () => {
+  it("names the full public client set, not the Grok/ChatGPT/Venice triad alone", () => {
+    assert.ok(AI_CLIENTS.includes("ChatGPT (GPT Actions / OpenAI)"));
+    assert.ok(AI_CLIENTS.includes("Grok (xAI)"));
+    assert.ok(AI_CLIENTS.includes("Venice"));
+    assert.ok(AI_CLIENTS.includes("Claude (Anthropic)"));
+    assert.ok(AI_CLIENTS.includes("Cursor (MCP)"));
+    assert.ok(AI_CLIENTS.includes("Glama (MCP)"));
+    assert.ok(AI_CLIENTS.includes("Perplexity"));
+    assert.ok(AI_CLIENTS.includes("Microsoft Copilot / Bing"));
+    assert.ok(AI_CLIENTS.includes("Google Gemini / Vertex"));
+    assert.ok(AI_CLIENTS.includes("Mistral"));
+    assert.ok(AI_CLIENTS.includes("Meta AI"));
+    assert.ok(AI_CLIENTS.includes("Apple Intelligence surfaces"));
+    assert.ok(AI_CLIENTS.includes("Amazon Q tooling"));
+    assert.ok(AI_CLIENTS.includes("DuckAssist"));
+    assert.ok(AI_CLIENTS.includes("You.com"));
+    assert.ok(AI_CLIENTS.includes("Cohere"));
+    assert.equal(AI_CLIENTS.length, 16);
+    assert.match(AI_CLIENTS_SENTENCE, /other MCP\/OpenAPI-capable assistants/);
+    const software = softwareBody({ products: [] });
+    assert.match(software, /Works with ChatGPT \(GPT Actions \/ OpenAI\), Grok \(xAI\), Venice, Claude \(Anthropic\)/);
+    assert.match(software, /Amazon Q tooling, DuckAssist, You\.com, Cohere/);
+    assert.doesNotMatch(software, /Use with Grok, ChatGPT, Venice/);
+    const home = homeBody({ stats: {}, latest: null, prior: [] });
+    assert.match(home, /Works with ChatGPT \(GPT Actions \/ OpenAI\)/);
+    const softwareMeta = defaultDescription("software");
+    assert.match(softwareMeta, /Claude \(Anthropic\)/);
+    assert.match(headMeta({ title: "Software", path: "/software", kind: "software" }), /Claude, Cursor, Glama, Perplexity/);
   });
 });
 

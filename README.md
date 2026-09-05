@@ -84,9 +84,11 @@ HTTP: `GET /` (one screen), `POST /stress`, `GET /verify`, `GET /doctor`, `GET /
 
 Flutter sources: [`mobile/`](mobile/). Application id `com.azieeliab.godlock`. Offline. Banner: product name GodLock; author Aziel Eliab; not a VPN or hiding tool.
 
-## Use with Grok, ChatGPT, Venice
+## Use with major AI clients
 
 Public engine and catalog live on godlock.uk and aziel-runtime — not on the download Worker.
+
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
 
 - Public engine: https://godlock.uk
 - Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json

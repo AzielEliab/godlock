@@ -314,6 +314,7 @@ async function indexHtml(env) {
     <p class="meta">The download count ticks on the Download click. The Worker serves the gzip (HTTP 200). No 302 to GitHub. Forks using this same link are counted automatically. ${DEFAULT_ASSET} — ${n} counted.</p>
     <p class="iso">Isolated counter: Worker <code>godlock-download-tracker</code>, project <code>godlock</code>, KV <code>GODLOCK_DOWNLOADS</code>. Not mixed with any other product. /v1 does not increment downloads.</p>
     
+    <p class="kid">Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.</p>
     <p class="meta"><a href="/stats">JSON stats</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/v1/skill">Skill</a> · <a href="/ai">AI runtime</a> · <a href="${GITHUB_REPO}">GitHub</a> · <a href="${GITHUB_LATEST}">releases</a></p>
     <script>
       (function () {
@@ -455,7 +456,7 @@ export default {
       });
     }
     if ((url.pathname === "/cite.json" || url.pathname === "/cite.json/") && request.method === "GET") {
-      return json({"author": "Aziel Eliab", "title": "GodLock", "github": "https://github.com/AzielEliab/godlock", "download": "https://godlock-download-tracker.vibelock.workers.dev/download", "doi": null, "license": "Apache-2.0", "catalog": "https://aziel-runtime.vibelock.workers.dev/"});
+      return json({"author": "Aziel Eliab", "title": "GodLock", "github": "https://github.com/AzielEliab/godlock", "download": "https://godlock-download-tracker.vibelock.workers.dev/download", "doi": null, "license": "Apache-2.0", "catalog": "https://aziel-runtime.vibelock.workers.dev/", "ai_clients": ["ChatGPT (GPT Actions / OpenAI)", "Grok (xAI)", "Venice", "Claude (Anthropic)", "Cursor (MCP)", "Glama (MCP)", "Perplexity", "Microsoft Copilot / Bing", "Google Gemini / Vertex", "Mistral", "Meta AI", "Apple Intelligence surfaces", "Amazon Q tooling", "DuckAssist", "You.com", "Cohere", "other MCP/OpenAPI-capable assistants"]});
     }
     // /gitbaby-seo-routes
     return json({ error: "not found" }, 404);

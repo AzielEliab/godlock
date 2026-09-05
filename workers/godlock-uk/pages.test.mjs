@@ -4,6 +4,7 @@ import {
   AZIEL_ELIAB_PATH,
   AZIEL_CORPUS_PATH,
   SOFTWARE_PATH,
+  RUNTIME_PATH,
   AZIEL_MANIFESTO,
   AZIEL_SIGNATURE,
   azielEliabBody,
@@ -66,6 +67,7 @@ describe("Aziel Eliab page chrome", () => {
     assert.equal(AZIEL_ELIAB_PATH, "/AzielEliab");
     assert.equal(AZIEL_CORPUS_PATH, "/AzielCorpusLibrary");
     assert.equal(SOFTWARE_PATH, "/software");
+    assert.equal(RUNTIME_PATH, "/runtime");
   });
 
   it("keeps the manifesto paragraphs and signature exactly", () => {
@@ -79,11 +81,11 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(text.endsWith("— Aziel Eliab\n"));
   });
 
-  it("orders nav Engine | Software | Verify | Aziel Eliab | Aziel Corpus Library", () => {
+  it("orders nav Engine | Software | Runtime | Verify | Aziel Eliab | Aziel Corpus Library", () => {
     const nav = topNav("/verify");
     assert.match(
       nav,
-      /href="\/">Engine<\/a><span class="sep">\|<\/span><a href="\/software">Software<\/a><span class="sep">\|<\/span><a href="\/verify"/,
+      /href="\/">Engine<\/a><span class="sep">\|<\/span><a href="\/software">Software<\/a><span class="sep">\|<\/span><a href="\/runtime">Runtime<\/a><span class="sep">\|<\/span><a href="\/verify"/,
     );
     assert.match(
       nav,
@@ -130,6 +132,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/AzielEliab/);
     assert.doesNotMatch(robots, /Allow: \/AzielCorpusLibrary/);
     assert.match(robots, /Allow: \/software/);
+    assert.match(robots, /Allow: \/runtime\nAllow: \/runtime\//);
     assert.match(robots, /Allow: \/ai\.txt/);
     assert.match(robots, /User-agent: GPTBot\nAllow: \//);
     assert.match(robots, /User-agent: ChatGPT-User\nAllow: \//);
@@ -189,6 +192,13 @@ describe("Aziel Eliab SEO surfaces", () => {
     }
     const xml = await sitemapXml({});
     assert.ok(xml.includes(CANON_HOST + "/AzielEliab"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/runtime.json"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/openapi.json"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/llms.txt"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/cite.json"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/mcp"));
+    assert.ok(xml.includes("https://www.azielcorpuslibrary.net/runtime"));
     assert.ok(!xml.includes(CANON_HOST + "/AzielCorpusLibrary"));
     assert.ok(xml.includes(LIBRARY_AZIEL));
     const cite = citeDoc();
@@ -203,10 +213,21 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(cite.ai_clients.includes("Cursor (MCP)"));
     assert.ok(cite.ai_clients.includes("other MCP/OpenAPI-capable assistants"));
     assert.ok(cite.ai_clients.length >= 16);
+    assert.equal(cite.runtime, CANON_HOST + "/runtime");
+    assert.equal(cite.runtime_openapi, CANON_HOST + "/runtime/openapi.json");
+    assert.equal(cite.runtime_mcp, CANON_HOST + "/runtime/mcp");
+    assert.equal(cite.runtime_library, "https://www.azielcorpuslibrary.net/runtime");
+    assert.ok(cite.sameAs.includes(CANON_HOST + "/runtime"));
+    assert.equal(cite.door, "fraggate");
     const llms = llmsDoc();
     assert.match(llms, /Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
     assert.match(llms, /Aziel Corpus Library: https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab/);
     assert.doesNotMatch(llms, /Aziel Corpus Library: https:\/\/godlock\.uk\/AzielCorpusLibrary/);
+    assert.match(llms, /## Runtime \(FragGate door\)/);
+    assert.match(llms, /Door: https:\/\/godlock\.uk\/runtime/);
+    assert.match(llms, /OpenAPI: https:\/\/godlock\.uk\/runtime\/openapi\.json/);
+    assert.match(llms, /MCP: POST https:\/\/godlock\.uk\/runtime\/mcp/);
+    assert.match(llms, /Library door: https:\/\/www\.azielcorpuslibrary\.net\/runtime/);
     assert.match(llms, /Works with ChatGPT \(GPT Actions \/ OpenAI\), Grok \(xAI\), Venice, Claude \(Anthropic\)/);
     assert.match(llms, /Cursor \(MCP\), Glama \(MCP\), Perplexity, Microsoft Copilot \/ Bing, Google Gemini \/ Vertex/);
     assert.match(llms, /GPTBot, ChatGPT-User, OAI-SearchBot, Venice, Grok, Google-Extended/);
@@ -236,6 +257,10 @@ describe("homepage stays a natural argument surface", () => {
     assert.match(html, /Works with ChatGPT \(GPT Actions \/ OpenAI\), Grok \(xAI\), Venice, Claude \(Anthropic\)/);
     assert.match(html, /Cursor \(MCP\), Glama \(MCP\), Perplexity/);
     assert.match(html, /other MCP\/OpenAPI-capable assistants/);
+    assert.match(html, /href="\/runtime">Runtime<\/a>/);
+    const homeLd = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    assert.ok(homeLd["@graph"].some((n) => n["@type"] === "WebAPI" && n.documentation === "https://godlock.uk/runtime/openapi.json"));
+    assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "Aziel Eliab Runtime" && (n.sameAs || []).includes("https://www.azielcorpuslibrary.net/runtime")));
     assert.doesNotMatch(html, /Use with Grok, ChatGPT, Venice/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|Specified Fit|bootstrap lock|paste-block|how the argument works/i);
     assert.doesNotMatch(html, /Functionally specified digital information joined to a translation system/);

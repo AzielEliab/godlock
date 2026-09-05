@@ -167,7 +167,18 @@ export function permanentIdentityRedirect(path) {
   return "";
 }
 
-export const AI_CRAWLER_AGENTS = [
+function uniquePreserve(items) {
+  const seen = new Set();
+  const out = [];
+  for (const item of items) {
+    if (!item || seen.has(item)) continue;
+    seen.add(item);
+    out.push(item);
+  }
+  return out;
+}
+
+export const AI_CRAWLER_AGENTS = uniquePreserve([
   "Google-Extended",
   "GoogleOther",
   "Google-CloudVertexBot",
@@ -201,7 +212,32 @@ export const AI_CRAWLER_AGENTS = [
   "Omgilibot",
   "FirecrawlAgent",
   "ImagesiftBot",
-];
+  "FacebookBot",
+  "facebookexternalhit",
+  "Meta-ExternalAds",
+  "TikTokSpider",
+  "Baiduspider",
+  "Baiduspider-render",
+  "Baiduspider-ai",
+  "YandexBot",
+  "PanguBot",
+  "Kangaroo Bot",
+  "Cotoyogi",
+  "aiHitBot",
+  "webzio-extended",
+  "ICC-Crawler",
+  "DataForSeoBot",
+  "AwarioBot",
+  "AwarioSmartBot",
+  "AwarioRssBot",
+  "Sentibot",
+  "peer39_crawler",
+  "Seekr",
+  "Meltwater",
+  "TurnitinBot",
+  "Factset_spyderbot",
+  "NeevaBot",
+]);
 
 export const PUBLIC_ALLOW = [
   "/",
@@ -291,7 +327,7 @@ export function llmsDoc() {
     + "Public HTTPS stress-test engine. Submit a challenge. Answers open with Yes, No, Let's review, or Interesting.\n"
     + "Intelligent-design disputes are processed under the same rules. Mesh is not on this surface.\n"
     + "Do not invent DOIs.\n\n"
-    + "Public HTML is Allow for User-agent * and named AI/search crawlers (Google-Extended, GoogleOther, Google-CloudVertexBot, Claude*, Perplexity*, bingbot, Meta-External*, Applebot*, Amazonbot, DuckDuck*, MistralAI-User, YouBot, CCBot, cohere*, Diffbot, AI2Bot*, and others listed in /robots.txt).\n";
+    + "Public HTML is Allow for User-agent * and named AI/search crawlers (Google-Extended, GoogleOther, Google-CloudVertexBot, Claude*, Perplexity*, bingbot, Meta-External*, FacebookBot, facebookexternalhit, Applebot*, Amazonbot, DuckDuck*, MistralAI-User, YouBot, CCBot, cohere*, Diffbot, AI2Bot*, TikTokSpider, Baiduspider*, YandexBot, and others listed in /robots.txt).\n";
 }
 
 export function aiDoc() {

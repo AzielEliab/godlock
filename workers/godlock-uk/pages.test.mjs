@@ -322,7 +322,8 @@ describe("homepage stays a natural argument surface", () => {
       const res = await worker.fetch(new Request("https://godlock.uk" + path), mockEnv());
       assert.equal(res.status, 404, path);
       const html = await res.text();
-      assert.doesNotMatch(html, /Steel claim|INTERNAL_CRITERIA|Specified Fit, Not Pretty Spirals/);
+      assert.doesNotMatch(html, /Steel claim|INTERNAL_CRITERIA|bootstrap lock|how the argument works/i);
+      assert.doesNotMatch(html, /Layer A Detection|S without R/);
     }
   });
 });
@@ -1072,6 +1073,16 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(fromBanner.name, "AZNet");
     assert.match(fromBanner.one_line, /Separate software from AZBrowser/);
     assert.doesNotMatch(fromBanner.one_line, /Separate engine/);
+
+    const staleGodlock = hubProductCopy({
+      slug: "godlock",
+      name: "GodLock",
+      one_line: "Offline ABAD / hardening score. Not a VPN and not an anonymity network.",
+    });
+    assert.equal(staleGodlock.one_line, "Specified Fit / GodLock score. Not a VPN and not an anonymity network.");
+    assert.doesNotMatch(staleGodlock.one_line, /\bABAD\b/);
+    const bound = hubProductCopy({ slug: "godlock", name: "GodLock", one_line: "bound godlock" });
+    assert.equal(bound.one_line, "bound godlock");
 
     const card = compactProduct({ slug: "aznet", name: "AZNet", one_line: LIVE_AZNET_ONE_LINE });
     assert.equal(card.one_line, HEALED_AZNET_ONE_LINE);

@@ -1,14 +1,17 @@
 /**
- * Suite decentralized node mesh client (aziel-runtime /v1/mesh/*).
- * Default OFF. Not an anonymity network. Identity Aziel Eliab only.
- * Runtime routes may not be merged yet — fail closed to empty/disabled.
+ * Suite mesh client aligned to QNM-BUILD-1.0.
+ * Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal.
+ * Default OFF until operator/runtime enable. Not an anonymity network.
+ * Identity Aziel Eliab only. Runtime routes may not be merged yet — fail closed.
  * Author: Aziel Eliab.
  */
 import { AUTHOR, CATALOG, PUBLIC_RUNTIME, RUNTIME_PATH, ANON_BROADCAST } from "./seo.js";
-import { liveNodeCountFromDb } from "./presence.js";
 
+export const QNM_SPEC = "QNM-BUILD-1.0";
 export const MESH_DEFAULT_OFF = true;
 export const MESH_ANONYMITY_NETWORK = false;
+export const MESH_NODE_GATE = false;
+export const MESH_AUTO_HEAL = false;
 export const MESH_IDENTITY = AUTHOR;
 
 export const MESH_PATH = "/v1/mesh";
@@ -41,7 +44,7 @@ export const HTTPS_MESH_URLS = [
 
 export { ANON_BROADCAST };
 export const ANON_BROADCAST_NOTE =
-  "Local communique style tool (text → TTS / desk reel / metadata-culled MP4 + SHA-256 receipt). Not hosted on this Worker. No ffmpeg farm.";
+  "Local communique style tool (text → TTS / desk reel / metadata-culled MP4 + SHA-256 receipt). Not a publish path on godlock.uk. Not hosted on this Worker. No ffmpeg farm.";
 
 const UA = { "User-Agent": "Mozilla/5.0", Accept: "application/json" };
 
@@ -49,7 +52,7 @@ function firstNum(...vals) {
   for (const raw of vals) {
     if (raw == null || raw === "") continue;
     const n = typeof raw === "number" ? raw : Number(String(raw).replace(/,/g, ""));
-    if (Number.isFinite(n) && n >= 0) return n;
+    if (Number.isFinite(n) && n >= 0) return Math.floor(n);
   }
   return null;
 }
@@ -67,21 +70,85 @@ function truthyEnabled(value) {
   return s === "on" || s === "enabled" || s === "true" || s === "live";
 }
 
+export function emptyRollup() {
+  return { live: 0, locked: 0, isolated: 0 };
+}
+
+export function meshRollup(mesh) {
+  const m = mesh && typeof mesh === "object" ? mesh : {};
+  const r = m.rollup && typeof m.rollup === "object" && !Array.isArray(m.rollup) ? m.rollup : {};
+  return {
+    live: firstNum(r.live, m.live_nodes, m.live) ?? 0,
+    locked: firstNum(r.locked, m.locked_nodes, m.locked) ?? 0,
+    isolated: firstNum(r.isolated, m.isolated_nodes, m.isolated) ?? 0,
+  };
+}
+
+function parseRollup(inner, listedLive) {
+  const r = inner.rollup && typeof inner.rollup === "object" && !Array.isArray(inner.rollup)
+    ? inner.rollup
+    : {};
+  const live = firstNum(
+    r.live,
+    r.live_nodes,
+    r.live_count,
+    inner.live,
+    inner.live_nodes,
+    inner.mesh_live_nodes,
+    inner.live_count,
+    inner.count,
+    inner.n,
+    inner.node_count,
+    listedLive,
+  );
+  const locked = firstNum(
+    r.locked,
+    r.locked_nodes,
+    r.locked_count,
+    inner.locked,
+    inner.locked_nodes,
+    inner.locked_count,
+  );
+  const isolated = firstNum(
+    r.isolated,
+    r.isolated_nodes,
+    r.isolated_count,
+    inner.isolated,
+    inner.isolated_nodes,
+    inner.isolated_count,
+  );
+  return {
+    live: live != null ? live : 0,
+    locked: locked != null ? locked : 0,
+    isolated: isolated != null ? isolated : 0,
+  };
+}
+
 export function emptyMesh(extra = {}) {
+  const rollup = extra.rollup && typeof extra.rollup === "object"
+    ? { ...emptyRollup(), ...extra.rollup }
+    : emptyRollup();
   return {
     ok: true,
+    spec: QNM_SPEC,
     enabled: false,
     default_off: true,
     live_nodes: 0,
-    nodes: [],
     status: extra.status || "off",
     source: extra.source || "fallback",
+    node_gate: false,
+    auto_heal: false,
     anonymity_network: false,
     author: AUTHOR,
     identity: AUTHOR,
-    note: "Suite decentralized node mesh. Default off. Not an anonymity network.",
+    note: "QNM-BUILD-1.0. Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network.",
     door: PUBLIC_MESH,
     ...extra,
+    spec: QNM_SPEC,
+    rollup,
+    node_gate: false,
+    auto_heal: false,
+    anonymity_network: false,
   };
 }
 
@@ -111,18 +178,10 @@ export function parseMeshDoc(body) {
   const inner = body.mesh && typeof body.mesh === "object" && !Array.isArray(body.mesh)
     ? { ...body, ...body.mesh }
     : body;
-  const nodes = asList(inner.nodes || inner.list || inner.peers || inner.live_nodes_list)
+  const listed = asList(inner.nodes || inner.list || inner.peers || inner.live_nodes_list)
     .map(compactMeshNode)
     .filter(Boolean);
-  const live = firstNum(
-    inner.live_nodes,
-    inner.mesh_live_nodes,
-    inner.count,
-    inner.n,
-    inner.node_count,
-    nodes.length ? nodes.length : null,
-  );
-  const live_nodes = live != null ? live : 0;
+  const rollup = parseRollup(inner, listed.length ? listed.length : null);
   const enabled = truthyEnabled(inner.enabled)
     || truthyEnabled(inner.mesh_enabled)
     || String(inner.status || "").toLowerCase() === "on";
@@ -130,30 +189,38 @@ export function parseMeshDoc(body) {
     && !enabled
     && (inner.error || inner.status === "unavailable" || inner.status === "not_found");
   const status = enabled ? "on" : (unavailable ? "unavailable" : "off");
+  const live = enabled ? rollup.live : 0;
+  const locked = enabled ? rollup.locked : 0;
+  const isolated = enabled ? rollup.isolated : 0;
   return emptyMesh({
     ok: inner.ok !== false,
     enabled,
     default_off: inner.default_off !== false,
-    live_nodes: enabled ? live_nodes : 0,
-    nodes: enabled ? nodes : [],
+    live_nodes: live,
+    rollup: { live, locked, isolated },
     status,
     source: inner.source || "parsed",
     door: inner.door || PUBLIC_MESH,
     note: enabled
-      ? "Suite decentralized node mesh is on. Not an anonymity network."
-      : "Suite decentralized node mesh. Default off. Not an anonymity network.",
+      ? "QNM-BUILD-1.0. Suite mesh is on. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network."
+      : "QNM-BUILD-1.0. Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network.",
   });
 }
 
 export function publicMesh(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
+  const enabled = !!m.enabled;
+  const rollup = enabled ? meshRollup(m) : emptyRollup();
   return {
-    enabled: !!m.enabled,
+    spec: QNM_SPEC,
+    enabled,
     default_off: m.default_off !== false,
-    live_nodes: m.enabled ? (Number(m.live_nodes) || 0) : 0,
-    nodes: m.enabled && Array.isArray(m.nodes) ? m.nodes : [],
-    status: m.enabled ? "on" : (m.status === "unavailable" ? "unavailable" : "off"),
+    live_nodes: enabled ? rollup.live : 0,
+    rollup,
+    status: enabled ? "on" : (m.status === "unavailable" ? "unavailable" : "off"),
     source: m.source || "fallback",
+    node_gate: false,
+    auto_heal: false,
     anonymity_network: false,
     author: AUTHOR,
     identity: AUTHOR,
@@ -166,32 +233,31 @@ export function publicMesh(mesh) {
     mcp: RUNTIME_PATH + "/mcp",
     fraggate: RUNTIME_PATH + "/v1/fraggate/call",
     ops: MESH_OPS.slice(),
-    note: m.note || "Suite decentralized node mesh. Default off. Not an anonymity network.",
+    note: m.note || "QNM-BUILD-1.0. Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network.",
   };
 }
 
 export function meshStatusLine(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   if (m.enabled) {
-    const n = Number(m.live_nodes);
-    const count = Number.isFinite(n) ? n : 0;
-    return "Suite mesh: on · " + count + " live nodes. Not an anonymity network.";
+    const r = meshRollup(m);
+    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated + ". Not an anonymity network.";
   }
   if (m.status === "unavailable") {
-    return "Suite mesh: off (unavailable). Default off. Not an anonymity network.";
+    return "Suite mesh: off (unavailable). QNM-BUILD-1.0. Not an anonymity network.";
   }
-  return "Suite mesh: off (default). Not an anonymity network.";
+  return "Suite mesh: off (default). QNM-BUILD-1.0. Not an anonymity network.";
 }
 
 /**
- * Public Live Nodes: suite mesh count when mesh is enabled,
+ * Public Live Nodes: QNM rollup.live when mesh is enabled (no visiting floor),
  * otherwise GodLock.uk site heartbeats.
  */
-export function alignLiveNodes({ siteLiveNodes, mesh, visiting } = {}) {
+export function alignLiveNodes({ siteLiveNodes, mesh } = {}) {
   const site = Number(siteLiveNodes);
   const siteN = Number.isFinite(site) && site >= 0 ? site : 0;
   if (mesh && mesh.enabled) {
-    return liveNodeCountFromDb(mesh.live_nodes, !!visiting);
+    return meshRollup(mesh).live;
   }
   return siteN;
 }
@@ -228,10 +294,13 @@ async function fetchJson(fetcher, url, ms) {
 
 function looksLikeMeshDoc(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return false;
-  if (body.error && !body.enabled && !body.mesh && !body.nodes && !body.list) return false;
+  if (body.error && !body.enabled && !body.mesh && !body.nodes && !body.list && !body.rollup) return false;
   return body.enabled != null
     || body.mesh_enabled != null
     || body.live_nodes != null
+    || body.rollup != null
+    || body.locked != null
+    || body.isolated != null
     || body.mesh != null
     || body.nodes != null
     || body.list != null
@@ -239,6 +308,7 @@ function looksLikeMeshDoc(body) {
     || body.status === "on"
     || body.status === "off"
     || body.default_off != null
+    || body.spec === QNM_SPEC
     || body.door === "mesh";
 }
 
@@ -279,6 +349,7 @@ export async function fetchMeshSnapshot(env, deps = {}) {
 
 export function meshOpsDoc() {
   return {
+    spec: QNM_SPEC,
     door: PUBLIC_MESH,
     list: PUBLIC_MESH_LIST,
     join: PUBLIC_MESH_JOIN,
@@ -288,11 +359,15 @@ export function meshOpsDoc() {
     mcp: PUBLIC_RUNTIME + "/mcp",
     fraggate: PUBLIC_RUNTIME + "/v1/fraggate/call",
     ops: MESH_OPS.slice(),
+    rollup: "live|locked|isolated counts only",
     default_off: true,
+    node_gate: false,
+    auto_heal: false,
     anonymity_network: false,
     author: AUTHOR,
     identity: AUTHOR,
     anon_broadcast: ANON_BROADCAST,
     anon_broadcast_note: ANON_BROADCAST_NOTE,
+    anon_broadcast_publish_path: false,
   };
 }

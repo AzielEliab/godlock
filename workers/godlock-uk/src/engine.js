@@ -365,7 +365,7 @@ export function fallbackAnswer(text, currentScore, priorNodes) {
     label = "No";
     delta = -0.2;
     summary = "This HTTPS surface is not a mesh, VPN, Tor hop, or tunnel.";
-    explanation = "GodLock.uk is a public HTTPS bootstrap engine. Suite mesh is opt-in on the runtime door and default off. It is not an anonymity network, VPN, Tor hop, or tunnel. Treating this HTTPS page as a live hop mesh is a category error. The engine records the claim and lowers confidence slightly because the public copy must stay honest." + cite;
+    explanation = "GodLock.uk is a public HTTPS bootstrap engine. Suite mesh is QNM-BUILD-1.0: opt-in on the runtime door, default off, live|locked|isolated counts only. No Node Gate. No auto-heal. It is not an anonymity network, VPN, Tor hop, or tunnel. Treating this HTTPS page as a live hop mesh is a category error. The engine records the claim and lowers confidence slightly because the public copy must stay honest." + cite;
     weighing = "False mesh/VPN claim on this surface: -0.2.";
   } else if (fitClaim) {
     label = "Interesting";

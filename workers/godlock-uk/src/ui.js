@@ -7,7 +7,7 @@ import {
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH, PUBLIC_RUNTIME,
   AI_CLIENTS_SENTENCE, RUNTIME_VERSION, LIBRARY_RUNTIME, FRAGGATE_KERNEL, GITHUB_RUNTIME,
 } from "./seo.js";
-import { meshStatusLine, ANON_BROADCAST } from "./mesh.js";
+import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import { softwareSuite, invokeHref, workerHref } from "./catalog.js";
 
@@ -192,12 +192,15 @@ ${body}
     if(dl&&j.downloads!=null)dl.textContent=String(j.downloads);
     if(meshEl&&j.mesh){
       var on=!!j.mesh.enabled;
-      var n=j.mesh.live_nodes!=null?j.mesh.live_nodes:0;
+      var r=j.mesh.rollup||{};
+      var live=r.live!=null?r.live:(j.mesh.live_nodes!=null?j.mesh.live_nodes:0);
+      var locked=r.locked!=null?r.locked:0;
+      var isolated=r.isolated!=null?r.isolated:0;
       meshEl.textContent=on
-        ?("Suite mesh: on · "+n+" live nodes. Not an anonymity network.")
+        ?("Suite mesh: on · live "+live+" · locked "+locked+" · isolated "+isolated+". Not an anonymity network.")
         :(j.mesh.status==="unavailable"
-          ?"Suite mesh: off (unavailable). Default off. Not an anonymity network."
-          :"Suite mesh: off (default). Not an anonymity network.");
+          ?"Suite mesh: off (unavailable). QNM-BUILD-1.0. Not an anonymity network."
+          :"Suite mesh: off (default). QNM-BUILD-1.0. Not an anonymity network.");
     }
   }
   function beat(){
@@ -384,7 +387,7 @@ export function softwareBody({ products, extras } = {}) {
 <a class="button ghost" href="${esc(RUNTIME_PATH + "/v1/skill")}">Skill</a>
 <a class="button ghost" href="${esc(GITHUB_RUNTIME)}">aziel-runtime</a>
 <a class="button ghost" href="${esc(FRAGGATE_KERNEL)}">FragGate</a></p></div>
-<p class="muted">Full Aziel Eliab suite from the live <a href="${esc(RUNTIME_PATH + "/v1/software")}">same-origin /v1/software</a> catalog (origin <a href="${esc(CATALOG + "/v1/software")}">aziel-runtime /v1/software</a>; fallback <a href="${esc(RUNTIME_PATH + "/v1/fraggate/list")}">FragGate list</a>), matching Digital Library Software completeness. GitHub and runtime drops refresh this tab without hand copy. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (never nest Hub with Interface). FragGate is its own Gate card (A–Z with DecisionGATE). ${esc(AI_CLIENTS_SENTENCE)} Suite mesh default off (not an anonymity network). MCP/FragGate: <a href="${esc(RUNTIME_PATH + "/v1/mesh")}">/runtime/v1/mesh</a> · <a href="${esc(RUNTIME_PATH + "/mcp")}">/runtime/mcp</a>. Local communique style tool: <a href="${esc(ANON_BROADCAST)}">anon-broadcast</a> (not hosted on this Worker; no ffmpeg farm). Counted downloads and views stay on each product Worker <code>/count</code>; API uses show when the Worker or <a href="${esc(RUNTIME_PATH + "/v1/uses")}">/runtime/v1/uses</a> publishes them.${countLine} Identity is Aziel Eliab only.</p>
+<p class="muted">Full Aziel Eliab suite from the live <a href="${esc(RUNTIME_PATH + "/v1/software")}">same-origin /v1/software</a> catalog (origin <a href="${esc(CATALOG + "/v1/software")}">aziel-runtime /v1/software</a>; fallback <a href="${esc(RUNTIME_PATH + "/v1/fraggate/list")}">FragGate list</a>), matching Digital Library Software completeness. GitHub and runtime drops refresh this tab without hand copy. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (never nest Hub with Interface). FragGate is its own Gate card (A–Z with DecisionGATE). ${esc(AI_CLIENTS_SENTENCE)} Suite mesh default off (QNM-BUILD-1.0; live|locked|isolated counts only; no Node Gate; no auto-heal; not an anonymity network). MCP/FragGate: <a href="${esc(RUNTIME_PATH + "/v1/mesh")}">/runtime/v1/mesh</a> · <a href="${esc(RUNTIME_PATH + "/mcp")}">/runtime/mcp</a>. anon-broadcast is a local communique style tool — not a publish path on godlock.uk, not hosted here, and not an ffmpeg farm. Counted downloads and views stay on each product Worker <code>/count</code>; API uses show when the Worker or <a href="${esc(RUNTIME_PATH + "/v1/uses")}">/runtime/v1/uses</a> publishes them.${countLine} Identity is Aziel Eliab only.</p>
 <p class="muted">Suite: ${jumps}</p>
 <div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
 }

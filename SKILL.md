@@ -63,8 +63,8 @@ Author: **Aziel Eliab**. Honest scope: Offline Specified Fit / GodLock score. No
 - Sample payload: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/example`
 - Update check: `GET https://aziel-runtime.vibelock.workers.dev/v1/update/check?slug=godlock&version=0.1.0` (Worker: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/update`). If `update_available`, prompt with counted `https://godlock-download-tracker.vibelock.workers.dev/download`. Do not silently overwrite.
 - Live software catalog: `GET https://aziel-runtime.vibelock.workers.dev/v1/software` (fallback `GET /v1/fraggate/list`)
-- Suite mesh (default off, not an anonymity network): `GET https://godlock.uk/runtime/v1/mesh` · `GET https://godlock.uk/mesh`. MCP/FragGate: `POST https://godlock.uk/runtime/mcp` or `POST https://godlock.uk/runtime/v1/mesh/{join|heartbeat|enable|disable}`.
-- Local communique style tool (not hosted on the Worker; no ffmpeg farm): https://github.com/AzielEliab/anon-broadcast
+- Suite mesh (QNM-BUILD-1.0, default off; live|locked|isolated counts only; no Node Gate; no auto-heal; not an anonymity network): `GET https://godlock.uk/runtime/v1/mesh` · `GET https://godlock.uk/mesh`. MCP/FragGate: `POST https://godlock.uk/runtime/mcp` or `POST https://godlock.uk/runtime/v1/mesh/{join|heartbeat|enable|disable}`.
+- anon-broadcast is not a publish path on godlock.uk. Local communique style tool (not hosted on the Worker; no ffmpeg farm): https://github.com/AzielEliab/anon-broadcast
 
 Local UI: **Import JSON file** (`type=file`) and **Export JSON**. Then `godlock doctor`.
 

@@ -42,7 +42,7 @@ That's it. This computer only.
 
 A localhost tool that records a test, saves an honest receipt (id, time, text, SHA-256), and can save or load a JSON file. Governments and kids can both read the file. Receipts are not rewritten. This process is **not** a VPN, proxy, Tor hop, or hiding net.
 
-The public HTTPS stress-test engine is **https://godlock.uk** (fallback: https://godlock-uk.vibelock.workers.dev). Submit a challenge; Yes / No / Let's review / Interesting; hash-chained receipts. Suite mesh is opt-in via `https://godlock.uk/runtime/v1/mesh/*` and **default off**. Not an anonymity network.
+The public HTTPS stress-test engine is **https://godlock.uk** (fallback: https://godlock-uk.vibelock.workers.dev). Submit a challenge; Yes / No / Let's review / Interesting; hash-chained receipts. Suite mesh is **QNM-BUILD-1.0**: opt-in via `https://godlock.uk/runtime/v1/mesh/*` and **default off**. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network.
 
 Install and counted download stay on the download Worker (gzip HTTP 200, no 302). That URL is download/install only, not the project website:
 
@@ -96,8 +96,8 @@ Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic
 - Runtime door: https://godlock.uk/runtime
 - Catalog OpenAPI: https://godlock.uk/runtime/openapi.json
 - Catalog MCP: `POST https://godlock.uk/runtime/mcp`
-- Suite mesh (default off): `GET https://godlock.uk/runtime/v1/mesh` · snapshot `GET https://godlock.uk/mesh` · MCP/FragGate `POST https://godlock.uk/runtime/v1/mesh/{join|heartbeat|enable|disable}`
-- Local communique style tool (not hosted on the Worker; no ffmpeg farm): https://github.com/AzielEliab/anon-broadcast
+- Suite mesh (QNM-BUILD-1.0, default off; live|locked|isolated counts only; no Node Gate; no auto-heal): `GET https://godlock.uk/runtime/v1/mesh` · snapshot `GET https://godlock.uk/mesh` · MCP/FragGate `POST https://godlock.uk/runtime/v1/mesh/{join|heartbeat|enable|disable}`
+- anon-broadcast is not a publish path on godlock.uk. Local communique style tool (not hosted on the Worker; no ffmpeg farm): https://github.com/AzielEliab/anon-broadcast
 
 Hosted `/v1` on the counted-download Worker is an install/runtime helper. It does **not** increment the download counter and is **not** the primary website. Always send `User-Agent: Mozilla/5.0`.
 
@@ -120,8 +120,8 @@ No DOI is claimed. Do not invent one.
 - Software catalog on GodLock: https://godlock.uk/software
 - Runtime door: https://godlock.uk/runtime (library https://www.azielcorpuslibrary.net/runtime · origin https://aziel-runtime.vibelock.workers.dev/)
 - Runtime API uses (this door, not GodLock product Uses): https://godlock.uk/runtime/v1/uses
-- Suite mesh (default off, not an anonymity network): https://godlock.uk/runtime/v1/mesh
-- Local communique (anon-broadcast, not hosted here): https://github.com/AzielEliab/anon-broadcast
+- Suite mesh (QNM-BUILD-1.0, default off, live|locked|isolated counts only, not an anonymity network): https://godlock.uk/runtime/v1/mesh
+- anon-broadcast is not a publish path on godlock.uk (local communique, not hosted here): https://github.com/AzielEliab/anon-broadcast
 - Aziel Corpus Library: https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
 - aziel-runtime: https://aziel-runtime.vibelock.workers.dev/ — https://github.com/AzielEliab/aziel-runtime
 - Counted download / install: https://godlock-download-tracker.vibelock.workers.dev/

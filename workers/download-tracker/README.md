@@ -127,5 +127,5 @@ Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic
 See the product README section **Use with major AI clients**.
 OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json
 MCP: `POST https://godlock.uk/runtime/mcp` (origin `POST https://aziel-runtime.vibelock.workers.dev/mcp`)
-Suite mesh (default off, not an anonymity network): `GET https://godlock.uk/runtime/v1/mesh`
-Local communique style tool (not hosted here; no ffmpeg farm): https://github.com/AzielEliab/anon-broadcast
+Suite mesh (QNM-BUILD-1.0, default off; live|locked|isolated counts only; no Node Gate; no auto-heal; not an anonymity network): `GET https://godlock.uk/runtime/v1/mesh`
+anon-broadcast is not a publish path on godlock.uk. Local communique style tool (not hosted here; no ffmpeg farm): https://github.com/AzielEliab/anon-broadcast

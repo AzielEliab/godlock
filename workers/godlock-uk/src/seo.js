@@ -86,7 +86,7 @@ export function defaultDescription(kind) {
   }
   if (kind === "software") {
     return hideInternalDetermination(
-      "Full Aziel Eliab software suite on GodLock.uk: every aziel-runtime catalog engine (27) plus aziel-runtime / FragGate. Download, GitHub, and Invoke via Runtime at " + PUBLIC_RUNTIME + " (FragGate " + RUNTIME_VERSION + "). Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
+      "Full Aziel Eliab software suite on GodLock.uk: every live aziel-runtime catalog engine plus aziel-runtime / FragGate. Worker, GitHub, and /runtime FragGate/MCP tethers. Uses and download counters when published. Sorted Plain → Gate → Lock (Clock is not Lock). Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
     );
   }
   if (kind === "runtime") {
@@ -372,8 +372,8 @@ export function citeDoc() {
     verify: CANON_HOST + "/verify",
     software: CANON_HOST + SOFTWARE_PATH,
     software_catalog: PUBLIC_RUNTIME + "/v1/catalog.json",
-    software_suite: "Full aziel-runtime catalog (27 engines) plus aziel-runtime / FragGate. Same completeness as the Digital Library Software hub.",
-    software_product_count: 27,
+    software_suite: "Full live aziel-runtime catalog plus aziel-runtime / FragGate. New catalog slugs are included automatically. Same completeness as the Digital Library Software hub.",
+    software_product_count: null,
     runtime: PUBLIC_RUNTIME,
     runtime_health: PUBLIC_RUNTIME + "/v1/health",
     runtime_manifest: PUBLIC_RUNTIME + "/v1/runtime.json",
@@ -421,7 +421,7 @@ export function llmsDoc() {
     + "Digital Library identity: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n"
-    + "Software lists the full aziel-runtime catalog (27 engines + aziel-runtime / FragGate), matching Digital Library Software completeness. GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
+    + "Software lists the full live aziel-runtime catalog plus aziel-runtime / FragGate, matching Digital Library Software completeness. New catalog slugs are included automatically. Each product is tethered to its Worker, GitHub, and /runtime FragGate/MCP. Sorted Plain → Gate → Lock (Clock is not Lock). GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
     + "Catalog JSON: " + PUBLIC_RUNTIME + "/v1/catalog.json\n"
     + "Origin catalog: " + CATALOG + "/v1/catalog.json\n\n"
     + "## Runtime (FragGate door)\n\n"

@@ -2,8 +2,9 @@
  * Aziel Eliab software catalog for godlock.uk/software.
  * Live fetch via AZIEL_RUNTIME service binding, then HTTPS origin / library,
  * then this snapshot so the page never drops to two GitHub links.
- * Snapshot matches aziel-runtime 1.6.2 catalog.json products (27 engines).
- * Do not invent slugs. Author: Aziel Eliab.
+ * Snapshot is a fallback floor, not a 27-only cap — live catalog slugs
+ * (peacelock, azmail, …) are included automatically. Do not invent slugs.
+ * Sort: Plain → Gate → Lock. Clock ≠ Lock. Author: Aziel Eliab.
  */
 import { hideInternalDetermination } from "./publicCopy.js";
 import {
@@ -12,6 +13,7 @@ import {
 } from "./seo.js";
 
 export const CATALOG_JSON_PATH = "/v1/catalog.json";
+export const CATALOG_USES_PATH = "/v1/uses";
 export const CATALOG_ORIGIN_URL = CATALOG + CATALOG_JSON_PATH;
 export const CATALOG_LIBRARY_URL = LIBRARY + "/runtime" + CATALOG_JSON_PATH;
 export const CATALOG_PUBLIC_URL = RUNTIME_PATH + CATALOG_JSON_PATH;
@@ -20,8 +22,18 @@ export const BINDING_CATALOG_URLS = [
   "https://aziel-runtime" + CATALOG_JSON_PATH,
   CATALOG_ORIGIN_URL,
 ];
+export const BINDING_USES_URLS = [
+  "https://aziel-runtime" + CATALOG_USES_PATH,
+  CATALOG + CATALOG_USES_PATH,
+];
 
 const UA = { "User-Agent": "Mozilla/5.0", Accept: "application/json" };
+
+/** Known extras already hosted on this page. Keep if present; do not invent. */
+export const EXTRA_SUITE_SLUGS = ["aziel-runtime", "fraggate", "embryolock"];
+const EXTRA_SUITE_SET = new Set(EXTRA_SUITE_SLUGS);
+const EXTRA_RANK = { "aziel-runtime": 0, fraggate: 1, embryolock: 2 };
+const FAMILY_RANK = { extra: -1, plain: 0, gate: 1, lock: 2 };
 
 export const CATALOG_FALLBACK_PRODUCTS = [
   { slug: "vibelock", name: "VibeLock", version: "0.3.0", one_line: "Physical-consistency evaluation of speech audio. Risk assessment, not a liveness proof.", github: "https://github.com/AzielEliab/vibelock", download: "https://vibelock-download-tracker.vibelock.workers.dev/download" },
@@ -50,6 +62,7 @@ export const CATALOG_FALLBACK_PRODUCTS = [
   { slug: "trajectorylock", name: "TrajectoryLock", version: "0.1.0", one_line: "Auditable geometric test. Research prototype, not a certified forensic instrument.", github: "https://github.com/AzielEliab/trajectorylock", download: "https://trajectorylock-download-tracker.vibelock.workers.dev/download" },
   { slug: "mialock", name: "M.I.A.Lock", version: "0.1.1", one_line: "M.I.A.Lock 0.1.1: event map + Doe matching + uncertainty ellipses + coverage heat. Doe leads ≠ ID. Heat ≠ presence. Author Aziel Eliab.", github: "https://github.com/AzielEliab/mialock", download: "https://mialock-download-tracker.vibelock.workers.dev/download" },
   { slug: "azieltether", name: "AzielTether", version: "0.1.0", one_line: "AzielTether 0.1.0: central × decentral survival mesh for downloaded Aziel software. Prefer-central; peer sync when down; public HTTPS stays mesh-free. Not a VPN. Author Aziel Eliab.", github: "https://github.com/AzielEliab/azieltether", download: "https://azieltether-download-tracker.vibelock.workers.dev/download" },
+  { slug: "peacelock", name: "PeaceLock", version: "0.1.0", one_line: "Chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1).", github: "https://github.com/AzielEliab/peacelock", download: "https://peacelock-download-tracker.vibelock.workers.dev/download" },
   { slug: "aziel-corpus", name: "Aziel Digital Library", version: "2.6.2", one_line: "Self-contained immutable digital library. Public MASTER. Not a 26-card index.", github: "https://github.com/AzielEliab/aziel-corpus", download: "https://www.azielcorpuslibrary.net/download" },
 ];
 
@@ -68,10 +81,69 @@ export const RUNTIME_CARD = {
   suite: true,
 };
 
+function firstNum(...vals) {
+  for (const raw of vals) {
+    if (raw == null || raw === "") continue;
+    const n = typeof raw === "number" ? raw : Number(String(raw).replace(/,/g, ""));
+    if (Number.isFinite(n)) return n;
+  }
+  return null;
+}
+
+function looksLikeUrl(value) {
+  const s = String(value || "").trim();
+  return /^https?:\/\//i.test(s) || s.startsWith("/");
+}
+
+export function workerHref(product) {
+  if (!product) return "";
+  if (product.worker_home) return String(product.worker_home);
+  const worker = String(product.worker || "");
+  if (worker.startsWith("http")) return worker;
+  const download = String(product.download || "");
+  if (download) return download.replace(/\/download\/?$/i, "/");
+  return "";
+}
+
+export function countHref(product) {
+  if (!product) return "";
+  if (product.count && looksLikeUrl(product.count)) return String(product.count);
+  const download = String(product.download || "");
+  if (download) return download.replace(/\/download\/?$/i, "/count");
+  return "";
+}
+
+/** Plain → Gate → Lock. Clock is not Lock. EmbryoLock/FragGate extras stay extra. */
+export function suiteFamily(product) {
+  const slug = String((product && product.slug) || "").toLowerCase();
+  if (EXTRA_SUITE_SET.has(slug)) return "extra";
+  const name = String((product && product.name) || "").toLowerCase().replace(/[\s._'-]+/g, "");
+  const token = slug || name;
+  if (token.endsWith("clock")) return "plain";
+  if (token.endsWith("gate")) return "gate";
+  if (token.endsWith("lock")) return "lock";
+  return "plain";
+}
+
+export function sortSoftwareSuite(products) {
+  return (Array.isArray(products) ? products.slice() : []).sort((a, b) => {
+    const fa = FAMILY_RANK[suiteFamily(a)] ?? 0;
+    const fb = FAMILY_RANK[suiteFamily(b)] ?? 0;
+    if (fa !== fb) return fa - fb;
+    if (fa === FAMILY_RANK.extra) {
+      const ia = EXTRA_RANK[String((a && a.slug) || "")] ?? 50;
+      const ib = EXTRA_RANK[String((b && b.slug) || "")] ?? 50;
+      if (ia !== ib) return ia - ib;
+    }
+    return String((a && (a.name || a.slug)) || "").localeCompare(String((b && (b.name || b.slug)) || ""), "en");
+  });
+}
+
 export function compactProduct(raw) {
   if (!raw || typeof raw !== "object") return null;
   const slug = String(raw.slug || "").trim();
   if (!slug) return null;
+  const countUrl = looksLikeUrl(raw.count) ? String(raw.count) : "";
   return {
     slug,
     name: String(raw.name || slug),
@@ -79,7 +151,35 @@ export function compactProduct(raw) {
     one_line: hideInternalDetermination(String(raw.one_line || raw.banner || "")),
     github: raw.github ? String(raw.github) : "",
     download: raw.download ? String(raw.download) : "",
+    worker: raw.worker ? String(raw.worker) : "",
+    worker_home: raw.worker_home ? String(raw.worker_home) : "",
+    count: countUrl,
+    downloads: firstNum(raw.downloads, raw.download_count, !looksLikeUrl(raw.count) ? raw.count : null),
+    uses: firstNum(raw.uses, raw.uses_total),
   };
+}
+
+function mergeFields(live, fallback) {
+  const a = compactProduct(live) || {};
+  const b = fallback || {};
+  const name = a.name && a.name !== a.slug ? a.name : (b.name || a.name || a.slug);
+  const merged = compactProduct({
+    slug: a.slug || b.slug,
+    name,
+    version: a.version || b.version || "",
+    one_line: a.one_line || b.one_line || "",
+    github: a.github || b.github || "",
+    download: a.download || b.download || "",
+    worker: a.worker || b.worker || "",
+    worker_home: a.worker_home || b.worker_home || "",
+    count: a.count || b.count || "",
+    downloads: a.downloads != null ? a.downloads : b.downloads,
+    uses: a.uses != null ? a.uses : b.uses,
+  });
+  if (!merged) return null;
+  if (!merged.worker_home) merged.worker_home = workerHref(merged);
+  if (!merged.count) merged.count = countHref(merged);
+  return merged;
 }
 
 export function invokeHref(product) {
@@ -100,31 +200,35 @@ export function publicProduct(product) {
     one_line: hideInternalDetermination(p.one_line || ""),
     github: p.github || "",
     download: p.download || "",
-    invoke: invokeHref(p),
+    worker: workerHref(p),
+    invoke: invokeHref(product && product.invoke ? product : p),
+    mcp: RUNTIME_PATH + "/mcp",
+    fraggate: p.slug === "aziel-runtime" || p.slug === "fraggate" ? RUNTIME_PATH + "/v1/fraggate/list" : invokeHref(p),
+    downloads: p.downloads != null ? p.downloads : null,
+    uses: p.uses != null ? p.uses : null,
+    family: suiteFamily(p),
     author: AUTHOR,
   };
 }
 
 function mergeLiveOverFallback(live) {
-  const fallbackBySlug = new Map(CATALOG_FALLBACK_PRODUCTS.map((p) => [p.slug, p]));
-  const liveBySlug = new Map();
-  for (const raw of live) {
-    const p = compactProduct(raw);
-    if (p) liveBySlug.set(p.slug, p);
-  }
+  const fallbackBySlug = new Map(CATALOG_FALLBACK_PRODUCTS.map((p) => [p.slug, compactProduct(p)]));
   const out = [];
   const seen = new Set();
-  for (const base of CATALOG_FALLBACK_PRODUCTS) {
-    const next = liveBySlug.get(base.slug) || fallbackBySlug.get(base.slug);
-    if (!next || seen.has(next.slug)) continue;
+  for (const raw of live) {
+    const slug = String((raw && raw.slug) || "").trim();
+    if (!slug || slug === "aziel-runtime" || seen.has(slug)) continue;
+    const next = mergeFields(raw, fallbackBySlug.get(slug));
+    if (!next) continue;
     seen.add(next.slug);
     out.push(next);
   }
-  for (const p of liveBySlug.values()) {
-    if (seen.has(p.slug)) continue;
-    if (p.slug === "aziel-runtime") continue;
-    seen.add(p.slug);
-    out.push(p);
+  for (const base of CATALOG_FALLBACK_PRODUCTS) {
+    if (seen.has(base.slug)) continue;
+    const next = mergeFields(base, fallbackBySlug.get(base.slug));
+    if (!next) continue;
+    seen.add(next.slug);
+    out.push(next);
   }
   return out;
 }
@@ -147,6 +251,11 @@ export function productsFromCatalogDoc(body) {
   if (Array.isArray(body.true_engine_slugs)) {
     buckets.push(body.true_engine_slugs.map((slug) => ({ slug })));
   }
+  if (body.engines && typeof body.engines === "object") {
+    buckets.push(Object.entries(body.engines).map(([slug, raw]) => (
+      raw && typeof raw === "object" ? { slug, ...raw } : { slug }
+    )));
+  }
   const out = [];
   const seen = new Set();
   for (const list of buckets) {
@@ -160,10 +269,28 @@ export function productsFromCatalogDoc(body) {
   return out;
 }
 
+export function parseCounterDoc(body) {
+  if (body == null) return { downloads: null, uses: null };
+  if (typeof body === "number") return { downloads: firstNum(body), uses: null };
+  if (typeof body !== "object") return { downloads: null, uses: null };
+  return {
+    downloads: firstNum(body.downloads, body.total, body.download_count, !looksLikeUrl(body.count) ? body.count : null),
+    uses: firstNum(body.uses, body.uses_total),
+  };
+}
+
+async function readJsonResponse(res) {
+  if (!res || !res.ok) return null;
+  return res.json().catch(() => null);
+}
+
 async function productsFromResponse(res) {
-  if (!res || !res.ok) return [];
-  const body = await res.json().catch(() => null);
-  return productsFromCatalogDoc(body);
+  const body = await readJsonResponse(res);
+  if (!body) return { products: [], version: "" };
+  return {
+    products: productsFromCatalogDoc(body),
+    version: body.version != null && body.version !== "" ? String(body.version) : "",
+  };
 }
 
 async function fetchJson(fetcher, url, ms) {
@@ -187,29 +314,84 @@ export async function fetchCatalogProducts(env, deps = {}) {
     for (const url of BINDING_CATALOG_URLS) {
       try {
         const res = await env.AZIEL_RUNTIME.fetch(new Request(url, { method: "GET", headers: UA }));
-        const live = await productsFromResponse(res);
-        if (live.length) {
-          return { products: mergeLiveOverFallback(live), source: "service-binding" };
+        const parsed = await productsFromResponse(res);
+        if (parsed.products.length) {
+          return { products: mergeLiveOverFallback(parsed.products), source: "service-binding", version: parsed.version };
         }
       } catch { /* try next binding dest */ }
     }
-    return { products: CATALOG_FALLBACK_PRODUCTS.map((p) => ({ ...p })), source: "fallback" };
+    return { products: CATALOG_FALLBACK_PRODUCTS.map((p) => compactProduct(p)), source: "fallback", version: "" };
   }
 
   for (const [source, url] of [["origin", CATALOG_ORIGIN_URL], ["library", CATALOG_LIBRARY_URL]]) {
     try {
       const res = await fetchJson(httpFetch, url, timeoutMs);
-      const live = await productsFromResponse(res);
-      if (live.length) {
-        return { products: mergeLiveOverFallback(live), source };
+      const parsed = await productsFromResponse(res);
+      if (parsed.products.length) {
+        return { products: mergeLiveOverFallback(parsed.products), source, version: parsed.version };
       }
     } catch { /* try next */ }
   }
 
-  return { products: CATALOG_FALLBACK_PRODUCTS.map((p) => ({ ...p })), source: "fallback" };
+  return { products: CATALOG_FALLBACK_PRODUCTS.map((p) => compactProduct(p)), source: "fallback", version: "" };
 }
 
-export function softwareSuite(products) {
+export async function attachCatalogCounters(products, env, deps = {}) {
+  const list = Array.isArray(products) ? products.map((p) => ({ ...p })) : [];
+  const httpFetch = deps.counterFetch || deps.fetch || globalThis.fetch;
+  const timeoutMs = deps.timeoutMs != null ? deps.timeoutMs : 2500;
+  let runtimeUses = firstNum(deps.runtimeUses);
+  let fetched = 0;
+
+  const hasBinding = !!(env && env.AZIEL_RUNTIME && typeof env.AZIEL_RUNTIME.fetch === "function");
+  if (runtimeUses == null) {
+    if (hasBinding) {
+      for (const url of BINDING_USES_URLS) {
+        try {
+          const res = await env.AZIEL_RUNTIME.fetch(new Request(url, { method: "GET", headers: UA }));
+          const body = await readJsonResponse(res);
+          const n = parseCounterDoc(body).uses;
+          if (n != null) {
+            runtimeUses = n;
+            break;
+          }
+        } catch { /* try next */ }
+      }
+    }
+    if (runtimeUses == null && typeof httpFetch === "function") {
+      try {
+        const res = await fetchJson(httpFetch, CATALOG + CATALOG_USES_PATH, timeoutMs);
+        const body = await readJsonResponse(res);
+        runtimeUses = parseCounterDoc(body).uses;
+      } catch { /* optional */ }
+    }
+  }
+
+  await Promise.all(list.map(async (p) => {
+    if (p.downloads != null && p.uses != null) {
+      fetched += 1;
+      return;
+    }
+    const url = countHref(p);
+    if (!url || typeof httpFetch !== "function") return;
+    try {
+      const res = await fetchJson(httpFetch, url, timeoutMs);
+      const parsed = parseCounterDoc(await readJsonResponse(res));
+      if (p.downloads == null && parsed.downloads != null) p.downloads = parsed.downloads;
+      if (p.uses == null && parsed.uses != null) p.uses = parsed.uses;
+      if (parsed.downloads != null || parsed.uses != null) fetched += 1;
+    } catch { /* optional */ }
+  }));
+
+  if (runtimeUses != null) {
+    const runtime = list.find((p) => p.slug === "aziel-runtime");
+    if (runtime && runtime.uses == null) runtime.uses = runtimeUses;
+  }
+
+  return { products: list, runtimeUses, countersFetched: fetched };
+}
+
+export function softwareSuite(products, extras = {}) {
   const incoming = Array.isArray(products) ? products.map(compactProduct).filter(Boolean) : [];
   const seen = new Set();
   const out = [];
@@ -217,13 +399,28 @@ export function softwareSuite(products) {
     const p = compactProduct(raw);
     if (!p || seen.has(p.slug)) return;
     seen.add(p.slug);
-    out.push({ ...p, invoke: raw && raw.invoke ? raw.invoke : invokeHref(p), kernel: raw && raw.kernel, suite: !!(raw && raw.suite) });
+    const card = {
+      ...p,
+      invoke: raw && raw.invoke ? raw.invoke : invokeHref(p),
+      kernel: raw && raw.kernel,
+      suite: !!(raw && raw.suite),
+      worker_home: p.worker_home || workerHref(p),
+      family: suiteFamily(p),
+    };
+    if (card.slug === "aziel-runtime") {
+      if (extras.version) card.version = String(extras.version);
+      if (extras.runtimeUses != null && card.uses == null) card.uses = extras.runtimeUses;
+    }
+    out.push(card);
   };
-  push(RUNTIME_CARD);
+  push({ ...RUNTIME_CARD, uses: extras.runtimeUses != null ? extras.runtimeUses : RUNTIME_CARD.uses });
   for (const p of incoming) push(p);
-  return out;
+  return sortSoftwareSuite(out);
 }
 
-export function catalogSlugList() {
+export function catalogSlugList(products) {
+  if (Array.isArray(products) && products.length) {
+    return products.map((p) => p && p.slug).filter((slug) => slug && slug !== "aziel-runtime");
+  }
   return CATALOG_SLUGS.slice();
 }

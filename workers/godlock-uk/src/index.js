@@ -15,7 +15,7 @@ import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
   PUBLIC_RUNTIME, permanentIdentityRedirect,
 } from "./seo.js";
-import { fetchCatalogProducts, softwareSuite, publicProduct, catalogSlugList } from "./catalog.js";
+import { fetchCatalogProducts, attachCatalogCounters, softwareSuite, publicProduct } from "./catalog.js";
 import {
   START, shouldIsolate, answerChallenge, clampScore, residualOf, hashReceipt,
 } from "./engine.js";
@@ -372,9 +372,14 @@ export default {
         return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/cite.json") {
+        const fetched = await fetchCatalogProducts(env);
+        const products = softwareSuite(fetched.products, { version: fetched.version });
+        const catalogN = products.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "fraggate").length;
         return json({
           ...citeDoc(),
-          software_slugs: ["aziel-runtime"].concat(catalogSlugList()),
+          software_product_count: catalogN,
+          software_slugs: products.map((p) => p.slug),
+          software_source: fetched.source,
         });
       }
       if (path === "/llms.txt") {
@@ -459,7 +464,9 @@ export default {
 
       if (path === SOFTWARE_PATH) {
         const fetched = await fetchCatalogProducts(env);
-        const products = softwareSuite(fetched.products);
+        const counted = await attachCatalogCounters(fetched.products, env);
+        const extras = { version: fetched.version, runtimeUses: counted.runtimeUses };
+        const products = softwareSuite(counted.products, extras);
         if (wantsJson(request, url)) {
           return json({
             ok: true,
@@ -470,12 +477,15 @@ export default {
             catalog: PUBLIC_RUNTIME + "/v1/catalog.json",
             catalog_origin: CATALOG + "/v1/catalog.json",
             source: fetched.source,
-            product_count: products.filter((p) => p.slug !== "aziel-runtime").length,
+            sort: "plain-gate-lock",
+            clock_is_not_lock: true,
+            product_count: products.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "fraggate").length,
             suite_count: products.length,
+            counters_fetched: counted.countersFetched,
             products: products.map(publicProduct).filter(Boolean),
           }, 200, extraHeadersFor(nodeId));
         }
-        return html(page("Software", softwareBody({ products: fetched.products }), { path: SOFTWARE_PATH, kind: "software" }), {
+        return html(page("Software", softwareBody({ products: counted.products, extras }), { path: SOFTWARE_PATH, kind: "software" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

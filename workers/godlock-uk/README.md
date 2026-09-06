@@ -24,7 +24,7 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 - `GET /stats` JSON: `live_nodes`, `uses`, views, downloads, score (site counters; not the download-tracker)
 - `GET /count` JSON: `{ live_nodes, uses }` (site presence + ledger-backed Uses; not downloads)
 - `/verify` walk the ledger
-- `/software` full aziel-runtime catalog (27 engines + aziel-runtime / FragGate). Service-bind `AZIEL_RUNTIME` first, then HTTPS origin / library, then a snapshot fallback so the page never goes empty.
+- `/software` full live aziel-runtime catalog plus aziel-runtime / FragGate. Service-bind `AZIEL_RUNTIME` first, then HTTPS origin / library, then a snapshot fallback so the page never goes empty. New catalog slugs are included automatically. Each card tethers Worker, GitHub, and `/runtime` FragGate/MCP, with uses/download counters when published. Sorted Plain → Gate → Lock (Clock is not Lock).
 - `/runtime` and `/runtime/*` same-origin FragGate door (service-bind or HTTPS proxy to aziel-runtime 1.6.2)
 - `/AzielEliab` public identity page (Aziel Eliab only); `/aziel-eliab`, `/about`, `/aboutme` 308 here
 - Nav **Aziel Corpus Library** is an off-site link to `https://www.azielcorpuslibrary.net/AzielEliab`. `/AzielCorpusLibrary` (and kebab/case aliases) 308 there; godlock.uk does not host a library About mirror

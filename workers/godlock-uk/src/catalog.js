@@ -129,6 +129,12 @@ export function hubProductCopy(raw) {
   const slug = String((raw && raw.slug) || "").toLowerCase();
   let name = String((raw && raw.name) || slug);
   let one_line = hideInternalDetermination(String((raw && (raw.one_line || raw.banner)) || ""));
+  if (slug === "godlock") {
+    if (/\bABAD\b/i.test(one_line)) {
+      one_line = "Specified Fit / GodLock score. Not a VPN and not an anonymity network.";
+    }
+    return { name: name || "GodLock", one_line };
+  }
   if (slug === "aznet") {
     return { name: "AZNet", one_line: collapseAznetCopy(one_line) };
   }

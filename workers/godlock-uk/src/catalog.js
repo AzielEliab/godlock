@@ -59,8 +59,27 @@ function tidyHubCopy(text) {
 }
 
 /**
+ * Collapse leftover combined-product branding on hub cards.
+ * "AZBrowser / AZNet Phase 1" is not a product — AZBrowser and AZNet
+ * are separate apps. Keep catalog "AZNet is a separate engine…" and
+ * "not a shared Phase-1 UI". Restore AZNet when #12 stripped it and
+ * left "FragGate only. is a separate engine…".
+ */
+function collapseCombinedAzbrowserBranding(text) {
+  return tidyHubCopy(
+    String(text || "")
+      .replace(/AZBrowser\s*\/\s*AZNet(?:\s+Phase[-\s]?1)?/gi, "AZBrowser")
+      .replace(/AZBrowser\s*\/\s*Phase[-\s]?1/gi, "AZBrowser")
+      // Title leftover after the slash collapse: "AZBrowser Phase 1: …"
+      // Do not touch "not a shared Phase-1 UI".
+      .replace(/\s+Phase[-\s]?1(?=\s*:)/gi, "")
+      .replace(/(^|[.!?]\s+)is a separate (engine|product)/gi, "$1AZNet is a separate $2"),
+  );
+}
+
+/**
  * Hub copy: AZBrowser and AZNet stay separate cards.
- * Collapse combined "AZBrowser / AZNet" branding only.
+ * Collapse combined "AZBrowser / AZNet" / Phase 1 branding only.
  * Do not delete the bare word AZNet mid-sentence — that orphans
  * "AZNet is a separate engine…" into " is a separate engine…".
  */
@@ -73,16 +92,13 @@ export function hubProductCopy(raw) {
   }
   const combined = slug === "azbrowser"
     || /azbrowser\s*\/\s*aznet/i.test(name)
-    || /azbrowser\s*\/\s*aznet/i.test(one_line);
+    || /azbrowser\s*\/\s*aznet/i.test(one_line)
+    || /azbrowser\s*\/\s*phase[-\s]?1/i.test(name)
+    || /azbrowser\s*\/\s*phase[-\s]?1/i.test(one_line);
   if (combined) {
-    name = tidyHubCopy(name.replace(/AZBrowser\s*\/\s*AZNet/gi, "AZBrowser")) || "AZBrowser";
+    name = collapseCombinedAzbrowserBranding(name) || "AZBrowser";
     if (slug === "azbrowser") name = "AZBrowser";
-    one_line = tidyHubCopy(
-      one_line
-        .replace(/AZBrowser\s*\/\s*AZNet/gi, "AZBrowser")
-        // Heal copy that already lost the AZNet subject (PR #12 regression).
-        .replace(/(^|[.!?]\s+)is a separate (engine|product)/gi, "$1AZNet is a separate $2"),
-    );
+    one_line = collapseCombinedAzbrowserBranding(one_line);
   }
   return { name, one_line };
 }

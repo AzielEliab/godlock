@@ -5,7 +5,7 @@ description: Use when calling GodLock hosted /v1 or installing the local package
 
 # GodLock
 
-GodLock is a product name (ABAD stress-test and resilience engine). Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab.
+GodLock is a product name (Specified Fit stress-test and resilience engine). Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab.
 
 **Identity:** Aziel Eliab only. GodLock is a **product name**, not an identity label.
 
@@ -32,7 +32,7 @@ Ops (do **not** increment downloads or views):
 |--------|------|------|
 | GET | `/v1/health` | Liveness. Does not increment downloads. |
 | GET | `/v1/skill` | This markdown. Does not increment downloads. |
-| POST | `/v1/score` | ABAD engagement score. Advisory. Not a VPN. |
+| POST | `/v1/score` | Specified Fit / GodLock engagement score. Advisory. Not a VPN. |
 | POST | `/v1/submit` | Ephemeral logical receipt. Not anonymity. |
 
 Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. ChatGPT: GPT Actions. Grok: import OpenAPI as a custom tool. Venice: HTTP tools. Claude: OpenAPI / custom connector. Cursor and Glama: MCP. Others: the same OpenAPI or MCP catalog.
@@ -44,7 +44,7 @@ curl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v
 curl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/skill
 curl -s -A 'Mozilla/5.0' -X POST https://godlock-download-tracker.vibelock.workers.dev/v1/score \
   -H 'content-type: application/json' \
-  -d '{"text":"ABAD layers on phi"}'
+  -d '{"text":"Specified Fit is not a spiral proof"}'
 ```
 
 Counted download (gzip HTTP 200, no 302): https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz
@@ -52,7 +52,7 @@ GitHub: https://github.com/AzielEliab/godlock
 
 ## Catalog + local UI
 
-Author: **Aziel Eliab**. Honest scope: Offline ABAD / hardening score. Not a VPN and not an anonymity network. GodLock is a product name.
+Author: **Aziel Eliab**. Honest scope: Offline Specified Fit / GodLock score. Not a VPN and not an anonymity network. GodLock is a product name. Public reasoning: Specified Fit, Not Pretty Spirals.
 
 - Catalog product: https://aziel-runtime.vibelock.workers.dev/p/godlock/
 - Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json

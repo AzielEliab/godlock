@@ -15,11 +15,17 @@ export function liveNodeCountFromDb(dbCount, justTouched) {
   return count;
 }
 
-/** Uses = ledgered submissions only. Receipts or metadata without ledger rows do not count. */
-export function usesCountFromLedger({ ledgerSubmits } = {}) {
+/**
+ * Uses = ledgered SUBMIT/ISOLATE, floored by a durable metadata snapshot.
+ * Receipts or a leftover `uses` field without ledger/metadataUses do not count.
+ * metadataUses is the parent-wipe floor (never reset views/downloads/KV).
+ */
+export function usesCountFromLedger({ ledgerSubmits, metadataUses } = {}) {
   const l = Number(ledgerSubmits);
-  if (!Number.isFinite(l) || l < 0) return 0;
-  return l;
+  const m = Number(metadataUses);
+  const ledger = Number.isFinite(l) && l >= 0 ? l : 0;
+  const meta = Number.isFinite(m) && m >= 0 ? m : 0;
+  return Math.max(ledger, meta);
 }
 
 export function presenceCutoff(nowMs = Date.now()) {

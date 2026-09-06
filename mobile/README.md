@@ -1,6 +1,6 @@
 # GodLock — iPhone & Android
 
-Mint and list ABAD stress-test receipts on device (uuid, UTC, logical grid nodes, SHA-256). Resilience counter. Heuristic Jeeves note. In-memory.
+Mint and list Specified Fit / GodLock-score receipts on device (uuid, UTC, logical grid nodes, SHA-256). Resilience counter. Heuristic Jeeves note. In-memory.
 
 Offline. No analytics. Dark matte / gold.
 

@@ -1,5 +1,5 @@
 name: godlock
-description: On-device ABAD receipt dashboard. Not an anonymity network. Does not hide IPs.
+description: On-device Specified Fit / GodLock-score receipt dashboard. Not an anonymity network. Does not hide IPs.
 publish_to: "none"
 version: 0.1.0+1
 

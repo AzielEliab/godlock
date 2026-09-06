@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from godlock.abad import score_engagement
+from godlock.specified_fit import score_engagement
 from godlock.config import DATA_DIR_NAME, DEFAULT_ROTATE_INTERVAL_S
 from godlock.grid import Airlock, MirageGrid
 from godlock.jeeves import analyze as jeeves_analyze
@@ -138,7 +138,7 @@ class GodLockEngine:
         ]
 
     def resilience_score(self) -> float:
-        """Mean ABAD engagement of logged receipts. Engineering default, not a proof."""
+        """Mean Specified Fit / GodLock engagement of logged receipts. Engineering default, not a proof."""
         recs = self.receipts.all()
         if not recs:
             return 0.0

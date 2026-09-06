@@ -110,7 +110,8 @@ describe("publicSafeFields", () => {
       label: "Interesting",
     });
     assert.equal("weighing" in safe, false);
-    assert.doesNotMatch(safe.summary, /INTERNAL_CRITERIA|Specified Fit/i);
+    assert.doesNotMatch(safe.summary, /INTERNAL_CRITERIA/i);
+    assert.match(safe.summary, /Specified Fit, Not Pretty Spirals/);
     assert.doesNotMatch(safe.explanation, /bootstrap lock|ABAD framework/i);
     assert.equal(hideCopy("weighing internals: x"), "x");
   });

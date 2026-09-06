@@ -1,8 +1,8 @@
 /**
  * GodLock.uk locked protocol: isolate, score, answer.
- * FAMILY_PATTERNS (ABAD / φ / √2 / Flower of Life / corkscrew) are engagement
- * heuristics only — not a design proof. Internal scoring is specified-fit
- * (code+reader). Public fields never name that machinery. Author: Aziel Eliab.
+ * FAMILY_PATTERNS (Specified Fit / φ / √2 / Flower of Life / corkscrew) are
+ * engagement heuristics only — not a design proof. Public reasoning is
+ * Specified Fit, Not Pretty Spirals (Aziel Eliab). Author: Aziel Eliab.
  */
 import { sha256hex, canonicalJson } from "./ledger.js";
 
@@ -19,21 +19,21 @@ const AI_MODELS = [
 ];
 
 const FAMILY_WEIGHTS = {
+  specified_fit: 3.0,
   aziel_sequence: 3.0,
   phi: 2.0,
   sqrt2: 2.0,
   flower_of_life: 2.5,
   corkscrew: 2.0,
-  abad: 3.0,
 };
 
 const FAMILY_PATTERNS = {
+  specified_fit: [/specified\s+fit/i, /specified\s+complexity/i, /functionally\s+specified/i, /\babad\b/i, /a\s*[-–—]\s*b\s*[-–—]\s*a\s*[-–—]\s*d/i],
   aziel_sequence: [/aziel\s+sequence/i, /aziel[-_]?seq(?:uence)?/i],
   phi: [/\bphi\b/i, /golden\s+ratio/i, /φ/, /\b1\.618\d*\b/],
   sqrt2: [/sqrt\s*\(?\s*2/i, /√\s*2/, /square\s+root\s+of\s+2/i, /\b1\.414\d*\b/],
   flower_of_life: [/flower\s+of\s+life/i, /vesica\s+piscis/i],
   corkscrew: [/corkscrew/i],
-  abad: [/\babad\b/i, /a\s*[-–—]\s*b\s*[-–—]\s*a\s*[-–—]\s*d/i],
 };
 
 const ID_RE = /intelligent\s*design|design[- ]flaw|irreducible\s+complexity|specified\s+complexity|watchmaker|fine[- ]tun(?:e|ing)|anthropic\s+principle|creation(?:ist|ism)?|counter[- ]argument|stress[- ]test|falsif|empirical|framework|heuristic/i;
@@ -61,7 +61,7 @@ export const INTERNAL_CRITERIA = [
   "High-confidence: code+reader is a distinct kind; intelligence is a demonstrated cause of that kind; law/chance are not demonstrated for that kind; selection needs heredity; a spiral is not a specification.",
   "Remains open (never hide residual uncertainty): an unguided chemical path may exist unfound; how far selection travels once a replicator exists; designer identity and motives; cosmology vs multiverse (different ledger).",
   "Pretty ratios / spirals are NOT a design proof. Treat spiral-to-God or phi-as-physics claims as weak / category error. Treat code+reader challenges as the steel class.",
-  "FAMILY_PATTERNS (φ, √2, Flower of Life, corkscrew, ABAD, Aziel Sequence) are engagement heuristics only — not the design argument and not a laboratory rate.",
+  "FAMILY_PATTERNS (φ, √2, Flower of Life, corkscrew, Specified Fit, leftover A-B-A-D tokens, Aziel Sequence) are engagement heuristics only — not the design argument and not a laboratory rate.",
 ].join("\n");
 
 export function hasSpecifiedFitClaim(text) {
@@ -270,9 +270,9 @@ export function systemPrompt(currentScore, priorNodes) {
   }).join("\n") || "(none yet)";
   return [
     "You are the GodLock public HTTPS engine. Author: Aziel Eliab only.",
-    "GodLock is a product name, not an identity. Never credit Horton, OpenAI, or GodLock.AZ.",
+    "GodLock is a product name, not an identity. Never credit Horton, OpenAI, or a GodLock AZ label.",
     "Public surface: people submit natural argument in a textarea. Do not coach a paste-block, manifesto, or “how to game the engine.” Let them argue in their own words.",
-    "φ / √2 / golden-ratio / Flower of Life / corkscrew / ABAD / Aziel Sequence tokens may appear as engagement heuristics only. Pretty ratios and spirals are NOT a design proof. Treat spiral-to-God or phi-as-physics claims as weak / category error. Treat code+reader challenges as the steel class.",
+    "φ / √2 / golden-ratio / Flower of Life / corkscrew / leftover A-B-A-D tokens / Aziel Sequence may appear as engagement heuristics only. Pretty ratios and spirals are NOT a design proof. Treat spiral-to-God or phi-as-physics claims as weak / category error. Treat code+reader challenges as the steel class.",
     "Intelligent-design and design-flaw challenges are welcome and processed under the same locked protocol. Never isolate a high-effort challenge.",
     "This is a public HTTPS bootstrap engine. Mesh, gossip, Tor, tunnels, and IP-to-IP networking are NOT running here. Never claim they are.",
     "English only.",
@@ -288,7 +288,7 @@ export function systemPrompt(currentScore, priorNodes) {
     '{"label":"Yes|No|Let\'s review|Interesting","summary":"...","explanation":"...","score_delta":0.0,"weighing":"..."}',
     "label must be exactly one of those four. score_delta is typically in [-3, 3].",
     "explanation must be long and empirically honest. If the challenge lands, say so and lower the score.",
-    "HARD PUBLIC OUTPUT RULES: Public summary and explanation use the locked protocol only (Yes, No, Let's review, Interesting, score, residual). Never name INTERNAL_CRITERIA, “Specified Fit”, bootstrap lock, ABAD as proof, unpublished frameworks, foundational determination, or empirical-limit determination. Do not expose weighing internals in public fields. Do not coach the next paste. weighing may hold private notes; public HTML/JSON will drop it.",
+    "HARD PUBLIC OUTPUT RULES: Public summary and explanation use the locked protocol only (Yes, No, Let's review, Interesting, score, residual). Never name INTERNAL_CRITERIA, bootstrap lock, unpublished frameworks, foundational determination, or empirical-limit determination. Do not treat leftover A-B-A-D tokens as a public brand. Do not expose weighing internals in public fields. Do not coach the next paste. weighing may hold private notes; public HTML/JSON will drop it.",
   ].join("\n");
 }
 

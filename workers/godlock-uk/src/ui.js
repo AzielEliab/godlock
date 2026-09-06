@@ -4,7 +4,7 @@
  */
 import {
   headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
-  AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH, RUNTIME_PATH, PUBLIC_RUNTIME,
+  AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH, PUBLIC_RUNTIME,
   AI_CLIENTS_SENTENCE, RUNTIME_VERSION, LIBRARY_RUNTIME, FRAGGATE_KERNEL, GITHUB_RUNTIME,
 } from "./seo.js";
 import { hideInternalDetermination } from "./publicCopy.js";
@@ -99,11 +99,12 @@ function pillClass(label) {
   return "review";
 }
 
-export { AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, SOFTWARE_PATH, RUNTIME_PATH };
+export { AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH };
 
 export function navItems() {
   return [
     { href: "/", label: "Engine" },
+    { href: REASON_PATH, label: "Reason" },
     { href: SOFTWARE_PATH, label: "Software" },
     { href: RUNTIME_PATH, label: "Runtime" },
     { href: "/verify", label: "Verify" },
@@ -111,6 +112,18 @@ export function navItems() {
     { href: LIBRARY_AZIEL, label: "Aziel Corpus Library", aziel: true },
   ];
 }
+
+export const SPECIFIED_FIT_TITLE = "Specified Fit, Not Pretty Spirals";
+export const SPECIFIED_FIT_STEEL =
+  "Functionally specified digital information joined to a translation / reader system has only one observed adequate cause: intelligence. Pretty spirals and φ are not a proof. Darwinian selection is conceded after a replicator exists. Residual uncertainty stays. Score ceiling 99.7 · floor 33.3.";
+export const SPECIFIED_FIT_ANSWERS = "Answers: Yes / No / Let's review / Interesting.";
+export const SPECIFIED_FIT_MOTTO = "GodLock does not argue. It records, analyzes, hardens, and grows.";
+export const SPECIFIED_FIT_LAYERS = [
+  { letter: "A", title: "Detection", body: "Specified complexity / functional information: complex and independently specifiable. Same move as cryptanalysis / SETI. A spiral is not a specification." },
+  { letter: "B", title: "Biological object", body: "Digital sequence + mapping table + machines that implement the mapping + error repair + machines encoded in the sequences (compiler+source / code+reader). Not “life is complicated.”" },
+  { letter: "C", title: "Fine-tuning physics", body: "Separate ledger. Cosmology does not write a codon table. Do not spend biological capital on a physics dispute." },
+  { letter: "D", title: "GodLock as method", body: "Receipts are specified information. GodLock is the ledger, not evidence biology was designed." },
+];
 
 export const AZIEL_MANIFESTO = [
   "I made this because a debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion. Intelligent design was never the point by itself. The point was whether a claim could stand in the open, be answered, and leave something behind that was not just my voice.",
@@ -219,6 +232,12 @@ export function homeBody({ stats, latest, prior, error }) {
   <div><div class="n">${esc(score)}%</div><div class="k">Current confidence</div></div>
   <div><div class="n">${esc(residual)}%</div><div class="k">Residual uncertainty</div></div>
 </div>
+<div class="card">
+  <h2>${esc(SPECIFIED_FIT_TITLE)}</h2>
+  <p>${esc(SPECIFIED_FIT_STEEL)}</p>
+  <p>${esc(SPECIFIED_FIT_ANSWERS)} ${esc(SPECIFIED_FIT_MOTTO)}</p>
+  <p class="muted">Four layers stay separate: detection criterion · biological code+reader · fine-tuning physics · GodLock as method, not evidence. <a href="${esc(REASON_PATH)}">Read the brief</a>.</p>
+</div>
 <p class="muted">Answers open with Yes, No, Let's review, or Interesting. Intelligent-design disputes are processed under the same rules. Score floor 33.3 · ceiling 99.7. GodLock records a receipt. It does not sermonize.</p>
 <p class="muted">${esc(AI_CLIENTS_SENTENCE)}</p>
 ${err}
@@ -272,12 +291,41 @@ export function verifyBody({ report }) {
   return `<div class="card"><h2 class="${cls}">${title}</h2><p class="muted">The ledger is walked. Each entry_hash is recomputed from canonical JSON (sorted keys, comma-colon separators) without the stored hash. Isolated submissions stay in the archive and are omitted from the public feed.</p><pre class="verify">${esc(JSON.stringify(safe, null, 2))}</pre><p class="actions"><a class="button" href="/">Back</a></p></div>`;
 }
 
+export function specifiedFitPublicHtml() {
+  const layers = SPECIFIED_FIT_LAYERS.map((L) => {
+    return `<div class="block"><div class="k">${esc(L.letter)}. ${esc(L.title)}</div><p>${esc(L.body)}</p></div>`;
+  }).join("");
+  return `<section class="answer" id="specified-fit">
+  <h2>${esc(SPECIFIED_FIT_TITLE)}</h2>
+  <p><strong>Aziel Eliab</strong></p>
+  <p>${esc(SPECIFIED_FIT_STEEL)}</p>
+  <p>${esc(SPECIFIED_FIT_ANSWERS)}</p>
+  <p>${esc(SPECIFIED_FIT_MOTTO)}</p>
+  ${layers}
+  <p class="muted">Public identity is Aziel Eliab only. GodLock is a product name.</p>
+</section>`;
+}
+
+export function reasonBody() {
+  return `<section class="about-aziel" id="specified-fit-brief"><div class="card about-prose">
+${specifiedFitPublicHtml()}
+<p><a href="${esc(AZIEL_ELIAB_PATH)}">Aziel Eliab</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a></p>
+</div></section>`;
+}
+
+export function reasonText() {
+  const layers = SPECIFIED_FIT_LAYERS.map((L) => L.letter + ". " + L.title + " — " + L.body).join("\n\n");
+  return SPECIFIED_FIT_TITLE + "\n\nAziel Eliab\n\n" + SPECIFIED_FIT_STEEL + "\n\n"
+    + SPECIFIED_FIT_ANSWERS + "\n\n" + SPECIFIED_FIT_MOTTO + "\n\n" + layers + "\n";
+}
+
 export function azielEliabBody() {
   const paras = AZIEL_MANIFESTO.map((p) => `<p>${esc(p)}</p>`).join("\n");
   return `<section class="about-aziel" id="aziel-eliab"><div class="card about-prose">
 ${paras}
 <p class="about-sign">${esc(AZIEL_SIGNATURE)}</p>
-<p><a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a></p>
+${specifiedFitPublicHtml()}
+<p><a href="${esc(REASON_PATH)}">Specified Fit, Not Pretty Spirals</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a></p>
 </div></section>`;
 }
 

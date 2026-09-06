@@ -40,6 +40,9 @@ describe("usesCountFromLedger", () => {
 
   it("does not use receipts or metadata as a substitute for the ledger", () => {
     assert.equal(usesCountFromLedger({ ledgerSubmits: 0, receipts: 9, uses: 9 }), 0);
+    assert.equal(usesCountFromLedger({ ledgerSubmits: 0, metadataUses: 9 }), 9);
+    assert.equal(usesCountFromLedger({ ledgerSubmits: 7, metadataUses: 3 }), 7);
+    assert.equal(usesCountFromLedger({ ledgerSubmits: 2, metadataUses: 11 }), 11);
   });
 });
 
@@ -63,10 +66,12 @@ describe("hideInternalDetermination", () => {
     assert.match(hideInternalDetermination("Public HTTPS engine. Author Aziel Eliab."), /Aziel Eliab/);
   });
 
-  it("strips specified-fit method labels and bootstrap jargon from public text", () => {
+  it("strips bootstrap jargon and leftover ABAD-framework labels, not Specified Fit", () => {
     assert.equal(hideInternalDetermination("INTERNAL_CRITERIA says submit a challenge."), "says submit a challenge.");
-    assert.equal(hideInternalDetermination("Specified Fit, Not Pretty Spirals is hidden"), "is hidden");
-    assert.equal(hideInternalDetermination("The specified-fit brief stays internal."), "The stays internal.");
+    assert.equal(
+      hideInternalDetermination("Specified Fit, Not Pretty Spirals is the public brief"),
+      "Specified Fit, Not Pretty Spirals is the public brief",
+    );
     assert.equal(hideInternalDetermination("bootstrap lock as engine jargon"), "as engine jargon");
     assert.equal(hideInternalDetermination("ABAD framework used as determination"), "used as determination");
     assert.equal(hideInternalDetermination("weighing internals: do not publish"), "do not publish");

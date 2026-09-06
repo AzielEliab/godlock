@@ -2,7 +2,7 @@
 
 Merge is corkscrew growth: the table only grows. Rules are not deleted
 by this API. Keywords extracted from the hardening feed back into
-ABAD scoring as extra hits (simple keyword add).
+Specified Fit / GodLock scoring as extra hits (simple keyword add).
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
-from godlock.abad import extract_keywords
+from godlock.specified_fit import extract_keywords
 
 
 def _utc_now() -> str:

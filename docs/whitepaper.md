@@ -1,6 +1,6 @@
 # GodLock
 
-**A self-hosted stress-test and resilience engine for the ABAD framework**
+**A self-hosted stress-test and resilience engine for Specified Fit**
 
 **Author:** Aziel Eliab
 **Date:** 12 July 2026
@@ -15,8 +15,8 @@
 
 GodLock is a localhost research tool that treats opposition as fuel.
 A counter-argument is not a debate to win. It is a **stress test**:
-logged as an immutable receipt, scored for engagement with the ABAD
-framework, analysed by Jeeves into a suggested hardening, optionally
+logged as an immutable receipt, scored for Specified Fit / GodLock
+engagement, analysed by Jeeves into a suggested hardening, optionally
 merged into an active rules table, and optionally sealed into a
 one-way Lumen capsule.
 
@@ -41,7 +41,7 @@ GodLock is:
 - self-hosted;
 - browser-served on the loopback interface by default;
 - a recorder of counter-arguments;
-- an ABAD-aware scorer;
+- a Specified Fit / GodLock-score scorer;
 - a Jeeves proposer of hardenings;
 - a merge table for active rules;
 - a Lumen exporter of encrypted capsules.
@@ -57,36 +57,40 @@ GodLock is not:
 
 ---
 
-## 2. The ABAD surface this engine hardens
+## 2. The Specified Fit surface this engine hardens
 
-GodLock exists to stress-test the ABAD framework as used by Aziel
-Systems work: layered reading (A-B-A-D), the Aziel Sequence, φ and
-√2 as named convergences, Flower of Life geometry, and corkscrew
-growth. A submission *engages* the framework when its text hits one
-or more of those families. Engagement is a heuristic, not a
-decryption of a historical artifact and not a laboratory measurement.
+GodLock exists to stress-test **Specified Fit, Not Pretty Spirals**
+(Aziel Eliab): functionally specified digital information plus a
+translation / reader system. Pretty spirals and φ are not a proof.
+Darwinian selection is conceded after a replicator exists. Public
+reasoning: `docs/Specified_Fit_Not_Pretty_Spirals.md`.
 
-The families and default weights (also in `godlock/abad.py`):
+A submission *engages* the scorer when its text hits one or more
+families. Engagement is a heuristic, not a decryption of a historical
+artifact and not a laboratory measurement. Four layers stay separate:
+(A) detection criterion, (B) biological code+reader object, (C)
+fine-tuning physics, (D) GodLock as method / ledger, not evidence.
+
+The families and default weights (also in `godlock/specified_fit.py`):
 
 | Family | Tokens (examples) | Weight |
 |--------|-------------------|--------|
+| `specified_fit` | Specified Fit, specified complexity; leftover A-B-A-D tokens | 3.0 |
 | `aziel_sequence` | Aziel Sequence, aziel-seq | 3.0 |
 | `phi` | phi, golden ratio, φ, 1.618 | 2.0 |
 | `sqrt2` | sqrt(2), √2, square root of 2, 1.414 | 2.0 |
 | `flower_of_life` | Flower of Life, vesica piscis | 2.5 |
 | `corkscrew` | corkscrew | 2.0 |
-| `abad` | ABAD, A-B-A-D | 3.0 |
 | `merged_rule` | extra keywords from merged hardenings | 1.5 each |
 
 Families stack. These numbers are **defaults for software**, not
 empirical proof. A fork may change them; it must not pretend a study
 was run unless it publishes the method next to the number.
 
-A-B-A-D layering, in this engine, is operationalized as: **A**ccept
-the counter-argument as a receipt, **B**ind it to logical ingress /
-egress identity, **A**nalyse it (Jeeves), **D**eploy a merged rule
-(corkscrew growth of the table). That is a software loop, not a
-claim about a manuscript.
+The software loop is: accept the counter-argument as a receipt, bind
+it to logical ingress / egress identity, analyse it (Jeeves), deploy
+a merged rule (corkscrew growth of the table). That is a method, not
+biological evidence.
 
 ---
 
@@ -197,7 +201,7 @@ Jeeves consumes a receipt and returns:
 }
 ```
 
-The default model is a stdlib heuristic over ABAD families. It does
+The default model is a stdlib heuristic over Specified Fit / GodLock-score families. It does
 not require the network. If the environment variable `OLLAMA_HOST`
 is set, a thin adapter may POST to that host's `/api/generate` with
 a short timeout and must fall back to the heuristic on any failure.
@@ -290,8 +294,8 @@ logical-only.
 ## 13. What this document does not claim
 
 It does not publish a measured ROC, a latency benchmark, or a
-physical proof of φ or √2. Resilience score is the mean ABAD
-engagement of logged receipts, an engineering convenience.
+physical proof of φ or √2. Resilience score is the mean Specified Fit
+/ GodLock engagement of logged receipts, an engineering convenience.
 
 ---
 

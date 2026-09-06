@@ -1,7 +1,7 @@
 """Jeeves: propose a hardening for a stress-test receipt.
 
 Default model is ``godlock-jeeves-heuristic-0.1`` — stdlib regex and
-ABAD scoring, no network. If ``OLLAMA_HOST`` is set, a thin adapter may
+Specified Fit / GodLock scoring, no network. If ``OLLAMA_HOST`` is set, a thin adapter may
 try a local Ollama generate call and fall back to the heuristic on any
 failure. Tests must pass with the heuristic, offline.
 """
@@ -14,7 +14,7 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-from godlock.abad import score_engagement
+from godlock.specified_fit import score_engagement
 from godlock.config import JEEVES_MODEL
 from godlock.receipts import Receipt
 
@@ -45,7 +45,7 @@ def _heuristic(receipt: Receipt, extra_keywords: list[str] | None = None) -> dic
     families = [h for h in hits if not h.startswith("merged_rule:")]
     if families:
         suggested = (
-            "Harden ABAD coverage for: "
+            "Harden Specified Fit / GodLock-score coverage for: "
             + ", ".join(families)
             + f". Require an explicit {families[0]} check in the active rules."
         )
@@ -57,12 +57,12 @@ def _heuristic(receipt: Receipt, extra_keywords: list[str] | None = None) -> dic
     else:
         suggested = (
             "Add a rule requiring the counter-argument to engage at least "
-            "one ABAD token (Aziel Sequence, phi, sqrt(2), Flower of Life, "
-            "corkscrew, A-B-A-D)."
+            "one GodLock-score family (Specified Fit, Aziel Sequence, phi, "
+            "sqrt(2), Flower of Life, corkscrew)."
         )
         notes = (
             f"Heuristic engagement score={engagement['score']}. "
-            "No ABAD family hit. Suggested rule is a keyword floor, not a proof."
+            "No Specified Fit family hit. Suggested rule is a keyword floor, not a proof."
         )
     return {
         "receipt_id": receipt.id,

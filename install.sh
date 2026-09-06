@@ -5,6 +5,8 @@ set -euo pipefail
 
 HOST="${GODLOCK_HOME_HOST:-https://godlock-download-tracker.vibelock.workers.dev}"
 ASSET="${GODLOCK_HOME_ASSET:-godlock-0.1.0.tar.gz}"
+VERSION="${GODLOCK_VERSION:-0.1.0}"
+RUNTIME="${AZIEL_RUNTIME_HOST:-https://aziel-runtime.vibelock.workers.dev}"
 WORKDIR="${GODLOCK_HOME:-$HOME/godlock}"
 
 mkdir -p "$WORKDIR"
@@ -27,6 +29,15 @@ python -m pip install -e .
 
 echo
 echo "Installed GodLock."
+UPDATE_JSON="$(curl -fsSL -A 'Mozilla/5.0' --max-time 3 "${RUNTIME}/v1/update/check?slug=godlock&version=${VERSION}" 2>/dev/null || true)"
+if [ -z "$UPDATE_JSON" ]; then
+  UPDATE_JSON="$(curl -fsSL -A 'Mozilla/5.0' --max-time 3 "${RUNTIME}/v1/pull/godlock" 2>/dev/null || true)"
+fi
+case "$UPDATE_JSON" in
+  *'"update_available":true'*|*'"update_available": true'*)
+    echo "Update available (you have ${VERSION}). Counted download (no silent overwrite): ${HOST}/download"
+    ;;
+esac
 echo "Run:  godlock ui"
 echo "Then open http://127.0.0.1:8080  (loopback only)"
 echo "Author: Aziel Eliab."

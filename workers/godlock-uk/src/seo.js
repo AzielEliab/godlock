@@ -234,7 +234,8 @@ export function headMeta(opts) {
   );
   if (kind !== "aziel") {
     tags.push(
-      linkRel("alternate", RUNTIME_PATH + "/openapi.json", " type=" + Q + "application/json" + Q + " title=" + Q + "OpenAPI" + Q),
+      linkRel("alternate", "/openapi.json", " type=" + Q + "application/json" + Q + " title=" + Q + "OpenAPI" + Q),
+      linkRel("alternate", RUNTIME_PATH + "/openapi.json", " type=" + Q + "application/json" + Q + " title=" + Q + "Runtime OpenAPI" + Q),
       linkRel("alternate", RUNTIME_PATH + "/llms.txt", " type=" + Q + "text/plain" + Q),
     );
   }
@@ -349,6 +350,7 @@ export const PUBLIC_ALLOW = [
   "/cite.json",
   "/llms.txt",
   "/ai.txt",
+  "/openapi.json",
   "/receipt/",
   "/health",
 ];
@@ -372,6 +374,9 @@ export async function sitemapXml(env) {
     CANON_HOST + SOFTWARE_PATH + "#azinterface",
     CANON_HOST + SOFTWARE_PATH + "#godlock",
     PUBLIC_RUNTIME,
+    PUBLIC_RUNTIME + "/v1/software",
+    PUBLIC_RUNTIME + "/v1/fraggate/list",
+    PUBLIC_RUNTIME + "/v1/update/check",
     PUBLIC_RUNTIME + "/v1/runtime.json",
     PUBLIC_RUNTIME + "/v1/uses",
     PUBLIC_RUNTIME + "/openapi.json",
@@ -379,6 +384,7 @@ export async function sitemapXml(env) {
     PUBLIC_RUNTIME + "/cite.json",
     PUBLIC_RUNTIME + "/mcp",
     PUBLIC_RUNTIME + "/v1/skill",
+    CANON_HOST + "/openapi.json",
     CANON_HOST + REASON_PATH,
     CANON_HOST + AZIEL_ELIAB_PATH,
     CANON_HOST + "/health",
@@ -391,6 +397,10 @@ export async function sitemapXml(env) {
     LIBRARY_AZIEL,
     LIBRARY_RUNTIME,
     CATALOG + "/",
+    CATALOG + "/v1/software",
+    CATALOG + "/v1/fraggate/list",
+    CATALOG + "/v1/update/check",
+    CATALOG + "/v1/catalog.json",
   ];
   try {
     const rows = (await env.DB.prepare(
@@ -414,9 +424,16 @@ export function citeDoc() {
     download: DOWNLOAD,
     verify: CANON_HOST + "/verify",
     software: CANON_HOST + SOFTWARE_PATH,
-    software_catalog: PUBLIC_RUNTIME + "/v1/catalog.json",
-    software_suite: "Full live aziel-runtime catalog plus aziel-runtime / FragGate. New catalog slugs are included automatically. Same completeness as the Digital Library Software hub.",
+    software_catalog: PUBLIC_RUNTIME + "/v1/software",
+    software_catalog_origin: CATALOG + "/v1/software",
+    software_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/list",
+    software_fraggate_origin: CATALOG + "/v1/fraggate/list",
+    software_catalog_json: PUBLIC_RUNTIME + "/v1/catalog.json",
+    software_suite: "Live aziel-runtime /v1/software (fallback /v1/fraggate/list) plus aziel-runtime / FragGate. GitHub and runtime drops refresh the tab without hand copy. Same completeness as the Digital Library Software hub.",
     software_product_count: null,
+    openapi: CANON_HOST + "/openapi.json",
+    update_check: CATALOG + "/v1/update/check?slug=godlock&version=0.1.0",
+    update_download: DOWNLOAD,
     runtime: PUBLIC_RUNTIME,
     runtime_health: PUBLIC_RUNTIME + "/v1/health",
     runtime_manifest: PUBLIC_RUNTIME + "/v1/runtime.json",
@@ -468,8 +485,13 @@ export function llmsDoc() {
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n"
     + "Software lists the full live aziel-runtime catalog plus aziel-runtime / FragGate, matching Digital Library Software completeness. New catalog slugs are included automatically. AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (azbrowser-download-tracker, aznet-download-tracker, azhub-download-tracker, azinterface-download-tracker). Never nest AZHub with AZInterface. FragGate is its own Gate card (fraggate-download-tracker Download/Worker, A–Z with DecisionGATE). Each product is tethered to its Worker, GitHub, and /runtime FragGate/MCP. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
+    + "Live software catalog: " + PUBLIC_RUNTIME + "/v1/software\n"
+    + "Origin software: " + CATALOG + "/v1/software\n"
+    + "FragGate list fallback: " + PUBLIC_RUNTIME + "/v1/fraggate/list\n"
     + "Catalog JSON: " + PUBLIC_RUNTIME + "/v1/catalog.json\n"
-    + "Origin catalog: " + CATALOG + "/v1/catalog.json\n\n"
+    + "Origin catalog: " + CATALOG + "/v1/catalog.json\n"
+    + "OpenAPI: " + CANON_HOST + "/openapi.json\n"
+    + "Update check: " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, use counted " + DOWNLOAD + " (no silent overwrite).\n\n"
     + "## Runtime (FragGate door)\n\n"
     + "GodLock → Runtime. Same-origin Aziel Eliab Runtime " + RUNTIME_VERSION + " on GodLock.uk. One door — discover, route, refuse. Kernel: " + FRAGGATE_KERNEL + " (FG-0.1).\n"
     + "Door: " + PUBLIC_RUNTIME + "\n"
@@ -497,4 +519,33 @@ export function llmsDoc() {
 
 export function aiDoc() {
   return llmsDoc();
+}
+
+export function siteOpenApi() {
+  return {
+    openapi: "3.1.0",
+    info: {
+      title: "GodLock.uk",
+      version: "0.1.0",
+      summary: "Public HTTPS stress-test engine by Aziel Eliab.",
+      description: hideInternalDetermination(
+        "GodLock.uk public routes plus same-origin FragGate / MCP door. Software tab reads live " + CATALOG + "/v1/software (fallback /v1/fraggate/list). Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
+      ),
+      contact: { name: AUTHOR, url: CANON_HOST + AZIEL_ELIAB_PATH },
+      license: { name: "Apache-2.0", url: "https://www.apache.org/licenses/LICENSE-2.0" },
+    },
+    servers: [{ url: CANON_HOST }, { url: FALLBACK_HOST }],
+    paths: {
+      "/health": { get: { operationId: "godlockUkHealth", summary: "Liveness", responses: { "200": { description: "OK" } } } },
+      "/software": { get: { operationId: "godlockUkSoftware", summary: "Live Aziel Eliab software suite (Plain → Gate → Lock)", responses: { "200": { description: "HTML or JSON" } } } },
+      "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
+      "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record", responses: { "200": { description: "OK" } } } },
+      "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief", responses: { "200": { description: "OK" } } } },
+      "/runtime/openapi.json": { get: { operationId: "godlockUkRuntimeOpenApi", summary: "Same-origin FragGate OpenAPI", responses: { "200": { description: "OK" } } } },
+      "/runtime/mcp": { post: { operationId: "godlockUkRuntimeMcp", summary: "Same-origin FragGate MCP door", responses: { "200": { description: "OK" } } } },
+      "/runtime/v1/software": { get: { operationId: "godlockUkRuntimeSoftware", summary: "Live software catalog proxy", responses: { "200": { description: "OK" } } } },
+      "/runtime/v1/fraggate/list": { get: { operationId: "godlockUkRuntimeFraggateList", summary: "FragGate list fallback catalog", responses: { "200": { description: "OK" } } } },
+      "/runtime/v1/update/check": { get: { operationId: "godlockUkRuntimeUpdateCheck", summary: "Client update check (prompt only; no silent overwrite)", responses: { "200": { description: "OK" } } } },
+    },
+  };
 }

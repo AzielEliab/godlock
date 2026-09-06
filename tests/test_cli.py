@@ -8,11 +8,13 @@ from godlock.cli import main
 from godlock.config import DEFAULT_BIND_HOST
 
 
-def test_cli_version(capsys) -> None:
+def test_cli_version(capsys, monkeypatch) -> None:
+    monkeypatch.setattr("godlock.update.check_update", lambda version=None, **_kw: None)
     assert main(["version"]) == 0
     out = capsys.readouterr().out
     assert __version__ in out
     assert "godlock" in out.lower()
+    assert "Update available" not in out
 
 
 def test_cli_score_and_submit(tmp_path: Path, capsys, monkeypatch) -> None:

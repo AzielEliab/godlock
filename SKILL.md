@@ -32,6 +32,7 @@ Ops (do **not** increment downloads or views):
 |--------|------|------|
 | GET | `/v1/health` | Liveness. Does not increment downloads. |
 | GET | `/v1/skill` | This markdown. Does not increment downloads. |
+| GET | `/v1/update` | Online update check. Prompt + counted /download if update_available. Never silent overwrite. |
 | POST | `/v1/score` | Specified Fit / GodLock engagement score. Advisory. Not a VPN. |
 | POST | `/v1/submit` | Ephemeral logical receipt. Not anonymity. |
 
@@ -60,6 +61,8 @@ Author: **Aziel Eliab**. Honest scope: Offline Specified Fit / GodLock score. No
 - This Worker skill: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`
 - This Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json
 - Sample payload: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/example`
+- Update check: `GET https://aziel-runtime.vibelock.workers.dev/v1/update/check?slug=godlock&version=0.1.0` (Worker: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/update`). If `update_available`, prompt with counted `https://godlock-download-tracker.vibelock.workers.dev/download`. Do not silently overwrite.
+- Live software catalog: `GET https://aziel-runtime.vibelock.workers.dev/v1/software` (fallback `GET /v1/fraggate/list`)
 
 Local UI: **Import JSON file** (`type=file`) and **Export JSON**. Then `godlock doctor`.
 

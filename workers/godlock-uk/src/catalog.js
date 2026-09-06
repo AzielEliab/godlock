@@ -17,15 +17,34 @@ import {
   DOWNLOAD, GITHUB,
 } from "./seo.js";
 
+export const SOFTWARE_JSON_PATH = "/v1/software";
+export const FRAGGATE_LIST_PATH = "/v1/fraggate/list";
 export const CATALOG_JSON_PATH = "/v1/catalog.json";
 export const CATALOG_USES_PATH = "/v1/uses";
+export const SOFTWARE_ORIGIN_URL = CATALOG + SOFTWARE_JSON_PATH;
+export const FRAGGATE_LIST_ORIGIN_URL = CATALOG + FRAGGATE_LIST_PATH;
 export const CATALOG_ORIGIN_URL = CATALOG + CATALOG_JSON_PATH;
 export const CATALOG_LIBRARY_URL = LIBRARY + "/runtime" + CATALOG_JSON_PATH;
-export const CATALOG_PUBLIC_URL = RUNTIME_PATH + CATALOG_JSON_PATH;
-/** In-process service-binding dest (Worker name), then the same origin URL runtimeRoot uses. */
-export const BINDING_CATALOG_URLS = [
+export const CATALOG_PUBLIC_URL = RUNTIME_PATH + SOFTWARE_JSON_PATH;
+export const CATALOG_PUBLIC_FALLBACK_URL = RUNTIME_PATH + FRAGGATE_LIST_PATH;
+/** Prefer live /v1/software, then fraggate/list, then catalog.json. Binding dest first. */
+export const BINDING_SOFTWARE_URLS = [
+  "https://aziel-runtime" + SOFTWARE_JSON_PATH,
+  SOFTWARE_ORIGIN_URL,
+];
+export const BINDING_FRAGGATE_URLS = [
+  "https://aziel-runtime" + FRAGGATE_LIST_PATH,
+  FRAGGATE_LIST_ORIGIN_URL,
+];
+export const BINDING_CATALOG_URLS = BINDING_SOFTWARE_URLS.concat(BINDING_FRAGGATE_URLS, [
   "https://aziel-runtime" + CATALOG_JSON_PATH,
   CATALOG_ORIGIN_URL,
+]);
+export const HTTPS_CATALOG_TRIES = [
+  ["software", SOFTWARE_ORIGIN_URL],
+  ["fraggate-list", FRAGGATE_LIST_ORIGIN_URL],
+  ["origin", CATALOG_ORIGIN_URL],
+  ["library", CATALOG_LIBRARY_URL],
 ];
 export const BINDING_USES_URLS = [
   "https://aziel-runtime" + CATALOG_USES_PATH,
@@ -427,13 +446,21 @@ function asProductList(value) {
   return [];
 }
 
+function entryAsProduct(raw) {
+  if (typeof raw === "string") return { slug: raw };
+  if (!raw || typeof raw !== "object") return null;
+  const one_line = raw.one_line || raw.description || raw.banner || "";
+  return { ...raw, one_line };
+}
+
 export function productsFromCatalogDoc(body) {
   if (!body || typeof body !== "object") return [];
   const buckets = [
     asProductList(body.products),
-    asProductList(body.catalog),
-    asProductList(body.items),
     asProductList(body.software),
+    asProductList(body.items),
+    Array.isArray(body.catalog) ? body.catalog : [],
+    asProductList(body.entries).map(entryAsProduct),
   ];
   if (Array.isArray(body.true_engine_slugs)) {
     buckets.push(body.true_engine_slugs.map((slug) => ({ slug })));
@@ -511,7 +538,7 @@ export async function fetchCatalogProducts(env, deps = {}) {
     return { products: CATALOG_FALLBACK_PRODUCTS.map((p) => compactProduct(p)), source: "fallback", version: "" };
   }
 
-  for (const [source, url] of [["origin", CATALOG_ORIGIN_URL], ["library", CATALOG_LIBRARY_URL]]) {
+  for (const [source, url] of HTTPS_CATALOG_TRIES) {
     try {
       const res = await fetchJson(httpFetch, url, timeoutMs);
       const parsed = await productsFromResponse(res);

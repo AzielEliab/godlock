@@ -117,6 +117,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.cmd == "version":
         sys.stdout.write(f"godlock {__version__}\n")
         sys.stdout.write(MOTTO + "\n")
+        from godlock.update import check_update, format_prompt
+
+        prompt = format_prompt(check_update(__version__))
+        if prompt:
+            sys.stdout.write(prompt + "\n")
         return 0
 
     if args.cmd == "doctor":
@@ -138,12 +143,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             return 2
         engine = _engine(args)
+        from godlock.update import check_update, format_prompt
+
+        update = check_update(__version__)
+        prompt = format_prompt(update)
+        if prompt:
+            sys.stderr.write(prompt + "\n")
         app = create_app(
             engine=engine,
             persist=args.persist,
             data_dir=_data_dir(args),
             bind_host=args.host,
             bind_port=args.port,
+            update=update,
         )
         uvicorn.run(app, host=args.host, port=args.port, log_level="info")
         return 0

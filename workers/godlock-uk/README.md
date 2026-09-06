@@ -8,7 +8,7 @@ One input. Submit a challenge (including intelligent-design / design-flaw attack
 
 Every submission is hash-chained into an append-only ledger. Isolated gibberish is stored but not scored and not shown on the public feed. High-effort intelligent-design challenges are never isolated.
 
-**This is a public HTTPS bootstrap surface. Mesh is not on this surface.** No Cloudflare Tunnel. No node mesh. Author: **Aziel Eliab**.
+**This is a public HTTPS bootstrap surface.** Suite mesh is opt-in on the runtime door (`/runtime/v1/mesh/*`) and **default off**. Not an anonymity network. No Cloudflare Tunnel. Author: **Aziel Eliab**.
 
 GodLock is a product name, not an identity.
 
@@ -23,9 +23,10 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 - `/` engine (one screen; Specified Fit steel claim on the spine)
 - `/reason` Specified Fit, Not Pretty Spirals (public brief); `/specified-fit` 308 here
 - `POST /submit` challenge (`text`); JSON unless `Accept: text/html` (then 303)
-- `POST /heartbeat` live-node ping; JSON includes `live_nodes` and `uses` so the homepage can update
-- `GET /stats` JSON: `live_nodes`, `uses`, views, downloads, score (site counters; not the download-tracker)
-- `GET /count` JSON: `{ live_nodes, uses }` (site presence + ledger-backed Uses; not downloads)
+- `POST /heartbeat` live-node ping; JSON includes `live_nodes`, `mesh`, and `uses` so the homepage can update
+- `GET /stats` JSON: `live_nodes`, `site_live_nodes`, `mesh`, `uses`, views, downloads, score (site counters; not the download-tracker)
+- `GET /count` JSON: `{ live_nodes, site_live_nodes, mesh_enabled, mesh_live_nodes, uses }` (site presence + optional suite mesh + ledger-backed Uses; not downloads)
+- `GET /mesh` JSON snapshot of suite mesh aligned with Live Nodes (default off; empty/disabled when runtime `/v1/mesh/*` is missing)
 - `/verify` walk the ledger
 - `/software` full live aziel-runtime catalog from `GET /v1/software` (fallback `GET /v1/fraggate/list`, then catalog.json / snapshot) plus aziel-runtime, AZBrowser (Plain), AZNet (Plain, `aznet-download-tracker`), AZHub (Plain, `azhub-download-tracker`, Blank Key / AIH-WP-1.0), AZInterface (Plain, `azinterface-download-tracker`, custodial page cycles / AIH-WP-1.0), and a dedicated FragGate Gate card (`fraggate-download-tracker` Download/Worker, not GitHub-only), A–Z with DecisionGATE. Service-bind `AZIEL_RUNTIME` first, then HTTPS origin / library, then a snapshot fallback so the page never goes empty. New catalog slugs are included automatically. Each card tethers Worker, GitHub, and `/runtime` FragGate/MCP, with download/view counters from Worker `/count` and uses when published. AZBrowser, AZNet, AZHub, and AZInterface stay separate cards. Never nest Hub with Interface. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock).
 - `/runtime` and `/runtime/*` same-origin FragGate door (service-bind or HTTPS proxy to aziel-runtime 1.6.8)
@@ -34,11 +35,15 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 - `/receipt/{id}` public if not isolated
 - `/health` JSON
 - `/robots.txt` `/sitemap.xml` `/cite.json` `/llms.txt` `/ai.txt` `/openapi.json` (each lists the `/runtime` door)
-- Same-origin runtime also serves `/runtime/v1/health`, `/runtime/v1/runtime.json`, `/runtime/v1/software`, `/runtime/v1/fraggate/list`, `/runtime/v1/update/check`, `/runtime/v1/uses`, `/runtime/openapi.json`, `POST /runtime/mcp`
+- Same-origin runtime also serves `/runtime/v1/health`, `/runtime/v1/runtime.json`, `/runtime/v1/software`, `/runtime/v1/fraggate/list`, `/runtime/v1/mesh`, `/runtime/v1/mesh/list`, `POST /runtime/v1/mesh/{join|heartbeat|enable|disable}`, `/runtime/v1/update/check`, `/runtime/v1/uses`, `/runtime/openapi.json`, `POST /runtime/mcp`
 
 ## Counters
 
-**Live Nodes** = distinct `godlock_node` sessions with a heartbeat in the last **5 minutes**. Every request (including the homepage GET) upserts `heartbeats(session_id, last_ms)`. Homepage GET counts the current visitor on first paint (`visiting`), even if D1 COUNT lags. The page POSTs `/heartbeat` on load, every 25s, and when the tab becomes visible, then writes the returned `live_nodes` into `#stat-live-nodes`. Presence rows older than 15 minutes are deleted.
+**Live Nodes** = distinct `godlock_node` sessions with a heartbeat in the last **5 minutes**, **unless suite mesh is enabled**. When aziel-runtime `/v1/mesh` reports `enabled: true`, the public Live Nodes figure is the suite mesh count (`mesh.live_nodes`). When mesh is off, missing, or 404 (routes not merged yet), Live Nodes stay on site heartbeats and `mesh.status` is `off` or `unavailable`. Every request (including the homepage GET) upserts `heartbeats(session_id, last_ms)`. Homepage GET counts the current visitor on first paint (`visiting`), even if D1 COUNT lags. The page POSTs `/heartbeat` on load, every 25s, and when the tab becomes visible, then writes the returned `live_nodes` into `#stat-live-nodes` and the mesh caption into `#mesh-status`. Presence rows older than 15 minutes are deleted.
+
+MCP / FragGate call mesh ops through the same-origin runtime proxy: `GET/POST https://godlock.uk/runtime/v1/mesh/*` or `POST https://godlock.uk/runtime/mcp`. Enable/disable stay on that door (default off). The public engine does not auto-join visitors to the mesh.
+
+Local communique style tool: [anon-broadcast](https://github.com/AzielEliab/anon-broadcast) — text → TTS / desk reel / metadata-culled MP4 + SHA-256 receipt. Not hosted on this Worker. No ffmpeg farm. Identity Aziel Eliab only. Mesh is not an anonymity network.
 
 **Uses** = `COUNT(*)` of receipt-ledger rows with action `SUBMIT` or `ISOLATE`, floored by durable `metadata.uses` so a parent ledger wipe does not drop the counter. That is a real submission that went through `POST /submit` and was hash-chained. Heartbeats, page views, downloads, and `/runtime` API traffic do not increment Uses. Isolated submissions count because they are ledgered (`ISOLATE`). `SCORE` rows do not count. Application code never resets Views, Uses, downloads, or Live Nodes.
 

@@ -143,7 +143,11 @@ describe("SEO / MCP discoverability", () => {
     assert.match(sitemap, /\/v1\/update/);
     assert.match(sitemap, /\/llms\.txt/);
     assert.match(sitemap, /aziel-runtime\.vibelock\.workers\.dev\/v1\/software/);
+    assert.match(sitemap, /aziel-runtime\.vibelock\.workers\.dev\/v1\/mesh/);
+    assert.match(sitemap, /godlock\.uk\/mesh/);
     assert.match(llms, /Live software catalog/);
+    assert.match(llms, /Suite mesh \(default off\)/);
+    assert.match(llms, /anon-broadcast/);
     assert.match(llms, /no silent overwrite/i);
     assert.equal(cite.author, "Aziel Eliab");
     assert.equal(cite.identity, "Aziel Eliab");
@@ -153,6 +157,9 @@ describe("SEO / MCP discoverability", () => {
     assert.equal(robotsTxt().includes("GPTBot"), true);
     assert.ok(sitemapXml().includes("/cite.json"));
     assert.equal(citeDoc().software_catalog, "https://aziel-runtime.vibelock.workers.dev/v1/software");
+    assert.equal(citeDoc().mesh, "https://aziel-runtime.vibelock.workers.dev/v1/mesh");
+    assert.equal(citeDoc().mesh_default_off, true);
+    assert.equal(citeDoc().anon_broadcast, "https://github.com/AzielEliab/anon-broadcast");
     assert.match(llmsDoc(), /FragGate list fallback/);
   });
 });

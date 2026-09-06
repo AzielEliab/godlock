@@ -49,6 +49,7 @@ custom DNS is ready. This tree documents the intended public URL
 |--------|------|----------|
 | GET | `/` | Index page with the GitHub Releases link |
 | GET | `/download?repo=&tag=&asset=` | Increment KV, 302 to the hosted asset (default: `godlock-0.1.0.tar.gz`) |
+| GET | `/count` | `{ project, views, downloads, total }` — `total` is the download tally (same as `downloads`), matching sibling product Workers |
 | GET | `/stats` | JSON totals plus per-repo and per-branch breakdown |
 | POST | `/event` | A fork reports a download |
 
@@ -84,10 +85,24 @@ curl -X POST https://godlock-download-tracker.vibelock.workers.dev/event \
 `fork=1` or `fork=YourFork/godlock`. If `owner/repo` is not
 `AzielEliab/godlock`, the worker records `fork=1` automatically.
 
-## Stats
+## Count and stats
 
-`GET /stats` returns `total`, `by_repo`, `by_branch`, `by_fork`, and a
-`breakdown` array so forks can read aggregates.
+`GET /count` matches sibling product Workers (`azbrowser`, `fraggate`,
+`aznet`, `azhub`, `azinterface`):
+
+```json
+{ "project": "godlock", "views": 12, "downloads": 40, "total": 40 }
+```
+
+- `views` — homepage view counter (`godlock|__views__`).
+- `downloads` — counted Download / `/event` increments (`project|owner|repo|branch|fork`).
+- `total` — download tally (same as `downloads`). This is the documented
+  sum, not `views + downloads`. Existing KV keys are read as-is; `/count`
+  does not increment or reset counters.
+
+`GET /stats` returns `views`, `downloads`, `total` (download tally),
+`by_repo`, `by_branch`, `by_fork`, and a `breakdown` array so forks can
+read aggregates.
 
 ## CORS
 

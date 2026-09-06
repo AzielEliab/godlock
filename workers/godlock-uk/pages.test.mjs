@@ -775,10 +775,19 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /href="https:\/\/aznet-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
     assert.match(html, /href="https:\/\/aznet-download-tracker\.vibelock\.workers\.dev\/">Worker<\/a>/);
     assert.doesNotMatch(html, /AZBrowser \/ AZNet/);
+    assert.doesNotMatch(html, /AZBrowser\s+Phase[-\s]?1/i);
     const copy = hubProductCopy({ slug: "azbrowser", name: "AZBrowser / AZNet", one_line: "AZBrowser / AZNet Phase 1: cite." });
     assert.equal(copy.name, "AZBrowser");
-    assert.equal(copy.one_line, "AZBrowser Phase 1: cite.");
+    assert.equal(copy.one_line, "AZBrowser: cite.");
     assert.doesNotMatch(copy.one_line, /AZBrowser\s*\/\s*AZNet/);
+    assert.doesNotMatch(copy.one_line, /Phase[-\s]?1/i);
+    const slashPhase = hubProductCopy({
+      slug: "azbrowser",
+      name: "AZBrowser / Phase 1",
+      one_line: "AZBrowser / Phase 1: leftover after AZNet strip.",
+    });
+    assert.equal(slashPhase.name, "AZBrowser");
+    assert.equal(slashPhase.one_line, "AZBrowser: leftover after AZNet strip.");
     assert.equal(hubProductCopy({ slug: "aznet", name: "AZNet / AZBrowser", one_line: "AZNet SIDE-NET." }).name, "AZNet");
     const pub = publicProduct(fg);
     assert.equal(pub.worker, FRAGGATE_WORKER);
@@ -818,6 +827,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(fromBanner.one_line, /AZNet is a separate product\/engine/);
     assert.doesNotMatch(fromBanner.one_line, / {2}/);
     assert.doesNotMatch(fromBanner.one_line, /AZBrowser\s*\/\s*AZNet/);
+    assert.doesNotMatch(fromBanner.one_line, /AZBrowser\s+Phase[-\s]?1/i);
+    assert.match(fromBanner.one_line, /not a shared Phase-1 UI/);
     assert.match(fromBanner.one_line, /[A-Za-z0-9)]\.$/);
 
     const healed = hubProductCopy({
@@ -825,6 +836,13 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       one_line: "FragGate only. is a separate engine (order/token pairing only).",
     });
     assert.equal(healed.one_line, "FragGate only. AZNet is a separate engine (order/token pairing only).");
+
+    const liveOrphan = hubProductCopy({
+      slug: "azbrowser",
+      name: "AZBrowser",
+      one_line: "AZBrowser (AZB-1.0): Lamb Lens ethical research browser. Cite; refuse harvest; no invented visits. FragGate only. is a separate engine (order/token pairing only).",
+    });
+    assert.equal(liveOrphan.one_line, LIVE_AZBROWSER_ONE_LINE);
 
     const card = compactProduct({
       slug: "azbrowser",

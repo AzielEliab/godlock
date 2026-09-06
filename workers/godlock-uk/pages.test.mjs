@@ -168,6 +168,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/reason/);
     assert.doesNotMatch(robots, /Allow: \/AzielCorpusLibrary/);
     assert.match(robots, /Allow: \/software/);
+    assert.match(robots, /Allow: \/mesh/);
     assert.match(robots, /Allow: \/runtime\nAllow: \/runtime\//);
     assert.match(robots, /Allow: \/ai\.txt/);
     assert.match(robots, /Allow: \/openapi\.json/);
@@ -243,6 +244,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/runtime/cite.json"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/mcp"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/software"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/mesh"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/mesh/list"));
+    assert.ok(xml.includes(CANON_HOST + "/mesh"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/list"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/update/check"));
     assert.ok(xml.includes(CANON_HOST + "/openapi.json"));
@@ -267,6 +271,12 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.runtime, CANON_HOST + "/runtime");
     assert.equal(cite.runtime_openapi, CANON_HOST + "/runtime/openapi.json");
     assert.equal(cite.runtime_mcp, CANON_HOST + "/runtime/mcp");
+    assert.equal(cite.runtime_mesh, CANON_HOST + "/runtime/v1/mesh");
+    assert.equal(cite.runtime_mesh_list, CANON_HOST + "/runtime/v1/mesh/list");
+    assert.equal(cite.mesh, CANON_HOST + "/mesh");
+    assert.equal(cite.mesh_default_off, true);
+    assert.equal(cite.mesh_anonymity_network, false);
+    assert.equal(cite.anon_broadcast, "https://github.com/AzielEliab/anon-broadcast");
     assert.equal(cite.runtime_uses, CANON_HOST + "/runtime/v1/uses");
     assert.match(cite.runtime_uses_note, /Not GodLock product Uses/);
     assert.equal(cite.runtime_library, "https://www.azielcorpuslibrary.net/runtime");
@@ -287,6 +297,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Door: https:\/\/godlock\.uk\/runtime/);
     assert.match(llms, /OpenAPI: https:\/\/godlock\.uk\/runtime\/openapi\.json/);
     assert.match(llms, /MCP: POST https:\/\/godlock\.uk\/runtime\/mcp/);
+    assert.match(llms, /Suite mesh \(default off\): https:\/\/godlock\.uk\/runtime\/v1\/mesh/);
+    assert.match(llms, /anon-broadcast/);
+    assert.match(llms, /Not an anonymity network/);
     assert.match(llms, /API uses \(this door\): https:\/\/godlock\.uk\/runtime\/v1\/uses/);
     assert.match(llms, /Library door: https:\/\/www\.azielcorpuslibrary\.net\/runtime/);
     assert.match(llms, /Works with ChatGPT \(GPT Actions \/ OpenAI\), Grok \(xAI\), Venice, Claude \(Anthropic\)/);
@@ -300,6 +313,10 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(spec.openapi, "3.1.0");
     assert.ok(spec.paths["/software"]);
     assert.ok(spec.paths["/runtime/v1/software"]);
+    assert.ok(spec.paths["/runtime/v1/mesh"]);
+    assert.ok(spec.paths["/runtime/v1/mesh/list"]);
+    assert.ok(spec.paths["/runtime/v1/mesh/join"]);
+    assert.ok(spec.paths["/mesh"]);
     assert.ok(spec.paths["/runtime/v1/update/check"]);
     assert.doesNotMatch(JSON.stringify(spec), /\bABAD\b/);
   });
@@ -333,6 +350,9 @@ describe("homepage stays a natural argument surface", () => {
     assert.match(html, /Cursor \(MCP\), Glama \(MCP\), Perplexity/);
     assert.match(html, /other MCP\/OpenAPI-capable assistants/);
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
+    assert.match(html, /id="mesh-status"/);
+    assert.match(html, /Suite mesh: off/);
+    assert.match(html, /Not an anonymity network/);
     const homeLd = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "WebAPI" && n.documentation === "https://godlock.uk/runtime/openapi.json"));
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "Aziel Eliab Runtime" && (n.sameAs || []).includes("https://www.azielcorpuslibrary.net/runtime")));
@@ -644,6 +664,9 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /42 uses/);
     assert.match(html, /Sorted Plain A–Z → Gate A–Z → Lock A–Z/);
     assert.match(html, /Full Aziel Eliab suite/);
+    assert.match(html, /Suite mesh default off/);
+    assert.match(html, /href="\/runtime\/v1\/mesh"/);
+    assert.match(html, /anon-broadcast/);
     assert.match(topNav("/software"), /href="\/runtime">Runtime<\/a>/);
     assert.match(html, /Specified Fit \/ GodLock score/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock/i);
@@ -811,6 +834,10 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /Invoke via Runtime/);
     assert.match(html, /every live aziel-runtime catalog engine plus aziel-runtime \/ FragGate/);
     assert.match(html, /href="\/runtime\/mcp">MCP<\/a>/);
+    assert.match(html, /Suite mesh default off/);
+    assert.match(html, /href="\/runtime\/v1\/mesh">\/runtime\/v1\/mesh<\/a>/);
+    assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/anon-broadcast">anon-broadcast<\/a>/);
+    assert.match(html, /no ffmpeg farm/);
     assert.match(html, /Worker<\/a>/);
     assert.doesNotMatch(html, /Catalog unavailable/);
     assert.match(html, /Specified Fit \/ GodLock score/);

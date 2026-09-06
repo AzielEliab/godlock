@@ -7,6 +7,7 @@ import {
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH, PUBLIC_RUNTIME,
   AI_CLIENTS_SENTENCE, RUNTIME_VERSION, LIBRARY_RUNTIME, FRAGGATE_KERNEL, GITHUB_RUNTIME,
 } from "./seo.js";
+import { meshStatusLine, ANON_BROADCAST } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import { softwareSuite, invokeHref, workerHref } from "./catalog.js";
 
@@ -184,10 +185,20 @@ ${body}
     var usesEl=document.getElementById("stat-uses");
     var views=document.getElementById("stat-views");
     var dl=document.getElementById("stat-downloads");
+    var meshEl=document.getElementById("mesh-status");
     if(live&&j.live_nodes!=null)live.textContent=String(j.live_nodes);
     if(usesEl&&j.uses!=null)usesEl.textContent=String(j.uses);
     if(views&&j.views!=null)views.textContent=String(j.views);
     if(dl&&j.downloads!=null)dl.textContent=String(j.downloads);
+    if(meshEl&&j.mesh){
+      var on=!!j.mesh.enabled;
+      var n=j.mesh.live_nodes!=null?j.mesh.live_nodes:0;
+      meshEl.textContent=on
+        ?("Suite mesh: on · "+n+" live nodes. Not an anonymity network.")
+        :(j.mesh.status==="unavailable"
+          ?"Suite mesh: off (unavailable). Default off. Not an anonymity network."
+          :"Suite mesh: off (default). Not an anonymity network.");
+    }
   }
   function beat(){
     if(typeof fetch!=="function")return;
@@ -213,6 +224,7 @@ export function homeBody({ stats, latest, prior, error }) {
   const downloads = s.downloads != null ? s.downloads : 0;
   const score = s.current_score != null ? s.current_score : 50;
   const residual = s.residual != null ? s.residual : 50;
+  const meshLine = meshStatusLine(s.mesh);
   const err = error ? `<p class="bad">${esc(error)}</p>` : "";
   const latestHtml = latest && !latest.isolated ? answerCard(latest, true) : "";
   const list = (prior || []).map((r) => {
@@ -228,6 +240,7 @@ export function homeBody({ stats, latest, prior, error }) {
   <div class="stat"><b id="stat-uses">${esc(uses)}</b><span>Uses</span></div>
   <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>
 </div>
+<p class="muted" id="mesh-status">${esc(meshLine)}</p>
 <div class="scorebox">
   <div><div class="n">${esc(score)}%</div><div class="k">Current confidence</div></div>
   <div><div class="n">${esc(residual)}%</div><div class="k">Residual uncertainty</div></div>
@@ -371,7 +384,7 @@ export function softwareBody({ products, extras } = {}) {
 <a class="button ghost" href="${esc(RUNTIME_PATH + "/v1/skill")}">Skill</a>
 <a class="button ghost" href="${esc(GITHUB_RUNTIME)}">aziel-runtime</a>
 <a class="button ghost" href="${esc(FRAGGATE_KERNEL)}">FragGate</a></p></div>
-<p class="muted">Full Aziel Eliab suite from the live <a href="${esc(RUNTIME_PATH + "/v1/software")}">same-origin /v1/software</a> catalog (origin <a href="${esc(CATALOG + "/v1/software")}">aziel-runtime /v1/software</a>; fallback <a href="${esc(RUNTIME_PATH + "/v1/fraggate/list")}">FragGate list</a>), matching Digital Library Software completeness. GitHub and runtime drops refresh this tab without hand copy. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (never nest Hub with Interface). FragGate is its own Gate card (A–Z with DecisionGATE). ${esc(AI_CLIENTS_SENTENCE)} GodLock.uk is not a mesh. Counted downloads and views stay on each product Worker <code>/count</code>; API uses show when the Worker or <a href="${esc(RUNTIME_PATH + "/v1/uses")}">/runtime/v1/uses</a> publishes them.${countLine} Identity is Aziel Eliab only.</p>
+<p class="muted">Full Aziel Eliab suite from the live <a href="${esc(RUNTIME_PATH + "/v1/software")}">same-origin /v1/software</a> catalog (origin <a href="${esc(CATALOG + "/v1/software")}">aziel-runtime /v1/software</a>; fallback <a href="${esc(RUNTIME_PATH + "/v1/fraggate/list")}">FragGate list</a>), matching Digital Library Software completeness. GitHub and runtime drops refresh this tab without hand copy. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (never nest Hub with Interface). FragGate is its own Gate card (A–Z with DecisionGATE). ${esc(AI_CLIENTS_SENTENCE)} Suite mesh default off (not an anonymity network). MCP/FragGate: <a href="${esc(RUNTIME_PATH + "/v1/mesh")}">/runtime/v1/mesh</a> · <a href="${esc(RUNTIME_PATH + "/mcp")}">/runtime/mcp</a>. Local communique style tool: <a href="${esc(ANON_BROADCAST)}">anon-broadcast</a> (not hosted on this Worker; no ffmpeg farm). Counted downloads and views stay on each product Worker <code>/count</code>; API uses show when the Worker or <a href="${esc(RUNTIME_PATH + "/v1/uses")}">/runtime/v1/uses</a> publishes them.${countLine} Identity is Aziel Eliab only.</p>
 <p class="muted">Suite: ${jumps}</p>
 <div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
 }

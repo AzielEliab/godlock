@@ -15,7 +15,8 @@ export const SIGIL = LIBRARY + "/sigil.png";
 export const SITE = "GodLock";
 export const AUTHOR = "Aziel Eliab";
 export const AUTHOR_AKA = "Aziel Elroi Eliab";
-export const BANNER = "Public HTTPS engine. Mesh is not on this surface. Author Aziel Eliab.";
+export const BANNER = "Public HTTPS engine. Suite mesh default off. Not an anonymity network. Author Aziel Eliab.";
+export const ANON_BROADCAST = "https://github.com/AzielEliab/anon-broadcast";
 export const AZIEL_ELIAB_PATH = "/AzielEliab";
 export const AZIEL_CORPUS_PATH = "/AzielCorpusLibrary";
 export const REASON_PATH = "/reason";
@@ -110,15 +111,15 @@ export function defaultDescription(kind) {
   }
   if (kind === "software") {
     return hideInternalDetermination(
-      "Full Aziel Eliab software suite on GodLock.uk: every live aziel-runtime catalog engine plus aziel-runtime / FragGate. Worker, GitHub, and /runtime FragGate/MCP tethers. Uses and download counters when published. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (never nest Hub with Interface). FragGate is its own Gate card. Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
+      "Full Aziel Eliab software suite on GodLock.uk: every live aziel-runtime catalog engine plus aziel-runtime / FragGate. Worker, GitHub, and /runtime FragGate/MCP tethers. Uses and download counters when published. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (never nest Hub with Interface). FragGate is its own Gate card. Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " Suite mesh default off via /runtime/v1/mesh/* (not an anonymity network). Author Aziel Eliab.",
     );
   }
   if (kind === "runtime") {
     return hideInternalDetermination(
-      "Aziel Eliab Runtime " + RUNTIME_VERSION + " FragGate door on GodLock.uk. Same-origin /runtime/* proxies the live engine-runtime. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. API uses log: " + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
+      "Aziel Eliab Runtime " + RUNTIME_VERSION + " FragGate door on GodLock.uk. Same-origin /runtime/* proxies the live engine-runtime. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. Suite mesh (default off): " + PUBLIC_RUNTIME + "/v1/mesh. API uses log: " + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
-  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Runtime door: " + PUBLIC_RUNTIME + " (FragGate " + RUNTIME_VERSION + "). " + AI_CLIENTS_SENTENCE + " Not a mesh.");
+  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Runtime door: " + PUBLIC_RUNTIME + " (FragGate " + RUNTIME_VERSION + "). Suite mesh default off: " + PUBLIC_RUNTIME + "/v1/mesh. Not an anonymity network. " + AI_CLIENTS_SENTENCE);
 }
 
 function defaultKeywords(kind) {
@@ -353,6 +354,7 @@ export const PUBLIC_ALLOW = [
   "/openapi.json",
   "/receipt/",
   "/health",
+  "/mesh",
 ];
 
 export function robotsTxt() {
@@ -375,6 +377,8 @@ export async function sitemapXml(env) {
     CANON_HOST + SOFTWARE_PATH + "#godlock",
     PUBLIC_RUNTIME,
     PUBLIC_RUNTIME + "/v1/software",
+    PUBLIC_RUNTIME + "/v1/mesh",
+    PUBLIC_RUNTIME + "/v1/mesh/list",
     PUBLIC_RUNTIME + "/v1/fraggate/list",
     PUBLIC_RUNTIME + "/v1/update/check",
     PUBLIC_RUNTIME + "/v1/runtime.json",
@@ -388,6 +392,7 @@ export async function sitemapXml(env) {
     CANON_HOST + REASON_PATH,
     CANON_HOST + AZIEL_ELIAB_PATH,
     CANON_HOST + "/health",
+    CANON_HOST + "/mesh",
     CANON_HOST + "/cite.json",
     CANON_HOST + "/llms.txt",
     CANON_HOST + "/ai.txt",
@@ -441,6 +446,17 @@ export function citeDoc() {
     runtime_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/list",
     runtime_openapi: PUBLIC_RUNTIME + "/openapi.json",
     runtime_mcp: PUBLIC_RUNTIME + "/mcp",
+    runtime_mesh: PUBLIC_RUNTIME + "/v1/mesh",
+    runtime_mesh_list: PUBLIC_RUNTIME + "/v1/mesh/list",
+    runtime_mesh_join: PUBLIC_RUNTIME + "/v1/mesh/join",
+    runtime_mesh_heartbeat: PUBLIC_RUNTIME + "/v1/mesh/heartbeat",
+    runtime_mesh_enable: PUBLIC_RUNTIME + "/v1/mesh/enable",
+    runtime_mesh_disable: PUBLIC_RUNTIME + "/v1/mesh/disable",
+    mesh: CANON_HOST + "/mesh",
+    mesh_default_off: true,
+    mesh_anonymity_network: false,
+    anon_broadcast: ANON_BROADCAST,
+    anon_broadcast_note: "Local communique style tool. Not hosted on this Worker. No ffmpeg farm.",
     runtime_uses: PUBLIC_RUNTIME + "/v1/uses",
     runtime_uses_note: "Same-origin /runtime API tracker. Not GodLock product Uses (ledger SUBMIT/ISOLATE).",
     runtime_cite: PUBLIC_RUNTIME + "/cite.json",
@@ -501,6 +517,12 @@ export function llmsDoc() {
     + "FragGate list: " + PUBLIC_RUNTIME + "/v1/fraggate/list\n"
     + "OpenAPI: " + PUBLIC_RUNTIME + "/openapi.json\n"
     + "MCP: POST " + PUBLIC_RUNTIME + "/mcp\n"
+    + "Suite mesh (default off): " + PUBLIC_RUNTIME + "/v1/mesh\n"
+    + "Mesh list: " + PUBLIC_RUNTIME + "/v1/mesh/list\n"
+    + "Mesh join / heartbeat / enable / disable: POST " + PUBLIC_RUNTIME + "/v1/mesh/{join|heartbeat|enable|disable}\n"
+    + "Site mesh snapshot: " + CANON_HOST + "/mesh\n"
+    + "Mesh is not an anonymity network. Identity Aziel Eliab only.\n"
+    + "Local communique style tool (not hosted here; no ffmpeg farm): " + ANON_BROADCAST + "\n"
     + "API uses (this door): " + PUBLIC_RUNTIME + "/v1/uses — KV-backed host log. Not GodLock product Uses on /stats.\n"
     + "Cite: " + PUBLIC_RUNTIME + "/cite.json\n"
     + "LLMs: " + PUBLIC_RUNTIME + "/llms.txt\n"
@@ -512,7 +534,7 @@ export function llmsDoc() {
     + "Grok / Venice / Claude / Gemini / Copilot / others: OpenAPI or MCP POST " + PUBLIC_RUNTIME + "/mcp\n"
     + "Cursor / Glama: remote MCP " + PUBLIC_RUNTIME + "/mcp\n\n"
     + "Public HTTPS stress-test engine. Submit a challenge. Answers open with Yes, No, Let's review, or Interesting.\n"
-    + "Intelligent-design disputes are processed under the same rules. Mesh is not on this surface.\n"
+    + "Intelligent-design disputes are processed under the same rules. Suite mesh default off. Not an anonymity network.\n"
     + "Do not invent DOIs.\n\n"
     + "Public HTML is Allow for User-agent * and named AI/search crawlers (GPTBot, ChatGPT-User, OAI-SearchBot, Venice, Grok, Google-Extended, GoogleOther, Google-CloudVertexBot, Claude*, Perplexity*, bingbot, Meta-External*, FacebookBot, facebookexternalhit, Applebot*, Amazonbot, DuckDuck*, MistralAI-User, YouBot, CCBot, cohere*, Diffbot, AI2Bot*, TikTokSpider, Baiduspider*, YandexBot, and others listed in /robots.txt).\n";
 }
@@ -529,7 +551,7 @@ export function siteOpenApi() {
       version: "0.1.0",
       summary: "Public HTTPS stress-test engine by Aziel Eliab.",
       description: hideInternalDetermination(
-        "GodLock.uk public routes plus same-origin FragGate / MCP door. Software tab reads live " + CATALOG + "/v1/software (fallback /v1/fraggate/list). Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
+        "GodLock.uk public routes plus same-origin FragGate / MCP door. Software tab reads live " + CATALOG + "/v1/software (fallback /v1/fraggate/list). Suite mesh (default off): GET " + PUBLIC_RUNTIME + "/v1/mesh and POST join/heartbeat/enable/disable. Not an anonymity network. Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
       ),
       contact: { name: AUTHOR, url: CANON_HOST + AZIEL_ELIAB_PATH },
       license: { name: "Apache-2.0", url: "https://www.apache.org/licenses/LICENSE-2.0" },
@@ -545,6 +567,13 @@ export function siteOpenApi() {
       "/runtime/mcp": { post: { operationId: "godlockUkRuntimeMcp", summary: "Same-origin FragGate MCP door", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/software": { get: { operationId: "godlockUkRuntimeSoftware", summary: "Live software catalog proxy", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/fraggate/list": { get: { operationId: "godlockUkRuntimeFraggateList", summary: "FragGate list fallback catalog", responses: { "200": { description: "OK" } } } },
+      "/runtime/v1/mesh": { get: { operationId: "godlockUkRuntimeMesh", summary: "Suite mesh status (default off; not an anonymity network)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
+      "/runtime/v1/mesh/list": { get: { operationId: "godlockUkRuntimeMeshList", summary: "Suite mesh Live Nodes list (empty when off)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
+      "/runtime/v1/mesh/join": { post: { operationId: "godlockUkRuntimeMeshJoin", summary: "Join suite mesh (runtime proxy)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
+      "/runtime/v1/mesh/heartbeat": { post: { operationId: "godlockUkRuntimeMeshHeartbeat", summary: "Suite mesh heartbeat (runtime proxy)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
+      "/runtime/v1/mesh/enable": { post: { operationId: "godlockUkRuntimeMeshEnable", summary: "Enable suite mesh (runtime proxy; default off)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
+      "/runtime/v1/mesh/disable": { post: { operationId: "godlockUkRuntimeMeshDisable", summary: "Disable suite mesh (runtime proxy)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
+      "/mesh": { get: { operationId: "godlockUkMesh", summary: "GodLock.uk mesh snapshot aligned with Live Nodes", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/update/check": { get: { operationId: "godlockUkRuntimeUpdateCheck", summary: "Client update check (prompt only; no silent overwrite)", responses: { "200": { description: "OK" } } } },
     },
   };

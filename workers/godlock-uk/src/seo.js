@@ -91,7 +91,7 @@ export function defaultDescription(kind) {
   }
   if (kind === "runtime") {
     return hideInternalDetermination(
-      "Aziel Eliab Runtime " + RUNTIME_VERSION + " FragGate door on GodLock.uk. Same-origin /runtime/* proxies the live engine-runtime. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
+      "Aziel Eliab Runtime " + RUNTIME_VERSION + " FragGate door on GodLock.uk. Same-origin /runtime/* proxies the live engine-runtime. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. API uses log: " + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
   return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Runtime door: " + PUBLIC_RUNTIME + " (FragGate " + RUNTIME_VERSION + "). " + AI_CLIENTS_SENTENCE + " Not a mesh.");
@@ -134,7 +134,7 @@ export function runtimeWebApiNode(person) {
     url: PUBLIC_RUNTIME,
     documentation: PUBLIC_RUNTIME + "/openapi.json",
     provider: person,
-    description: "FragGate " + RUNTIME_VERSION + " door. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json. MCP POST " + PUBLIC_RUNTIME + "/mcp.",
+    description: "FragGate " + RUNTIME_VERSION + " door. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json. MCP POST " + PUBLIC_RUNTIME + "/mcp. API uses " + PUBLIC_RUNTIME + "/v1/uses.",
   };
 }
 
@@ -331,6 +331,7 @@ export async function sitemapXml(env) {
     CANON_HOST + SOFTWARE_PATH + "#godlock",
     PUBLIC_RUNTIME,
     PUBLIC_RUNTIME + "/v1/runtime.json",
+    PUBLIC_RUNTIME + "/v1/uses",
     PUBLIC_RUNTIME + "/openapi.json",
     PUBLIC_RUNTIME + "/llms.txt",
     PUBLIC_RUNTIME + "/cite.json",
@@ -380,6 +381,8 @@ export function citeDoc() {
     runtime_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/list",
     runtime_openapi: PUBLIC_RUNTIME + "/openapi.json",
     runtime_mcp: PUBLIC_RUNTIME + "/mcp",
+    runtime_uses: PUBLIC_RUNTIME + "/v1/uses",
+    runtime_uses_note: "Same-origin /runtime API tracker. Not GodLock product Uses (ledger SUBMIT/ISOLATE).",
     runtime_cite: PUBLIC_RUNTIME + "/cite.json",
     runtime_llms: PUBLIC_RUNTIME + "/llms.txt",
     runtime_origin: CATALOG + "/",
@@ -430,6 +433,7 @@ export function llmsDoc() {
     + "FragGate list: " + PUBLIC_RUNTIME + "/v1/fraggate/list\n"
     + "OpenAPI: " + PUBLIC_RUNTIME + "/openapi.json\n"
     + "MCP: POST " + PUBLIC_RUNTIME + "/mcp\n"
+    + "API uses (this door): " + PUBLIC_RUNTIME + "/v1/uses — KV-backed host log. Not GodLock product Uses on /stats.\n"
     + "Cite: " + PUBLIC_RUNTIME + "/cite.json\n"
     + "LLMs: " + PUBLIC_RUNTIME + "/llms.txt\n"
     + "Library door: " + LIBRARY_RUNTIME + "\n"

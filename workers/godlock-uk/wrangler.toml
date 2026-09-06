@@ -20,6 +20,12 @@ binding = "DB"
 database_name = "godlock-uk"
 database_id = "a499ef56-ad02-4431-a3e4-e23f96f500f0"
 
+# Reuse the download-tracker DOWNLOADS namespace. Keys are prefixed runtime_uses|
+# so download stats (project|owner|repo|branch|fork) stay isolated.
+[[kv_namespaces]]
+binding = "RUNTIME_USES"
+id = "39527eecfc294ddd86af99c806baaa45"
+
 # Zone godlock.uk is not in this Cloudflare account (API 10082).
 # Apex https://godlock.uk is proxied to this origin separately.
 # [[routes]]

@@ -12,7 +12,7 @@ import {
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
-  robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
+  robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
   PUBLIC_RUNTIME, permanentIdentityRedirect,
 } from "./seo.js";
 import { fetchCatalogProducts, attachCatalogCounters, softwareSuite, publicProduct } from "./catalog.js";
@@ -403,6 +403,9 @@ export default {
       if (path === "/ai.txt") {
         return new Response(aiDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
+      if (path === "/openapi.json") {
+        return json(siteOpenApi());
+      }
 
       const identityTo = permanentIdentityRedirect(path);
       if (identityTo) {
@@ -507,8 +510,11 @@ export default {
             author: AUTHOR,
             identity: AUTHOR,
             path: SOFTWARE_PATH,
-            catalog: PUBLIC_RUNTIME + "/v1/catalog.json",
-            catalog_origin: CATALOG + "/v1/catalog.json",
+            catalog: PUBLIC_RUNTIME + "/v1/software",
+            catalog_origin: CATALOG + "/v1/software",
+            catalog_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/list",
+            catalog_fraggate_origin: CATALOG + "/v1/fraggate/list",
+            catalog_json: PUBLIC_RUNTIME + "/v1/catalog.json",
             source: fetched.source,
             sort: "plain-gate-lock",
             clock_is_not_lock: true,

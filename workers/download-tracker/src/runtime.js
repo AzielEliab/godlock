@@ -3,6 +3,8 @@
  * Ports Specified Fit / GodLock engagement scoring and ephemeral receipts from the Python core.
  * NOT an anonymity network. No IP hiding. Logical GodLock receipts only.
  */
+import { checkGodlockUpdate, updateCheckUrl, COUNTED_DOWNLOAD } from "./update.js";
+
 function runtimeCors() {
   return {
     "Access-Control-Allow-Origin": "*",
@@ -113,7 +115,7 @@ const EXAMPLE_PAYLOAD = {
   "text": "Specified Fit is not a spiral proof."
 };
 
-const SKILL_MARKDOWN = "---\nname: GodLock\ndescription: Use when calling GodLock hosted /v1 or installing the local package. Author Aziel Eliab.\n---\n\n# GodLock\n\nGodLock is a product name (Specified Fit stress-test and resilience engine). Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab.\n\n**Identity:** Aziel Eliab only. GodLock is a **product name**, not an identity label.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## How to use (3 steps)\n\n1. `curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash`\n2. `godlock ui`\n3. Open http://127.0.0.1:8080 and tap **Record**, **Verify**, **Import JSON**, or **Export JSON**.\n\n`godlock doctor` prints PASS or FAIL in plain words.\n\n## Call these URLs\n\n- Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| POST | `/v1/score` | Specified Fit / GodLock engagement score. Advisory. Not a VPN. |\n| POST | `/v1/submit` | Ephemeral logical receipt. Not anonymity. |\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. ChatGPT: GPT Actions. Grok: import OpenAPI as a custom tool. Venice: HTTP tools. Claude: OpenAPI / custom connector. Cursor and Glama: MCP. Others: the same OpenAPI or MCP catalog.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' -X POST https://godlock-download-tracker.vibelock.workers.dev/v1/score \\\n  -H 'content-type: application/json' \\\n  -d '{\"text\":\"Specified Fit is not a spiral proof\"}'\n```\n\nCounted download (gzip HTTP 200, no 302): https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/godlock\n\n## Catalog + local UI\n\nAuthor: **Aziel Eliab**. Honest scope: Offline Specified Fit / GodLock score. Not a VPN and not an anonymity network. GodLock is a product name. Public reasoning: Specified Fit, Not Pretty Spirals.\n\n- Catalog product: https://aziel-runtime.vibelock.workers.dev/p/godlock/\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- This Worker skill: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`\n- This Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json\n- Sample payload: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/example`\n\nLocal UI: **Import JSON file** (`type=file`) and **Export JSON**. Then `godlock doctor`.\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import catalog or Worker OpenAPI as GPT Actions, a Grok custom tool, Claude/Gemini/Copilot/Mistral/Meta/Cohere/Amazon Q/Perplexity HTTP or OpenAPI tools, Venice HTTP tools, or Cursor/Glama MCP.\n";
+const SKILL_MARKDOWN = "---\nname: GodLock\ndescription: Use when calling GodLock hosted /v1 or installing the local package. Author Aziel Eliab.\n---\n\n# GodLock\n\nGodLock is a product name (Specified Fit stress-test and resilience engine). Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab.\n\n**Identity:** Aziel Eliab only. GodLock is a **product name**, not an identity label.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## How to use (3 steps)\n\n1. `curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash`\n2. `godlock ui`\n3. Open http://127.0.0.1:8080 and tap **Record**, **Verify**, **Import JSON**, or **Export JSON**.\n\n`godlock doctor` prints PASS or FAIL in plain words.\n\n## Call these URLs\n\n- Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| GET | `/v1/update` | Online update check (prompt + counted /download if update_available). Never silent overwrite. |\n| POST | `/v1/score` | Specified Fit / GodLock engagement score. Advisory. Not a VPN. |\n| POST | `/v1/submit` | Ephemeral logical receipt. Not anonymity. |\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. ChatGPT: GPT Actions. Grok: import OpenAPI as a custom tool. Venice: HTTP tools. Claude: OpenAPI / custom connector. Cursor and Glama: MCP. Others: the same OpenAPI or MCP catalog.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' -X POST https://godlock-download-tracker.vibelock.workers.dev/v1/score \\\n  -H 'content-type: application/json' \\\n  -d '{\"text\":\"Specified Fit is not a spiral proof\"}'\n```\n\nCounted download (gzip HTTP 200, no 302): https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/godlock\n\n## Update check (no silent overwrite)\n\nWhen online, call `GET https://aziel-runtime.vibelock.workers.dev/v1/update/check?slug=godlock&version=0.1.0` (this Worker: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/update`). If `update_available`, prompt with the counted download `https://godlock-download-tracker.vibelock.workers.dev/download`. Do not overwrite the local package.\nLive software catalog: `GET https://aziel-runtime.vibelock.workers.dev/v1/software` (fallback `GET /v1/fraggate/list`).\n\n## Catalog + local UI\n\nAuthor: **Aziel Eliab**. Honest scope: Offline Specified Fit / GodLock score. Not a VPN and not an anonymity network. GodLock is a product name. Public reasoning: Specified Fit, Not Pretty Spirals.\n\n- Catalog product: https://aziel-runtime.vibelock.workers.dev/p/godlock/\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- This Worker skill: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`\n- This Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json\n- Sample payload: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/example`\n\nLocal UI: **Import JSON file** (`type=file`) and **Export JSON**. Then `godlock doctor`.\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import catalog or Worker OpenAPI as GPT Actions, a Grok custom tool, Claude/Gemini/Copilot/Mistral/Meta/Cohere/Amazon Q/Perplexity HTTP or OpenAPI tools, Venice HTTP tools, or Cursor/Glama MCP.\n";
 const VERSION = "0.1.0";
 const BASE = "https://godlock-download-tracker.vibelock.workers.dev";
 const BANNER = "NOT an anonymity network. No IP hiding. Logical GodLock receipts only. Not a VPN, proxy, or Tor hop.";
@@ -229,6 +231,9 @@ function openapiDoc() {
     paths: {
             "/v1/example": { get: { operationId: "godlockExample", summary: "Sample JSON payload. Does not increment downloads.", responses: { "200": { description: "OK" } } } },
       "/v1/health": { get: { operationId: "godlockHealth", summary: "Liveness", responses: { "200": { description: "OK" } } } },
+      "/v1/update": { get: { operationId: "godlockUpdateCheck", summary: "Online update check. Prompt + counted /download when update_available. Never silent overwrite.", responses: { "200": { description: "OK" } } } },
+      "/llms.txt": { get: { operationId: "godlockLlms", summary: "LLM/crawler brief", responses: { "200": { description: "OK" } } } },
+      "/cite.json": { get: { operationId: "godlockCite", summary: "Citation record", responses: { "200": { description: "OK" } } } },
       "/v1/score": {
         post: {
           operationId: "godlockScore",
@@ -291,7 +296,31 @@ async function handleSubmit(body) {
 export async function handleRuntime(request, url, env) {
   const path = url.pathname;
   if (path === "/v1/health" && request.method === "GET") {
-    return runtimeJson(withBanner({ ok: true, author: "Aziel Eliab", product: PRODUCT, version: VERSION }));
+    return runtimeJson(withBanner({
+      ok: true,
+      author: "Aziel Eliab",
+      product: PRODUCT,
+      version: VERSION,
+      update_check: BASE + "/v1/update",
+      runtime_update_check: updateCheckUrl(VERSION),
+      download: COUNTED_DOWNLOAD,
+      software_catalog: "https://aziel-runtime.vibelock.workers.dev/v1/software",
+      software_fraggate: "https://aziel-runtime.vibelock.workers.dev/v1/fraggate/list",
+    }));
+  }
+  if ((path === "/v1/update" || path === "/v1/update/") && request.method === "GET") {
+    const checked = await checkGodlockUpdate({ version: VERSION, fetch: globalThis.fetch });
+    return runtimeJson(withBanner({
+      ok: true,
+      product: PRODUCT,
+      version: VERSION,
+      update: checked,
+      update_available: !!(checked && checked.update_available),
+      download: (checked && checked.download) || COUNTED_DOWNLOAD,
+      prompt: (checked && checked.prompt) || "",
+      forced: false,
+      note: "Prompt only. Counted /download when update_available. No silent overwrite.",
+    }));
   }
   if ((path === "/v1/example" || path === "/v1/example/") && (request.method === "GET" || request.method === "HEAD")) {
     return runtimeJson({
@@ -323,11 +352,15 @@ export async function handleRuntime(request, url, env) {
       title: "Use with major AI clients",
       openapi: BASE + "/openapi.json",
       health: BASE + "/v1/health",
+      update: BASE + "/v1/update",
+      runtime_update_check: updateCheckUrl(VERSION),
+      download: COUNTED_DOWNLOAD,
+      software_catalog: "https://aziel-runtime.vibelock.workers.dev/v1/software",
       ...aiHowTo(BASE),
     }));
   }
   if (path === "/v1" && request.method === "GET") {
-    return runtimeJson(withBanner({ product: PRODUCT, endpoints: ["GET /v1/health", "POST /v1/score", "POST /v1/submit", "GET /openapi.json", "GET /ai"] }));
+    return runtimeJson(withBanner({ product: PRODUCT, endpoints: ["GET /v1/health", "GET /v1/update", "POST /v1/score", "POST /v1/submit", "GET /openapi.json", "GET /ai", "GET /llms.txt", "GET /cite.json"] }));
   }
   if (path === "/v1/score" && request.method === "POST") {
     let body = {};

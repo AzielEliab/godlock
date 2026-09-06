@@ -1,0 +1,47 @@
+name: Deploy Workers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# CLOUDFLARE_API_TOKEN is a GitHub Actions secret. Do not put tokens in this repo.
+# Cloudflare account id is public in wrangler.toml for both Workers.
+
+jobs:
+  godlock-uk:
+    name: Deploy godlock-uk
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: workers/godlock-uk
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy godlock-uk
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ac575a9b822bea2bed97d0ab73aed238
+          workingDirectory: workers/godlock-uk
+          command: deploy --keep-vars
+
+  download-tracker:
+    name: Deploy download-tracker
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: workers/download-tracker
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy download-tracker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ac575a9b822bea2bed97d0ab73aed238
+          workingDirectory: workers/download-tracker
+          command: deploy

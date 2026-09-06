@@ -1,6 +1,8 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import worker from "./src/index.js";
+import { checkGodlockUpdate, compareVersions, parseUpdateDoc } from "./src/update.js";
+import { citeDoc, llmsDoc, robotsTxt, sitemapXml } from "./src/discover.js";
 
 function mockEnv(initial = {}) {
   const store = { ...initial };
@@ -104,14 +106,102 @@ describe("user-facing ABAD leftovers", () => {
     const openapi = await (await fetchPath(env, "/openapi.json")).text();
     const example = await (await fetchPath(env, "/v1/example")).text();
     const health = await (await fetchPath(env, "/v1/health")).text();
+    const llms = await (await fetchPath(env, "/llms.txt")).text();
+    const cite = await (await fetchPath(env, "/cite.json")).text();
+    const robots = await (await fetchPath(env, "/robots.txt")).text();
+    const sitemap = await (await fetchPath(env, "/sitemap.xml")).text();
     for (const [name, text] of [
       ["index", html],
       ["skill", skill],
       ["openapi", openapi],
       ["example", example],
       ["health", health],
+      ["llms", llms],
+      ["cite", cite],
+      ["robots", robots],
+      ["sitemap", sitemap],
     ]) {
       assert.equal(/\bABAD\b/.test(text), false, name + " still has user-facing ABAD");
+    }
+  });
+});
+
+describe("SEO / MCP discoverability", () => {
+  it("serves robots, sitemap, llms, cite, and openapi without incrementing KV", async () => {
+    const env = mockEnv({
+      "godlock|__views__": "3",
+      "godlock|AzielEliab|godlock|main|0": "4",
+    });
+    const before = { ...env.store };
+    const robots = await (await fetchPath(env, "/robots.txt")).text();
+    const sitemap = await (await fetchPath(env, "/sitemap.xml")).text();
+    const llms = await (await fetchPath(env, "/llms.txt")).text();
+    const cite = await (await fetchPath(env, "/cite.json")).json();
+    const spec = await (await fetchPath(env, "/openapi.json")).json();
+    assert.match(robots, /User-agent: GPTBot\nAllow: \//);
+    assert.match(robots, /Sitemap: https:\/\/godlock-download-tracker\.vibelock\.workers\.dev\/sitemap\.xml/);
+    assert.match(sitemap, /\/v1\/update/);
+    assert.match(sitemap, /\/llms\.txt/);
+    assert.match(sitemap, /aziel-runtime\.vibelock\.workers\.dev\/v1\/software/);
+    assert.match(llms, /Live software catalog/);
+    assert.match(llms, /no silent overwrite/i);
+    assert.equal(cite.author, "Aziel Eliab");
+    assert.equal(cite.identity, "Aziel Eliab");
+    assert.match(cite.update_check, /\/v1\/update\/check\?slug=godlock/);
+    assert.ok(spec.paths["/v1/update"]);
+    assert.deepEqual(env.store, before);
+    assert.equal(robotsTxt().includes("GPTBot"), true);
+    assert.ok(sitemapXml().includes("/cite.json"));
+    assert.equal(citeDoc().software_catalog, "https://aziel-runtime.vibelock.workers.dev/v1/software");
+    assert.match(llmsDoc(), /FragGate list fallback/);
+  });
+});
+
+describe("update check", () => {
+  it("parses runtime update_available and never marks forced", async () => {
+    assert.equal(compareVersions("0.2.0", "0.1.0"), 1);
+    const parsed = parseUpdateDoc({ version: "0.2.0", download: "https://godlock-download-tracker.vibelock.workers.dev/download" }, "0.1.0");
+    assert.equal(parsed.update_available, true);
+    assert.equal(parsed.forced, false);
+    const checked = await checkGodlockUpdate({
+      version: "0.1.0",
+      fetch: async (url) => {
+        assert.match(String(url), /\/v1\/update\/check\?slug=godlock&version=0\.1\.0/);
+        return new Response(JSON.stringify({
+          update_available: true,
+          latest: "0.2.0",
+          download: "https://godlock-download-tracker.vibelock.workers.dev/download",
+        }), { headers: { "Content-Type": "application/json" } });
+      },
+    });
+    assert.equal(checked.update_available, true);
+    assert.equal(checked.forced, false);
+    assert.match(checked.prompt, /Counted download/);
+  });
+
+  it("GET /v1/update surfaces a prompt and counted download", async () => {
+    const env = mockEnv();
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = async (url) => {
+      if (String(url).includes("/v1/update/check")) {
+        return new Response(JSON.stringify({
+          update_available: true,
+          latest: "0.2.0",
+          download: "https://godlock-download-tracker.vibelock.workers.dev/download",
+        }), { headers: { "Content-Type": "application/json" } });
+      }
+      return new Response(JSON.stringify({ error: "not found" }), { status: 404 });
+    };
+    try {
+      const res = await fetchPath(env, "/v1/update");
+      assert.equal(res.status, 200);
+      const body = await res.json();
+      assert.equal(body.update_available, true);
+      assert.equal(body.forced, false);
+      assert.match(body.download, /\/download$/);
+      assert.match(body.prompt, /no silent overwrite/i);
+    } finally {
+      globalThis.fetch = realFetch;
     }
   });
 });

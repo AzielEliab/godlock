@@ -137,6 +137,7 @@ const PATTERNS = {
   sqrt2: [/sqrt\s*\(?\s*2/i, /√\s*2/, /square\s+root\s+of\s+2/i, /\b1\.414\d*\b/],
   flower_of_life: [/flower\s+of\s+life/i, /vesica\s+piscis/i],
   corkscrew: [/corkscrew/i],
+  // ABAD tokens stay as an internal engagement heuristic only — not user-facing copy.
   specified_fit: [/specified\s+fit/i, /specified\s+complexity/i, /functionally\s+specified/i, /\babad\b/i, /a\s*[-–—]\s*b\s*[-–—]\s*a\s*[-–—]\s*d/i, /\ba\s*-\s*b\s*-\s*a\s*-\s*d\b/i],
 };
 

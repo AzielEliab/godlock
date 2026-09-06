@@ -6,6 +6,7 @@ import { handleRuntime } from "./runtime.js";
  * GET  /download?repo=AzielEliab/godlock&tag=latest&asset=...
  *      increments KV, 302 to the GitHub release asset
  *      (default https://github.com/AzielEliab/godlock/releases)
+ * GET  /count   {project, views, downloads, total} — total is the download tally
  * GET  /stats   JSON totals + per-repo + per-branch breakdown
  * POST /event   forks report a download {owner,repo,branch,fork,asset}
  *
@@ -130,9 +131,39 @@ async function listAllKeys(env) {
   return keys;
 }
 
+function viewsKey() {
+  return PROJECT + "|__views__";
+}
+
+function isViewsKey(name) {
+  return name === viewsKey() || String(name).split("|").includes("__views__");
+}
+
+function asCount(raw) {
+  const n = parseInt(raw || "0", 10);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+async function readViews(env) {
+  return asCount(await env.DOWNLOADS.get(viewsKey()));
+}
+
+function countPayload(stats) {
+  const views = Number(stats.views) || 0;
+  const downloads = Number(stats.downloads != null ? stats.downloads : stats.total) || 0;
+  return {
+    project: PROJECT,
+    views,
+    downloads,
+    // Sibling product Workers (azbrowser, fraggate, aznet, azhub, azinterface)
+    // publish total as the download tally, not views+downloads.
+    total: downloads,
+  };
+}
+
 async function collectStats(env) {
   const keys = await listAllKeys(env);
-  let total = 0;
+  let downloads = 0;
   const by_repo = {};
   const by_branch = {};
   const by_fork = { "0": 0, "1": 0 };
@@ -140,12 +171,13 @@ async function collectStats(env) {
 
   for (const k of keys) {
     const name = k.name;
-    const n = parseInt((await env.DOWNLOADS.get(name)) || "0", 10);
-    if (!Number.isFinite(n) || n <= 0) continue;
+    if (isViewsKey(name)) continue;
+    const n = asCount(await env.DOWNLOADS.get(name));
+    if (n <= 0) continue;
     const parts = name.split("|");
     if (parts.length < 5) continue;
     const [project, owner, repo, branch, fork] = parts;
-    total += n;
+    downloads += n;
     const repoId = `${owner}/${repo}`;
     by_repo[repoId] = (by_repo[repoId] || 0) + n;
     by_branch[branch] = (by_branch[branch] || 0) + n;
@@ -154,24 +186,22 @@ async function collectStats(env) {
     breakdown.push({ project, owner, repo, branch, fork: forkFlag, count: n });
   }
 
+  const views = await readViews(env);
   return {
     project: PROJECT,
-    total,
+    views,
+    downloads,
+    total: downloads,
     by_repo,
     by_branch,
     by_fork,
     breakdown,
-    note: "Forks identified by GitHub owner/repo. Key layout: project|owner|repo|branch|fork",
+    note: "Forks identified by GitHub owner/repo. Key layout: project|owner|repo|branch|fork. GET /count is {project, views, downloads, total}; total is the download tally (same as downloads), matching sibling product Workers.",
   };
 }
 
-
-function viewsKey() {
-  return PROJECT + "|__views__";
-}
-
 async function incrementViews(env) {
-  const n = parseInt((await env.DOWNLOADS.get(viewsKey())) || "0", 10) + 1;
+  const n = asCount(await env.DOWNLOADS.get(viewsKey())) + 1;
   await env.DOWNLOADS.put(viewsKey(), String(n));
   return n;
 }
@@ -229,7 +259,7 @@ async function serveAsset(request, env, asset, { head = false } = {}) {
 async function indexHtml(env) {
   const stats = await collectStats(env);
   const downloads = Number(stats.downloads != null ? stats.downloads : stats.total) || 0;
-  const views = parseInt((await env.DOWNLOADS.get(viewsKey())) || "0", 10) || 0;
+  const views = Number(stats.views) || 0;
   const v = views.toLocaleString("en-US");
   const n = downloads.toLocaleString("en-US");
   const breakdown = (stats.breakdown || [])
@@ -388,8 +418,7 @@ export default {
     }
 
     if (url.pathname === "/count" && request.method === "GET") {
-      const stats = await collectStats(env);
-      return json({ project: PROJECT, total: stats.total || 0 });
+      return json(countPayload(await collectStats(env)));
     }
 
     if (url.pathname === "/stats" && request.method === "GET") {

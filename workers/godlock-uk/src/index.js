@@ -1,8 +1,9 @@
 /**
  * GodLock.uk public HTTPS stress-test engine (Cloudflare Worker).
  * One input. Locked protocol. Append-only hash-chained receipts.
- * Not a forum, not a tunnel. Suite mesh is opt-in via runtime /v1/mesh/*
- * (default OFF). Not an anonymity network. Author: Aziel Eliab.
+ * Not a forum, not a tunnel. Suite mesh is QNM-BUILD-1.0 (default OFF):
+ * live|locked|isolated counts only. No Node Gate. No auto-heal.
+ * Not an anonymity network. Author: Aziel Eliab.
  */
 import { randomBytes } from "node:crypto";
 import { json, html, corsHeaders, wantsJson, readCookie } from "./http.js";
@@ -451,6 +452,8 @@ export default {
           site_live_nodes: stats.site_live_nodes,
           mesh_enabled: !!(stats.mesh && stats.mesh.enabled),
           mesh_live_nodes: stats.mesh && stats.mesh.enabled ? stats.mesh.live_nodes : 0,
+          mesh_locked: stats.mesh && stats.mesh.enabled && stats.mesh.rollup ? stats.mesh.rollup.locked : 0,
+          mesh_isolated: stats.mesh && stats.mesh.enabled && stats.mesh.rollup ? stats.mesh.rollup.isolated : 0,
           uses: stats.uses,
         }, 200, extraHeadersFor(nodeId));
       }
@@ -463,9 +466,13 @@ export default {
           site: "godlock.uk",
           author: AUTHOR,
           identity: AUTHOR,
+          spec: "QNM-BUILD-1.0",
           anonymity_network: false,
           default_off: true,
+          node_gate: false,
+          auto_heal: false,
           live_nodes: stats.live_nodes,
+          rollup: stats.mesh && stats.mesh.rollup ? stats.mesh.rollup : { live: 0, locked: 0, isolated: 0 },
           site_live_nodes: stats.site_live_nodes,
           mesh: stats.mesh,
           ...meshOpsDoc(),

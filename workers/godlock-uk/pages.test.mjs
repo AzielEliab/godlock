@@ -204,6 +204,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/AzielEliab"));
     assert.ok(xml.includes(CANON_HOST + "/runtime"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/runtime.json"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/uses"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/openapi.json"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/llms.txt"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/cite.json"));
@@ -226,6 +227,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.runtime, CANON_HOST + "/runtime");
     assert.equal(cite.runtime_openapi, CANON_HOST + "/runtime/openapi.json");
     assert.equal(cite.runtime_mcp, CANON_HOST + "/runtime/mcp");
+    assert.equal(cite.runtime_uses, CANON_HOST + "/runtime/v1/uses");
+    assert.match(cite.runtime_uses_note, /Not GodLock product Uses/);
     assert.equal(cite.runtime_library, "https://www.azielcorpuslibrary.net/runtime");
     assert.ok(cite.sameAs.includes(CANON_HOST + "/runtime"));
     assert.equal(cite.door, "fraggate");
@@ -237,6 +240,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Door: https:\/\/godlock\.uk\/runtime/);
     assert.match(llms, /OpenAPI: https:\/\/godlock\.uk\/runtime\/openapi\.json/);
     assert.match(llms, /MCP: POST https:\/\/godlock\.uk\/runtime\/mcp/);
+    assert.match(llms, /API uses \(this door\): https:\/\/godlock\.uk\/runtime\/v1\/uses/);
     assert.match(llms, /Library door: https:\/\/www\.azielcorpuslibrary\.net\/runtime/);
     assert.match(llms, /Works with ChatGPT \(GPT Actions \/ OpenAI\), Grok \(xAI\), Venice, Claude \(Anthropic\)/);
     assert.match(llms, /Cursor \(MCP\), Glama \(MCP\), Perplexity, Microsoft Copilot \/ Bing, Google Gemini \/ Vertex/);

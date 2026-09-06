@@ -338,7 +338,7 @@ function extraHeadersFor(nodeId, more) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, "") || "/";
     if (request.method === "OPTIONS") {
@@ -360,7 +360,7 @@ export default {
       }
 
       if (isRuntimeRequest(url.pathname) || isRuntimeRequest(path)) {
-        const runtime = await handleRuntimeRoot(request, url, env);
+        const runtime = await handleRuntimeRoot(request, url, env, ctx);
         if (runtime) return runtime;
       }
 

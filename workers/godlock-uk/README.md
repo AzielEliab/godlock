@@ -31,13 +31,15 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 - `/receipt/{id}` public if not isolated
 - `/health` JSON
 - `/robots.txt` `/sitemap.xml` `/cite.json` `/llms.txt` `/ai.txt` (each lists the `/runtime` door)
-- Same-origin runtime also serves `/runtime/v1/health`, `/runtime/v1/runtime.json`, `/runtime/v1/fraggate/list`, `/runtime/openapi.json`, `POST /runtime/mcp`
+- Same-origin runtime also serves `/runtime/v1/health`, `/runtime/v1/runtime.json`, `/runtime/v1/fraggate/list`, `/runtime/v1/uses`, `/runtime/openapi.json`, `POST /runtime/mcp`
 
 ## Counters
 
 **Live Nodes** = distinct `godlock_node` sessions with a heartbeat in the last **5 minutes**. Every request (including the homepage GET) upserts `heartbeats(session_id, last_ms)`. Homepage GET counts the current visitor on first paint (`visiting`), even if D1 COUNT lags. The page POSTs `/heartbeat` on load, every 25s, and when the tab becomes visible, then writes the returned `live_nodes` into `#stat-live-nodes`. Presence rows older than 15 minutes are deleted.
 
-**Uses** = `COUNT(*)` of receipt-ledger rows with action `SUBMIT` or `ISOLATE` only. That is a real submission that went through `POST /submit` and was hash-chained. Heartbeats, page views, and downloads do not increment Uses. A receipt with no ledger row does not count. Isolated submissions count because they are ledgered (`ISOLATE`). `SCORE` rows do not count.
+**Uses** = `COUNT(*)` of receipt-ledger rows with action `SUBMIT` or `ISOLATE` only. That is a real submission that went through `POST /submit` and was hash-chained. Heartbeats, page views, downloads, and `/runtime` API traffic do not increment Uses. A receipt with no ledger row does not count. Isolated submissions count because they are ledgered (`ISOLATE`). `SCORE` rows do not count.
+
+**Runtime API uses** (`GET /runtime/v1/uses`) is a separate KV-backed host log for proxied FragGate / MCP / session / pull / v1 traffic on this door. SEO static, `GET /runtime/v1/uses`, and GET health/ready do not increment it. It is not the GodLock product Uses ledger. Proxy requests are stamped `X-Aziel-Runtime-Via: godlock.uk`.
 
 Foundational / empirical-limit determination stays internal. It is stripped from public HTML, receipt copy, and scrapeable metadata. Operator notes under `internal/` are not a public route.
 

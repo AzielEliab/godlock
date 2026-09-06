@@ -10,6 +10,14 @@ import {
   runtimeWebApiNode, personNode, defaultDescription,
 } from "./seo.js";
 import { navItems } from "./ui.js";
+import {
+  handleRuntimeUses,
+  isRuntimeUsesPath,
+  recordRuntimeUse,
+  scheduleRuntimeUse,
+  shouldCountRuntimeUse,
+  stampRuntimeVia,
+} from "./runtimeUses.js";
 
 export const RUNTIME_ORIGIN = CATALOG;
 const UA = "Mozilla/5.0";
@@ -130,7 +138,7 @@ function dropHopHeaders(headers) {
     out.set(k, v);
   }
   if (!out.get("User-Agent")) out.set("User-Agent", UA);
-  return out;
+  return stampRuntimeVia(out);
 }
 
 export function runtimeChromeNav() {
@@ -280,13 +288,30 @@ function jsonError(body, status) {
   });
 }
 
-export async function handleRuntimeRoot(request, url, env) {
+export async function handleRuntimeRoot(request, url, env, ctx) {
   if (!isRuntimeRequest(url.pathname)) return null;
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: runtimeCors() });
   }
   const dest = destFromRuntimePath(url.pathname, url.search);
   if (dest == null) return null;
+  const destPath = String(dest).split("?")[0];
+  if (isRuntimeUsesPath(destPath)) {
+    if (request.method === "GET" || request.method === "HEAD") {
+      return handleRuntimeUses(request, env);
+    }
+    return jsonError({
+      ok: false,
+      error: "method not allowed",
+      host: "godlock.uk",
+      via: "godlock.uk",
+      author: AUTHOR,
+    }, 405);
+  }
+  if (shouldCountRuntimeUse(request.method, destPath)) {
+    const counted = scheduleRuntimeUse(ctx, () => recordRuntimeUse(env, request.method, destPath));
+    if (counted) await counted;
+  }
   const via = env && env.AZIEL_RUNTIME ? "service-binding" : "origin-fetch";
   let res;
   try {

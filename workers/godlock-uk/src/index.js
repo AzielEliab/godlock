@@ -1,7 +1,9 @@
 /**
  * GodLock.uk public HTTPS stress-test engine (Cloudflare Worker).
  * One input. Locked protocol. Append-only hash-chained receipts.
- * Not a forum, not a mesh, not a tunnel. Author: Aziel Eliab.
+ * Not a forum, not a tunnel. Suite mesh is QNM-BUILD-1.0 (default OFF):
+ * live|locked|isolated counts only. No Node Gate. No auto-heal.
+ * Not an anonymity network. Author: Aziel Eliab.
  */
 import { randomBytes } from "node:crypto";
 import { json, html, corsHeaders, wantsJson, readCookie } from "./http.js";
@@ -26,6 +28,12 @@ import {
   presenceCutoff,
 } from "./presence.js";
 import { hideInternalDetermination, publicSafeFields } from "./publicCopy.js";
+import {
+  fetchMeshSnapshot,
+  alignLiveNodes,
+  publicMesh,
+  meshOpsDoc,
+} from "./mesh.js";
 
 const TEXT_MAX = 8000;
 const NODE_COOKIE = "godlock_node";
@@ -197,13 +205,22 @@ async function getReceipt(env, id) {
 async function gatherStats(env, { wrote, visiting } = {}) {
   const score = await currentScore(env);
   const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
-  const [nodes, downloads, uses] = await Promise.all([
+  const [siteNodes, downloads, uses, meshSnap] = await Promise.all([
     liveNodes(env, { wrote, visiting }),
     fetchDownloads(env),
     usesCount(env),
+    fetchMeshSnapshot(env),
   ]);
+  const mesh = publicMesh(meshSnap);
+  const live = alignLiveNodes({
+    siteLiveNodes: siteNodes,
+    mesh,
+    visiting: !!(wrote || visiting),
+  });
   return {
-    live_nodes: nodes,
+    live_nodes: live,
+    site_live_nodes: siteNodes,
+    mesh,
     views,
     uses,
     downloads,
@@ -432,7 +449,33 @@ export default {
         return json({
           ok: true,
           live_nodes: stats.live_nodes,
+          site_live_nodes: stats.site_live_nodes,
+          mesh_enabled: !!(stats.mesh && stats.mesh.enabled),
+          mesh_live_nodes: stats.mesh && stats.mesh.enabled ? stats.mesh.live_nodes : 0,
+          mesh_locked: stats.mesh && stats.mesh.enabled && stats.mesh.rollup ? stats.mesh.rollup.locked : 0,
+          mesh_isolated: stats.mesh && stats.mesh.enabled && stats.mesh.rollup ? stats.mesh.rollup.isolated : 0,
           uses: stats.uses,
+        }, 200, extraHeadersFor(nodeId));
+      }
+
+      if (path === "/mesh") {
+        const stats = await gatherStats(env, { wrote });
+        return json({
+          ok: true,
+          product: "GodLock",
+          site: "godlock.uk",
+          author: AUTHOR,
+          identity: AUTHOR,
+          ...meshOpsDoc(),
+          spec: "QNM-BUILD-1.0",
+          anonymity_network: false,
+          default_off: true,
+          node_gate: false,
+          auto_heal: false,
+          live_nodes: stats.live_nodes,
+          rollup: stats.mesh && stats.mesh.rollup ? stats.mesh.rollup : { live: 0, locked: 0, isolated: 0 },
+          site_live_nodes: stats.site_live_nodes,
+          mesh: stats.mesh,
         }, 200, extraHeadersFor(nodeId));
       }
 

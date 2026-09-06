@@ -841,7 +841,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
   });
 
   it("keeps grammar on the live AZBrowser catalog banner (no orphaned AZNet subject)", () => {
-    const LIVE_AZBROWSER_ONE_LINE = "AZBrowser (AZB-1.0): Lamb Lens ethical research browser. Cite; refuse harvest; no invented visits. FragGate only. AZNet is a separate engine (order/token pairing only).";
+    const LIVE_AZBROWSER_ONE_LINE = "AZBrowser (AZB-1.0): Lamb Lens ethical research browser. Cite; refuse harvest; no invented visits. FragGate only. AZNet is a separate software (order/token pairing only).";
     const LIVE_AZBROWSER_BANNER = "AZBrowser (AZB-1.0): Lamb Lens ethical research browser. Reached only via FragGate (POST /v1/fraggate/call { slug: \"azbrowser\", op }). Cite; refuse harmful harvest; never invent visit results. Not Chromium. tor_exit / phoenix_wipe / unrestricted proxy stay stub. AZNet is a separate product/engine — pairing is order/token only, not a shared Phase-1 UI. Author Aziel Eliab.";
     const fromOneLine = hubProductCopy({
       slug: "azbrowser",
@@ -853,7 +853,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.doesNotMatch(fromOneLine.one_line, /^\s*is a separate/);
     assert.doesNotMatch(fromOneLine.one_line, /\.\s+is a separate/);
     assert.doesNotMatch(fromOneLine.one_line, /FragGate only\.\s+is a separate/);
-    assert.match(fromOneLine.one_line, /AZNet is a separate engine \(order\/token pairing only\)\./);
+    assert.match(fromOneLine.one_line, /AZNet is a separate software \(order\/token pairing only\)\./);
     assert.doesNotMatch(fromOneLine.one_line, / {2}/);
     assert.doesNotMatch(fromOneLine.one_line, /AZBrowser\s*\/\s*AZNet/);
 
@@ -865,7 +865,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(fromBanner.name, "AZBrowser");
     assert.doesNotMatch(fromBanner.one_line, /^\s*is a separate/);
     assert.doesNotMatch(fromBanner.one_line, /\.\s+is a separate/);
-    assert.match(fromBanner.one_line, /AZNet is a separate product\/engine/);
+    assert.match(fromBanner.one_line, /AZNet is a separate software/);
     assert.doesNotMatch(fromBanner.one_line, / {2}/);
     assert.doesNotMatch(fromBanner.one_line, /AZBrowser\s*\/\s*AZNet/);
     assert.doesNotMatch(fromBanner.one_line, /AZBrowser\s+Phase[-\s]?1/i);
@@ -876,7 +876,12 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       slug: "azbrowser",
       one_line: "FragGate only. is a separate engine (order/token pairing only).",
     });
-    assert.equal(healed.one_line, "FragGate only. AZNet is a separate engine (order/token pairing only).");
+    assert.equal(healed.one_line, "FragGate only. AZNet is a separate software (order/token pairing only).");
+    const staleBrowser = hubProductCopy({
+      slug: "azbrowser",
+      one_line: "AZBrowser (AZB-1.0): Lamb Lens ethical research browser. Cite; refuse harvest; no invented visits. FragGate only. AZNet is a separate engine (order/token pairing only).",
+    });
+    assert.equal(staleBrowser.one_line, LIVE_AZBROWSER_ONE_LINE);
 
     const liveOrphan = hubProductCopy({
       slug: "azbrowser",
@@ -893,12 +898,12 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(card.one_line, LIVE_AZBROWSER_ONE_LINE);
     const html = softwareBody({ products: [card] });
     assert.doesNotMatch(html, /FragGate only\.\s+is a separate/);
-    assert.match(html, /AZNet is a separate engine \(order\/token pairing only\)\./);
+    assert.match(html, /AZNet is a separate software \(order\/token pairing only\)\./);
   });
 
   it("lists AZHub and AZInterface as separate Plain cards and never nests them", async () => {
-    const LIVE_AZHUB_ONE_LINE = "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate engine.";
-    const LIVE_AZINTERFACE_ONE_LINE = "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate engine.";
+    const LIVE_AZHUB_ONE_LINE = "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate software.";
+    const LIVE_AZINTERFACE_ONE_LINE = "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate software.";
     const counted = await attachCatalogCounters([
       {
         slug: "azhub",
@@ -962,21 +967,31 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     const ifaceCopy = hubProductCopy({ slug: "azinterface", name: "AZInterface / AZHub", one_line: LIVE_AZINTERFACE_ONE_LINE });
     assert.equal(ifaceCopy.name, "AZInterface");
     assert.equal(ifaceCopy.one_line, LIVE_AZINTERFACE_ONE_LINE);
-    assert.match(ifaceCopy.one_line, /AZHub is a separate engine\./);
+    assert.match(ifaceCopy.one_line, /AZHub is a separate software\./);
     const hubLive = hubProductCopy({ slug: "azhub", name: "AZHub", one_line: LIVE_AZHUB_ONE_LINE });
     assert.equal(hubLive.name, "AZHub");
     assert.equal(hubLive.one_line, LIVE_AZHUB_ONE_LINE);
-    assert.match(hubLive.one_line, /AZInterface is a separate engine\./);
+    assert.match(hubLive.one_line, /AZInterface is a separate software\./);
     const healedHub = hubProductCopy({
       slug: "azhub",
       one_line: "FragGate only. is a separate engine.",
     });
-    assert.equal(healedHub.one_line, "FragGate only. AZInterface is a separate engine.");
+    assert.equal(healedHub.one_line, "FragGate only. AZInterface is a separate software.");
     const healedIface = hubProductCopy({
       slug: "azinterface",
       one_line: "FragGate only. is a separate engine.",
     });
-    assert.equal(healedIface.one_line, "FragGate only. AZHub is a separate engine.");
+    assert.equal(healedIface.one_line, "FragGate only. AZHub is a separate software.");
+    const staleHub = hubProductCopy({
+      slug: "azhub",
+      one_line: "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate engine.",
+    });
+    assert.equal(staleHub.one_line, LIVE_AZHUB_ONE_LINE);
+    const staleIface = hubProductCopy({
+      slug: "azinterface",
+      one_line: "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate engine.",
+    });
+    assert.equal(staleIface.one_line, LIVE_AZINTERFACE_ONE_LINE);
     const pubHub = publicProduct(hub);
     assert.equal(pubHub.worker, AZHUB_WORKER);
     assert.equal(pubHub.family, "plain");

@@ -52,6 +52,8 @@ export function omitUntilWorker(slug) {
 /** Collapse leftover double spaces and orphaned punctuation after branding edits. */
 function tidyHubCopy(text) {
   return String(text || "")
+    .replace(/\bis a separate product\/engine\b/gi, "is a separate software")
+    .replace(/\bis a separate engine\b/gi, "is a separate software")
     .replace(/[ \t]{2,}/g, " ")
     .replace(/\s+([,.;:!?])/g, "$1")
     .replace(/([.!?])\1+/g, "$1")
@@ -64,9 +66,9 @@ function tidyHubCopy(text) {
 /**
  * Collapse leftover combined-product branding on hub cards.
  * "AZBrowser / AZNet Phase 1" is not a product — AZBrowser and AZNet
- * are separate apps. Keep catalog "AZNet is a separate engine…" and
- * "not a shared Phase-1 UI". Restore AZNet when #12 stripped it and
- * left "FragGate only. is a separate engine…".
+ * are sibling software on one FragGate door (functional pairing only).
+ * Keep catalog "AZNet is a separate software…" and "not a shared Phase-1 UI".
+ * Restore AZNet when a strip left "FragGate only. is a separate engine…".
  */
 function collapseCombinedAzbrowserBranding(text) {
   return tidyHubCopy(
@@ -76,16 +78,17 @@ function collapseCombinedAzbrowserBranding(text) {
       // Title leftover after the slash collapse: "AZBrowser Phase 1: …"
       // Do not touch "not a shared Phase-1 UI".
       .replace(/\s+Phase[-\s]?1(?=\s*:)/gi, "")
-      .replace(/(^|[.!?]\s+)is a separate (engine|product)/gi, "$1AZNet is a separate $2"),
+      .replace(/(^|[.!?]\s+)is a separate (?:engine|product|software)/gi, "$1AZNet is a separate software"),
   );
 }
 
 /**
  * Collapse leftover combined-product branding on hub cards.
  * "AZHub / AZInterface" is not a product — AZHub and AZInterface
- * are separate apps. Keep catalog "AZInterface is a separate engine…"
- * and "AZHub is a separate engine…". Restore the sibling name when
- * a combined strip left "FragGate only. is a separate engine…".
+ * are sibling software on one FragGate door. Keep catalog
+ * "AZInterface is a separate software…" and "AZHub is a separate software…".
+ * Restore the sibling name when a combined strip left
+ * "FragGate only. is a separate engine…".
  */
 function collapseCombinedAzhubBranding(text, keepName, siblingName) {
   const keep = keepName || "AZHub";
@@ -96,7 +99,7 @@ function collapseCombinedAzhubBranding(text, keepName, siblingName) {
       .replace(/AZInterface\s*\/\s*AZHub(?:\s+Phase[-\s]?1)?/gi, keep)
       .replace(new RegExp(keep.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\/\\s*Phase[-\\s]?1", "gi"), keep)
       .replace(/\s+Phase[-\s]?1(?=\s*:)/gi, "")
-      .replace(/(^|[.!?]\s+)is a separate (engine|product)/gi, "$1" + sibling + " is a separate $2"),
+      .replace(/(^|[.!?]\s+)is a separate (?:engine|product|software)/gi, "$1" + sibling + " is a separate software"),
   );
 }
 
@@ -104,7 +107,7 @@ function collapseCombinedAzhubBranding(text, keepName, siblingName) {
  * Hub copy: AZBrowser, AZNet, AZHub, and AZInterface stay separate cards.
  * Collapse combined "AZBrowser / AZNet" / "AZHub / AZInterface" branding only.
  * Do not delete the bare sibling name mid-sentence — that orphans
- * "AZInterface is a separate engine…" into " is a separate engine…".
+ * "AZInterface is a separate software…" into " is a separate software…".
  */
 export function hubProductCopy(raw) {
   const slug = String((raw && raw.slug) || "").toLowerCase();
@@ -161,10 +164,10 @@ export const CATALOG_FALLBACK_PRODUCTS = [
   { slug: "azieltether", name: "AzielTether", version: "0.1.0", one_line: "AzielTether 0.1.0: central × decentral survival mesh for downloaded Aziel software. Prefer-central; peer sync when down; public HTTPS stays mesh-free. Not a VPN. Author Aziel Eliab.", github: "https://github.com/AzielEliab/azieltether", download: "https://azieltether-download-tracker.vibelock.workers.dev/download" },
   { slug: "peacelock", name: "PeaceLock", version: "0.1.0", one_line: "Chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1).", github: "https://github.com/AzielEliab/peacelock", download: "https://peacelock-download-tracker.vibelock.workers.dev/download" },
   { slug: "azmail", name: "AZMail", version: "0.1.0", one_line: "AZMail (APP 1.0): anonymous MCP mesh + advisory airlock. Not a full internet MTA. Mesh default off. FragGate only.", github: "https://github.com/AzielEliab/azmail", download: "https://azmail-download-tracker.vibelock.workers.dev/download" },
-  { slug: "azbrowser", name: "AZBrowser", version: "0.1.0", one_line: "AZBrowser (AZB-1.0): Lamb Lens ethical research browser. Cite; refuse harvest; no invented visits. FragGate only. AZNet is a separate engine (order/token pairing only).", github: "https://github.com/AzielEliab/azbrowser", download: AZBROWSER_DOWNLOAD, worker: AZBROWSER_WORKER, worker_home: AZBROWSER_WORKER, count: AZBROWSER_COUNT },
+  { slug: "azbrowser", name: "AZBrowser", version: "0.1.0", one_line: "AZBrowser (AZB-1.0): Lamb Lens ethical research browser. Cite; refuse harvest; no invented visits. FragGate only. AZNet is a separate software (order/token pairing only).", github: "https://github.com/AzielEliab/azbrowser", download: AZBROWSER_DOWNLOAD, worker: AZBROWSER_WORKER, worker_home: AZBROWSER_WORKER, count: AZBROWSER_COUNT },
   { slug: "aznet", name: "AZNet", version: "0.1.0", one_line: "AZNet is Aziel Eliab software: a silent verification SIDE-NET (AZN-WP-0.1). Hashes only. Separate from AZBrowser. Author Aziel Eliab.", github: AZNET_GITHUB, download: AZNET_DOWNLOAD, worker: AZNET_WORKER, worker_home: AZNET_WORKER, count: AZNET_COUNT },
-  { slug: "azhub", name: "AZHub", version: "0.1.0", one_line: "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate engine.", github: AZHUB_GITHUB, download: AZHUB_DOWNLOAD, worker: AZHUB_WORKER, worker_home: AZHUB_WORKER, count: AZHUB_COUNT },
-  { slug: "azinterface", name: "AZInterface", version: "0.1.0", one_line: "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate engine.", github: AZINTERFACE_GITHUB, download: AZINTERFACE_DOWNLOAD, worker: AZINTERFACE_WORKER, worker_home: AZINTERFACE_WORKER, count: AZINTERFACE_COUNT },
+  { slug: "azhub", name: "AZHub", version: "0.1.0", one_line: "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate software.", github: AZHUB_GITHUB, download: AZHUB_DOWNLOAD, worker: AZHUB_WORKER, worker_home: AZHUB_WORKER, count: AZHUB_COUNT },
+  { slug: "azinterface", name: "AZInterface", version: "0.1.0", one_line: "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate software.", github: AZINTERFACE_GITHUB, download: AZINTERFACE_DOWNLOAD, worker: AZINTERFACE_WORKER, worker_home: AZINTERFACE_WORKER, count: AZINTERFACE_COUNT },
   { slug: "aziel-corpus", name: "Aziel Digital Library", version: "2.6.2", one_line: "Self-contained immutable digital library. Public MASTER. Not a 26-card index.", github: "https://github.com/AzielEliab/aziel-corpus", download: "https://www.azielcorpuslibrary.net/download" },
 ];
 
@@ -201,7 +204,7 @@ export const AZHUB_CARD = {
   slug: "azhub",
   name: "AZHub",
   version: "0.1.0",
-  one_line: "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate engine.",
+  one_line: "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate software.",
   github: AZHUB_GITHUB,
   download: AZHUB_DOWNLOAD,
   worker: AZHUB_WORKER,
@@ -214,7 +217,7 @@ export const AZINTERFACE_CARD = {
   slug: "azinterface",
   name: "AZInterface",
   version: "0.1.0",
-  one_line: "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate engine.",
+  one_line: "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate software.",
   github: AZINTERFACE_GITHUB,
   download: AZINTERFACE_DOWNLOAD,
   worker: AZINTERFACE_WORKER,

@@ -22,7 +22,7 @@ export const SOFTWARE_PATH = "/software";
 export const RUNTIME_PATH = "/runtime";
 export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
 export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
-export const RUNTIME_VERSION = "1.6.2";
+export const RUNTIME_VERSION = "1.6.8";
 export const FRAGGATE_KERNEL = "https://github.com/AzielEliab/fraggate";
 export const FRAGGATE_DOWNLOAD = "https://fraggate-download-tracker.vibelock.workers.dev/download";
 export const FRAGGATE_WORKER = "https://fraggate-download-tracker.vibelock.workers.dev/";
@@ -34,6 +34,14 @@ export const AZNET_DOWNLOAD = "https://aznet-download-tracker.vibelock.workers.d
 export const AZNET_WORKER = "https://aznet-download-tracker.vibelock.workers.dev/";
 export const AZNET_COUNT = "https://aznet-download-tracker.vibelock.workers.dev/count";
 export const AZNET_GITHUB = "https://github.com/AzielEliab/aznet";
+export const AZHUB_DOWNLOAD = "https://azhub-download-tracker.vibelock.workers.dev/download";
+export const AZHUB_WORKER = "https://azhub-download-tracker.vibelock.workers.dev/";
+export const AZHUB_COUNT = "https://azhub-download-tracker.vibelock.workers.dev/count";
+export const AZHUB_GITHUB = "https://github.com/AzielEliab/azhub";
+export const AZINTERFACE_DOWNLOAD = "https://azinterface-download-tracker.vibelock.workers.dev/download";
+export const AZINTERFACE_WORKER = "https://azinterface-download-tracker.vibelock.workers.dev/";
+export const AZINTERFACE_COUNT = "https://azinterface-download-tracker.vibelock.workers.dev/count";
+export const AZINTERFACE_GITHUB = "https://github.com/AzielEliab/azinterface";
 
 export const AI_CLIENTS = [
   "ChatGPT (GPT Actions / OpenAI)",
@@ -96,7 +104,7 @@ export function defaultDescription(kind) {
   }
   if (kind === "software") {
     return hideInternalDetermination(
-      "Full Aziel Eliab software suite on GodLock.uk: every live aziel-runtime catalog engine plus aziel-runtime / FragGate. Worker, GitHub, and /runtime FragGate/MCP tethers. Uses and download counters when published. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). AZBrowser and AZNet are separate Plain cards. FragGate is its own Gate card. Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
+      "Full Aziel Eliab software suite on GodLock.uk: every live aziel-runtime catalog engine plus aziel-runtime / FragGate. Worker, GitHub, and /runtime FragGate/MCP tethers. Uses and download counters when published. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (never nest Hub with Interface). FragGate is its own Gate card. Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
     );
   }
   if (kind === "runtime") {
@@ -341,6 +349,8 @@ export async function sitemapXml(env) {
     CANON_HOST + SOFTWARE_PATH + "#fraggate",
     CANON_HOST + SOFTWARE_PATH + "#azbrowser",
     CANON_HOST + SOFTWARE_PATH + "#aznet",
+    CANON_HOST + SOFTWARE_PATH + "#azhub",
+    CANON_HOST + SOFTWARE_PATH + "#azinterface",
     CANON_HOST + SOFTWARE_PATH + "#godlock",
     PUBLIC_RUNTIME,
     PUBLIC_RUNTIME + "/v1/runtime.json",
@@ -434,7 +444,7 @@ export function llmsDoc() {
     + "Digital Library identity: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n"
-    + "Software lists the full live aziel-runtime catalog plus aziel-runtime / FragGate, matching Digital Library Software completeness. New catalog slugs are included automatically. AZBrowser and AZNet are separate Plain cards (azbrowser-download-tracker, aznet-download-tracker). FragGate is its own Gate card (fraggate-download-tracker Download/Worker, A–Z with DecisionGATE). Each product is tethered to its Worker, GitHub, and /runtime FragGate/MCP. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
+    + "Software lists the full live aziel-runtime catalog plus aziel-runtime / FragGate, matching Digital Library Software completeness. New catalog slugs are included automatically. AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (azbrowser-download-tracker, aznet-download-tracker, azhub-download-tracker, azinterface-download-tracker). Never nest AZHub with AZInterface. FragGate is its own Gate card (fraggate-download-tracker Download/Worker, A–Z with DecisionGATE). Each product is tethered to its Worker, GitHub, and /runtime FragGate/MCP. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
     + "Catalog JSON: " + PUBLIC_RUNTIME + "/v1/catalog.json\n"
     + "Origin catalog: " + CATALOG + "/v1/catalog.json\n\n"
     + "## Runtime (FragGate door)\n\n"

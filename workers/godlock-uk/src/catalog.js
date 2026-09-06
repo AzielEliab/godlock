@@ -3,15 +3,18 @@
  * Live fetch via AZIEL_RUNTIME service binding, then HTTPS origin / library,
  * then this snapshot so the page never drops to two GitHub links.
  * Snapshot is a fallback floor, not a 27-only cap — live catalog slugs
- * (peacelock, azmail, …) are included automatically. Do not invent slugs.
- * Sort: Plain → Gate → Lock. Clock ≠ Lock. Author: Aziel Eliab.
+ * (peacelock, azmail, azhub, azinterface, …) are included automatically. Do not invent slugs.
+ * Sort: Plain A–Z → Gate A–Z → Lock A–Z. Clock ≠ Lock. Author: Aziel Eliab.
  */
 import { hideInternalDetermination } from "./publicCopy.js";
 import {
   AUTHOR, CATALOG, LIBRARY, RUNTIME_PATH, RUNTIME_VERSION, GITHUB_RUNTIME,
   FRAGGATE_KERNEL, FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, FRAGGATE_COUNT,
   AZBROWSER_DOWNLOAD, AZBROWSER_WORKER, AZBROWSER_COUNT,
-  AZNET_DOWNLOAD, AZNET_WORKER, AZNET_COUNT, AZNET_GITHUB, DOWNLOAD, GITHUB,
+  AZNET_DOWNLOAD, AZNET_WORKER, AZNET_COUNT, AZNET_GITHUB,
+  AZHUB_DOWNLOAD, AZHUB_WORKER, AZHUB_COUNT, AZHUB_GITHUB,
+  AZINTERFACE_DOWNLOAD, AZINTERFACE_WORKER, AZINTERFACE_COUNT, AZINTERFACE_GITHUB,
+  DOWNLOAD, GITHUB,
 } from "./seo.js";
 
 export const CATALOG_JSON_PATH = "/v1/catalog.json";
@@ -37,7 +40,7 @@ const EXTRA_SUITE_SET = new Set(EXTRA_SUITE_SLUGS);
 const EXTRA_RANK = { "aziel-runtime": 0, embryolock: 1 };
 const FAMILY_RANK = { extra: -1, plain: 0, gate: 1, lock: 2 };
 
-/** Reserved for apps whose Worker is not live yet. AZNet is live — do not omit it. */
+/** Reserved for apps whose Worker is not live yet. AZNet, AZHub, and AZInterface are live — do not omit them. */
 export const OMIT_UNTIL_WORKER_SLUGS = [];
 const OMIT_UNTIL_WORKER_SET = new Set(OMIT_UNTIL_WORKER_SLUGS);
 
@@ -78,10 +81,30 @@ function collapseCombinedAzbrowserBranding(text) {
 }
 
 /**
- * Hub copy: AZBrowser and AZNet stay separate cards.
- * Collapse combined "AZBrowser / AZNet" / Phase 1 branding only.
- * Do not delete the bare word AZNet mid-sentence — that orphans
- * "AZNet is a separate engine…" into " is a separate engine…".
+ * Collapse leftover combined-product branding on hub cards.
+ * "AZHub / AZInterface" is not a product — AZHub and AZInterface
+ * are separate apps. Keep catalog "AZInterface is a separate engine…"
+ * and "AZHub is a separate engine…". Restore the sibling name when
+ * a combined strip left "FragGate only. is a separate engine…".
+ */
+function collapseCombinedAzhubBranding(text, keepName, siblingName) {
+  const keep = keepName || "AZHub";
+  const sibling = siblingName || "AZInterface";
+  return tidyHubCopy(
+    String(text || "")
+      .replace(/AZHub\s*\/\s*AZInterface(?:\s+Phase[-\s]?1)?/gi, keep)
+      .replace(/AZInterface\s*\/\s*AZHub(?:\s+Phase[-\s]?1)?/gi, keep)
+      .replace(new RegExp(keep.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\/\\s*Phase[-\\s]?1", "gi"), keep)
+      .replace(/\s+Phase[-\s]?1(?=\s*:)/gi, "")
+      .replace(/(^|[.!?]\s+)is a separate (engine|product)/gi, "$1" + sibling + " is a separate $2"),
+  );
+}
+
+/**
+ * Hub copy: AZBrowser, AZNet, AZHub, and AZInterface stay separate cards.
+ * Collapse combined "AZBrowser / AZNet" / "AZHub / AZInterface" branding only.
+ * Do not delete the bare sibling name mid-sentence — that orphans
+ * "AZInterface is a separate engine…" into " is a separate engine…".
  */
 export function hubProductCopy(raw) {
   const slug = String((raw && raw.slug) || "").toLowerCase();
@@ -89,6 +112,12 @@ export function hubProductCopy(raw) {
   let one_line = hideInternalDetermination(String((raw && (raw.one_line || raw.banner)) || ""));
   if (slug === "aznet") {
     return { name: "AZNet", one_line };
+  }
+  if (slug === "azhub") {
+    return { name: "AZHub", one_line: collapseCombinedAzhubBranding(one_line, "AZHub", "AZInterface") };
+  }
+  if (slug === "azinterface") {
+    return { name: "AZInterface", one_line: collapseCombinedAzhubBranding(one_line, "AZInterface", "AZHub") };
   }
   const combined = slug === "azbrowser"
     || /azbrowser\s*\/\s*aznet/i.test(name)
@@ -134,6 +163,8 @@ export const CATALOG_FALLBACK_PRODUCTS = [
   { slug: "azmail", name: "AZMail", version: "0.1.0", one_line: "AZMail (APP 1.0): anonymous MCP mesh + advisory airlock. Not a full internet MTA. Mesh default off. FragGate only.", github: "https://github.com/AzielEliab/azmail", download: "https://azmail-download-tracker.vibelock.workers.dev/download" },
   { slug: "azbrowser", name: "AZBrowser", version: "0.1.0", one_line: "AZBrowser (AZB-1.0): Lamb Lens ethical research browser. Cite; refuse harvest; no invented visits. FragGate only. AZNet is a separate engine (order/token pairing only).", github: "https://github.com/AzielEliab/azbrowser", download: AZBROWSER_DOWNLOAD, worker: AZBROWSER_WORKER, worker_home: AZBROWSER_WORKER, count: AZBROWSER_COUNT },
   { slug: "aznet", name: "AZNet", version: "0.1.0", one_line: "AZNet is Aziel Eliab software: a silent verification SIDE-NET (AZN-WP-0.1). Hashes only. Separate from AZBrowser. Author Aziel Eliab.", github: AZNET_GITHUB, download: AZNET_DOWNLOAD, worker: AZNET_WORKER, worker_home: AZNET_WORKER, count: AZNET_COUNT },
+  { slug: "azhub", name: "AZHub", version: "0.1.0", one_line: "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate engine.", github: AZHUB_GITHUB, download: AZHUB_DOWNLOAD, worker: AZHUB_WORKER, worker_home: AZHUB_WORKER, count: AZHUB_COUNT },
+  { slug: "azinterface", name: "AZInterface", version: "0.1.0", one_line: "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate engine.", github: AZINTERFACE_GITHUB, download: AZINTERFACE_DOWNLOAD, worker: AZINTERFACE_WORKER, worker_home: AZINTERFACE_WORKER, count: AZINTERFACE_COUNT },
   { slug: "aziel-corpus", name: "Aziel Digital Library", version: "2.6.2", one_line: "Self-contained immutable digital library. Public MASTER. Not a 26-card index.", github: "https://github.com/AzielEliab/aziel-corpus", download: "https://www.azielcorpuslibrary.net/download" },
 ];
 
@@ -163,6 +194,32 @@ export const AZNET_CARD = {
   worker: AZNET_WORKER,
   worker_home: AZNET_WORKER,
   count: AZNET_COUNT,
+};
+
+/** Own Plain card. Blank Key spatial container. Separate from AZInterface. */
+export const AZHUB_CARD = {
+  slug: "azhub",
+  name: "AZHub",
+  version: "0.1.0",
+  one_line: "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate engine.",
+  github: AZHUB_GITHUB,
+  download: AZHUB_DOWNLOAD,
+  worker: AZHUB_WORKER,
+  worker_home: AZHUB_WORKER,
+  count: AZHUB_COUNT,
+};
+
+/** Own Plain card. Custodial page cycles. Separate from AZHub. */
+export const AZINTERFACE_CARD = {
+  slug: "azinterface",
+  name: "AZInterface",
+  version: "0.1.0",
+  one_line: "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate engine.",
+  github: AZINTERFACE_GITHUB,
+  download: AZINTERFACE_DOWNLOAD,
+  worker: AZINTERFACE_WORKER,
+  worker_home: AZINTERFACE_WORKER,
+  count: AZINTERFACE_COUNT,
 };
 
 /** Own hub card. Download/Worker point at the FragGate tracker, not GitHub-only. */
@@ -447,6 +504,8 @@ export async function attachCatalogCounters(products, env, deps = {}) {
   const seen = new Set(incoming.map((p) => p && p.slug).filter(Boolean));
   if (!seen.has(FRAGGATE_CARD.slug)) incoming.push({ ...FRAGGATE_CARD });
   if (!seen.has(AZNET_CARD.slug)) incoming.push({ ...AZNET_CARD });
+  if (!seen.has(AZHUB_CARD.slug)) incoming.push({ ...AZHUB_CARD });
+  if (!seen.has(AZINTERFACE_CARD.slug)) incoming.push({ ...AZINTERFACE_CARD });
   const list = incoming.filter((p) => p && p.slug && !omitUntilWorker(p.slug));
   const httpFetch = deps.counterFetch || deps.fetch || globalThis.fetch;
   const timeoutMs = deps.timeoutMs != null ? deps.timeoutMs : 5000;
@@ -538,12 +597,28 @@ export function softwareSuite(products, extras = {}) {
       if (!card.count) card.count = AZNET_CARD.count;
       if (!card.github) card.github = AZNET_CARD.github;
     }
+    if (card.slug === "azhub") {
+      if (!card.download) card.download = AZHUB_CARD.download;
+      if (!card.worker) card.worker = AZHUB_CARD.worker;
+      if (!card.worker_home) card.worker_home = AZHUB_CARD.worker_home;
+      if (!card.count) card.count = AZHUB_CARD.count;
+      if (!card.github) card.github = AZHUB_CARD.github;
+    }
+    if (card.slug === "azinterface") {
+      if (!card.download) card.download = AZINTERFACE_CARD.download;
+      if (!card.worker) card.worker = AZINTERFACE_CARD.worker;
+      if (!card.worker_home) card.worker_home = AZINTERFACE_CARD.worker_home;
+      if (!card.count) card.count = AZINTERFACE_CARD.count;
+      if (!card.github) card.github = AZINTERFACE_CARD.github;
+    }
     out.push(card);
   };
   push({ ...RUNTIME_CARD, uses: extras.runtimeUses != null ? extras.runtimeUses : RUNTIME_CARD.uses });
   for (const p of incoming) push(p);
   if (!seen.has(FRAGGATE_CARD.slug)) push(FRAGGATE_CARD);
   if (!seen.has(AZNET_CARD.slug)) push(AZNET_CARD);
+  if (!seen.has(AZHUB_CARD.slug)) push(AZHUB_CARD);
+  if (!seen.has(AZINTERFACE_CARD.slug)) push(AZINTERFACE_CARD);
   return sortSoftwareSuite(out);
 }
 

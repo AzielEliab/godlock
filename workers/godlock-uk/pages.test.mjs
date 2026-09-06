@@ -41,6 +41,8 @@ import {
   RUNTIME_CARD,
   FRAGGATE_CARD,
   AZNET_CARD,
+  AZHUB_CARD,
+  AZINTERFACE_CARD,
   BINDING_CATALOG_URLS,
   EXTRA_SUITE_SLUGS,
   OMIT_UNTIL_WORKER_SLUGS,
@@ -59,6 +61,7 @@ import {
 import {
   FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, AZBROWSER_DOWNLOAD, AZBROWSER_WORKER,
   AZNET_DOWNLOAD, AZNET_WORKER,
+  AZHUB_DOWNLOAD, AZHUB_WORKER, AZINTERFACE_DOWNLOAD, AZINTERFACE_WORKER,
 } from "./src/seo.js";
 
 function mockEnv() {
@@ -221,6 +224,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/software#fraggate"));
     assert.ok(xml.includes(CANON_HOST + "/software#azbrowser"));
     assert.ok(xml.includes(CANON_HOST + "/software#aznet"));
+    assert.ok(xml.includes(CANON_HOST + "/software#azhub"));
+    assert.ok(xml.includes(CANON_HOST + "/software#azinterface"));
     assert.ok(xml.includes(CANON_HOST + "/runtime"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/runtime.json"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/uses"));
@@ -421,6 +426,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(CATALOG_SLUGS.includes("azmail"));
     assert.ok(CATALOG_SLUGS.includes("azbrowser"));
     assert.ok(CATALOG_SLUGS.includes("aznet"));
+    assert.ok(CATALOG_SLUGS.includes("azhub"));
+    assert.ok(CATALOG_SLUGS.includes("azinterface"));
     assert.ok(!CATALOG_SLUGS.includes("aziel-runtime"));
     assert.equal(RUNTIME_CARD.slug, "aziel-runtime");
     assert.match(RUNTIME_CARD.one_line, /FragGate/);
@@ -434,11 +441,15 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(suite.find((p) => p.slug === "fraggate").family, "gate");
     assert.equal(suite.find((p) => p.slug === "azbrowser").family, "plain");
     assert.equal(suite.find((p) => p.slug === "aznet").family, "plain");
+    assert.equal(suite.find((p) => p.slug === "azhub").family, "plain");
+    assert.equal(suite.find((p) => p.slug === "azinterface").family, "plain");
     for (const slug of CATALOG_SLUGS) {
       assert.ok(suite.some((p) => p.slug === slug), slug);
     }
     const slugs = suite.map((p) => p.slug);
-    assert.ok(slugs.indexOf("azbrowser") < slugs.indexOf("aznet"), "Plain A–Z: AZBrowser before AZNet");
+    assert.ok(slugs.indexOf("azbrowser") < slugs.indexOf("azhub"), "Plain A–Z: AZBrowser before AZHub");
+    assert.ok(slugs.indexOf("azhub") < slugs.indexOf("azinterface"), "Plain A–Z: AZHub before AZInterface");
+    assert.ok(slugs.indexOf("azinterface") < slugs.indexOf("aznet"), "Plain A–Z: AZInterface before AZNet");
     assert.ok(slugs.indexOf("aznet") < slugs.indexOf("decisiongate"), "AZNet stays in Plain, before Gate");
     const decision = slugs.indexOf("decisiongate");
     const frag = slugs.indexOf("fraggate");
@@ -460,6 +471,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(suiteFamily({ slug: "fraggate" }), "gate");
     assert.equal(suiteFamily({ slug: "azbrowser" }), "plain");
     assert.equal(suiteFamily({ slug: "aznet" }), "plain");
+    assert.equal(suiteFamily({ slug: "azhub" }), "plain");
+    assert.equal(suiteFamily({ slug: "azinterface" }), "plain");
     const ordered = sortSoftwareSuite([
       { slug: "godlock", name: "GodLock" },
       { slug: "staticclock", name: "StaticClock" },
@@ -474,7 +487,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       { slug: "decisiongate", name: "DecisionGATE" },
       { slug: "azai", name: "AZAI" },
     ]);
-    assert.deepEqual(suite.map((p) => p.slug), ["aziel-runtime", "azai", "aznet", "staticclock", "decisiongate", "fraggate", "godlock"]);
+    assert.deepEqual(suite.map((p) => p.slug), ["aziel-runtime", "azai", "azhub", "azinterface", "aznet", "staticclock", "decisiongate", "fraggate", "godlock"]);
     assert.equal(suite.find((p) => p.slug === "staticclock").family, "plain");
     assert.equal(suite.find((p) => p.slug === "godlock").family, "lock");
   });
@@ -526,11 +539,15 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(names.length >= CATALOG_PRODUCT_COUNT, "h3 " + names.length);
     assert.ok(names.includes("GodLock"));
     assert.ok(names.includes("Aziel Eliab Runtime"));
+    assert.ok(names.includes("AZHub"));
+    assert.ok(names.includes("AZInterface"));
     assert.ok(ids.includes("aziel-runtime"));
     assert.ok(ids.includes("fraggate"));
     assert.ok(ids.includes("godlock"));
     assert.ok(ids.includes("azbrowser"));
     assert.ok(ids.includes("aznet"));
+    assert.ok(ids.includes("azhub"));
+    assert.ok(ids.includes("azinterface"));
     assert.ok(ids.includes("peacelock"));
     for (const slug of CATALOG_SLUGS) {
       assert.ok(ids.includes(slug), slug);
@@ -547,6 +564,10 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /href="https:\/\/azbrowser-download-tracker\.vibelock\.workers\.dev\/">Worker<\/a>/);
     assert.match(html, /href="https:\/\/aznet-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
     assert.match(html, /href="https:\/\/aznet-download-tracker\.vibelock\.workers\.dev\/">Worker<\/a>/);
+    assert.match(html, /href="https:\/\/azhub-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
+    assert.match(html, /href="https:\/\/azhub-download-tracker\.vibelock\.workers\.dev\/">Worker<\/a>/);
+    assert.match(html, /href="https:\/\/azinterface-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
+    assert.match(html, /href="https:\/\/azinterface-download-tracker\.vibelock\.workers\.dev\/">Worker<\/a>/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/godlock">GitHub<\/a>/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/fraggate">FragGate<\/a>/);
     assert.match(html, /40 downloads/);
@@ -649,6 +670,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(ids.includes("fraggate"));
     assert.ok(ids.includes("azbrowser"));
     assert.ok(ids.includes("aznet"));
+    assert.ok(ids.includes("azhub"));
+    assert.ok(ids.includes("azinterface"));
     assert.ok(ids.includes("peacelock"));
     assert.match(html, /<title>Software — GodLock<\/title>/);
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
@@ -670,8 +693,12 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(body.products.some((p) => p.slug === "fraggate" && p.download === FRAGGATE_DOWNLOAD && p.worker === FRAGGATE_WORKER && p.family === "gate"));
     assert.ok(body.products.some((p) => p.slug === "azbrowser" && p.download === AZBROWSER_DOWNLOAD && p.worker === AZBROWSER_WORKER && p.family === "plain"));
     assert.ok(body.products.some((p) => p.slug === "aznet" && p.download === AZNET_DOWNLOAD && p.worker === AZNET_WORKER && p.family === "plain"));
+    assert.ok(body.products.some((p) => p.slug === "azhub" && p.download === AZHUB_DOWNLOAD && p.worker === AZHUB_WORKER && p.family === "plain"));
+    assert.ok(body.products.some((p) => p.slug === "azinterface" && p.download === AZINTERFACE_DOWNLOAD && p.worker === AZINTERFACE_WORKER && p.family === "plain"));
     const listed = body.products.map((p) => p.slug);
-    assert.ok(listed.indexOf("azbrowser") < listed.indexOf("aznet"));
+    assert.ok(listed.indexOf("azbrowser") < listed.indexOf("azhub"));
+    assert.ok(listed.indexOf("azhub") < listed.indexOf("azinterface"));
+    assert.ok(listed.indexOf("azinterface") < listed.indexOf("aznet"));
     assert.ok(listed.indexOf("aznet") < listed.indexOf("decisiongate"));
     assert.ok(listed.indexOf("decisiongate") < listed.indexOf("fraggate"));
     assert.ok(listed.indexOf("fraggate") < body.products.findIndex((p) => p.family === "lock"));
@@ -689,6 +716,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(cite.software_slugs.includes("fraggate"));
     assert.ok(cite.software_slugs.includes("azbrowser"));
     assert.ok(cite.software_slugs.includes("aznet"));
+    assert.ok(cite.software_slugs.includes("azhub"));
+    assert.ok(cite.software_slugs.includes("azinterface"));
     assert.ok(cite.software_slugs.includes("peacelock"));
     assert.ok(cite.software_slugs.length >= CATALOG_PRODUCT_COUNT);
     assert.ok(cite.software_product_count >= CATALOG_PRODUCT_COUNT);
@@ -722,8 +751,14 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.deepEqual(OMIT_UNTIL_WORKER_SLUGS, []);
     assert.equal(omitUntilWorker("aznet"), false);
     assert.equal(omitUntilWorker("azbrowser"), false);
+    assert.equal(omitUntilWorker("azhub"), false);
+    assert.equal(omitUntilWorker("azinterface"), false);
     assert.equal(AZNET_CARD.download, AZNET_DOWNLOAD);
     assert.equal(AZNET_CARD.worker, AZNET_WORKER);
+    assert.equal(AZHUB_CARD.download, AZHUB_DOWNLOAD);
+    assert.equal(AZHUB_CARD.worker, AZHUB_WORKER);
+    assert.equal(AZINTERFACE_CARD.download, AZINTERFACE_DOWNLOAD);
+    assert.equal(AZINTERFACE_CARD.worker, AZINTERFACE_WORKER);
     const counted = await attachCatalogCounters([
       {
         slug: "azbrowser",
@@ -744,6 +779,12 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
         }
         if (u.includes("aznet-download-tracker") && u.endsWith("/count")) {
           return new Response(JSON.stringify({ project: "aznet", views: 3, downloads: 1, total: 1 }), { headers: { "Content-Type": "application/json" } });
+        }
+        if (u.includes("azhub-download-tracker") && u.endsWith("/count")) {
+          return new Response(JSON.stringify({ project: "azhub", views: 4, downloads: 1, total: 1 }), { headers: { "Content-Type": "application/json" } });
+        }
+        if (u.includes("azinterface-download-tracker") && u.endsWith("/count")) {
+          return new Response(JSON.stringify({ project: "azinterface", views: 5, downloads: 1, total: 1 }), { headers: { "Content-Type": "application/json" } });
         }
         throw new Error("unexpected " + url);
       },
@@ -853,5 +894,98 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     const html = softwareBody({ products: [card] });
     assert.doesNotMatch(html, /FragGate only\.\s+is a separate/);
     assert.match(html, /AZNet is a separate engine \(order\/token pairing only\)\./);
+  });
+
+  it("lists AZHub and AZInterface as separate Plain cards and never nests them", async () => {
+    const LIVE_AZHUB_ONE_LINE = "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate engine.";
+    const LIVE_AZINTERFACE_ONE_LINE = "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate engine.";
+    const counted = await attachCatalogCounters([
+      {
+        slug: "azhub",
+        name: "AZHub / AZInterface",
+        one_line: "AZHub / AZInterface: Blank Key + custodial page cycles.",
+        download: AZHUB_DOWNLOAD,
+        count: "https://azhub-download-tracker.vibelock.workers.dev/count",
+      },
+      {
+        slug: "azinterface",
+        name: "AZInterface / AZHub",
+        one_line: LIVE_AZINTERFACE_ONE_LINE,
+        download: AZINTERFACE_DOWNLOAD,
+        count: "https://azinterface-download-tracker.vibelock.workers.dev/count",
+      },
+    ], {}, {
+      counterFetch: async (url) => {
+        const u = String(url);
+        if (u.includes("azhub-download-tracker") && u.endsWith("/count")) {
+          return new Response(JSON.stringify({ project: "azhub", views: 4, downloads: 2, total: 2 }), { headers: { "Content-Type": "application/json" } });
+        }
+        if (u.includes("azinterface-download-tracker") && u.endsWith("/count")) {
+          return new Response(JSON.stringify({ project: "azinterface", views: 5, downloads: 3, total: 3 }), { headers: { "Content-Type": "application/json" } });
+        }
+        if (u.includes("fraggate-download-tracker") && u.endsWith("/count")) {
+          return new Response(JSON.stringify({ project: "fraggate", views: 1, downloads: 1, total: 1 }), { headers: { "Content-Type": "application/json" } });
+        }
+        if (u.includes("aznet-download-tracker") && u.endsWith("/count")) {
+          return new Response(JSON.stringify({ project: "aznet", views: 1, downloads: 1, total: 1 }), { headers: { "Content-Type": "application/json" } });
+        }
+        throw new Error("unexpected " + url);
+      },
+    });
+    const hub = counted.products.find((p) => p.slug === "azhub");
+    const iface = counted.products.find((p) => p.slug === "azinterface");
+    assert.ok(hub);
+    assert.equal(hub.download, AZHUB_DOWNLOAD);
+    assert.equal(hub.downloads, 2);
+    assert.equal(hub.views, 4);
+    assert.ok(iface);
+    assert.equal(iface.download, AZINTERFACE_DOWNLOAD);
+    assert.equal(iface.downloads, 3);
+    assert.equal(iface.views, 5);
+    const html = softwareBody({ products: counted.products });
+    assert.match(html, /id="azhub"[^>]*data-family="plain"/);
+    assert.match(html, /<h3>AZHub<\/h3>/);
+    assert.match(html, /href="https:\/\/azhub-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
+    assert.match(html, /href="https:\/\/azhub-download-tracker\.vibelock\.workers\.dev\/">Worker<\/a>/);
+    assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/azhub">GitHub<\/a>/);
+    assert.match(html, /id="azinterface"[^>]*data-family="plain"/);
+    assert.match(html, /<h3>AZInterface<\/h3>/);
+    assert.match(html, /href="https:\/\/azinterface-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
+    assert.match(html, /href="https:\/\/azinterface-download-tracker\.vibelock\.workers\.dev\/">Worker<\/a>/);
+    assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/azinterface">GitHub<\/a>/);
+    assert.doesNotMatch(html, /AZHub \/ AZInterface/);
+    assert.doesNotMatch(html, /AZInterface \/ AZHub/);
+    assert.doesNotMatch(html, /<h3>AZHub \/ AZInterface<\/h3>/);
+    const nested = hubProductCopy({ slug: "azhub", name: "AZHub / AZInterface", one_line: "AZHub / AZInterface: Blank Key." });
+    assert.equal(nested.name, "AZHub");
+    assert.equal(nested.one_line, "AZHub: Blank Key.");
+    const ifaceCopy = hubProductCopy({ slug: "azinterface", name: "AZInterface / AZHub", one_line: LIVE_AZINTERFACE_ONE_LINE });
+    assert.equal(ifaceCopy.name, "AZInterface");
+    assert.equal(ifaceCopy.one_line, LIVE_AZINTERFACE_ONE_LINE);
+    assert.match(ifaceCopy.one_line, /AZHub is a separate engine\./);
+    const hubLive = hubProductCopy({ slug: "azhub", name: "AZHub", one_line: LIVE_AZHUB_ONE_LINE });
+    assert.equal(hubLive.name, "AZHub");
+    assert.equal(hubLive.one_line, LIVE_AZHUB_ONE_LINE);
+    assert.match(hubLive.one_line, /AZInterface is a separate engine\./);
+    const healedHub = hubProductCopy({
+      slug: "azhub",
+      one_line: "FragGate only. is a separate engine.",
+    });
+    assert.equal(healedHub.one_line, "FragGate only. AZInterface is a separate engine.");
+    const healedIface = hubProductCopy({
+      slug: "azinterface",
+      one_line: "FragGate only. is a separate engine.",
+    });
+    assert.equal(healedIface.one_line, "FragGate only. AZHub is a separate engine.");
+    const pubHub = publicProduct(hub);
+    assert.equal(pubHub.worker, AZHUB_WORKER);
+    assert.equal(pubHub.family, "plain");
+    assert.equal(pubHub.author, "Aziel Eliab");
+    const pubIface = publicProduct(iface);
+    assert.equal(pubIface.worker, AZINTERFACE_WORKER);
+    assert.equal(pubIface.family, "plain");
+    assert.equal(pubIface.author, "Aziel Eliab");
+    assert.equal(suiteFamily({ slug: "azhub", name: "AZHub" }), "plain");
+    assert.equal(suiteFamily({ slug: "azinterface", name: "AZInterface" }), "plain");
   });
 });

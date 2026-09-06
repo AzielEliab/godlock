@@ -46,7 +46,24 @@ export function omitUntilWorker(slug) {
   return OMIT_UNTIL_WORKER_SET.has(s);
 }
 
-/** Hub copy: AZBrowser and AZNet stay separate cards. Never combine them. */
+/** Collapse leftover double spaces and orphaned punctuation after branding edits. */
+function tidyHubCopy(text) {
+  return String(text || "")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+([,.;:!?])/g, "$1")
+    .replace(/([.!?])\1+/g, "$1")
+    .replace(/^\s*[,.;:!?/]+\s*/g, "")
+    .replace(/\(\s+/g, "(")
+    .replace(/\s+\)/g, ")")
+    .trim();
+}
+
+/**
+ * Hub copy: AZBrowser and AZNet stay separate cards.
+ * Collapse combined "AZBrowser / AZNet" branding only.
+ * Do not delete the bare word AZNet mid-sentence — that orphans
+ * "AZNet is a separate engine…" into " is a separate engine…".
+ */
 export function hubProductCopy(raw) {
   const slug = String((raw && raw.slug) || "").toLowerCase();
   let name = String((raw && raw.name) || slug);
@@ -54,15 +71,18 @@ export function hubProductCopy(raw) {
   if (slug === "aznet") {
     return { name: "AZNet", one_line };
   }
-  const combined = slug === "azbrowser" || /azbrowser\s*\/\s*aznet/i.test(name) || /azbrowser\s*\/\s*aznet/i.test(one_line);
+  const combined = slug === "azbrowser"
+    || /azbrowser\s*\/\s*aznet/i.test(name)
+    || /azbrowser\s*\/\s*aznet/i.test(one_line);
   if (combined) {
-    name = "AZBrowser";
-    one_line = one_line
-      .replace(/AZBrowser\s*\/\s*AZNet\s*/gi, "AZBrowser ")
-      .replace(/\bAZNet\b/gi, "")
-      .replace(/\s{2,}/g, " ")
-      .replace(/\s+\./g, ".")
-      .trim();
+    name = tidyHubCopy(name.replace(/AZBrowser\s*\/\s*AZNet/gi, "AZBrowser")) || "AZBrowser";
+    if (slug === "azbrowser") name = "AZBrowser";
+    one_line = tidyHubCopy(
+      one_line
+        .replace(/AZBrowser\s*\/\s*AZNet/gi, "AZBrowser")
+        // Heal copy that already lost the AZNet subject (PR #12 regression).
+        .replace(/(^|[.!?]\s+)is a separate (engine|product)/gi, "$1AZNet is a separate $2"),
+    );
   }
   return { name, one_line };
 }
@@ -96,7 +116,7 @@ export const CATALOG_FALLBACK_PRODUCTS = [
   { slug: "azieltether", name: "AzielTether", version: "0.1.0", one_line: "AzielTether 0.1.0: central × decentral survival mesh for downloaded Aziel software. Prefer-central; peer sync when down; public HTTPS stays mesh-free. Not a VPN. Author Aziel Eliab.", github: "https://github.com/AzielEliab/azieltether", download: "https://azieltether-download-tracker.vibelock.workers.dev/download" },
   { slug: "peacelock", name: "PeaceLock", version: "0.1.0", one_line: "Chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1).", github: "https://github.com/AzielEliab/peacelock", download: "https://peacelock-download-tracker.vibelock.workers.dev/download" },
   { slug: "azmail", name: "AZMail", version: "0.1.0", one_line: "AZMail (APP 1.0): anonymous MCP mesh + advisory airlock. Not a full internet MTA. Mesh default off. FragGate only.", github: "https://github.com/AzielEliab/azmail", download: "https://azmail-download-tracker.vibelock.workers.dev/download" },
-  { slug: "azbrowser", name: "AZBrowser", version: "0.1.0", one_line: "AZBrowser Phase 1: secure research browser + Lamb Lens ethical search. Cite; refuse harvest; no invented visits. FragGate only. Not Chromium. Author Aziel Eliab.", github: "https://github.com/AzielEliab/azbrowser", download: AZBROWSER_DOWNLOAD, worker: AZBROWSER_WORKER, worker_home: AZBROWSER_WORKER, count: AZBROWSER_COUNT },
+  { slug: "azbrowser", name: "AZBrowser", version: "0.1.0", one_line: "AZBrowser (AZB-1.0): Lamb Lens ethical research browser. Cite; refuse harvest; no invented visits. FragGate only. AZNet is a separate engine (order/token pairing only).", github: "https://github.com/AzielEliab/azbrowser", download: AZBROWSER_DOWNLOAD, worker: AZBROWSER_WORKER, worker_home: AZBROWSER_WORKER, count: AZBROWSER_COUNT },
   { slug: "aznet", name: "AZNet", version: "0.1.0", one_line: "AZNet is Aziel Eliab software: a silent verification SIDE-NET (AZN-WP-0.1). Hashes only. Separate from AZBrowser. Author Aziel Eliab.", github: AZNET_GITHUB, download: AZNET_DOWNLOAD, worker: AZNET_WORKER, worker_home: AZNET_WORKER, count: AZNET_COUNT },
   { slug: "aziel-corpus", name: "Aziel Digital Library", version: "2.6.2", one_line: "Self-contained immutable digital library. Public MASTER. Not a 26-card index.", github: "https://github.com/AzielEliab/aziel-corpus", download: "https://www.azielcorpuslibrary.net/download" },
 ];

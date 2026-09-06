@@ -9,6 +9,11 @@ import {
   handleRuntimeRoot,
   RUNTIME_ORIGIN,
 } from "./src/runtimeRoot.js";
+import {
+  bucketRuntimePath,
+  shouldCountRuntimeUse,
+  USES_KEY_TOTAL,
+} from "./src/runtimeUses.js";
 import { PUBLIC_RUNTIME, LIBRARY_RUNTIME, CATALOG, RUNTIME_PATH } from "./src/seo.js";
 import { softwareBody, topNav } from "./src/ui.js";
 import worker from "./src/index.js";
@@ -29,11 +34,25 @@ function mockDbEnv(extra) {
   };
 }
 
-function runtimeEnv(handler) {
+function mockKv() {
+  const store = new Map();
+  return {
+    async get(key) {
+      return store.has(key) ? store.get(key) : null;
+    },
+    async put(key, val) {
+      store.set(key, String(val));
+    },
+    store,
+  };
+}
+
+function runtimeEnv(handler, extra) {
   return mockDbEnv({
     AZIEL_RUNTIME: {
       fetch: handler,
     },
+    ...(extra || {}),
   });
 }
 
@@ -156,6 +175,112 @@ describe("runtime proxy", () => {
     const html = await res.text();
     assert.doesNotMatch(html, /Specified Fit|INTERNAL_CRITERIA|bootstrap lock|weighing framework/i);
     assert.match(html, /Author Aziel Eliab|GodLock|FragGate|1\.6\.2/);
+  });
+});
+
+describe("runtime API use tracker", () => {
+  it("counts FragGate / MCP / session / pull / v1 API and skips SEO, uses, and GET health/ready", () => {
+    assert.equal(shouldCountRuntimeUse("POST", "/v1/fraggate/call"), true);
+    assert.equal(shouldCountRuntimeUse("GET", "/v1/fraggate/list"), true);
+    assert.equal(shouldCountRuntimeUse("POST", "/mcp"), true);
+    assert.equal(shouldCountRuntimeUse("POST", "/v1/session/open"), true);
+    assert.equal(shouldCountRuntimeUse("GET", "/v1/pull/godlock"), true);
+    assert.equal(shouldCountRuntimeUse("GET", "/v1/skill"), true);
+    assert.equal(shouldCountRuntimeUse("POST", "/p/azclce/score"), true);
+    assert.equal(shouldCountRuntimeUse("GET", "/openapi.json"), true);
+    assert.equal(shouldCountRuntimeUse("GET", "/v1/uses"), false);
+    assert.equal(shouldCountRuntimeUse("GET", "/v1/health"), false);
+    assert.equal(shouldCountRuntimeUse("HEAD", "/v1/ready"), false);
+    assert.equal(shouldCountRuntimeUse("GET", "/llms.txt"), false);
+    assert.equal(shouldCountRuntimeUse("GET", "/cite.json"), false);
+    assert.equal(shouldCountRuntimeUse("GET", "/sitemap.xml"), false);
+    assert.equal(shouldCountRuntimeUse("GET", "/"), false);
+    assert.equal(shouldCountRuntimeUse("OPTIONS", "/mcp"), false);
+    assert.equal(shouldCountRuntimeUse("POST", "/v1/health"), true);
+    assert.equal(bucketRuntimePath("/v1/session/abc123/exec"), "/v1/session/*/exec");
+  });
+
+  it("intercepts GET /runtime/v1/uses locally and does not increment that read", async () => {
+    const kv = mockKv();
+    let originUsesHits = 0;
+    const env = runtimeEnv(async (req) => {
+      const u = new URL(req.url);
+      if (u.pathname === "/v1/uses") {
+        originUsesHits += 1;
+        return new Response(JSON.stringify({ ok: true, host: "aziel-runtime", uses: 9, author: "Aziel Eliab" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+        });
+      }
+      return new Response(JSON.stringify({ ok: true, proxied: u.pathname }), {
+        status: 200,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      });
+    }, { RUNTIME_USES: kv });
+
+    const res = await worker.fetch(new Request("https://godlock.uk/runtime/v1/uses"), env);
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get("X-Aziel-Runtime-Via"), "godlock.uk");
+    const body = await res.json();
+    assert.equal(body.ok, true);
+    assert.equal(body.host, "godlock.uk");
+    assert.equal(body.via, "godlock.uk");
+    assert.equal(body.uses, 0);
+    assert.deepEqual(body.by_path, {});
+    assert.deepEqual(body.recent, []);
+    assert.equal(body.author, "Aziel Eliab");
+    assert.equal(body.kind, "runtime-host");
+    assert.equal(body.origin && body.origin.uses, 9);
+    assert.equal(originUsesHits, 1);
+    assert.equal(kv.store.get(USES_KEY_TOTAL), undefined);
+
+    const head = await worker.fetch(new Request("https://godlock.uk/runtime/v1/uses", { method: "HEAD" }), env);
+    assert.equal(head.status, 200);
+    assert.equal(kv.store.get(USES_KEY_TOTAL), undefined);
+  });
+
+  it("increments KV on proxied API traffic, stamps the origin request, and skips health/SEO", async () => {
+    const kv = mockKv();
+    const seen = [];
+    const env = runtimeEnv(async (req) => {
+      seen.push({ method: req.method, path: new URL(req.url).pathname, via: req.headers.get("X-Aziel-Runtime-Via") });
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      });
+    }, { RUNTIME_USES: kv });
+
+    const api = await worker.fetch(new Request("https://godlock.uk/runtime/v1/fraggate/list"), env);
+    assert.equal(api.status, 200);
+    assert.equal(api.headers.get("X-Aziel-Runtime-Via"), "service-binding");
+    assert.equal(seen[0].via, "godlock.uk");
+    assert.equal(seen[0].path, "/v1/fraggate/list");
+
+    await worker.fetch(new Request("https://godlock.uk/runtime/mcp", { method: "POST", body: "{}", headers: { "Content-Type": "application/json" } }), env);
+    await worker.fetch(new Request("https://godlock.uk/runtime/v1/health"), env);
+    await worker.fetch(new Request("https://godlock.uk/runtime/llms.txt"), env);
+    await worker.fetch(new Request("https://godlock.uk/runtime/v1/uses"), env);
+
+    assert.equal(parseInt(kv.store.get(USES_KEY_TOTAL), 10), 2);
+    const uses = await (await worker.fetch(new Request("https://godlock.uk/runtime/v1/uses"), env)).json();
+    assert.equal(uses.uses, 2);
+    assert.equal(uses.by_path["/v1/fraggate/list"], 1);
+    assert.equal(uses.by_path["/mcp"], 1);
+    assert.equal(uses.author, "Aziel Eliab");
+    assert.ok(Array.isArray(uses.recent) && uses.recent.length === 2);
+  });
+
+  it("does not change GodLock product Uses on the receipt ledger", async () => {
+    const kv = mockKv();
+    const env = runtimeEnv(async () => new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+    }), { RUNTIME_USES: kv });
+    await worker.fetch(new Request("https://godlock.uk/runtime/v1/fraggate/call", { method: "POST", body: "{}", headers: { "Content-Type": "application/json" } }), env);
+    const stats = await worker.fetch(new Request("https://godlock.uk/stats"), env);
+    const body = await stats.json();
+    assert.equal(body.uses, 0);
+    assert.equal(parseInt(kv.store.get(USES_KEY_TOTAL), 10), 1);
   });
 });
 

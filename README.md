@@ -115,6 +115,7 @@ No DOI is claimed. Do not invent one.
 - Verify: https://godlock.uk/verify
 - Software catalog on GodLock: https://godlock.uk/software
 - Runtime door: https://godlock.uk/runtime (library https://www.azielcorpuslibrary.net/runtime · origin https://aziel-runtime.vibelock.workers.dev/)
+- Runtime API uses (this door, not GodLock product Uses): https://godlock.uk/runtime/v1/uses
 - Aziel Corpus Library: https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
 - aziel-runtime: https://aziel-runtime.vibelock.workers.dev/ — https://github.com/AzielEliab/aziel-runtime
 - Counted download / install: https://godlock-download-tracker.vibelock.workers.dev/

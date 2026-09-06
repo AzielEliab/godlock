@@ -8,7 +8,7 @@ import {
   AI_CLIENTS_SENTENCE, RUNTIME_VERSION, LIBRARY_RUNTIME, FRAGGATE_KERNEL, GITHUB_RUNTIME,
 } from "./seo.js";
 import { hideInternalDetermination } from "./publicCopy.js";
-import { softwareSuite, invokeHref } from "./catalog.js";
+import { softwareSuite, invokeHref, workerHref } from "./catalog.js";
 
 export const CSS = `
 :root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
@@ -38,6 +38,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;lin
 .pill.no{background:#2a1414;color:var(--no);border-color:#8a2b2b}
 .pill.review{background:#2a2210;color:var(--rev);border-color:#8a5a2b}
 .pill.interesting{background:#2a2410;color:var(--gold);border-color:var(--gold)}
+.pill.ok{background:#14261c;color:var(--yes);border-color:#2e6b45}
 .author{color:var(--muted);margin:0 0 14px;font-size:14px}
 .banner{background:#1a140c;border:1px solid #8a5a2b;border-radius:12px;padding:12px 14px;margin:0 0 16px;color:#f0d0a8;font-size:15px}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}
@@ -284,25 +285,31 @@ export function azielEliabText() {
   return AZIEL_MANIFESTO.join("\n\n") + "\n\n" + AZIEL_SIGNATURE + "\n";
 }
 
-export function softwareBody({ products } = {}) {
-  const list = softwareSuite(products);
+export function softwareBody({ products, extras } = {}) {
+  const list = softwareSuite(products, extras);
   const featured = new Set(["godlock", "aziel-runtime", "azieltether"]);
-  const catalogN = list.filter((p) => p.slug !== "aziel-runtime").length;
+  const catalogN = list.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "fraggate").length;
   const jumps = list.map((p) => `<a href="#${esc(p.slug)}">${esc(p.slug)}</a>`).join(" · ");
   const cards = list.map((p) => {
     const slug = String(p.slug || "");
     const feat = featured.has(slug);
+    const family = p.family || "";
     const ver = p.version ? `<span class="pill">v${esc(p.version)}</span>` : "";
+    const dl = p.downloads != null ? `<span class="pill ok">${esc(p.downloads)} downloads</span>` : "";
+    const uses = p.uses != null ? `<span class="pill ok">${esc(p.uses)} uses</span>` : "";
+    const worker = workerHref(p);
     const kernel = p.kernel
       ? `<a class="button ghost" href="${esc(p.kernel)}">FragGate</a>`
       : "";
     const links = [
       p.download ? `<a class="button" href="${esc(p.download)}">Download</a>` : "",
+      worker ? `<a class="button ghost" href="${esc(worker)}">Worker</a>` : "",
       p.github ? `<a class="button ghost" href="${esc(p.github)}">GitHub</a>` : "",
       `<a class="button ghost" href="${esc(invokeHref(p))}">Invoke via Runtime</a>`,
+      `<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>`,
       kernel,
     ].filter(Boolean).join(" ");
-    return `<article class="soft-card${feat ? " featured" : ""}" id="${esc(slug)}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(p.name || slug)}</h3><div class="soft-meta">${ver}</div><p>${esc(hideInternalDetermination(p.one_line || ""))}</p><p class="soft-links">${links}</p></article>`;
+    return `<article class="soft-card${feat ? " featured" : ""}" id="${esc(slug)}" data-family="${esc(family)}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(p.name || slug)}</h3><div class="soft-meta">${ver}${dl}${uses}</div><p>${esc(hideInternalDetermination(p.one_line || ""))}</p><p class="soft-links">${links}</p></article>`;
   }).join("");
   const countLine = catalogN
     ? ` ${esc(catalogN)} catalog engines plus aziel-runtime / FragGate.`
@@ -315,7 +322,7 @@ export function softwareBody({ products } = {}) {
 <a class="button ghost" href="${esc(RUNTIME_PATH + "/v1/skill")}">Skill</a>
 <a class="button ghost" href="${esc(GITHUB_RUNTIME)}">aziel-runtime</a>
 <a class="button ghost" href="${esc(FRAGGATE_KERNEL)}">FragGate</a></p></div>
-<p class="muted">Full Aziel Eliab suite from the <a href="${esc(RUNTIME_PATH + "/v1/catalog.json")}">same-origin catalog</a> (also <a href="${esc(CATALOG + "/v1/catalog.json")}">aziel-runtime catalog.json</a>), matching Digital Library Software completeness. ${esc(AI_CLIENTS_SENTENCE)} GodLock.uk is not a mesh. Counted downloads stay on each product Worker.${countLine} Identity is Aziel Eliab only.</p>
+<p class="muted">Full Aziel Eliab suite from the live <a href="${esc(RUNTIME_PATH + "/v1/catalog.json")}">same-origin catalog</a> (also <a href="${esc(CATALOG + "/v1/catalog.json")}">aziel-runtime catalog.json</a>), matching Digital Library Software completeness. New catalog slugs are included automatically. Sorted Plain → Gate → Lock (Clock is not Lock). ${esc(AI_CLIENTS_SENTENCE)} GodLock.uk is not a mesh. Counted downloads stay on each product Worker; API uses show when the Worker or <a href="${esc(RUNTIME_PATH + "/v1/uses")}">/runtime/v1/uses</a> publishes them.${countLine} Identity is Aziel Eliab only.</p>
 <p class="muted">Suite: ${jumps}</p>
 <div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
 }

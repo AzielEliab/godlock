@@ -83,9 +83,12 @@ export function sitemapLocs() {
     RUNTIME + "/",
     RUNTIME + "/v1/software",
     RUNTIME + "/v1/fraggate/list",
+    RUNTIME + "/v1/mesh",
+    RUNTIME + "/v1/mesh/list",
     RUNTIME + "/v1/update/check?slug=godlock&version=0.1.0",
     RUNTIME + "/openapi.json",
     RUNTIME + "/mcp",
+    SITE + "/mesh",
   ];
 }
 
@@ -117,6 +120,22 @@ export function citeDoc() {
     runtime_openapi: RUNTIME + "/openapi.json",
     software_catalog: RUNTIME + "/v1/software",
     software_fraggate: RUNTIME + "/v1/fraggate/list",
+    mesh: RUNTIME + "/v1/mesh",
+    mesh_list: RUNTIME + "/v1/mesh/list",
+    mesh_join: RUNTIME + "/v1/mesh/join",
+    mesh_heartbeat: RUNTIME + "/v1/mesh/heartbeat",
+    mesh_enable: RUNTIME + "/v1/mesh/enable",
+    mesh_disable: RUNTIME + "/v1/mesh/disable",
+    site_mesh: SITE + "/mesh",
+    mesh_spec: "QNM-BUILD-1.0",
+    mesh_default_off: true,
+    mesh_anonymity_network: false,
+    mesh_node_gate: false,
+    mesh_auto_heal: false,
+    mesh_rollup: "live|locked|isolated counts only",
+    anon_broadcast: "https://github.com/AzielEliab/anon-broadcast",
+    anon_broadcast_note: "Local communique style tool. Not a publish path on godlock.uk. Not hosted on this Worker. No ffmpeg farm.",
+    anon_broadcast_publish_path: false,
     doi: null,
     license: "Apache-2.0",
     catalog: RUNTIME + "/",
@@ -149,7 +168,13 @@ export function llmsDoc() {
     + "Live software catalog: " + RUNTIME + "/v1/software\n"
     + "FragGate list fallback: " + RUNTIME + "/v1/fraggate/list\n"
     + "Catalog OpenAPI: " + RUNTIME + "/openapi.json\n"
-    + "MCP: POST " + RUNTIME + "/mcp\n\n"
+    + "MCP: POST " + RUNTIME + "/mcp\n"
+    + "Suite mesh (default off): " + RUNTIME + "/v1/mesh\n"
+    + "QNM-BUILD-1.0 rollup: live|locked|isolated counts only. No Node Gate. No auto-heal.\n"
+    + "Mesh list: " + RUNTIME + "/v1/mesh/list\n"
+    + "GodLock.uk mesh snapshot: " + SITE + "/mesh\n"
+    + "Mesh is not an anonymity network. Identity Aziel Eliab only.\n"
+    + "anon-broadcast is not a publish path on godlock.uk. Local communique style tool (not hosted here; no ffmpeg farm): https://github.com/AzielEliab/anon-broadcast\n\n"
     + "Works with " + AI_CLIENTS.join(", ") + ".\n"
     + "ChatGPT: GPT Actions → Import " + HOST + "/openapi.json or " + RUNTIME + "/openapi.json\n"
     + "Cursor / Glama: remote MCP POST " + RUNTIME + "/mcp\n"

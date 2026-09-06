@@ -54,6 +54,9 @@ function tidyHubCopy(text) {
   return String(text || "")
     .replace(/\bis a separate product\/engine\b/gi, "is a separate software")
     .replace(/\bis a separate engine\b/gi, "is a separate software")
+    // Live AZNet catalog: "Separate engine; functional-order pair with AZBrowser."
+    .replace(/Separate engine/g, "Separate software")
+    .replace(/\bseparate engine\b/g, "separate software")
     .replace(/[ \t]{2,}/g, " ")
     .replace(/\s+([,.;:!?])/g, "$1")
     .replace(/([.!?])\1+/g, "$1")
@@ -104,6 +107,19 @@ function collapseCombinedAzhubBranding(text, keepName, siblingName) {
 }
 
 /**
+ * AZNet is sibling software on the same FragGate door as AZBrowser
+ * (functional-order pair only). Heal live catalog "Separate engine".
+ */
+function collapseAznetCopy(text) {
+  return tidyHubCopy(
+    String(text || "")
+      .replace(/AZNet\s*\/\s*AZBrowser(?:\s+Phase[-\s]?1)?/gi, "AZNet")
+      .replace(/AZBrowser\s*\/\s*AZNet(?:\s+Phase[-\s]?1)?/gi, "AZNet")
+      .replace(/\s+Phase[-\s]?1(?=\s*:)/gi, ""),
+  );
+}
+
+/**
  * Hub copy: AZBrowser, AZNet, AZHub, and AZInterface stay separate cards.
  * Collapse combined "AZBrowser / AZNet" / "AZHub / AZInterface" branding only.
  * Do not delete the bare sibling name mid-sentence — that orphans
@@ -114,7 +130,7 @@ export function hubProductCopy(raw) {
   let name = String((raw && raw.name) || slug);
   let one_line = hideInternalDetermination(String((raw && (raw.one_line || raw.banner)) || ""));
   if (slug === "aznet") {
-    return { name: "AZNet", one_line };
+    return { name: "AZNet", one_line: collapseAznetCopy(one_line) };
   }
   if (slug === "azhub") {
     return { name: "AZHub", one_line: collapseCombinedAzhubBranding(one_line, "AZHub", "AZInterface") };
@@ -165,7 +181,7 @@ export const CATALOG_FALLBACK_PRODUCTS = [
   { slug: "peacelock", name: "PeaceLock", version: "0.1.0", one_line: "Chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1).", github: "https://github.com/AzielEliab/peacelock", download: "https://peacelock-download-tracker.vibelock.workers.dev/download" },
   { slug: "azmail", name: "AZMail", version: "0.1.0", one_line: "AZMail (APP 1.0): anonymous MCP mesh + advisory airlock. Not a full internet MTA. Mesh default off. FragGate only.", github: "https://github.com/AzielEliab/azmail", download: "https://azmail-download-tracker.vibelock.workers.dev/download" },
   { slug: "azbrowser", name: "AZBrowser", version: "0.1.0", one_line: "AZBrowser (AZB-1.0): Lamb Lens ethical research browser. Cite; refuse harvest; no invented visits. FragGate only. AZNet is a separate software (order/token pairing only).", github: "https://github.com/AzielEliab/azbrowser", download: AZBROWSER_DOWNLOAD, worker: AZBROWSER_WORKER, worker_home: AZBROWSER_WORKER, count: AZBROWSER_COUNT },
-  { slug: "aznet", name: "AZNet", version: "0.1.0", one_line: "AZNet is Aziel Eliab software: a silent verification SIDE-NET (AZN-WP-0.1). Hashes only. Separate from AZBrowser. Author Aziel Eliab.", github: AZNET_GITHUB, download: AZNET_DOWNLOAD, worker: AZNET_WORKER, worker_home: AZNET_WORKER, count: AZNET_COUNT },
+  { slug: "aznet", name: "AZNet", version: "0.1.0", one_line: "AZNet (AZN-WP-0.1): silent verification side-net. Hash continuity without hosting. Separate software; functional-order pair with AZBrowser.", github: AZNET_GITHUB, download: AZNET_DOWNLOAD, worker: AZNET_WORKER, worker_home: AZNET_WORKER, count: AZNET_COUNT },
   { slug: "azhub", name: "AZHub", version: "0.1.0", one_line: "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate software.", github: AZHUB_GITHUB, download: AZHUB_DOWNLOAD, worker: AZHUB_WORKER, worker_home: AZHUB_WORKER, count: AZHUB_COUNT },
   { slug: "azinterface", name: "AZInterface", version: "0.1.0", one_line: "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate software.", github: AZINTERFACE_GITHUB, download: AZINTERFACE_DOWNLOAD, worker: AZINTERFACE_WORKER, worker_home: AZINTERFACE_WORKER, count: AZINTERFACE_COUNT },
   { slug: "aziel-corpus", name: "Aziel Digital Library", version: "2.6.2", one_line: "Self-contained immutable digital library. Public MASTER. Not a 26-card index.", github: "https://github.com/AzielEliab/aziel-corpus", download: "https://www.azielcorpuslibrary.net/download" },
@@ -191,7 +207,7 @@ export const AZNET_CARD = {
   slug: "aznet",
   name: "AZNet",
   version: "0.1.0",
-  one_line: "AZNet is Aziel Eliab software: a silent verification SIDE-NET (AZN-WP-0.1). Hashes only. Separate from AZBrowser. Author Aziel Eliab.",
+  one_line: "AZNet (AZN-WP-0.1): silent verification side-net. Hash continuity without hosting. Separate software; functional-order pair with AZBrowser.",
   github: AZNET_GITHUB,
   download: AZNET_DOWNLOAD,
   worker: AZNET_WORKER,

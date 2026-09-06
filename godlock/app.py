@@ -29,6 +29,7 @@ def create_app(
     data_dir: str | Path | None = None,
     bind_host: str = DEFAULT_BIND_HOST,
     bind_port: int = DEFAULT_BIND_PORT,
+    update: dict[str, Any] | None = None,
 ) -> FastAPI:
     """Application factory. Default bind host is 127.0.0.1 (localhost only)."""
     eng = engine or GodLockEngine(data_dir=data_dir, persist=persist)
@@ -40,6 +41,7 @@ def create_app(
     app.state.engine = eng
     app.state.bind_host = bind_host or DEFAULT_BIND_HOST
     app.state.bind_port = int(bind_port)
+    app.state.update = update
 
     def _dashboard(
         request: Request,
@@ -65,6 +67,7 @@ def create_app(
                 "doctor": doctor,
                 "import_result": import_result,
                 "error": error,
+                "update": app.state.update,
             },
         )
 
@@ -74,13 +77,32 @@ def create_app(
 
     @app.get("/health")
     def health() -> dict[str, Any]:
-        return {
+        payload: dict[str, Any] = {
             "ok": True,
             "bind_host": app.state.bind_host,
             "persist": eng.persist,
             "motto": MOTTO,
             "banner": HONEST_BANNER,
             "author": "Aziel Eliab",
+        }
+        if app.state.update:
+            payload["update"] = app.state.update
+            payload["update_available"] = bool(app.state.update.get("update_available"))
+        return payload
+
+    @app.get("/update")
+    def update_status() -> dict[str, Any]:
+        from godlock.update import DOWNLOAD, check_update, format_prompt
+
+        doc = app.state.update if app.state.update is not None else check_update()
+        return {
+            "ok": True,
+            "author": "Aziel Eliab",
+            "update": doc,
+            "update_available": bool(doc and doc.get("update_available")),
+            "download": (doc or {}).get("download") or DOWNLOAD,
+            "prompt": format_prompt(doc),
+            "forced": False,
         }
 
     @app.get("/stats")

@@ -45,6 +45,10 @@ import {
   AZHUB_CARD,
   AZINTERFACE_CARD,
   BINDING_CATALOG_URLS,
+  BINDING_SOFTWARE_URLS,
+  HTTPS_CATALOG_TRIES,
+  SOFTWARE_JSON_PATH,
+  FRAGGATE_LIST_PATH,
   EXTRA_SUITE_SLUGS,
   OMIT_UNTIL_WORKER_SLUGS,
   fetchCatalogProducts,
@@ -166,6 +170,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/software/);
     assert.match(robots, /Allow: \/runtime\nAllow: \/runtime\//);
     assert.match(robots, /Allow: \/ai\.txt/);
+    assert.match(robots, /Allow: \/openapi\.json/);
     assert.match(robots, /User-agent: GPTBot\nAllow: \//);
     assert.match(robots, /User-agent: ChatGPT-User\nAllow: \//);
     assert.match(robots, /User-agent: OAI-SearchBot\nAllow: \//);
@@ -237,6 +242,11 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/runtime/llms.txt"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/cite.json"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/mcp"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/software"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/list"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/update/check"));
+    assert.ok(xml.includes(CANON_HOST + "/openapi.json"));
+    assert.ok(xml.includes("https://aziel-runtime.vibelock.workers.dev/v1/software"));
     assert.ok(xml.includes("https://www.azielcorpuslibrary.net/runtime"));
     assert.ok(!xml.includes(CANON_HOST + "/AzielCorpusLibrary"));
     assert.ok(xml.includes(LIBRARY_AZIEL));
@@ -262,8 +272,14 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.runtime_library, "https://www.azielcorpuslibrary.net/runtime");
     assert.ok(cite.sameAs.includes(CANON_HOST + "/runtime"));
     assert.equal(cite.door, "fraggate");
+    assert.equal(cite.software_catalog, CANON_HOST + "/runtime/v1/software");
+    assert.equal(cite.software_fraggate, CANON_HOST + "/runtime/v1/fraggate/list");
+    assert.equal(cite.openapi, CANON_HOST + "/openapi.json");
+    assert.match(cite.update_check, /\/v1\/update\/check\?slug=godlock/);
     const llms = llmsDoc();
     assert.match(llms, /Specified Fit, Not Pretty Spirals: https:\/\/godlock\.uk\/reason/);
+    assert.match(llms, /Live software catalog: https:\/\/godlock\.uk\/runtime\/v1\/software/);
+    assert.match(llms, /FragGate list fallback: https:\/\/godlock\.uk\/runtime\/v1\/fraggate\/list/);
     assert.match(llms, /Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
     assert.match(llms, /Aziel Corpus Library: https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab/);
     assert.doesNotMatch(llms, /Aziel Corpus Library: https:\/\/godlock\.uk\/AzielCorpusLibrary/);
@@ -278,6 +294,14 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /GPTBot, ChatGPT-User, OAI-SearchBot, Venice, Grok, Google-Extended/);
     assert.doesNotMatch(llms, /Use with Grok, ChatGPT, Venice/);
     assert.equal(aiDoc(), llmsDoc());
+    const openapiRes = await worker.fetch(new Request("https://godlock.uk/openapi.json"), mockEnv());
+    assert.equal(openapiRes.status, 200);
+    const spec = await openapiRes.json();
+    assert.equal(spec.openapi, "3.1.0");
+    assert.ok(spec.paths["/software"]);
+    assert.ok(spec.paths["/runtime/v1/software"]);
+    assert.ok(spec.paths["/runtime/v1/update/check"]);
+    assert.doesNotMatch(JSON.stringify(spec), /\bABAD\b/);
   });
 
   it("308s about/kebab/case variants to the canonical identity paths", () => {
@@ -653,6 +677,11 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(fromCatalog.some((p) => p.slug === "godlock" && p.name === "GodLock"));
     const fromProducts = productsFromCatalogDoc({ products: CATALOG_FALLBACK_PRODUCTS });
     assert.equal(fromProducts.length, CATALOG_PRODUCT_COUNT);
+    const fromEntries = productsFromCatalogDoc({
+      entries: [{ slug: "godlock", name: "GodLock", description: "Specified Fit / GodLock score. Not a VPN and not an anonymity network." }],
+    });
+    assert.equal(fromEntries[0].slug, "godlock");
+    assert.match(fromEntries[0].one_line, /Specified Fit \/ GodLock score/);
   });
 
   it("prefers the AZIEL_RUNTIME service binding over HTTPS", async () => {
@@ -677,10 +706,67 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     });
     assert.equal(fetched.source, "service-binding");
     assert.equal(httpsHits, 0);
-    assert.ok(urls.includes("https://aziel-runtime/v1/catalog.json"));
-    assert.deepEqual(BINDING_CATALOG_URLS[0], "https://aziel-runtime/v1/catalog.json");
+    assert.ok(urls.includes("https://aziel-runtime/v1/software"));
+    assert.deepEqual(BINDING_CATALOG_URLS[0], "https://aziel-runtime/v1/software");
+    assert.deepEqual(BINDING_SOFTWARE_URLS[0], "https://aziel-runtime" + SOFTWARE_JSON_PATH);
+    assert.equal(HTTPS_CATALOG_TRIES[0][0], "software");
+    assert.equal(HTTPS_CATALOG_TRIES[1][0], "fraggate-list");
     assert.equal(fetched.products.length, CATALOG_PRODUCT_COUNT);
     assert.equal(fetched.products.find((p) => p.slug === "godlock").one_line, "bound godlock");
+  });
+
+  it("falls through from empty /v1/software to fraggate/list entries", async () => {
+    const urls = [];
+    const env = {
+      ...mockEnv(),
+      AZIEL_RUNTIME: {
+        async fetch(req) {
+          const u = String(req && req.url);
+          urls.push(u);
+          if (u.includes(SOFTWARE_JSON_PATH)) {
+            return new Response(JSON.stringify({ error: "not found" }), { status: 404 });
+          }
+          if (u.includes(FRAGGATE_LIST_PATH)) {
+            return new Response(JSON.stringify({
+              entries: CATALOG_FALLBACK_PRODUCTS.map((p) => ({
+                slug: p.slug,
+                name: p.name,
+                description: "listed " + p.slug,
+              })),
+            }), { headers: { "Content-Type": "application/json" } });
+          }
+          return new Response(JSON.stringify({ ok: true }), { headers: { "Content-Type": "application/json" } });
+        },
+      },
+    };
+    const fetched = await fetchCatalogProducts(env, {
+      fetch: async () => {
+        throw new Error("binding present");
+      },
+    });
+    assert.ok(urls[0].includes("/v1/software"));
+    assert.ok(urls.some((u) => u.includes("/v1/fraggate/list")));
+    assert.equal(fetched.source, "service-binding");
+    assert.equal(fetched.products.find((p) => p.slug === "godlock").one_line, "listed godlock");
+  });
+
+  it("HTTPS prefers /v1/software then fraggate/list", async () => {
+    const urls = [];
+    const fetched = await fetchCatalogProducts({}, {
+      fetch: async (url) => {
+        urls.push(String(url));
+        if (String(url).includes("/v1/software")) {
+          return new Response(JSON.stringify({
+            software: CATALOG_FALLBACK_PRODUCTS.map((p) => ({ ...p, one_line: "https " + p.slug })),
+          }), { headers: { "Content-Type": "application/json" } });
+        }
+        throw new Error("should stop after software");
+      },
+    });
+    assert.equal(fetched.source, "software");
+    assert.equal(urls.length, 1);
+    assert.ok(urls[0].endsWith("/v1/software"));
+    assert.equal(fetched.products.find((p) => p.slug === "peacelock").one_line, "https peacelock");
   });
 
   it("does not use HTTPS when the service binding is present but empty", async () => {
@@ -735,6 +821,9 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(body.author, "Aziel Eliab");
     assert.equal(body.sort, "plain-gate-lock");
     assert.equal(body.clock_is_not_lock, true);
+    assert.equal(body.catalog, "https://godlock.uk/runtime/v1/software");
+    assert.equal(body.catalog_origin, "https://aziel-runtime.vibelock.workers.dev/v1/software");
+    assert.equal(body.catalog_fraggate, "https://godlock.uk/runtime/v1/fraggate/list");
     assert.ok(body.product_count >= CATALOG_PRODUCT_COUNT);
     assert.ok(body.suite_count >= CATALOG_PRODUCT_COUNT);
     assert.ok(body.products.some((p) => p.slug === "godlock" && p.invoke === "/runtime/v1/pull/godlock" && p.worker && p.mcp === "/runtime/mcp"));

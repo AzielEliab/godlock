@@ -39,6 +39,9 @@
   <h1>GodLock</h1>
   <p class="motto">{{ motto }}</p>
   <p class="warn">{{ banner }}</p>
+  {% if update and update.update_available %}
+  <p class="warn">Update available: GodLock {{ update.latest }} (you have {{ update.version }}). Counted download (no silent overwrite): <a href="{{ update.download }}">{{ update.download }}</a></p>
+  {% endif %}
 
   <div class="nums">
     <div class="num"><b>{{ counter }}</b><span>Tests</span></div>

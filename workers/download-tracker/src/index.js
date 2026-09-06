@@ -243,11 +243,11 @@ async function indexHtml(env) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GodLock — Aziel Eliab</title>
-<meta name="description" content="ABAD stress-test and resilience engine by Aziel Eliab; not a VPN, ghost net, or anonymity tool.">
+<meta name="description" content="Specified Fit stress-test and resilience engine by Aziel Eliab; not a VPN, ghost net, or anonymity tool.">
 <meta name="author" content="Aziel Eliab">
 <link rel="canonical" href="https://godlock-download-tracker.vibelock.workers.dev/">
 <meta property="og:title" content="GodLock — Aziel Eliab">
-<meta property="og:description" content="ABAD stress-test and resilience engine by Aziel Eliab; not a VPN, ghost net, or anonymity tool.">
+<meta property="og:description" content="Specified Fit stress-test and resilience engine by Aziel Eliab; not a VPN, ghost net, or anonymity tool.">
 <meta property="og:url" content="https://godlock-download-tracker.vibelock.workers.dev/">
 <meta property="og:type" content="website">
 <script type="application/ld+json">
@@ -263,7 +263,7 @@ async function indexHtml(env) {
   "downloadUrl": "https://godlock-download-tracker.vibelock.workers.dev/download",
   "license": "https://www.apache.org/licenses/LICENSE-2.0",
   "url": "https://godlock-download-tracker.vibelock.workers.dev/",
-  "description": "ABAD stress-test and resilience engine by Aziel Eliab; not a VPN, ghost net, or anonymity tool."
+  "description": "Specified Fit stress-test and resilience engine by Aziel Eliab; not a VPN, ghost net, or anonymity tool."
 }
 </script>
 <!-- gitbaby-seo -->
@@ -298,7 +298,7 @@ async function indexHtml(env) {
 <body>
   <h1>GodLock</h1>
   <p class="motto">GodLock does not argue. It records, analyzes, hardens, and grows. Author Aziel Eliab.</p>
-  <p class="banner">GodLock is a product name (ABAD stress-test and resilience engine), not an identity label. Author: Aziel Eliab. Not a VPN. Not a ghost net. Not anonymity. Logical ABAD receipts only.</p>
+  <p class="banner">GodLock is a product name (Specified Fit stress-test and resilience engine), not an identity label. Author: Aziel Eliab. Not a VPN. Not a ghost net. Not anonymity. Logical GodLock receipts only. Public reasoning: Specified Fit, Not Pretty Spirals.</p>
   <div class="card">
     <div class="nums">
       <p class="count">${v}<span>Views</span></p>

@@ -1,7 +1,7 @@
 /**
  * GodLock hosted runtime (Cloudflare Worker).
- * Ports ABAD engagement scoring and ephemeral receipts from the Python core.
- * NOT an anonymity network. No IP hiding. Logical ABAD receipts only.
+ * Ports Specified Fit / GodLock engagement scoring and ephemeral receipts from the Python core.
+ * NOT an anonymity network. No IP hiding. Logical GodLock receipts only.
  */
 function runtimeCors() {
   return {
@@ -110,13 +110,13 @@ function aiHowTo(base) {
 
 const PRODUCT = "godlock";
 const EXAMPLE_PAYLOAD = {
-  "text": "ABAD does not layer on phi."
+  "text": "Specified Fit is not a spiral proof."
 };
 
-const SKILL_MARKDOWN = "---\nname: GodLock\ndescription: Use when calling GodLock hosted /v1 or installing the local package. Author Aziel Eliab.\n---\n\n# GodLock\n\nGodLock is a product name (ABAD stress-test and resilience engine). Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab.\n\n**Identity:** Aziel Eliab only. GodLock is a **product name**, not an identity label.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## How to use (3 steps)\n\n1. `curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash`\n2. `godlock ui`\n3. Open http://127.0.0.1:8080 and tap **Record**, **Verify**, **Import JSON**, or **Export JSON**.\n\n`godlock doctor` prints PASS or FAIL in plain words.\n\n## Call these URLs\n\n- Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| POST | `/v1/score` | ABAD engagement score. Advisory. Not a VPN. |\n| POST | `/v1/submit` | Ephemeral logical receipt. Not anonymity. |\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. ChatGPT: GPT Actions. Grok: import OpenAPI as a custom tool. Venice: HTTP tools. Claude: OpenAPI / custom connector. Cursor and Glama: MCP. Others: the same OpenAPI or MCP catalog.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' -X POST https://godlock-download-tracker.vibelock.workers.dev/v1/score \\\n  -H 'content-type: application/json' \\\n  -d '{\"text\":\"ABAD layers on phi\"}'\n```\n\nCounted download (gzip HTTP 200, no 302): https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/godlock\n\n## Catalog + local UI\n\nAuthor: **Aziel Eliab**. Honest scope: Offline ABAD / hardening score. Not a VPN and not an anonymity network. GodLock is a product name.\n\n- Catalog product: https://aziel-runtime.vibelock.workers.dev/p/godlock/\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- This Worker skill: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`\n- This Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json\n- Sample payload: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/example`\n\nLocal UI: **Import JSON file** (`type=file`) and **Export JSON**. Then `godlock doctor`.\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import catalog or Worker OpenAPI as GPT Actions, a Grok custom tool, Claude/Gemini/Copilot/Mistral/Meta/Cohere/Amazon Q/Perplexity HTTP or OpenAPI tools, Venice HTTP tools, or Cursor/Glama MCP.\n";
+const SKILL_MARKDOWN = "---\nname: GodLock\ndescription: Use when calling GodLock hosted /v1 or installing the local package. Author Aziel Eliab.\n---\n\n# GodLock\n\nGodLock is a product name (Specified Fit stress-test and resilience engine). Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab.\n\n**Identity:** Aziel Eliab only. GodLock is a **product name**, not an identity label.\n\nAlways send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.\n\n## How to use (3 steps)\n\n1. `curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash`\n2. `godlock ui`\n3. Open http://127.0.0.1:8080 and tap **Record**, **Verify**, **Import JSON**, or **Export JSON**.\n\n`godlock doctor` prints PASS or FAIL in plain words.\n\n## Call these URLs\n\n- Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- Live skill (this markdown): `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`\n\nOps (do **not** increment downloads or views):\n\n| Method | Path | What |\n|--------|------|------|\n| GET | `/v1/health` | Liveness. Does not increment downloads. |\n| GET | `/v1/skill` | This markdown. Does not increment downloads. |\n| POST | `/v1/score` | Specified Fit / GodLock engagement score. Advisory. Not a VPN. |\n| POST | `/v1/submit` | Ephemeral logical receipt. Not anonymity. |\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. ChatGPT: GPT Actions. Grok: import OpenAPI as a custom tool. Venice: HTTP tools. Claude: OpenAPI / custom connector. Cursor and Glama: MCP. Others: the same OpenAPI or MCP catalog.\n\n## Example\n\n```bash\ncurl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/health\ncurl -s -A 'Mozilla/5.0' https://godlock-download-tracker.vibelock.workers.dev/v1/skill\ncurl -s -A 'Mozilla/5.0' -X POST https://godlock-download-tracker.vibelock.workers.dev/v1/score \\\n  -H 'content-type: application/json' \\\n  -d '{\"text\":\"Specified Fit is not a spiral proof\"}'\n```\n\nCounted download (gzip HTTP 200, no 302): https://godlock-download-tracker.vibelock.workers.dev/download?asset=godlock-0.1.0.tar.gz\nGitHub: https://github.com/AzielEliab/godlock\n\n## Catalog + local UI\n\nAuthor: **Aziel Eliab**. Honest scope: Offline Specified Fit / GodLock score. Not a VPN and not an anonymity network. GodLock is a product name. Public reasoning: Specified Fit, Not Pretty Spirals.\n\n- Catalog product: https://aziel-runtime.vibelock.workers.dev/p/godlock/\n- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json\n- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`\n- This Worker skill: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`\n- This Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json\n- Sample payload: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/example`\n\nLocal UI: **Import JSON file** (`type=file`) and **Export JSON**. Then `godlock doctor`.\n\nWorks with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants. Import catalog or Worker OpenAPI as GPT Actions, a Grok custom tool, Claude/Gemini/Copilot/Mistral/Meta/Cohere/Amazon Q/Perplexity HTTP or OpenAPI tools, Venice HTTP tools, or Cursor/Glama MCP.\n";
 const VERSION = "0.1.0";
 const BASE = "https://godlock-download-tracker.vibelock.workers.dev";
-const BANNER = "NOT an anonymity network. No IP hiding. Logical ABAD receipts only. Not a VPN, proxy, or Tor hop.";
+const BANNER = "NOT an anonymity network. No IP hiding. Logical GodLock receipts only. Not a VPN, proxy, or Tor hop.";
 const MOTTO = "GodLock does not argue. It records, analyzes, hardens, and grows.";
 const JEEVES_MODEL = "godlock-jeeves-heuristic-0.1";
 const MAX_TEXT = 32768;
@@ -128,7 +128,7 @@ const WEIGHTS = {
   sqrt2: 2.0,
   flower_of_life: 2.5,
   corkscrew: 2.0,
-  abad: 3.0,
+  specified_fit: 3.0,
   merged_rule: 1.5,
 };
 const PATTERNS = {
@@ -137,7 +137,7 @@ const PATTERNS = {
   sqrt2: [/sqrt\s*\(?\s*2/i, /√\s*2/, /square\s+root\s+of\s+2/i, /\b1\.414\d*\b/],
   flower_of_life: [/flower\s+of\s+life/i, /vesica\s+piscis/i],
   corkscrew: [/corkscrew/i],
-  abad: [/\babad\b/i, /a\s*[-–—]\s*b\s*[-–—]\s*a\s*[-–—]\s*d/i, /\ba\s*-\s*b\s*-\s*a\s*-\s*d\b/i],
+  specified_fit: [/specified\s+fit/i, /specified\s+complexity/i, /functionally\s+specified/i, /\babad\b/i, /a\s*[-–—]\s*b\s*[-–—]\s*a\s*[-–—]\s*d/i, /\ba\s*-\s*b\s*-\s*a\s*-\s*d\b/i],
 };
 
 function withBanner(obj) {
@@ -200,11 +200,11 @@ function jeevesHeuristic(receipt, engagement) {
   let suggested;
   let notes;
   if (families.length) {
-    suggested = "Harden ABAD coverage for: " + families.join(", ") + ". Require an explicit " + families[0] + " check in the active rules.";
+    suggested = "Harden Specified Fit / GodLock-score coverage for: " + families.join(", ") + ". Require an explicit " + families[0] + " check in the active rules.";
     notes = "Heuristic engagement score=" + engagement.score + ". Families present in the counter-argument are treated as the surface that should be hardened. Not a language model.";
   } else {
-    suggested = "Add a rule requiring the counter-argument to engage at least one ABAD token (Aziel Sequence, phi, sqrt(2), Flower of Life, corkscrew, A-B-A-D).";
-    notes = "Heuristic engagement score=" + engagement.score + ". No ABAD family hit. Suggested rule is a keyword floor, not a proof.";
+    suggested = "Add a rule requiring the counter-argument to engage at least one GodLock-score family (Specified Fit, Aziel Sequence, phi, sqrt(2), Flower of Life, corkscrew).";
+    notes = "Heuristic engagement score=" + engagement.score + ". No Specified Fit family hit. Suggested rule is a keyword floor, not a proof.";
   }
   return {
     receipt_id: receipt.id,
@@ -231,7 +231,7 @@ function openapiDoc() {
       "/v1/score": {
         post: {
           operationId: "godlockScore",
-          summary: "ABAD engagement score for text (heuristic, not a proof)",
+          summary: "Specified Fit / GodLock engagement score for text (heuristic, not a proof)",
           requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["text"], properties: { text: { type: "string" } } } } } },
           responses: { "200": { description: "Score plus hits" } },
         },
@@ -239,7 +239,7 @@ function openapiDoc() {
       "/v1/submit": {
         post: {
           operationId: "godlockSubmit",
-          summary: "Mint an ephemeral logical ABAD receipt. Not stored. Not an anonymity network.",
+          summary: "Mint an ephemeral logical GodLock receipt. Not stored. Not an anonymity network.",
           requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["text"], properties: { text: { type: "string" } } } } } },
           responses: { "200": { description: "Ephemeral receipt + Jeeves heuristic" } },
         },

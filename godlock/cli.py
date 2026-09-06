@@ -48,7 +48,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="godlock",
         description=(
-            "GodLock is a product name (ABAD stress-test and resilience engine). "
+            "GodLock is a product name (Specified Fit stress-test and resilience engine). "
             "Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab. "
             "Local UI: `godlock ui` then open http://127.0.0.1:8080 "
             "(this computer only)."
@@ -84,7 +84,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p_sub.add_argument("--text", required=True, help="Stress-test text.")
     p_sub.add_argument("--out", default=None, help="Optional path to write receipt JSON.")
 
-    p_score = sub.add_parser("score", help="ABAD engagement score for text (offline).")
+    p_score = sub.add_parser("score", help="GodLock / Specified Fit engagement score for text (offline).")
     p_score.add_argument("--text", required=True)
 
     p_merge = sub.add_parser("merge", help="Apply a hardening into the active rules table.")

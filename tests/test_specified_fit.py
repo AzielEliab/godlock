@@ -1,19 +1,24 @@
 from __future__ import annotations
 
-from godlock.abad import score_engagement
 from godlock.engine import GodLockEngine
+from godlock.specified_fit import score_engagement
 
 
-def test_abad_scores_higher_than_lorem() -> None:
-    abad = score_engagement(
-        "The ABAD layering meets phi and the Flower of Life via corkscrew "
+def test_specified_fit_scores_higher_than_lorem() -> None:
+    fitted = score_engagement(
+        "Specified Fit meets phi and the Flower of Life via corkscrew "
         "growth along the Aziel Sequence near sqrt(2)."
     )
+    leftover = score_engagement(
+        "The leftover A-B-A-D token still scores under specified_fit."
+    )
     lorem = score_engagement("Lorem ipsum dolor sit amet, consectetur adipiscing elit.")
-    assert abad["score"] > lorem["score"]
-    assert abad["score"] > 0
-    for family in ("abad", "phi", "flower_of_life", "corkscrew", "aziel_sequence", "sqrt2"):
-        assert family in abad["hits"]
+    assert fitted["score"] > lorem["score"]
+    assert fitted["score"] > 0
+    for family in ("specified_fit", "phi", "flower_of_life", "corkscrew", "aziel_sequence", "sqrt2"):
+        assert family in fitted["hits"]
+    assert "specified_fit" in leftover["hits"]
+    assert "abad" not in leftover["hits"]
     assert lorem["hits"] == []
 
 

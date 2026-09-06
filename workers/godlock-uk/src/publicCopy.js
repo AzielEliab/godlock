@@ -15,8 +15,6 @@ const HIDDEN = [
   /empirical[- ]limits?(?:\s+of\s+observation)?/gi,
   /INTERNAL_CRITERIA/gi,
   /internal criteria/gi,
-  /specified fit,\s*not pretty spirals/gi,
-  /specified[- ]fit(?:\s+brief)?/gi,
   /bootstrap lock/gi,
   /ABAD framework/gi,
   /unpublished frameworks?/gi,

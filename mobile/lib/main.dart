@@ -81,8 +81,8 @@ class _DashboardPageState extends State<DashboardPage> {
     final eng = _score(body);
     final families = eng.$2;
     final hardening = families.isEmpty
-        ? 'Add a rule requiring the counter-argument to engage at least one ABAD token (Aziel Sequence, phi, sqrt(2), Flower of Life, corkscrew, ABAD).'
-        : 'Harden ABAD coverage for: ${families.join(', ')}. Require an explicit ${families.first} check in the active rules.';
+        ? 'Add a rule requiring the counter-argument to engage at least one GodLock-score family (Specified Fit, Aziel Sequence, phi, sqrt(2), Flower of Life, corkscrew).'
+        : 'Harden Specified Fit / GodLock-score coverage for: ${families.join(', ')}. Require an explicit ${families.first} check in the active rules.';
     setState(() {
       _receipts.insert(
         0,
@@ -132,7 +132,7 @@ class _DashboardPageState extends State<DashboardPage> {
     hit('sqrt2', 2.0, t.contains('sqrt') && t.contains('2') || t.contains('√2') || t.contains('1.414'));
     hit('flower_of_life', 2.5, t.contains('flower of life') || t.contains('vesica piscis'));
     hit('corkscrew', 2.0, t.contains('corkscrew'));
-    hit('abad', 3.0, RegExp(r'\babad\b').hasMatch(t) || t.contains('a-b-a-d'));
+    hit('specified_fit', 3.0, t.contains('specified fit') || t.contains('specified complexity') || RegExp(r'\babad\b').hasMatch(t) || t.contains('a-b-a-d'));
     return (double.parse(score.toStringAsFixed(4)), hits);
   }
 
@@ -148,7 +148,7 @@ class _DashboardPageState extends State<DashboardPage> {
             child: const Padding(
               padding: EdgeInsets.all(12),
               child: Text(
-                'GodLock is a product name (ABAD stress-test and resilience engine). '
+                'GodLock is a product name (Specified Fit stress-test and resilience engine). '
                 'Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab. '
                 'grid-NN values are labels only — this app does not hide IPs.',
                 style: TextStyle(color: kIvory, height: 1.4),

@@ -1,4 +1,4 @@
-"""GodLock: stress-test and resilience engine for the ABAD framework.
+"""GodLock: Specified Fit stress-test and resilience engine.
 
 July 12 2026 whitepaper implementation by Aziel Eliab.
 
@@ -11,7 +11,7 @@ Forks are welcome and always allowed.
 
 from __future__ import annotations
 
-from godlock.abad import score_engagement
+from godlock.specified_fit import score_engagement
 from godlock.engine import GodLockEngine
 from godlock.grid import Airlock, MirageGrid
 from godlock.lumen import decrypt_capsule, export_capsule

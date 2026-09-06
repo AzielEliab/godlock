@@ -7,7 +7,7 @@ import { randomBytes } from "node:crypto";
 import { json, html, corsHeaders, wantsJson, readCookie } from "./http.js";
 import {
   page, homeBody, verifyBody, receiptBody, azielEliabBody, azielEliabText,
-  softwareBody, AZIEL_ELIAB_PATH, SOFTWARE_PATH,
+  reasonBody, reasonText, softwareBody, AZIEL_ELIAB_PATH, REASON_PATH, SOFTWARE_PATH,
 } from "./ui.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
@@ -56,6 +56,16 @@ async function ensureSchema(env) {
   try {
     await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_heartbeats_last_ms ON heartbeats(last_ms)").run();
   } catch { /* index or column not ready */ }
+  // Floor Uses into metadata so a parent receipt/ledger wipe does not drop the counter.
+  // Never lower views, uses, or download KV.
+  try {
+    const l = await env.DB.prepare(
+      "SELECT COUNT(*) AS n FROM ledger WHERE action IN ('SUBMIT', 'ISOLATE')"
+    ).first();
+    const ledgerN = Number(l && l.n) || 0;
+    const metaN = parseInt(await metaGet(env, "uses", "0"), 10) || 0;
+    if (ledgerN > metaN) await metaSet(env, "uses", String(ledgerN));
+  } catch { /* first run */ }
 }
 
 function newId() {
@@ -140,14 +150,15 @@ async function liveNodes(env, { wrote, visiting } = {}) {
 }
 
 async function usesCount(env) {
+  let ledgerN = 0;
   try {
     const l = await env.DB.prepare(
       "SELECT COUNT(*) AS n FROM ledger WHERE action IN ('SUBMIT', 'ISOLATE')"
     ).first();
-    return usesCountFromLedger({ ledgerSubmits: l && l.n });
-  } catch {
-    return 0;
-  }
+    ledgerN = Number(l && l.n) || 0;
+  } catch { /* empty or first run */ }
+  const metaN = parseInt(await metaGet(env, "uses", "0"), 10) || 0;
+  return usesCountFromLedger({ ledgerSubmits: ledgerN, metadataUses: metaN });
 }
 
 async function fetchDownloads(env) {
@@ -258,6 +269,8 @@ async function processSubmit(env, text) {
       "INSERT INTO receipts(id, created_utc, text_sha256, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
     ).bind(id, created_utc, text_sha256, row.label, row.summary, row.explanation, row.score_before, row.score_after, row.residual, 1, row.content_sha256).run();
     await appendLedger(env, "ISOLATE", { receipt_id: id, text_sha256, content_sha256: row.content_sha256 });
+    const uses = await usesCount(env);
+    try { if (uses > 0) await metaSet(env, "uses", String(uses)); } catch { /* keep prior floor */ }
     return { ...row, isolated: true };
   }
 
@@ -298,6 +311,8 @@ async function processSubmit(env, text) {
     delta: Math.round((score_after - score_before) * 10) / 10,
   });
   if (score_after !== score_before) await metaSet(env, "current_score", String(score_after));
+  const uses = await usesCount(env);
+  try { if (uses > 0) await metaSet(env, "uses", String(uses)); } catch { /* keep prior floor */ }
   return row;
 }
 
@@ -439,6 +454,24 @@ export default {
           });
         }
         return html(page("Verify", verifyBody({ report }), { path: "/verify", kind: "verify" }), {
+          extraHeaders: extraHeadersFor(nodeId),
+        });
+      }
+
+      if (path === REASON_PATH) {
+        if (wantsJson(request, url)) {
+          return json({
+            ok: true,
+            product: "GodLock",
+            site: "godlock.uk",
+            author: AUTHOR,
+            title: "Specified Fit, Not Pretty Spirals",
+            path: REASON_PATH,
+            identity: AUTHOR,
+            text: reasonText(),
+          }, 200, extraHeadersFor(nodeId));
+        }
+        return html(page("Specified Fit, Not Pretty Spirals", reasonBody(), { path: REASON_PATH, kind: "reason" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

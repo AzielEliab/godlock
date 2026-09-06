@@ -24,9 +24,10 @@ heuristic Jeeves model (`godlock-jeeves-heuristic-0.1`) is offline.
 1. Treat `origin` as one peer among many. Downstream forks are part of
    the download-tracking model (see `workers/download-tracker`): they
    report as `{owner}/{repo}`, not as anonymous noise.
-2. **Do not invent evaluation numbers or fake "proof" scores.** ABAD
-   weights in `godlock/abad.py` are engineering defaults. If you measure
-   something, publish the method in the same breath as the number.
+2. **Do not invent evaluation numbers or fake "proof" scores.** Specified
+   Fit / GodLock-score weights in `godlock/specified_fit.py` are
+   engineering defaults. If you measure something, publish the method in
+   the same breath as the number. Pretty spirals are not a proof.
 3. **No real ghosting / opsec-evasion PRs.** GodLock's MirageGrid and
    Airlock are *logical identities* (strings like `grid-07`). Pull
    requests that add Tor, proxy chains, IP hopping, traffic-analysis
@@ -46,7 +47,7 @@ heuristic Jeeves model (`godlock-jeeves-heuristic-0.1`) is offline.
 
 ## Where to change things
 
-- ABAD tokens / weights: `godlock/abad.py`
+- Specified Fit / GodLock-score tokens / weights: `godlock/specified_fit.py`
 - Logical grid / airlock: `godlock/grid.py`
 - Receipts / counter: `godlock/receipts.py`
 - Jeeves heuristic: `godlock/jeeves.py`

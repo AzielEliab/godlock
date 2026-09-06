@@ -41,10 +41,10 @@ def run() -> dict[str, Any]:
         )
     )
     engine = GodLockEngine(persist=False)
-    scored = engine.score("ABAD Flower of Life phi")
+    scored = engine.score("Specified Fit Flower of Life phi")
     score_ok = isinstance(scored, dict) and "score" in scored
     checks.append(_check("score", score_ok, "Scoring works", "ok" if score_ok else "missing score"))
-    minted = engine.submit("ABAD Flower of Life phi")
+    minted = engine.submit("Specified Fit Flower of Life phi")
     rec = Receipt(**minted["receipt"])
     checks.append(
         _check(

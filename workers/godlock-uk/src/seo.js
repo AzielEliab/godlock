@@ -18,6 +18,7 @@ export const AUTHOR_AKA = "Aziel Elroi Eliab";
 export const BANNER = "Public HTTPS engine. Mesh is not on this surface. Author Aziel Eliab.";
 export const AZIEL_ELIAB_PATH = "/AzielEliab";
 export const AZIEL_CORPUS_PATH = "/AzielCorpusLibrary";
+export const REASON_PATH = "/reason";
 export const SOFTWARE_PATH = "/software";
 export const RUNTIME_PATH = "/runtime";
 export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
@@ -99,7 +100,12 @@ export function defaultDescription(kind) {
   if (kind === "receipt") return hideInternalDetermination("A GodLock.uk receipt. Append-only. Author Aziel Eliab.");
   if (kind === "aziel") {
     return hideInternalDetermination(
-      "Aziel Eliab on GodLock: a debate with no record becomes a pulpit. Receipt, intelligent design stress-test. Identity is Aziel Eliab only.",
+      "Aziel Eliab on GodLock. Specified Fit, Not Pretty Spirals. A debate with no record becomes a pulpit. Receipt, intelligent design stress-test. Identity is Aziel Eliab only.",
+    );
+  }
+  if (kind === "reason") {
+    return hideInternalDetermination(
+      "Specified Fit, Not Pretty Spirals (Aziel Eliab). Functionally specified digital information plus a translation/reader system: the only observed adequate cause is intelligence. Pretty spirals and φ are not a proof. Score floor 33.3 · ceiling 99.7.",
     );
   }
   if (kind === "software") {
@@ -112,11 +118,12 @@ export function defaultDescription(kind) {
       "Aziel Eliab Runtime " + RUNTIME_VERSION + " FragGate door on GodLock.uk. Same-origin /runtime/* proxies the live engine-runtime. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. API uses log: " + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
-  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Runtime door: " + PUBLIC_RUNTIME + " (FragGate " + RUNTIME_VERSION + "). " + AI_CLIENTS_SENTENCE + " Not a mesh.");
+  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Runtime door: " + PUBLIC_RUNTIME + " (FragGate " + RUNTIME_VERSION + "). " + AI_CLIENTS_SENTENCE + " Not a mesh.");
 }
 
 function defaultKeywords(kind) {
-  if (kind === "aziel") return "Aziel Eliab, GodLock, receipt, intelligent design stress-test";
+  if (kind === "aziel") return "Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test";
+  if (kind === "reason") return "Specified Fit, Not Pretty Spirals, Aziel Eliab, GodLock, code+reader";
   if (kind === "software" || kind === "runtime" || kind === "home") {
     return "GodLock, Aziel Eliab, Runtime, FragGate, MCP, OpenAPI, ChatGPT, Grok, Venice, Claude, Cursor, Glama, Perplexity, Copilot, Gemini, Mistral, Meta AI, Apple Intelligence, Amazon Q, DuckAssist, You.com, Cohere";
   }
@@ -169,8 +176,16 @@ function jsonLd(_title, _path, description, kind) {
     license: "https://www.apache.org/licenses/LICENSE-2.0",
   };
   const graph = [website, software, person];
-  if (kind !== "aziel" && kind !== "verify" && kind !== "receipt") {
+  if (kind !== "aziel" && kind !== "reason" && kind !== "verify" && kind !== "receipt") {
     graph.push(runtimeSoftwareNode(person), runtimeWebApiNode(person));
+  }
+  if (kind === "reason") {
+    graph.push({
+      "@type": "ScholarlyArticle",
+      name: "Specified Fit, Not Pretty Spirals",
+      url: CANON_HOST + REASON_PATH,
+      author: person,
+    });
   }
   if (kind === "aziel") {
     graph.push({
@@ -236,6 +251,9 @@ export function permanentIdentityRedirect(path) {
   const compact = compactPath(p);
   if (p === "/about" || p === "/aboutme" || (compact === "azieleliab" && p !== AZIEL_ELIAB_PATH)) {
     return AZIEL_ELIAB_PATH;
+  }
+  if (compact === "specifiedfit" || compact === "specifiedfitnotprettyspirals" || p === "/specified-fit") {
+    return REASON_PATH;
   }
   if (compact === "azielcorpuslibrary") {
     return LIBRARY_AZIEL;
@@ -323,6 +341,7 @@ export const AI_CRAWLER_AGENTS = uniquePreserve([
 export const PUBLIC_ALLOW = [
   "/",
   "/verify",
+  "/reason",
   "/software",
   "/runtime",
   "/runtime/",
@@ -360,6 +379,7 @@ export async function sitemapXml(env) {
     PUBLIC_RUNTIME + "/cite.json",
     PUBLIC_RUNTIME + "/mcp",
     PUBLIC_RUNTIME + "/v1/skill",
+    CANON_HOST + REASON_PATH,
     CANON_HOST + AZIEL_ELIAB_PATH,
     CANON_HOST + "/health",
     CANON_HOST + "/cite.json",
@@ -415,6 +435,8 @@ export function citeDoc() {
     door: "fraggate",
     runtime_version: RUNTIME_VERSION,
     kernel: FRAGGATE_KERNEL,
+    specified_fit: CANON_HOST + REASON_PATH,
+    reason: CANON_HOST + REASON_PATH,
     aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,
     aziel_corpus_library: LIBRARY_AZIEL,
     library: LIBRARY + "/",
@@ -439,6 +461,7 @@ export function llmsDoc() {
     + "License: Apache-2.0\n\n"
     + hideInternalDetermination(BANNER) + "\n\n"
     + "GodLock is a product name, not an identity. Identity is Aziel Eliab only.\n"
+    + "Specified Fit, Not Pretty Spirals: " + CANON_HOST + REASON_PATH + "\n"
     + "Aziel Eliab: " + CANON_HOST + AZIEL_ELIAB_PATH + "\n"
     + "Aziel Corpus Library: " + LIBRARY_AZIEL + "\n"
     + "Digital Library identity: " + LIBRARY_AZIEL + "\n"

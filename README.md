@@ -1,6 +1,6 @@
 # GodLock
 
-**GodLock is a product name** (ABAD stress-test and resilience engine).
+**GodLock is a product name** (Specified Fit stress-test and resilience engine).
 It is **not** a VPN, ghost net, or anonymity tool.
 **Author: Aziel Eliab only.**
 
@@ -12,6 +12,7 @@ It is **not** a VPN, ghost net, or anonymity tool.
 
 - **GodLock.uk (public engine):** https://godlock.uk
 - **Aziel Eliab on GodLock:** https://godlock.uk/AzielEliab
+- **Specified Fit (public reasoning):** https://godlock.uk/reason
 - **Verify:** https://godlock.uk/verify
 - **Software catalog on GodLock:** https://godlock.uk/software — full live aziel-runtime suite plus aziel-runtime / FragGate (Worker, GitHub, `/runtime` FragGate/MCP; uses/download counters)
 - **Runtime (FragGate door):** https://godlock.uk/runtime — same-origin proxy of aziel-runtime 1.6.8
@@ -63,14 +64,14 @@ PASS means version, author (Aziel Eliab), this-computer-only bind, scoring, hone
 
 ## For researchers
 
-Spec: [docs/whitepaper.md](docs/whitepaper.md). Contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
+Public reasoning: [docs/Specified_Fit_Not_Pretty_Spirals.md](docs/Specified_Fit_Not_Pretty_Spirals.md). Parent D1 history wipe (receipts/ledger only — never counter KV): [docs/d1-receipt-wipe.md](docs/d1-receipt-wipe.md). Spec: [docs/whitepaper.md](docs/whitepaper.md). Contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 MirageGrid / Airlock are *names* such as `grid-07`. They do not hop IPs, speak Tor, or hide origin addresses. `--no-persist` keeps receipts in memory. It is not a wipe. POST `/merge` has no auth because this is a localhost research tool.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate && pip install -e ".[dev]"
 godlock ui
-godlock submit --text "ABAD phi" --out receipt.json
+godlock submit --text "Specified Fit phi" --out receipt.json
 godlock export --out godlock.json
 godlock import --file godlock.json
 godlock doctor
@@ -112,6 +113,7 @@ No DOI is claimed. Do not invent one.
 
 - Public engine: https://godlock.uk (fallback https://godlock-uk.vibelock.workers.dev)
 - Aziel Eliab on GodLock: https://godlock.uk/AzielEliab
+- Specified Fit: https://godlock.uk/reason
 - Verify: https://godlock.uk/verify
 - Software catalog on GodLock: https://godlock.uk/software
 - Runtime door: https://godlock.uk/runtime (library https://www.azielcorpuslibrary.net/runtime · origin https://aziel-runtime.vibelock.workers.dev/)

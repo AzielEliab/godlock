@@ -23,7 +23,7 @@ PAPER_DATE = "12 July 2026"
 LICENSE_ID = "Apache-2.0"
 
 HONEST_BANNER = (
-    "GodLock is a product name (ABAD stress-test and resilience engine). "
+    "GodLock is a product name (Specified Fit stress-test and resilience engine). "
     "Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab."
 )
 

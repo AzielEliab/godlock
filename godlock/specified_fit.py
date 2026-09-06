@@ -1,18 +1,22 @@
-"""ABAD-aware engagement scoring.
+"""Specified Fit / GodLock engagement scoring.
 
 Weights below are *engineering defaults* for a local heuristic. They are
 not empirical proof numbers, not ROC points, and not a claim that a
 particular ratio appears in nature. Documented so a fork can change them
 without pretending a study was run.
 
+Pretty spirals and φ are not a design proof. The steel claim lives in
+``docs/Specified_Fit_Not_Pretty_Spirals.md``. Family bonuses are
+engagement heuristics only.
+
 Family bonuses (applied once per family that hits):
 
+    specified_fit    3.0   Specified Fit, specified complexity; leftover A-B-A-D tokens
     aziel_sequence   3.0   "Aziel Sequence" / aziel-seq
     phi              2.0   phi, golden ratio, φ, 1.618
     sqrt2            2.0   sqrt(2), √2, square root of 2, 1.414
     flower_of_life   2.5   Flower of Life, vesica piscis
     corkscrew        2.0   corkscrew (growth)
-    abad             3.0   ABAD, A-B-A-D
     merged_rule      1.5   per distinct extra keyword from merged rules
 
 Multiple families stack. Extra keywords come from the active rules table
@@ -26,16 +30,24 @@ from typing import Iterable, Mapping, Sequence
 
 # Engineering defaults — not empirical "proof" numbers.
 WEIGHTS: Mapping[str, float] = {
+    "specified_fit": 3.0,
     "aziel_sequence": 3.0,
     "phi": 2.0,
     "sqrt2": 2.0,
     "flower_of_life": 2.5,
     "corkscrew": 2.0,
-    "abad": 3.0,
     "merged_rule": 1.5,
 }
 
 _PATTERNS: Mapping[str, tuple[re.Pattern[str], ...]] = {
+    "specified_fit": (
+        re.compile(r"specified\s+fit", re.I),
+        re.compile(r"specified\s+complexity", re.I),
+        re.compile(r"functionally\s+specified", re.I),
+        re.compile(r"\babad\b", re.I),
+        re.compile(r"a\s*[-–—]\s*b\s*[-–—]\s*a\s*[-–—]\s*d", re.I),
+        re.compile(r"\ba\s*-\s*b\s*-\s*a\s*-\s*d\b", re.I),
+    ),
     "aziel_sequence": (
         re.compile(r"aziel\s+sequence", re.I),
         re.compile(r"aziel[-_]?seq(?:uence)?", re.I),
@@ -58,11 +70,6 @@ _PATTERNS: Mapping[str, tuple[re.Pattern[str], ...]] = {
     ),
     "corkscrew": (
         re.compile(r"corkscrew", re.I),
-    ),
-    "abad": (
-        re.compile(r"\babad\b", re.I),
-        re.compile(r"a\s*[-–—]\s*b\s*[-–—]\s*a\s*[-–—]\s*d", re.I),
-        re.compile(r"\ba\s*-\s*b\s*-\s*a\s*-\s*d\b", re.I),
     ),
 }
 

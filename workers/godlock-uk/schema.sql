@@ -1,6 +1,9 @@
 -- GodLock.uk public HTTPS stress-test engine. Append-only.
 -- Author: Aziel Eliab.
--- NEVER UPDATE or DELETE receipts or ledger rows (metadata + heartbeats excepted).
+-- Application code NEVER UPDATE or DELETE receipts or ledger rows
+-- (metadata + heartbeats excepted). Parent-only history wipe is documented
+-- in docs/d1-receipt-wipe.md — receipts/ledger only; never counter KV,
+-- never metadata.views / metadata.uses.
 
 CREATE TABLE IF NOT EXISTS receipts (
   id TEXT PRIMARY KEY,

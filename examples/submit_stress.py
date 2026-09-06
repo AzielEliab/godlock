@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Submit a synthetic ABAD-aware stress test through the GodLock engine.
+"""Submit a synthetic Specified Fit stress test through the GodLock engine.
 
 Writes artifacts under examples/_out/. Offline. No Ollama.
 """

@@ -359,7 +359,7 @@ export function meshOpsDoc() {
     mcp: PUBLIC_RUNTIME + "/mcp",
     fraggate: PUBLIC_RUNTIME + "/v1/fraggate/call",
     ops: MESH_OPS.slice(),
-    rollup: "live|locked|isolated counts only",
+    rollup_shape: "live|locked|isolated counts only",
     default_off: true,
     node_gate: false,
     auto_heal: false,

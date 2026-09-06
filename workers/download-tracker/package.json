@@ -1,4 +1,10 @@
 {
+  "private": true,
+  "name": "godlock-download-tracker",
+  "type": "module",
+  "scripts": {
+    "test": "node --test count.test.mjs"
+  },
   "dependencies": {
     "wrangler": "^4.127.1"
   }

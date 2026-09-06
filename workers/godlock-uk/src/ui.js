@@ -287,7 +287,7 @@ export function azielEliabText() {
 
 export function softwareBody({ products, extras } = {}) {
   const list = softwareSuite(products, extras);
-  const featured = new Set(["godlock", "aziel-runtime", "azieltether"]);
+  const featured = new Set(["godlock", "aziel-runtime", "fraggate", "azieltether"]);
   const catalogN = list.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "fraggate").length;
   const jumps = list.map((p) => `<a href="#${esc(p.slug)}">${esc(p.slug)}</a>`).join(" · ");
   const cards = list.map((p) => {
@@ -296,6 +296,7 @@ export function softwareBody({ products, extras } = {}) {
     const family = p.family || "";
     const ver = p.version ? `<span class="pill">v${esc(p.version)}</span>` : "";
     const dl = p.downloads != null ? `<span class="pill ok">${esc(p.downloads)} downloads</span>` : "";
+    const views = p.views != null ? `<span class="pill ok">${esc(p.views)} views</span>` : "";
     const uses = p.uses != null ? `<span class="pill ok">${esc(p.uses)} uses</span>` : "";
     const worker = workerHref(p);
     const kernel = p.kernel
@@ -309,7 +310,7 @@ export function softwareBody({ products, extras } = {}) {
       `<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>`,
       kernel,
     ].filter(Boolean).join(" ");
-    return `<article class="soft-card${feat ? " featured" : ""}" id="${esc(slug)}" data-family="${esc(family)}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(p.name || slug)}</h3><div class="soft-meta">${ver}${dl}${uses}</div><p>${esc(hideInternalDetermination(p.one_line || ""))}</p><p class="soft-links">${links}</p></article>`;
+    return `<article class="soft-card${feat ? " featured" : ""}" id="${esc(slug)}" data-family="${esc(family)}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(p.name || slug)}</h3><div class="soft-meta">${ver}${dl}${views}${uses}</div><p>${esc(hideInternalDetermination(p.one_line || ""))}</p><p class="soft-links">${links}</p></article>`;
   }).join("");
   const countLine = catalogN
     ? ` ${esc(catalogN)} catalog engines plus aziel-runtime / FragGate.`
@@ -322,7 +323,7 @@ export function softwareBody({ products, extras } = {}) {
 <a class="button ghost" href="${esc(RUNTIME_PATH + "/v1/skill")}">Skill</a>
 <a class="button ghost" href="${esc(GITHUB_RUNTIME)}">aziel-runtime</a>
 <a class="button ghost" href="${esc(FRAGGATE_KERNEL)}">FragGate</a></p></div>
-<p class="muted">Full Aziel Eliab suite from the live <a href="${esc(RUNTIME_PATH + "/v1/catalog.json")}">same-origin catalog</a> (also <a href="${esc(CATALOG + "/v1/catalog.json")}">aziel-runtime catalog.json</a>), matching Digital Library Software completeness. New catalog slugs are included automatically. Sorted Plain → Gate → Lock (Clock is not Lock). ${esc(AI_CLIENTS_SENTENCE)} GodLock.uk is not a mesh. Counted downloads stay on each product Worker; API uses show when the Worker or <a href="${esc(RUNTIME_PATH + "/v1/uses")}">/runtime/v1/uses</a> publishes them.${countLine} Identity is Aziel Eliab only.</p>
+<p class="muted">Full Aziel Eliab suite from the live <a href="${esc(RUNTIME_PATH + "/v1/catalog.json")}">same-origin catalog</a> (also <a href="${esc(CATALOG + "/v1/catalog.json")}">aziel-runtime catalog.json</a>), matching Digital Library Software completeness. New catalog slugs are included automatically. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). FragGate is its own Gate card (A–Z with DecisionGATE). AZBrowser is a separate Plain card; AZNet is omitted until that Worker is live. ${esc(AI_CLIENTS_SENTENCE)} GodLock.uk is not a mesh. Counted downloads and views stay on each product Worker <code>/count</code>; API uses show when the Worker or <a href="${esc(RUNTIME_PATH + "/v1/uses")}">/runtime/v1/uses</a> publishes them.${countLine} Identity is Aziel Eliab only.</p>
 <p class="muted">Suite: ${jumps}</p>
 <div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
 }

@@ -24,6 +24,12 @@ export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
 export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
 export const RUNTIME_VERSION = "1.6.2";
 export const FRAGGATE_KERNEL = "https://github.com/AzielEliab/fraggate";
+export const FRAGGATE_DOWNLOAD = "https://fraggate-download-tracker.vibelock.workers.dev/download";
+export const FRAGGATE_WORKER = "https://fraggate-download-tracker.vibelock.workers.dev/";
+export const FRAGGATE_COUNT = "https://fraggate-download-tracker.vibelock.workers.dev/count";
+export const AZBROWSER_DOWNLOAD = "https://azbrowser-download-tracker.vibelock.workers.dev/download";
+export const AZBROWSER_WORKER = "https://azbrowser-download-tracker.vibelock.workers.dev/";
+export const AZBROWSER_COUNT = "https://azbrowser-download-tracker.vibelock.workers.dev/count";
 
 export const AI_CLIENTS = [
   "ChatGPT (GPT Actions / OpenAI)",
@@ -86,7 +92,7 @@ export function defaultDescription(kind) {
   }
   if (kind === "software") {
     return hideInternalDetermination(
-      "Full Aziel Eliab software suite on GodLock.uk: every live aziel-runtime catalog engine plus aziel-runtime / FragGate. Worker, GitHub, and /runtime FragGate/MCP tethers. Uses and download counters when published. Sorted Plain → Gate → Lock (Clock is not Lock). Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
+      "Full Aziel Eliab software suite on GodLock.uk: every live aziel-runtime catalog engine plus aziel-runtime / FragGate. Worker, GitHub, and /runtime FragGate/MCP tethers. Uses and download counters when published. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). FragGate is its own Gate card. AZBrowser is a separate Plain card. Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " GodLock.uk is not a mesh. Author Aziel Eliab.",
     );
   }
   if (kind === "runtime") {
@@ -328,6 +334,8 @@ export async function sitemapXml(env) {
     CANON_HOST + "/verify",
     CANON_HOST + SOFTWARE_PATH,
     CANON_HOST + SOFTWARE_PATH + "#aziel-runtime",
+    CANON_HOST + SOFTWARE_PATH + "#fraggate",
+    CANON_HOST + SOFTWARE_PATH + "#azbrowser",
     CANON_HOST + SOFTWARE_PATH + "#godlock",
     PUBLIC_RUNTIME,
     PUBLIC_RUNTIME + "/v1/runtime.json",
@@ -421,7 +429,7 @@ export function llmsDoc() {
     + "Digital Library identity: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n"
-    + "Software lists the full live aziel-runtime catalog plus aziel-runtime / FragGate, matching Digital Library Software completeness. New catalog slugs are included automatically. Each product is tethered to its Worker, GitHub, and /runtime FragGate/MCP. Sorted Plain → Gate → Lock (Clock is not Lock). GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
+    + "Software lists the full live aziel-runtime catalog plus aziel-runtime / FragGate, matching Digital Library Software completeness. New catalog slugs are included automatically. FragGate is its own Gate card (Download/Worker on fraggate-download-tracker, A–Z with DecisionGATE). AZBrowser is a separate Plain card. AZNet is omitted until its Worker is live. Each product is tethered to its Worker, GitHub, and /runtime FragGate/MCP. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
     + "Catalog JSON: " + PUBLIC_RUNTIME + "/v1/catalog.json\n"
     + "Origin catalog: " + CATALOG + "/v1/catalog.json\n\n"
     + "## Runtime (FragGate door)\n\n"

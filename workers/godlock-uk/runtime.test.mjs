@@ -82,13 +82,13 @@ describe("runtime path mapping", () => {
     assert.equal(rewriteLocation("/v1/skill"), "/runtime/v1/skill");
     const html = rewriteRuntimeBody(
       `<!doctype html><html><head><title>Aziel Eliab Runtime</title>
-<meta name="description" content="1.6.2 FragGate door">
+<meta name="description" content="1.6.8 FragGate door">
 <link rel="canonical" href="https://aziel-runtime.vibelock.workers.dev/">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","name":"Aziel Eliab Runtime","url":"https://aziel-runtime.vibelock.workers.dev/","sameAs":["https://www.azielcorpuslibrary.net/runtime"]}]}</script>
-</head><body><p>1.6.2 FragGate</p><a href="/v1/health">health</a></body></html>`,
+</head><body><p>1.6.8 FragGate</p><a href="/v1/health">health</a></body></html>`,
       "text/html",
     );
-    assert.match(html, /1\.6\.2 FragGate/);
+    assert.match(html, /1\.6\.8 FragGate/);
     assert.match(html, /href="https:\/\/godlock\.uk\/runtime\/"/);
     assert.match(html, /href="\/runtime\/v1\/health"/);
     assert.match(html, /godlock-runtime-chrome/);
@@ -106,20 +106,20 @@ describe("runtime proxy", () => {
       if (u.pathname === "/" || u.pathname === "") {
         return new Response(
           `<!doctype html><html><head><title>Aziel Eliab Runtime</title>
-<meta name="description" content="1.6.2 widens the public FragGate door">
+<meta name="description" content="1.6.8 widens the public FragGate door">
 <link rel="canonical" href="${RUNTIME_ORIGIN}/"></head>
-<body><p class="lead"><strong>1.6.2</strong> FragGate</p></body></html>`,
+<body><p class="lead"><strong>1.6.8</strong> FragGate</p></body></html>`,
           { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } },
         );
       }
       if (u.pathname === "/v1/fraggate/list") {
-        return new Response(JSON.stringify({ ok: true, live_count: 26, door: "fraggate", version: "1.6.2" }), {
+        return new Response(JSON.stringify({ ok: true, live_count: 26, door: "fraggate", version: "1.6.8" }), {
           status: 200,
           headers: { "Content-Type": "application/json; charset=utf-8" },
         });
       }
       if (u.pathname === "/v1/health") {
-        return new Response(JSON.stringify({ ok: true, version: "1.6.2", door: "fraggate", skill: "/v1/skill" }), {
+        return new Response(JSON.stringify({ ok: true, version: "1.6.8", door: "fraggate", skill: "/v1/skill" }), {
           status: 200,
           headers: { "Content-Type": "application/json; charset=utf-8" },
         });
@@ -136,7 +136,7 @@ describe("runtime proxy", () => {
     const door = await worker.fetch(new Request("https://godlock.uk/runtime"), env);
     assert.equal(door.status, 200);
     const html = await door.text();
-    assert.match(html, /1\.6\.2/);
+    assert.match(html, /1\.6\.8/);
     assert.match(html, /FragGate/);
     assert.doesNotMatch(html, /engine-runtime 1\.4\.0/);
     assert.match(html, /href="\/runtime"/);
@@ -153,7 +153,7 @@ describe("runtime proxy", () => {
 
     const health = await worker.fetch(new Request("https://godlock.uk/runtime/v1/health"), env);
     const hj = await health.json();
-    assert.equal(hj.version, "1.6.2");
+    assert.equal(hj.version, "1.6.8");
     assert.equal(hj.skill, "/runtime/v1/skill");
 
     const sm = await worker.fetch(new Request("https://godlock.uk/runtime/sitemap.xml"), env);
@@ -164,7 +164,7 @@ describe("runtime proxy", () => {
 
   it("does not expose specified-fit internals on the proxied door", async () => {
     const env = runtimeEnv(async () => new Response(
-      "<html><body>1.6.2 FragGate</body></html>",
+      "<html><body>1.6.8 FragGate</body></html>",
       { headers: { "Content-Type": "text/html" } },
     ));
     const res = await handleRuntimeRoot(
@@ -174,7 +174,7 @@ describe("runtime proxy", () => {
     );
     const html = await res.text();
     assert.doesNotMatch(html, /Specified Fit|INTERNAL_CRITERIA|bootstrap lock|weighing framework/i);
-    assert.match(html, /Author Aziel Eliab|GodLock|FragGate|1\.6\.2/);
+    assert.match(html, /Author Aziel Eliab|GodLock|FragGate|1\.6\.8/);
   });
 });
 

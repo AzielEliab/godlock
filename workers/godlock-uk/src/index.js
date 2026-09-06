@@ -466,6 +466,7 @@ export default {
           site: "godlock.uk",
           author: AUTHOR,
           identity: AUTHOR,
+          ...meshOpsDoc(),
           spec: "QNM-BUILD-1.0",
           anonymity_network: false,
           default_off: true,
@@ -475,7 +476,6 @@ export default {
           rollup: stats.mesh && stats.mesh.rollup ? stats.mesh.rollup : { live: 0, locked: 0, isolated: 0 },
           site_live_nodes: stats.site_live_nodes,
           mesh: stats.mesh,
-          ...meshOpsDoc(),
         }, 200, extraHeadersFor(nodeId));
       }
 

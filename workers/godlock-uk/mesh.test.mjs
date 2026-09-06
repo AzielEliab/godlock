@@ -68,7 +68,7 @@ describe("mesh contract", () => {
     assert.equal(ops.anonymity_network, false);
     assert.equal(ops.node_gate, false);
     assert.equal(ops.auto_heal, false);
-    assert.equal(ops.rollup, "live|locked|isolated counts only");
+    assert.equal(ops.rollup_shape, "live|locked|isolated counts only");
     assert.equal(ops.anon_broadcast_publish_path, false);
     assert.equal(ops.author, AUTHOR);
     assert.equal(ops.identity, AUTHOR);

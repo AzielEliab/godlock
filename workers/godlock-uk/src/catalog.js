@@ -9,7 +9,8 @@
 import { hideInternalDetermination } from "./publicCopy.js";
 import {
   AUTHOR, CATALOG, LIBRARY, RUNTIME_PATH, RUNTIME_VERSION, GITHUB_RUNTIME,
-  FRAGGATE_KERNEL, DOWNLOAD, GITHUB,
+  FRAGGATE_KERNEL, FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, FRAGGATE_COUNT,
+  AZBROWSER_DOWNLOAD, AZBROWSER_WORKER, AZBROWSER_COUNT, DOWNLOAD, GITHUB,
 } from "./seo.js";
 
 export const CATALOG_JSON_PATH = "/v1/catalog.json";
@@ -30,10 +31,37 @@ export const BINDING_USES_URLS = [
 const UA = { "User-Agent": "Mozilla/5.0", Accept: "application/json" };
 
 /** Known extras already hosted on this page. Keep if present; do not invent. */
-export const EXTRA_SUITE_SLUGS = ["aziel-runtime", "fraggate", "embryolock"];
+export const EXTRA_SUITE_SLUGS = ["aziel-runtime", "embryolock"];
 const EXTRA_SUITE_SET = new Set(EXTRA_SUITE_SLUGS);
-const EXTRA_RANK = { "aziel-runtime": 0, fraggate: 1, embryolock: 2 };
+const EXTRA_RANK = { "aziel-runtime": 0, embryolock: 1 };
 const FAMILY_RANK = { extra: -1, plain: 0, gate: 1, lock: 2 };
+
+/** AZNet stays off /software until its own Worker is live. Do not invent a combined card. */
+export const OMIT_UNTIL_WORKER_SLUGS = ["aznet", "az-net"];
+const OMIT_UNTIL_WORKER_SET = new Set(OMIT_UNTIL_WORKER_SLUGS);
+
+export function omitUntilWorker(slug) {
+  const s = String(slug || "").toLowerCase().replace(/[\s_]+/g, "-");
+  return OMIT_UNTIL_WORKER_SET.has(s);
+}
+
+/** Hub copy: AZBrowser is its own card. Strip combined AZNet branding. */
+export function hubProductCopy(raw) {
+  const slug = String((raw && raw.slug) || "").toLowerCase();
+  let name = String((raw && raw.name) || slug);
+  let one_line = hideInternalDetermination(String((raw && (raw.one_line || raw.banner)) || ""));
+  const combined = slug === "azbrowser" || /azbrowser\s*\/\s*aznet/i.test(name) || /azbrowser\s*\/\s*aznet/i.test(one_line);
+  if (combined) {
+    name = "AZBrowser";
+    one_line = one_line
+      .replace(/AZBrowser\s*\/\s*AZNet\s*/gi, "AZBrowser ")
+      .replace(/\bAZNet\b/gi, "")
+      .replace(/\s{2,}/g, " ")
+      .replace(/\s+\./g, ".")
+      .trim();
+  }
+  return { name, one_line };
+}
 
 export const CATALOG_FALLBACK_PRODUCTS = [
   { slug: "vibelock", name: "VibeLock", version: "0.3.0", one_line: "Physical-consistency evaluation of speech audio. Risk assessment, not a liveness proof.", github: "https://github.com/AzielEliab/vibelock", download: "https://vibelock-download-tracker.vibelock.workers.dev/download" },
@@ -63,6 +91,8 @@ export const CATALOG_FALLBACK_PRODUCTS = [
   { slug: "mialock", name: "M.I.A.Lock", version: "0.1.1", one_line: "M.I.A.Lock 0.1.1: event map + Doe matching + uncertainty ellipses + coverage heat. Doe leads ≠ ID. Heat ≠ presence. Author Aziel Eliab.", github: "https://github.com/AzielEliab/mialock", download: "https://mialock-download-tracker.vibelock.workers.dev/download" },
   { slug: "azieltether", name: "AzielTether", version: "0.1.0", one_line: "AzielTether 0.1.0: central × decentral survival mesh for downloaded Aziel software. Prefer-central; peer sync when down; public HTTPS stays mesh-free. Not a VPN. Author Aziel Eliab.", github: "https://github.com/AzielEliab/azieltether", download: "https://azieltether-download-tracker.vibelock.workers.dev/download" },
   { slug: "peacelock", name: "PeaceLock", version: "0.1.0", one_line: "Chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1).", github: "https://github.com/AzielEliab/peacelock", download: "https://peacelock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "azmail", name: "AZMail", version: "0.1.0", one_line: "AZMail (APP 1.0): anonymous MCP mesh + advisory airlock. Not a full internet MTA. Mesh default off. FragGate only.", github: "https://github.com/AzielEliab/azmail", download: "https://azmail-download-tracker.vibelock.workers.dev/download" },
+  { slug: "azbrowser", name: "AZBrowser", version: "0.1.0", one_line: "AZBrowser Phase 1: secure research browser + Lamb Lens ethical search. Cite; refuse harvest; no invented visits. FragGate only. Not Chromium. Author Aziel Eliab.", github: "https://github.com/AzielEliab/azbrowser", download: AZBROWSER_DOWNLOAD, worker: AZBROWSER_WORKER, worker_home: AZBROWSER_WORKER, count: AZBROWSER_COUNT },
   { slug: "aziel-corpus", name: "Aziel Digital Library", version: "2.6.2", one_line: "Self-contained immutable digital library. Public MASTER. Not a 26-card index.", github: "https://github.com/AzielEliab/aziel-corpus", download: "https://www.azielcorpuslibrary.net/download" },
 ];
 
@@ -76,6 +106,22 @@ export const RUNTIME_CARD = {
   one_line: "One door — discover, route, refuse. Hosts the FragGate kernel (FG-0.1) and every catalog engine. Author Aziel Eliab.",
   github: GITHUB_RUNTIME,
   download: "",
+  invoke: RUNTIME_PATH,
+  kernel: FRAGGATE_KERNEL,
+  suite: true,
+};
+
+/** Own hub card. Download/Worker point at the FragGate tracker, not GitHub-only. */
+export const FRAGGATE_CARD = {
+  slug: "fraggate",
+  name: "FragGate",
+  version: "0.1.0",
+  one_line: "FragGate is Aziel Eliab software: FG-0.1 kernel against tool fragmentation and model hallucination. Dual surface — Worker UI and MCP/OpenAPI share List / Describe / Call / Verify. Author Aziel Eliab.",
+  github: FRAGGATE_KERNEL,
+  download: FRAGGATE_DOWNLOAD,
+  worker: FRAGGATE_WORKER,
+  worker_home: FRAGGATE_WORKER,
+  count: FRAGGATE_COUNT,
   invoke: RUNTIME_PATH,
   kernel: FRAGGATE_KERNEL,
   suite: true,
@@ -113,9 +159,10 @@ export function countHref(product) {
   return "";
 }
 
-/** Plain → Gate → Lock. Clock is not Lock. EmbryoLock/FragGate extras stay extra. */
+/** Plain A–Z → Gate A–Z → Lock A–Z. Clock is not Lock. FragGate is Gate (with DecisionGATE). */
 export function suiteFamily(product) {
   const slug = String((product && product.slug) || "").toLowerCase();
+  if (slug === "fraggate") return "gate";
   if (EXTRA_SUITE_SET.has(slug)) return "extra";
   const name = String((product && product.name) || "").toLowerCase().replace(/[\s._'-]+/g, "");
   const token = slug || name;
@@ -142,19 +189,21 @@ export function sortSoftwareSuite(products) {
 export function compactProduct(raw) {
   if (!raw || typeof raw !== "object") return null;
   const slug = String(raw.slug || "").trim();
-  if (!slug) return null;
+  if (!slug || omitUntilWorker(slug)) return null;
+  const copy = hubProductCopy({ ...raw, slug });
   const countUrl = looksLikeUrl(raw.count) ? String(raw.count) : "";
   return {
     slug,
-    name: String(raw.name || slug),
+    name: copy.name || slug,
     version: raw.version != null && raw.version !== "" ? String(raw.version) : "",
-    one_line: hideInternalDetermination(String(raw.one_line || raw.banner || "")),
+    one_line: copy.one_line,
     github: raw.github ? String(raw.github) : "",
     download: raw.download ? String(raw.download) : "",
     worker: raw.worker ? String(raw.worker) : "",
     worker_home: raw.worker_home ? String(raw.worker_home) : "",
     count: countUrl,
     downloads: firstNum(raw.downloads, raw.download_count, !looksLikeUrl(raw.count) ? raw.count : null),
+    views: firstNum(raw.views, raw.view_count),
     uses: firstNum(raw.uses, raw.uses_total),
   };
 }
@@ -174,6 +223,7 @@ function mergeFields(live, fallback) {
     worker_home: a.worker_home || b.worker_home || "",
     count: a.count || b.count || "",
     downloads: a.downloads != null ? a.downloads : b.downloads,
+    views: a.views != null ? a.views : b.views,
     uses: a.uses != null ? a.uses : b.uses,
   });
   if (!merged) return null;
@@ -205,6 +255,7 @@ export function publicProduct(product) {
     mcp: RUNTIME_PATH + "/mcp",
     fraggate: p.slug === "aziel-runtime" || p.slug === "fraggate" ? RUNTIME_PATH + "/v1/fraggate/list" : invokeHref(p),
     downloads: p.downloads != null ? p.downloads : null,
+    views: p.views != null ? p.views : null,
     uses: p.uses != null ? p.uses : null,
     family: suiteFamily(p),
     author: AUTHOR,
@@ -217,7 +268,7 @@ function mergeLiveOverFallback(live) {
   const seen = new Set();
   for (const raw of live) {
     const slug = String((raw && raw.slug) || "").trim();
-    if (!slug || slug === "aziel-runtime" || seen.has(slug)) continue;
+    if (!slug || slug === "aziel-runtime" || omitUntilWorker(slug) || seen.has(slug)) continue;
     const next = mergeFields(raw, fallbackBySlug.get(slug));
     if (!next) continue;
     seen.add(next.slug);
@@ -261,7 +312,7 @@ export function productsFromCatalogDoc(body) {
   for (const list of buckets) {
     for (const raw of list) {
       const p = compactProduct(typeof raw === "string" ? { slug: raw } : raw);
-      if (!p || seen.has(p.slug) || p.slug === "aziel-runtime") continue;
+      if (!p || seen.has(p.slug) || p.slug === "aziel-runtime" || omitUntilWorker(p.slug)) continue;
       seen.add(p.slug);
       out.push(p);
     }
@@ -270,11 +321,12 @@ export function productsFromCatalogDoc(body) {
 }
 
 export function parseCounterDoc(body) {
-  if (body == null) return { downloads: null, uses: null };
-  if (typeof body === "number") return { downloads: firstNum(body), uses: null };
-  if (typeof body !== "object") return { downloads: null, uses: null };
+  if (body == null) return { downloads: null, views: null, uses: null };
+  if (typeof body === "number") return { downloads: firstNum(body), views: null, uses: null };
+  if (typeof body !== "object") return { downloads: null, views: null, uses: null };
   return {
     downloads: firstNum(body.downloads, body.total, body.download_count, !looksLikeUrl(body.count) ? body.count : null),
+    views: firstNum(body.views, body.view_count),
     uses: firstNum(body.uses, body.uses_total),
   };
 }
@@ -337,9 +389,12 @@ export async function fetchCatalogProducts(env, deps = {}) {
 }
 
 export async function attachCatalogCounters(products, env, deps = {}) {
-  const list = Array.isArray(products) ? products.map((p) => ({ ...p })) : [];
+  const incoming = Array.isArray(products) ? products.map((p) => ({ ...p })) : [];
+  const seen = new Set(incoming.map((p) => p && p.slug).filter(Boolean));
+  if (!seen.has(FRAGGATE_CARD.slug)) incoming.push({ ...FRAGGATE_CARD });
+  const list = incoming.filter((p) => p && p.slug && !omitUntilWorker(p.slug));
   const httpFetch = deps.counterFetch || deps.fetch || globalThis.fetch;
-  const timeoutMs = deps.timeoutMs != null ? deps.timeoutMs : 2500;
+  const timeoutMs = deps.timeoutMs != null ? deps.timeoutMs : 5000;
   let runtimeUses = firstNum(deps.runtimeUses);
   let fetched = 0;
 
@@ -378,8 +433,9 @@ export async function attachCatalogCounters(products, env, deps = {}) {
       const res = await fetchJson(httpFetch, url, timeoutMs);
       const parsed = parseCounterDoc(await readJsonResponse(res));
       if (p.downloads == null && parsed.downloads != null) p.downloads = parsed.downloads;
+      if (p.views == null && parsed.views != null) p.views = parsed.views;
       if (p.uses == null && parsed.uses != null) p.uses = parsed.uses;
-      if (parsed.downloads != null || parsed.uses != null) fetched += 1;
+      if (parsed.downloads != null || parsed.views != null || parsed.uses != null) fetched += 1;
     } catch { /* optional */ }
   }));
 
@@ -397,7 +453,7 @@ export function softwareSuite(products, extras = {}) {
   const out = [];
   const push = (raw) => {
     const p = compactProduct(raw);
-    if (!p || seen.has(p.slug)) return;
+    if (!p || omitUntilWorker(p.slug) || seen.has(p.slug)) return;
     seen.add(p.slug);
     const card = {
       ...p,
@@ -411,10 +467,20 @@ export function softwareSuite(products, extras = {}) {
       if (extras.version) card.version = String(extras.version);
       if (extras.runtimeUses != null && card.uses == null) card.uses = extras.runtimeUses;
     }
+    if (card.slug === "fraggate") {
+      if (!card.download) card.download = FRAGGATE_CARD.download;
+      if (!card.worker) card.worker = FRAGGATE_CARD.worker;
+      if (!card.worker_home) card.worker_home = FRAGGATE_CARD.worker_home;
+      if (!card.count) card.count = FRAGGATE_CARD.count;
+      if (!card.github) card.github = FRAGGATE_CARD.github;
+      if (!card.kernel) card.kernel = FRAGGATE_CARD.kernel;
+      if (!card.invoke) card.invoke = FRAGGATE_CARD.invoke;
+    }
     out.push(card);
   };
   push({ ...RUNTIME_CARD, uses: extras.runtimeUses != null ? extras.runtimeUses : RUNTIME_CARD.uses });
   for (const p of incoming) push(p);
+  if (!seen.has(FRAGGATE_CARD.slug)) push(FRAGGATE_CARD);
   return sortSoftwareSuite(out);
 }
 

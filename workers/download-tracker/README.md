@@ -24,6 +24,8 @@ as live until someone with the Cloudflare account runs the steps below.
 
 ## Deploy
 
+Push to `main` deploys this Worker via `.github/workflows/deploy-workers.yml` (`CLOUDFLARE_API_TOKEN` GitHub secret; account `ac575a9b822bea2bed97d0ab73aed238`). No tokens in the repo.
+
 ```bash
 cd workers/download-tracker
 
@@ -117,7 +119,9 @@ Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic
 | Method | Path | Notes |
 |--------|------|-------|
 | GET | `/v1/health` | Liveness |
+| GET | `/v1/update` | Runtime update check. Prompt + counted `/download` when `update_available`. Never silent overwrite. |
 | GET | `/openapi.json` | OpenAPI 3.1 |
+| GET | `/llms.txt` `/ai.txt` `/cite.json` `/robots.txt` `/sitemap.xml` | SEO / MCP discoverability |
 | GET | `/ai` | OpenAPI/MCP how-to for ChatGPT, Grok, Venice, Claude, Cursor, Glama, Perplexity, Copilot/Bing, Gemini/Vertex, Mistral, Meta AI, Apple Intelligence, Amazon Q, DuckAssist, You.com, Cohere, and other assistants |
 
 See the product README section **Use with major AI clients**.

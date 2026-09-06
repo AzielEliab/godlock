@@ -48,3 +48,27 @@ def test_fastapi_submit_stats_health() -> None:
     assert b"Export JSON" in home.content
     assert b"Verify" in home.content
     assert b"Not a VPN" in home.content
+    assert b"Update available" not in home.content
+
+
+def test_dashboard_update_prompt_is_not_silent_overwrite() -> None:
+    app = create_app(
+        engine=GodLockEngine(persist=False),
+        persist=False,
+        update={
+            "update_available": True,
+            "version": "0.1.0",
+            "latest": "0.2.0",
+            "download": "https://godlock-download-tracker.vibelock.workers.dev/download",
+            "forced": False,
+        },
+    )
+    client = TestClient(app)
+    home = client.get("/")
+    assert home.status_code == 200
+    assert b"Update available" in home.content
+    assert b"no silent overwrite" in home.content
+    assert b"godlock-download-tracker.vibelock.workers.dev/download" in home.content
+    health = client.get("/health").json()
+    assert health["update_available"] is True
+    assert health["update"]["forced"] is False

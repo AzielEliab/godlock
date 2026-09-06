@@ -1,4 +1,5 @@
 import { handleRuntime } from "./runtime.js";
+import { robotsTxt, sitemapXml, citeDoc, llmsDoc } from "./discover.js";
 
 /**
  * GodLock download tracker (Cloudflare Worker).
@@ -212,6 +213,8 @@ function installScript() {
 set -euo pipefail
 HOST="${HOST}"
 ASSET="${DEFAULT_ASSET}"
+VERSION="\${GODLOCK_VERSION:-0.1.0}"
+RUNTIME="\${AZIEL_RUNTIME_HOST:-https://aziel-runtime.vibelock.workers.dev}"
 WORKDIR="\${GODLOCK_HOME:-\$HOME/godlock}"
 mkdir -p "\$WORKDIR"
 cd "\$WORKDIR"
@@ -228,6 +231,15 @@ python -m pip install -U pip
 python -m pip install -e .
 echo
 echo "Installed GodLock."
+UPDATE_JSON="\$(curl -fsSL -A 'Mozilla/5.0' --max-time 3 "\${RUNTIME}/v1/update/check?slug=godlock&version=\${VERSION}" 2>/dev/null || true)"
+if [ -z "\$UPDATE_JSON" ]; then
+  UPDATE_JSON="\$(curl -fsSL -A 'Mozilla/5.0' --max-time 3 "\${RUNTIME}/v1/pull/godlock" 2>/dev/null || true)"
+fi
+case "\$UPDATE_JSON" in
+  *'"update_available":true'*|*'"update_available": true'*)
+    echo "Update available (you have \${VERSION}). Counted download (no silent overwrite): \${HOST}/download"
+    ;;
+esac
 echo "Run:  godlock ui"
 echo "Then open http://127.0.0.1:8080  (loopback only)"
 echo "Author: Aziel Eliab."
@@ -276,6 +288,10 @@ async function indexHtml(env) {
 <meta name="description" content="Specified Fit stress-test and resilience engine by Aziel Eliab; not a VPN, ghost net, or anonymity tool.">
 <meta name="author" content="Aziel Eliab">
 <link rel="canonical" href="https://godlock-download-tracker.vibelock.workers.dev/">
+<link rel="alternate" href="/cite.json" type="application/json">
+<link rel="alternate" href="/llms.txt" type="text/plain">
+<link rel="alternate" href="/ai.txt" type="text/plain">
+<link rel="alternate" href="/openapi.json" type="application/json" title="OpenAPI">
 <meta property="og:title" content="GodLock — Aziel Eliab">
 <meta property="og:description" content="Specified Fit stress-test and resilience engine by Aziel Eliab; not a VPN, ghost net, or anonymity tool.">
 <meta property="og:url" content="https://godlock-download-tracker.vibelock.workers.dev/">
@@ -379,7 +395,7 @@ async function indexHtml(env) {
 <section class="cite" id="cite">
   <h2>How to cite</h2>
   <p>Aziel Eliab. GodLock. https://github.com/AzielEliab/godlock. https://godlock-download-tracker.vibelock.workers.dev.</p>
-  <p><a href="https://aziel-runtime.vibelock.workers.dev/">Catalog</a> · <a href="https://github.com/AzielEliab/godlock">GitHub</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/download">Download</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/cite.json">cite.json</a></p>
+  <p><a href="https://aziel-runtime.vibelock.workers.dev/">Catalog</a> · <a href="https://aziel-runtime.vibelock.workers.dev/v1/software">Software</a> · <a href="https://github.com/AzielEliab/godlock">GitHub</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/download">Download</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/cite.json">cite.json</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/llms.txt">llms.txt</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/openapi.json">OpenAPI</a></p>
 </section>
 <!-- /gitbaby-seo -->
 </body>
@@ -468,24 +484,25 @@ export default {
 
     // gitbaby-seo-routes
     if ((url.pathname === "/robots.txt" || url.pathname === "/robots.txt/") && request.method === "GET") {
-      const body = "User-agent: *\nAllow: /\nSitemap: " + HOST + "/sitemap.xml\n";
-      return new Response(body, {
+      return new Response(robotsTxt(), {
         status: 200,
         headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() },
       });
     }
     if ((url.pathname === "/sitemap.xml" || url.pathname === "/sitemap.xml/") && request.method === "GET") {
-      const locs = [HOST + "/", HOST + "/download", HOST + "/install.sh", HOST + "/v1/skill", HOST + "/openapi.json", GITHUB_REPO];
-      const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        + locs.map((u) => "  <url><loc>" + u + "</loc></url>").join("\n")
-        + "\n</urlset>\n";
-      return new Response(xml, {
+      return new Response(sitemapXml(), {
         status: 200,
         headers: { "Content-Type": "application/xml; charset=utf-8", ...corsHeaders() },
       });
     }
     if ((url.pathname === "/cite.json" || url.pathname === "/cite.json/") && request.method === "GET") {
-      return json({"author": "Aziel Eliab", "title": "GodLock", "github": "https://github.com/AzielEliab/godlock", "download": "https://godlock-download-tracker.vibelock.workers.dev/download", "doi": null, "license": "Apache-2.0", "catalog": "https://aziel-runtime.vibelock.workers.dev/", "ai_clients": ["ChatGPT (GPT Actions / OpenAI)", "Grok (xAI)", "Venice", "Claude (Anthropic)", "Cursor (MCP)", "Glama (MCP)", "Perplexity", "Microsoft Copilot / Bing", "Google Gemini / Vertex", "Mistral", "Meta AI", "Apple Intelligence surfaces", "Amazon Q tooling", "DuckAssist", "You.com", "Cohere", "other MCP/OpenAPI-capable assistants"]});
+      return json(citeDoc());
+    }
+    if ((url.pathname === "/llms.txt" || url.pathname === "/llms.txt/" || url.pathname === "/ai.txt" || url.pathname === "/ai.txt/") && request.method === "GET") {
+      return new Response(llmsDoc(), {
+        status: 200,
+        headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() },
+      });
     }
     // /gitbaby-seo-routes
     return json({ error: "not found" }, 404);

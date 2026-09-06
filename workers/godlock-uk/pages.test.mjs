@@ -1003,4 +1003,34 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(suiteFamily({ slug: "azhub", name: "AZHub" }), "plain");
     assert.equal(suiteFamily({ slug: "azinterface", name: "AZInterface" }), "plain");
   });
+
+  it("heals AZNet live catalog Separate engine to Separate software", () => {
+    const LIVE_AZNET_ONE_LINE = "AZNet (AZN-WP-0.1): silent verification side-net. Hash continuity without hosting. Separate engine; functional-order pair with AZBrowser.";
+    const HEALED_AZNET_ONE_LINE = "AZNet (AZN-WP-0.1): silent verification side-net. Hash continuity without hosting. Separate software; functional-order pair with AZBrowser.";
+    const LIVE_AZNET_BANNER = "AZNet (AZN-WP-0.1): silent verification side-net. Hash continuity without hosting. Custodian garden of hash refs + memorial ledger. Integrity refuse/isolate. Separate engine from AZBrowser (functional-order pair: token AND flag required; own Worker / own UI). FragGate LIVE only. Never hosts payloads. Author Aziel Eliab.";
+    const snap = CATALOG_FALLBACK_PRODUCTS.find((p) => p.slug === "aznet");
+    assert.ok(snap);
+    assert.equal(snap.one_line, HEALED_AZNET_ONE_LINE);
+    assert.equal(AZNET_CARD.one_line, HEALED_AZNET_ONE_LINE);
+    assert.doesNotMatch(AZNET_CARD.one_line, /Separate engine/);
+
+    const healed = hubProductCopy({ slug: "aznet", name: "AZNet", one_line: LIVE_AZNET_ONE_LINE });
+    assert.equal(healed.name, "AZNet");
+    assert.equal(healed.one_line, HEALED_AZNET_ONE_LINE);
+    assert.match(healed.one_line, /Separate software; functional-order pair with AZBrowser\./);
+    assert.doesNotMatch(healed.one_line, /Separate engine/);
+
+    const fromBanner = hubProductCopy({ slug: "aznet", name: "AZNet", banner: LIVE_AZNET_BANNER });
+    assert.equal(fromBanner.name, "AZNet");
+    assert.match(fromBanner.one_line, /Separate software from AZBrowser/);
+    assert.doesNotMatch(fromBanner.one_line, /Separate engine/);
+
+    const card = compactProduct({ slug: "aznet", name: "AZNet", one_line: LIVE_AZNET_ONE_LINE });
+    assert.equal(card.one_line, HEALED_AZNET_ONE_LINE);
+    const html = softwareBody({ products: [card] });
+    assert.match(html, /id="aznet"[^>]*data-family="plain"/);
+    assert.match(html, /<h3>AZNet<\/h3>/);
+    assert.match(html, /Separate software; functional-order pair with AZBrowser\./);
+    assert.doesNotMatch(html, /Separate engine/);
+  });
 });

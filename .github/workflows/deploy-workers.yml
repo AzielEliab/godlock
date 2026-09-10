@@ -8,12 +8,16 @@ on:
 permissions:
   contents: read
 
-# CLOUDFLARE_API_TOKEN is a GitHub Actions secret. Do not put tokens in this repo.
+# Primary deploy is Cursor/wrangler OAuth (identity: Aziel Eliab).
+# GitHub Actions is backup only when CLOUDFLARE_API_TOKEN is set.
+# Skip both jobs if the secret is absent so the workflow does not fail
+# (and does not send failure emails). Do not invent or commit tokens.
 # Cloudflare account id is public in wrangler.toml for both Workers.
 
 jobs:
   godlock-uk:
     name: Deploy godlock-uk
+    if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     defaults:
@@ -31,6 +35,7 @@ jobs:
 
   download-tracker:
     name: Deploy download-tracker
+    if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     defaults:

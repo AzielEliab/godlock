@@ -65,6 +65,7 @@ export const DONATE_RAILS = [
     label: "XRP",
     address: "rLc3jZJbgEU1wBGwTFtgyq8bpayQE15K7b",
     uri: "xrp:rLc3jZJbgEU1wBGwTFtgyq8bpayQE15K7b",
+    uriAlt: "ripple:rLc3jZJbgEU1wBGwTFtgyq8bpayQE15K7b",
     extra: false,
     note: "No destination tag required.",
   },
@@ -164,7 +165,7 @@ export function donateRailHtml(rail) {
   <p class="muted">${esc(DONATE_NETWORK_NOTE)}</p>
   <div class="donate-actions">
     <button type="button" class="button ghost" data-copy="${esc(addr)}">Copy</button>
-    <a class="button ghost" href="${esc(uri)}">Open in wallet</a>
+    <a class="button ghost" href="${esc(uri)}" data-open-wallet data-wallet-uri="${esc(uri)}" data-copy-addr="${esc(addr)}" rel="noopener noreferrer">Open in wallet</a>
   </div>
   ${qr}
 </article>`;
@@ -191,6 +192,65 @@ export function donateCopyScript() {
     });
   });
 })();
+(function(){
+  function copyText(t, done){
+    if(!t){ if(done)done(); return; }
+    var ok=function(){ if(done)done(); };
+    var fail=function(){
+      try{
+        var ta=document.createElement("textarea");
+        ta.value=t; ta.setAttribute("readonly","");
+        ta.style.position="fixed"; ta.style.left="-9999px";
+        document.body.appendChild(ta); ta.select();
+        document.execCommand("copy"); document.body.removeChild(ta); ok();
+      }catch(e){}
+    };
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(ok).catch(fail);
+    } else fail();
+  }
+  function flash(el, msg){
+    var prev=el.getAttribute("data-label")||el.textContent;
+    if(!el.getAttribute("data-label")) el.setAttribute("data-label", prev);
+    el.textContent=msg;
+    setTimeout(function(){ el.textContent=el.getAttribute("data-label")||prev; }, 2400);
+  }
+  /* Safari (iOS + desktop) often has no handler for coin schemes → "link not valid". */
+  function safariLike(){
+    var ua=navigator.userAgent||"";
+    var iOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+    var safari=/Safari/.test(ua)&&!/Chrome|Chromium|CriOS|FxiOS|EdgiOS|Edg\/|OPR\/|Android/.test(ua);
+    return iOS||safari;
+  }
+  document.addEventListener("click", function(e){
+    var a=e.target.closest("[data-open-wallet]");
+    if(!a) return;
+    var uri=a.getAttribute("data-wallet-uri")||a.getAttribute("href")||"";
+    var addr=a.getAttribute("data-copy-addr")||"";
+    /* Seed clipboard with bare address — every wallet Send accepts paste. */
+    copyText(addr);
+    if(safariLike()){
+      e.preventDefault();
+      flash(a, "Address copied — scan QR in your wallet");
+      return;
+    }
+    /* Optional alt scheme (e.g. ripple: alongside xrp:). */
+    var alt=a.getAttribute("data-wallet-uri-alt")||"";
+    if(alt && alt!==uri){
+      try{
+        var fr=document.createElement("iframe");
+        fr.style.display="none";
+        fr.src=alt;
+        document.body.appendChild(fr);
+        setTimeout(function(){ try{document.body.removeChild(fr);}catch(e){} }, 1500);
+      }catch(e){}
+    }
+    /* Chrome/Firefox/Android: href navigates so Trust/MetaMask/Exodus/Phantom/Coinbase/etc. can claim it. */
+    setTimeout(function(){
+      if(!document.hidden) flash(a, "Scan QR if wallet did not open");
+    }, 1600);
+  }, true);
+})();
 </script>`;
 }
 
@@ -201,6 +261,7 @@ export function donateBody() {
 ${donateCopyHtml()}
 </div>
 ${donateRailsHtml()}
+<p class="wallet-hint">Open in wallet uses the standard payment URI your OS routes to an installed wallet (Exodus, MetaMask, Trust, Phantom, Coinbase, and peers). If Safari says the link is invalid, scan the QR inside your wallet — that path works for every wallet.</p>
 <div class="card">${donateCanonicalLine()}</div>
 ${donateCopyScript()}
 </section>`;
@@ -216,6 +277,7 @@ export function donateHomeBlock() {
   ${donateCanonicalLine()}
 </div>
 ${donateRailsHtml()}
+<p class="wallet-hint">Open in wallet uses the standard payment URI your OS routes to an installed wallet (Exodus, MetaMask, Trust, Phantom, Coinbase, and peers). If Safari says the link is invalid, scan the QR inside your wallet — that path works for every wallet.</p>
 ${donateCopyScript()}
 </section>`;
 }

@@ -14,7 +14,7 @@ It is **not** a VPN, ghost net, or anonymity tool.
 - **Aziel Eliab on GodLock:** https://godlock.uk/AzielEliab
 - **Specified Fit (public reasoning):** https://godlock.uk/reason
 - **Verify:** https://godlock.uk/verify
-- **Donate:** https://godlock.uk/donate — AZL-DONATE-1.0 (same door https://www.azieleliab.com/donate)
+- **Donate:** https://godlock.uk/donate — AZL-DONATE-1.0 (same door https://www.azieleliab.com/donate). Payment-URI QRs are solid black-on-white PNGs (`/donate/qr/{rail}.png`).
 - **Software catalog on GodLock:** https://godlock.uk/software — full live aziel-runtime suite plus aziel-runtime / FragGate (Worker, GitHub, `/runtime` FragGate/MCP; uses/download counters)
 - **Runtime (FragGate door):** https://godlock.uk/runtime — same-origin proxy of aziel-runtime 1.6.8
 - **Aziel Corpus Library (sister site):** https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab

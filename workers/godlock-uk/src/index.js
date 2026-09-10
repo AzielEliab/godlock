@@ -11,7 +11,7 @@ import {
   page, homeBody, verifyBody, receiptBody, azielEliabBody, azielEliabText,
   reasonBody, reasonText, softwareBody, donateBody, AZIEL_ELIAB_PATH, REASON_PATH, SOFTWARE_PATH, DONATE_PATH,
 } from "./ui.js";
-import { donateDoc } from "./donate.js";
+import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
@@ -370,6 +370,30 @@ function extraHeadersFor(nodeId, more) {
   return h;
 }
 
+async function serveDonateQrPng(request, env, path) {
+  const id = donateQrIdFromPath(path);
+  const known = DONATE_RAILS.some((r) => r.id === id);
+  if (!id || !known) {
+    return new Response("not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+  }
+  if (!env || !env.ASSETS) {
+    return new Response("not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+  }
+  const assetUrl = new URL(path, request.url);
+  const assetRes = await env.ASSETS.fetch(new Request(assetUrl, { method: "GET" }));
+  if (!assetRes.ok) {
+    return new Response("not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+  }
+  const headers = new Headers();
+  headers.set("Content-Type", "image/png");
+  headers.set("Cache-Control", "public, max-age=86400, immutable");
+  const len = assetRes.headers.get("Content-Length");
+  if (len) headers.set("Content-Length", len);
+  for (const [k, v] of Object.entries(corsHeaders())) headers.set(k, v);
+  if (request.method === "HEAD") return new Response(null, { status: 200, headers });
+  return new Response(assetRes.body, { status: 200, headers });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -379,6 +403,10 @@ export default {
         return new Response(null, { status: 204, headers: runtimeCors() });
       }
       return new Response(null, { status: 204, headers: corsHeaders() });
+    }
+
+    if ((request.method === "GET" || request.method === "HEAD") && donateQrIdFromPath(path)) {
+      return serveDonateQrPng(request, env, path);
     }
 
     try {

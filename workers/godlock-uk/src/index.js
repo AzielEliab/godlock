@@ -9,8 +9,9 @@ import { randomBytes } from "node:crypto";
 import { json, html, corsHeaders, wantsJson, readCookie } from "./http.js";
 import {
   page, homeBody, verifyBody, receiptBody, azielEliabBody, azielEliabText,
-  reasonBody, reasonText, softwareBody, AZIEL_ELIAB_PATH, REASON_PATH, SOFTWARE_PATH,
+  reasonBody, reasonText, softwareBody, donateBody, AZIEL_ELIAB_PATH, REASON_PATH, SOFTWARE_PATH, DONATE_PATH,
 } from "./ui.js";
+import { donateDoc } from "./donate.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
@@ -500,6 +501,18 @@ export default {
           });
         }
         return html(page("Verify", verifyBody({ report }), { path: "/verify", kind: "verify" }), {
+          extraHeaders: extraHeadersFor(nodeId),
+        });
+      }
+
+      if (path === DONATE_PATH) {
+        if (wantsJson(request, url)) {
+          return json({
+            ...donateDoc(),
+            author: AUTHOR,
+          }, 200, extraHeadersFor(nodeId));
+        }
+        return html(page("Donate", donateBody(), { path: DONATE_PATH, kind: "donate" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

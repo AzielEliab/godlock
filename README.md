@@ -14,6 +14,7 @@ It is **not** a VPN, ghost net, or anonymity tool.
 - **Aziel Eliab on GodLock:** https://godlock.uk/AzielEliab
 - **Specified Fit (public reasoning):** https://godlock.uk/reason
 - **Verify:** https://godlock.uk/verify
+- **Donate:** https://godlock.uk/donate — AZL-DONATE-1.0 (same door https://www.azieleliab.com/donate)
 - **Software catalog on GodLock:** https://godlock.uk/software — full live aziel-runtime suite plus aziel-runtime / FragGate (Worker, GitHub, `/runtime` FragGate/MCP; uses/download counters)
 - **Runtime (FragGate door):** https://godlock.uk/runtime — same-origin proxy of aziel-runtime 1.6.8
 - **Aziel Corpus Library (sister site):** https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
@@ -117,6 +118,7 @@ No DOI is claimed. Do not invent one.
 - Aziel Eliab on GodLock: https://godlock.uk/AzielEliab
 - Specified Fit: https://godlock.uk/reason
 - Verify: https://godlock.uk/verify
+- Donate: https://godlock.uk/donate (AZL-DONATE-1.0; same door https://www.azieleliab.com/donate)
 - Software catalog on GodLock: https://godlock.uk/software
 - Runtime door: https://godlock.uk/runtime (library https://www.azielcorpuslibrary.net/runtime · origin https://aziel-runtime.vibelock.workers.dev/)
 - Runtime API uses (this door, not GodLock product Uses): https://godlock.uk/runtime/v1/uses

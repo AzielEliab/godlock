@@ -8,7 +8,7 @@
  */
 import { hideInternalDetermination } from "./publicCopy.js";
 import {
-  AUTHOR, CATALOG, LIBRARY, RUNTIME_PATH, RUNTIME_VERSION, GITHUB_RUNTIME,
+  AUTHOR, CATALOG, LIBRARY, RUNTIME_PATH, RUNTIME_NAME, RUNTIME_SLUG, RUNTIME_VERSION, GITHUB_RUNTIME,
   FRAGGATE_KERNEL, FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, FRAGGATE_COUNT,
   AZBROWSER_DOWNLOAD, AZBROWSER_WORKER, AZBROWSER_COUNT,
   AZNET_DOWNLOAD, AZNET_WORKER, AZNET_COUNT, AZNET_GITHUB,
@@ -54,9 +54,9 @@ export const BINDING_USES_URLS = [
 const UA = { "User-Agent": "Mozilla/5.0", Accept: "application/json" };
 
 /** Known extras already hosted on this page. Keep if present; do not invent. */
-export const EXTRA_SUITE_SLUGS = ["aziel-runtime", "embryolock"];
+export const EXTRA_SUITE_SLUGS = [RUNTIME_SLUG, "embryolock"];
 const EXTRA_SUITE_SET = new Set(EXTRA_SUITE_SLUGS);
-const EXTRA_RANK = { "aziel-runtime": 0, embryolock: 1 };
+const EXTRA_RANK = { [RUNTIME_SLUG]: 0, embryolock: 1 };
 const FAMILY_RANK = { extra: -1, plain: 0, gate: 1, lock: 2 };
 
 /** Reserved for apps whose Worker is not live yet. AZNet, AZHub, and AZInterface are live — do not omit them. */
@@ -83,6 +83,21 @@ function tidyHubCopy(text) {
     .replace(/\(\s+/g, "(")
     .replace(/\s+\)/g, ")")
     .trim();
+}
+
+/** Never mash “runtime 1.6.x FragGate” in Software blurbs. */
+const RUNTIME_FRAGGATE_MASH = /\b(?:aziel[- ]?)?runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate(?:\s+door)?\b/gi;
+const AZIEL_RUNTIME_FRAGGATE_MASH = /\bAziel(?: Eliab)? Runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate(?:\s+door)?\b/gi;
+const FRAGGATE_VERSION_DOOR = /\bFragGate\s+\d+\.\d+(?:\.\d+)?\s+door\b/gi;
+
+export function stripRuntimeFragGateMash(text) {
+  return tidyHubCopy(
+    String(text || "")
+      .replace(/\bAziel Eliab Runtime\b/g, RUNTIME_NAME)
+      .replace(AZIEL_RUNTIME_FRAGGATE_MASH, RUNTIME_NAME)
+      .replace(RUNTIME_FRAGGATE_MASH, RUNTIME_SLUG)
+      .replace(FRAGGATE_VERSION_DOOR, RUNTIME_SLUG + " door"),
+  );
 }
 
 /**
@@ -154,6 +169,9 @@ export function hubProductCopy(raw) {
     }
     return { name: name || "GodLock", one_line };
   }
+  if (slug === RUNTIME_SLUG || slug === "aziel-runtime") {
+    return { name: RUNTIME_NAME, one_line: stripRuntimeFragGateMash(one_line) };
+  }
   if (slug === "aznet") {
     return { name: "AZNet", one_line: collapseAznetCopy(one_line) };
   }
@@ -216,8 +234,8 @@ export const CATALOG_SLUGS = CATALOG_FALLBACK_PRODUCTS.map((p) => p.slug);
 export const CATALOG_PRODUCT_COUNT = CATALOG_FALLBACK_PRODUCTS.length;
 
 export const RUNTIME_CARD = {
-  slug: "aziel-runtime",
-  name: "Aziel Eliab Runtime",
+  slug: RUNTIME_SLUG,
+  name: RUNTIME_NAME,
   version: RUNTIME_VERSION,
   one_line: "One door — discover, route, refuse. Hosts the FragGate kernel (FG-0.1) and every catalog engine. Author Aziel Eliab.",
   github: GITHUB_RUNTIME,
@@ -351,7 +369,7 @@ export function compactProduct(raw) {
     slug,
     name: copy.name || slug,
     version: raw.version != null && raw.version !== "" ? String(raw.version) : "",
-    one_line: copy.one_line,
+    one_line: stripRuntimeFragGateMash(copy.one_line),
     github: raw.github ? String(raw.github) : "",
     download: raw.download ? String(raw.download) : "",
     worker: raw.worker ? String(raw.worker) : "",

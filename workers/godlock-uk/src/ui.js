@@ -30,6 +30,9 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;lin
 .about-aziel a:hover{color:var(--gold)}
 .about-sign{font-weight:700;margin-top:18px}
 .soft-heading{margin:4px 0 14px;font-size:22px;letter-spacing:-.02em}
+.home-software{margin:18px 0}
+.soft-line{margin:0 0 10px;line-height:1.7}
+.soft-name{font-weight:700}
 .soft-grid{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 18px}
 .soft-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
 .soft-card h3{margin:0 0 6px;font-size:18px}
@@ -231,7 +234,21 @@ ${body}
 </body></html>`;
 }
 
-export function homeBody({ stats, latest, prior, error }) {
+export function homeSoftwareLine({ products, extras } = {}) {
+  const list = softwareSuite(products, extras);
+  const links = list.map((p) => {
+    const slug = String(p.slug || "");
+    const name = stripRuntimeFragGateMash(p.name || slug);
+    return `<a class="soft-name" href="${esc(SOFTWARE_PATH + "#" + slug)}">${esc(name)}</a>`;
+  }).join(". ");
+  return `<section class="home-software" id="software">
+  <h2>Software</h2>
+  <p class="soft-line">${links}${links ? "." : ""}</p>
+  <p class="muted"><a href="${esc(SOFTWARE_PATH)}">Full cards</a> · <a href="/v1/software">Software API</a> · <a href="${esc(RUNTIME_PATH + "/v1/software")}">Runtime catalog</a></p>
+</section>`;
+}
+
+export function homeBody({ stats, latest, prior, error, products, extras }) {
   const s = stats || {};
   const live = s.live_nodes != null ? s.live_nodes : 0;
   const views = s.views != null ? s.views : 0;
@@ -280,6 +297,7 @@ ${err}
     <a class="button ghost" href="${esc(DONATE_PATH)}">Donate</a>
   </div>
 </form>
+${homeSoftwareLine({ products, extras })}
 ${latestHtml}
 ${donateHomeBlock()}
 <h2>Prior receipts</h2>

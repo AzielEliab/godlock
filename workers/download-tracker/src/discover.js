@@ -84,7 +84,8 @@ export function sitemapLocs() {
     RUNTIME + "/v1/software",
     RUNTIME + "/v1/fraggate/list",
     RUNTIME + "/v1/mesh",
-    RUNTIME + "/v1/mesh/list",
+    RUNTIME + "/v1/mesh/status",
+    RUNTIME + "/v1/mesh/nodes",
     RUNTIME + "/v1/update/check?slug=godlock&version=0.1.0",
     RUNTIME + "/openapi.json",
     RUNTIME + "/mcp",
@@ -121,9 +122,12 @@ export function citeDoc() {
     software_catalog: RUNTIME + "/v1/software",
     software_fraggate: RUNTIME + "/v1/fraggate/list",
     mesh: RUNTIME + "/v1/mesh",
-    mesh_list: RUNTIME + "/v1/mesh/list",
+    mesh_status: RUNTIME + "/v1/mesh/status",
+    mesh_nodes: RUNTIME + "/v1/mesh/nodes",
+    mesh_list: RUNTIME + "/v1/mesh/nodes",
     mesh_join: RUNTIME + "/v1/mesh/join",
     mesh_heartbeat: RUNTIME + "/v1/mesh/heartbeat",
+    mesh_leave: RUNTIME + "/v1/mesh/leave",
     mesh_enable: RUNTIME + "/v1/mesh/enable",
     mesh_disable: RUNTIME + "/v1/mesh/disable",
     site_mesh: SITE + "/mesh",
@@ -171,7 +175,9 @@ export function llmsDoc() {
     + "MCP: POST " + RUNTIME + "/mcp\n"
     + "Suite mesh (default off): " + RUNTIME + "/v1/mesh\n"
     + "QNM-BUILD-1.0 rollup: live|locked|isolated counts only. No Node Gate. No auto-heal.\n"
-    + "Mesh list: " + RUNTIME + "/v1/mesh/list\n"
+    + "GET /v1/mesh never enables. Display rollup only.\n"
+    + "Mesh status: " + RUNTIME + "/v1/mesh/status\n"
+    + "Mesh nodes: " + RUNTIME + "/v1/mesh/nodes\n"
     + "GodLock.uk mesh snapshot: " + SITE + "/mesh\n"
     + "Mesh is not an anonymity network. Identity Aziel Eliab only.\n"
     + "anon-broadcast is not a publish path on godlock.uk. Local communique style tool (not hosted here; no ffmpeg farm): https://github.com/AzielEliab/anon-broadcast\n\n"

@@ -39,6 +39,14 @@ import {
 const TEXT_MAX = 8000;
 const NODE_COOKIE = "godlock_node";
 
+/** Production probes LIVE origin /v1/mesh/status. Tests set MESH_PROBE_ORIGIN=false. */
+function meshSnapshotDeps(env) {
+  if (env && (env.MESH_PROBE_ORIGIN === false || env.MESH_PROBE_ORIGIN === "0")) {
+    return { probeOrigin: false };
+  }
+  return { fetch: globalThis.fetch, probeOrigin: true };
+}
+
 async function ensureSchema(env) {
   if (!env || !env.DB) return;
   await env.DB.batch([
@@ -210,7 +218,7 @@ async function gatherStats(env, { wrote, visiting } = {}) {
     liveNodes(env, { wrote, visiting }),
     fetchDownloads(env),
     usesCount(env),
-    fetchMeshSnapshot(env),
+    fetchMeshSnapshot(env, meshSnapshotDeps(env)),
   ]);
   const mesh = publicMesh(meshSnap);
   const live = alignLiveNodes({

@@ -645,6 +645,8 @@ export const PUBLIC_ALLOW = [
   "/receipt/",
   "/health",
   "/mesh",
+  "/v1/mesh",
+  "/v1/mesh/status",
 ];
 
 export function robotsTxt() {
@@ -653,6 +655,7 @@ export function robotsTxt() {
     "# Author: Aziel Eliab. Also known as Aziel Elroi Eliab (alternateName only).",
     "# Content-Signal opens search + AI input + AI train.",
     "# Softwares HTML: /software. Catalog JSON: /v1/software (not a second FragGate door). Door: /runtime.",
+    "# Same-origin mesh: GET /v1/mesh and /v1/mesh/status (never enables). Remain-OFF.",
     "",
   ];
   const star = [
@@ -708,6 +711,8 @@ export async function sitemapXml(env, extras = {}) {
   add(CANON_HOST + "/robots.txt", "0.4", "weekly");
   add(CANON_HOST + "/health", "0.3", "daily");
   add(CANON_HOST + "/mesh", "0.4", "daily");
+  add(CANON_HOST + "/v1/mesh", "0.45", "daily");
+  add(CANON_HOST + "/v1/mesh/status", "0.5", "daily");
   add(DONATE_CANONICAL, "0.5", "monthly");
   add(PUBLIC_RUNTIME, "0.9", "daily");
   add(PUBLIC_RUNTIME + "/v1/software", "0.85", "daily");
@@ -814,6 +819,8 @@ export function citeDoc() {
     runtime_mcp: PUBLIC_RUNTIME + "/mcp",
     runtime_mesh: PUBLIC_RUNTIME + "/v1/mesh",
     runtime_mesh_status: PUBLIC_RUNTIME + "/v1/mesh/status",
+    mesh_status_local: CANON_HOST + "/v1/mesh/status",
+    mesh_local: CANON_HOST + "/v1/mesh",
     runtime_mesh_nodes: PUBLIC_RUNTIME + "/v1/mesh/nodes",
     runtime_mesh_list: PUBLIC_RUNTIME + "/v1/mesh/nodes",
     runtime_mesh_join: PUBLIC_RUNTIME + "/v1/mesh/join",
@@ -822,6 +829,7 @@ export function citeDoc() {
     runtime_mesh_enable: PUBLIC_RUNTIME + "/v1/mesh/enable",
     runtime_mesh_disable: PUBLIC_RUNTIME + "/v1/mesh/disable",
     mesh: CANON_HOST + "/mesh",
+    mesh_get_never_enables: true,
     mesh_spec: "QNM-BUILD-1.0",
     mesh_default_off: true,
     mesh_anonymity_network: false,
@@ -915,6 +923,8 @@ export function llmsDoc() {
     + "Suite mesh (default off): " + PUBLIC_RUNTIME + "/v1/mesh\n"
     + "QNM-BUILD-1.0 rollup: live|locked|isolated counts only. No Node Gate. No auto-heal.\n"
     + "GET /v1/mesh never enables. Display rollup only.\n"
+    + "Same-origin mesh (Live Nodes clients): " + CANON_HOST + "/v1/mesh\n"
+    + "Same-origin mesh status: " + CANON_HOST + "/v1/mesh/status\n"
     + "Mesh status: " + PUBLIC_RUNTIME + "/v1/mesh/status\n"
     + "Mesh nodes: " + PUBLIC_RUNTIME + "/v1/mesh/nodes\n"
     + "Mesh join / heartbeat / leave / enable / disable: POST " + PUBLIC_RUNTIME + "/v1/mesh/{join|heartbeat|leave|enable|disable}\n"
@@ -949,7 +959,7 @@ export function siteOpenApi() {
       version: "0.1.0",
       summary: "Public HTTPS stress-test engine by Aziel Eliab.",
       description: hideInternalDetermination(
-        "GodLock.uk public routes plus same-origin FragGate / MCP door. Software tab reads live " + CATALOG + "/v1/software (fallback /v1/fraggate/list). Suite mesh (QNM-BUILD-1.0, default off): GET " + PUBLIC_RUNTIME + "/v1/mesh. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
+        "GodLock.uk public routes plus same-origin FragGate / MCP door. Software tab reads live " + CATALOG + "/v1/software (fallback /v1/fraggate/list). Suite mesh (QNM-BUILD-1.0, default off): GET " + CANON_HOST + "/v1/mesh and GET " + CANON_HOST + "/v1/mesh/status (same-origin proxies; GET never enables) plus GET " + PUBLIC_RUNTIME + "/v1/mesh. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
       ),
       contact: { name: AUTHOR, url: CANON_HOST + AZIEL_ELIAB_PATH },
       license: { name: "Apache-2.0", url: "https://www.apache.org/licenses/LICENSE-2.0" },
@@ -967,6 +977,8 @@ export function siteOpenApi() {
       "/runtime/mcp": { post: { operationId: "godlockUkRuntimeMcp", summary: "Same-origin FragGate MCP door", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/software": { get: { operationId: "godlockUkRuntimeSoftware", summary: "Live software catalog proxy", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/fraggate/list": { get: { operationId: "godlockUkRuntimeFraggateList", summary: "FragGate list fallback catalog", responses: { "200": { description: "OK" } } } },
+      "/v1/mesh": { get: { operationId: "godlockUkOriginMesh", summary: "Same-origin QNM-BUILD-1.0 mesh proxy (default off; GET never enables; remain-OFF). Live Nodes clients hit this path.", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
+      "/v1/mesh/status": { get: { operationId: "godlockUkOriginMeshStatus", summary: "Same-origin LIVE QNM rollup proxy (enabled?, bearers, live|locked|isolated). GET never enables.", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
       "/runtime/v1/mesh": { get: { operationId: "godlockUkRuntimeMesh", summary: "QNM-BUILD-1.0 suite mesh status (default off; live|locked|isolated counts only; GET never enables; no Node Gate; no auto-heal; not an anonymity network)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
       "/runtime/v1/mesh/status": { get: { operationId: "godlockUkRuntimeMeshStatus", summary: "LIVE QNM-BUILD-1.0 suite rollup (enabled?, bearers, live|locked|isolated). GET never enables.", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
       "/runtime/v1/mesh/nodes": { get: { operationId: "godlockUkRuntimeMeshNodes", summary: "QNM roster with live|locked|isolated presence (5-minute TTL). Not a peer-list publish path. GET never enables.", responses: { "200": { description: "OK or graceful empty/disabled" } } } },

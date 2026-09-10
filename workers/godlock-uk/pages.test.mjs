@@ -59,6 +59,10 @@ import {
   OMIT_UNTIL_WORKER_SLUGS,
   fetchCatalogProducts,
   attachCatalogCounters,
+  loadCatalogForHtml,
+  packedCatalogSnapshot,
+  resetCatalogCache,
+  SOFTWARE_HTML_CACHE_CONTROL,
   softwareSuite,
   productsFromCatalogDoc,
   suiteFamily,
@@ -199,6 +203,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/software/);
     assert.match(robots, /Allow: \/v1\/software/);
     assert.match(robots, /Allow: \/mesh/);
+    assert.match(robots, /Allow: \/v1\/mesh\nAllow: \/v1\/mesh\/status/);
     assert.match(robots, /Allow: \/runtime\nAllow: \/runtime\//);
     assert.match(robots, /Allow: \/ai\.txt/);
     assert.match(robots, /Allow: \/openapi\.json/);
@@ -315,6 +320,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/mesh/nodes"));
     assert.ok(!xml.includes(CANON_HOST + "/runtime/v1/mesh/list"));
     assert.ok(xml.includes(CANON_HOST + "/mesh"));
+    assert.ok(xml.includes(CANON_HOST + "/v1/mesh"));
+    assert.ok(xml.includes(CANON_HOST + "/v1/mesh/status"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/list"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/update/check"));
     assert.ok(xml.includes(CANON_HOST + "/openapi.json"));
@@ -358,6 +365,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.runtime_mesh_nodes, CANON_HOST + "/runtime/v1/mesh/nodes");
     assert.equal(cite.runtime_mesh_list, CANON_HOST + "/runtime/v1/mesh/nodes");
     assert.equal(cite.mesh, CANON_HOST + "/mesh");
+    assert.equal(cite.mesh_local, CANON_HOST + "/v1/mesh");
+    assert.equal(cite.mesh_status_local, CANON_HOST + "/v1/mesh/status");
+    assert.equal(cite.mesh_get_never_enables, true);
     assert.equal(cite.mesh_spec, "QNM-BUILD-1.0");
     assert.equal(cite.mesh_default_off, true);
     assert.equal(cite.mesh_anonymity_network, false);
@@ -413,6 +423,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /MCP: POST https:\/\/godlock\.uk\/runtime\/mcp/);
     assert.match(llms, /Suite mesh \(default off\): https:\/\/godlock\.uk\/runtime\/v1\/mesh/);
     assert.match(llms, /GET \/v1\/mesh never enables/);
+    assert.match(llms, /Same-origin mesh \(Live Nodes clients\): https:\/\/godlock\.uk\/v1\/mesh/);
+    assert.match(llms, /Same-origin mesh status: https:\/\/godlock\.uk\/v1\/mesh\/status/);
     assert.match(llms, /Mesh status: https:\/\/godlock\.uk\/runtime\/v1\/mesh\/status/);
     assert.match(llms, /Mesh nodes: https:\/\/godlock\.uk\/runtime\/v1\/mesh\/nodes/);
     assert.match(llms, /QNM-BUILD-1\.0 rollup: live\|locked\|isolated counts only/);
@@ -435,6 +447,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(spec.paths["/v1/software"]);
     assert.ok(spec.paths["/donate"]);
     assert.ok(spec.paths["/runtime/v1/software"]);
+    assert.ok(spec.paths["/v1/mesh"]);
+    assert.ok(spec.paths["/v1/mesh/status"]);
     assert.ok(spec.paths["/runtime/v1/mesh"]);
     assert.ok(spec.paths["/runtime/v1/mesh/status"]);
     assert.ok(spec.paths["/runtime/v1/mesh/nodes"]);
@@ -1043,6 +1057,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
     assert.match(html, /Invoke via Runtime/);
     assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+    assert.match(res.headers.get("Cache-Control") || "", /s-maxage=300/);
     assert.match(html, /aziel-runtime \(Aziel Runtime\)/);
     assert.match(html, /href="\/runtime\/mcp">MCP<\/a>/);
     assert.match(html, /QNM-BUILD-1\.0/);
@@ -1111,6 +1126,45 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(defaultDescription("software"), /aziel-runtime \(Aziel Runtime\)/);
     assert.doesNotMatch(defaultDescription("software"), /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
     assert.doesNotMatch(defaultDescription("runtime"), /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
+  });
+
+  it("renders Softwares HTML from the packed catalog without waiting on a slow upstream", async () => {
+    resetCatalogCache();
+    const packed = packedCatalogSnapshot();
+    assert.equal(packed.source, "packed");
+    assert.ok(packed.products.length >= CATALOG_PRODUCT_COUNT);
+    let hung = 0;
+    const env = {
+      ...mockEnv(),
+      AZIEL_RUNTIME: {
+        async fetch() {
+          hung += 1;
+          await new Promise(() => { /* never resolve — HTML must not wait */ });
+          return new Response("{}", { headers: { "Content-Type": "application/json" } });
+        },
+      },
+    };
+    const started = Date.now();
+    const res = await worker.fetch(new Request("https://godlock.uk/software", {
+      headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
+    }), env);
+    const elapsed = Date.now() - started;
+    assert.equal(res.status, 200);
+    assert.ok(elapsed < 1500, "HTML blocked on upstream for " + elapsed + "ms");
+    assert.match(res.headers.get("Cache-Control") || "", /s-maxage=300/);
+    assert.equal(SOFTWARE_HTML_CACHE_CONTROL.includes("s-maxage=300"), true);
+    const html = await res.text();
+    assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+    assert.match(html, /<title>Aziel Eliab Softwares — GodLock<\/title>/);
+    assert.match(html, /name="description" content="Aziel Eliab Softwares/);
+    assert.doesNotMatch(html, /<h2>Runtime<\/h2>/);
+    assert.doesNotMatch(html, /Full Aziel Eliab suite/);
+    const ids = softCardIds(html);
+    assert.ok(ids.includes("godlock"));
+    assert.ok(ids.includes("azcoherence"));
+    const cached = await loadCatalogForHtml(env);
+    assert.ok(cached.products.length >= CATALOG_PRODUCT_COUNT);
+    assert.equal(hung, 0);
   });
 
   it("serves GET /v1/software with AZCoherence in Plain A–Z even from the local fallback", async () => {

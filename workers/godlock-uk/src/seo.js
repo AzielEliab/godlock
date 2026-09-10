@@ -109,6 +109,25 @@ export function personNode() {
   };
 }
 
+/** Unique <title> / OG / Twitter strings. Home must not render "GodLock — GodLock". */
+export function documentTitle(title, kind) {
+  if (kind === "home" || title === SITE) return SITE + " — Specified Fit, Not Pretty Spirals";
+  if (kind === "software") return "Softwares — " + SITE;
+  if (kind === "aziel") return AUTHOR + " — " + SITE;
+  if (kind === "reason") return "Specified Fit, Not Pretty Spirals — " + SITE;
+  if (kind === "verify") return "Verify — " + SITE;
+  if (kind === "donate") return "Donate — " + SITE;
+  if (kind === "runtime") return "Runtime — " + SITE;
+  if (kind === "notfound") return "Not found — " + SITE;
+  const raw = String(title || SITE).trim();
+  if (new RegExp("\\b" + SITE + "\\b", "i").test(raw)) return raw;
+  return raw + " — " + SITE;
+}
+
+export function isIndexCrawler(ua) {
+  return /Googlebot|Google-Extended|bingbot|GPTBot|ChatGPT|OAI-SearchBot|ClaudeBot|Claude-Search|Perplexity|Applebot|Amazonbot|DuckDuck|DuckAssist|Bytespider|CCBot|cohere|Yandex|Baiduspider|Slurp|FacebookBot|Meta-External|YouBot|MistralAI|Cloudflare-AI-Search|Firecrawl|Imagesift|TikTokSpider|peer39/i.test(String(ua || ""));
+}
+
 export function defaultDescription(kind) {
   if (kind === "verify") return hideInternalDetermination("Verify the GodLock.uk hash-chained ledger. Author Aziel Eliab.");
   if (kind === "receipt") return hideInternalDetermination("A GodLock.uk receipt. Append-only. Author Aziel Eliab.");
@@ -183,21 +202,66 @@ export function runtimeWebApiNode(person) {
   };
 }
 
-function jsonLd(_title, _path, description, kind) {
-  const person = personNode();
-  const website = { "@type": "WebSite", name: SITE, url: CANON_HOST + "/", description, author: person };
-  const software = {
+function websiteNode(person, description) {
+  return {
+    "@type": "WebSite",
+    "@id": CANON_HOST + "/#website",
+    name: SITE,
+    url: CANON_HOST + "/",
+    description,
+    inLanguage: "en",
+    author: person,
+    publisher: person,
+  };
+}
+
+function godlockSoftwareNode(person) {
+  return {
     "@type": "SoftwareApplication",
+    "@id": CANON_HOST + "/#godlock",
     name: SITE,
     applicationCategory: "DeveloperApplication",
     operatingSystem: "Web",
     url: CANON_HOST + "/",
+    description: hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals."),
     author: person,
     license: "https://www.apache.org/licenses/LICENSE-2.0",
+    codeRepository: GITHUB,
+    isPartOf: { "@id": CANON_HOST + "/#website" },
   };
+}
+
+function jsonLd(title, path, description, kind) {
+  const person = personNode();
+  const website = websiteNode(person, description);
+  const software = godlockSoftwareNode(person);
   const graph = [website, software, person];
-  if (kind !== "aziel" && kind !== "reason" && kind !== "verify" && kind !== "receipt" && kind !== "donate") {
+  if (kind !== "aziel" && kind !== "reason" && kind !== "verify" && kind !== "receipt" && kind !== "donate" && kind !== "notfound") {
     graph.push(runtimeSoftwareNode(person), runtimeWebApiNode(person));
+  }
+  if (kind === "home") {
+    graph.push({
+      "@type": "WebPage",
+      "@id": CANON_HOST + "/#webpage",
+      name: documentTitle(title, kind),
+      url: CANON_HOST + "/",
+      description,
+      isPartOf: { "@id": website["@id"] },
+      about: { "@id": software["@id"] },
+      author: person,
+    });
+  }
+  if (kind === "software") {
+    graph.push({
+      "@type": "CollectionPage",
+      "@id": CANON_HOST + SOFTWARE_PATH + "#page",
+      name: "Softwares",
+      url: CANON_HOST + SOFTWARE_PATH,
+      description: defaultDescription("software"),
+      author: person,
+      isPartOf: { "@id": website["@id"] },
+      mainEntity: { "@id": software["@id"] },
+    });
   }
   if (kind === "reason") {
     graph.push({
@@ -209,10 +273,26 @@ function jsonLd(_title, _path, description, kind) {
   }
   if (kind === "aziel") {
     graph.push({
-      "@type": "ProfilePage",
+      "@type": ["AboutPage", "ProfilePage"],
+      "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#page",
       name: AUTHOR,
       url: CANON_HOST + AZIEL_ELIAB_PATH,
+      description: defaultDescription("aziel"),
+      about: { "@id": person["@id"] },
       mainEntity: { "@id": person["@id"] },
+      isPartOf: { "@id": website["@id"] },
+      author: person,
+    });
+  }
+  if (kind === "verify") {
+    graph.push({
+      "@type": "WebPage",
+      "@id": CANON_HOST + "/verify#page",
+      name: "Verify",
+      url: CANON_HOST + "/verify",
+      description: defaultDescription("verify"),
+      isPartOf: { "@id": website["@id"] },
+      author: person,
     });
   }
   if (kind === "donate") {
@@ -231,32 +311,37 @@ export function headMeta(opts) {
   const title = opts.title || SITE;
   const path = opts.path || "/";
   const kind = opts.kind || "";
+  const indexable = opts.indexable !== false && kind !== "notfound";
+  const docTitle = documentTitle(title, kind);
   const description = hideInternalDetermination(opts.description || defaultDescription(kind));
   const url = CANON_HOST + path;
   const ld = jsonLd(title, path, description, kind);
   const ldOpen = "<" + "script type=" + Q + "application/ld+json" + Q + ">";
   const ldClose = "</" + "script>";
   const keywords = defaultKeywords(kind);
+  const robots = indexable ? "index,follow" : "noindex,follow";
   const tags = [
     meta("description", description),
-    meta("robots", "index,follow"),
-    meta("googlebot", "index,follow"),
+    meta("robots", robots),
+    meta("googlebot", robots),
     meta("author", AUTHOR),
   ];
   if (keywords) tags.push(meta("keywords", keywords));
   tags.push(
     linkRel("canonical", url),
-    prop("og:title", title + " — " + SITE),
+    prop("og:title", docTitle),
     prop("og:description", description),
     prop("og:type", kind === "aziel" ? "profile" : "website"),
     prop("og:url", url),
     prop("og:site_name", SITE),
+    prop("og:locale", "en_GB"),
     prop("og:image", SIGIL),
     prop("og:image:alt", "Aziel Eliab sigil. Author Aziel Eliab."),
     meta("twitter:card", "summary"),
-    meta("twitter:title", title + " — " + SITE),
+    meta("twitter:title", docTitle),
     meta("twitter:description", description),
     meta("twitter:image", SIGIL),
+    meta("twitter:image:alt", "Aziel Eliab sigil. Author Aziel Eliab."),
     linkRel("alternate", "/cite.json", " type=" + Q + "application/json" + Q),
     linkRel("alternate", "/llms.txt", " type=" + Q + "text/plain" + Q),
     linkRel("alternate", "/ai.txt", " type=" + Q + "text/plain" + Q),
@@ -308,9 +393,11 @@ export const AI_CRAWLER_AGENTS = uniquePreserve([
   "OAI-SearchBot",
   "Grok",
   "Venice",
+  "Googlebot",
   "Google-Extended",
   "GoogleOther",
   "Google-CloudVertexBot",
+  "Cloudflare-AI-Search",
   "ClaudeBot",
   "Claude-SearchBot",
   "Claude-User",
@@ -372,9 +459,9 @@ export const PUBLIC_ALLOW = [
   "/",
   "/verify",
   "/reason",
-    "/software",
-    "/v1/software",
-    "/runtime",
+  "/software",
+  "/v1/software",
+  "/runtime",
   "/runtime/",
   "/donate",
   "/AzielEliab",
@@ -388,9 +475,20 @@ export const PUBLIC_ALLOW = [
 ];
 
 export function robotsTxt() {
-  const star = ["User-agent: *"].concat(PUBLIC_ALLOW.map((p) => "Allow: " + p));
+  const header = [
+    "# GodLock.uk — open crawl for Google and AI search.",
+    "# Author: Aziel Eliab. Also known as Aziel Elroi Eliab (alternateName only).",
+    "# Content-Signal opens search + AI input + AI train.",
+    "# Softwares HTML: /software. Catalog JSON: /v1/software (not a second FragGate door). Door: /runtime.",
+    "",
+  ];
+  const star = [
+    "User-agent: *",
+    "Allow: /",
+    "Content-Signal: search=yes, ai-input=yes, ai-train=yes",
+  ].concat(PUBLIC_ALLOW.filter((p) => p !== "/").map((p) => "Allow: " + p));
   const bots = AI_CRAWLER_AGENTS.flatMap((agent) => ["", "User-agent: " + agent, "Allow: /"]);
-  return star.concat(bots).concat(["", "Sitemap: " + CANON_HOST + "/sitemap.xml", ""]).join("\n");
+  return header.concat(star).concat(bots).concat(["", "Sitemap: " + CANON_HOST + "/sitemap.xml", ""]).join("\n");
 }
 
 export async function sitemapXml(env) {
@@ -458,9 +556,25 @@ export async function sitemapXml(env) {
 export function citeDoc() {
   return {
     author: AUTHOR,
+    identity: AUTHOR,
+    identity_note: "Aziel Eliab only. Aziel Elroi Eliab is SEO alternateName only.",
     alternateName: AUTHOR_AKA,
     title: SITE,
+    reasoning_spine: "Specified Fit, Not Pretty Spirals",
     site: CANON_HOST + "/",
+    priority_pages: {
+      home: CANON_HOST + "/",
+      software: CANON_HOST + SOFTWARE_PATH,
+      aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,
+      verify: CANON_HOST + "/verify",
+      donate: CANON_HOST + DONATE_PATH,
+      cite: CANON_HOST + "/cite.json",
+      llms: CANON_HOST + "/llms.txt",
+      ai: CANON_HOST + "/ai.txt",
+      runtime: PUBLIC_RUNTIME,
+    },
+    software_html: CANON_HOST + SOFTWARE_PATH,
+    software_api_note: "Thin SEO/catalog JSON on /v1/software. Not a second FragGate door. Door remains /runtime.",
     github: GITHUB,
     download: DOWNLOAD,
     verify: CANON_HOST + "/verify",
@@ -555,8 +669,21 @@ export function llmsDoc() {
     + "License: Apache-2.0\n\n"
     + hideInternalDetermination(BANNER) + "\n\n"
     + "GodLock is a product name, not an identity. Identity is Aziel Eliab only.\n"
+    + "Aziel Elroi Eliab is SEO alternateName only.\n"
     + "Specified Fit, Not Pretty Spirals: " + CANON_HOST + REASON_PATH + "\n"
     + "Aziel Eliab: " + CANON_HOST + AZIEL_ELIAB_PATH + "\n"
+    + "\n## Priority pages\n\n"
+    + "Home: " + CANON_HOST + "/\n"
+    + "Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
+    + "About Aziel Eliab: " + CANON_HOST + AZIEL_ELIAB_PATH + "\n"
+    + "Verify: " + CANON_HOST + "/verify\n"
+    + "Donate: " + CANON_HOST + DONATE_PATH + "\n"
+    + "Cite: " + CANON_HOST + "/cite.json\n"
+    + "LLMs: " + CANON_HOST + "/llms.txt\n"
+    + "AI: " + CANON_HOST + "/ai.txt\n"
+    + "Catalog JSON (SEO proxy, not a FragGate door): " + CANON_HOST + "/v1/software\n"
+    + "Runtime FragGate door: " + PUBLIC_RUNTIME + "\n"
+    + "\n"
     + "Aziel Corpus Library: " + LIBRARY_AZIEL + "\n"
     + "Digital Library identity: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"

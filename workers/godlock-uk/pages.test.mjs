@@ -27,6 +27,8 @@ import {
   defaultDescription,
   headMeta,
   personNode,
+  documentTitle,
+  isIndexCrawler,
   permanentIdentityRedirect,
   CANON_HOST,
   LIBRARY_AZIEL,
@@ -156,7 +158,13 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(person.sameAs.includes(LIBRARY_AZIEL));
     assert.ok(person.sameAs.includes(AUTHOR_GITHUB));
     assert.ok(person.sameAs.includes(GITHUB));
-    assert.ok(ld["@graph"].some((n) => n["@type"] === "ProfilePage"));
+    const about = ld["@graph"].find((n) => {
+      const types = [].concat(n["@type"] || []);
+      return types.includes("AboutPage");
+    });
+    assert.ok(about);
+    assert.ok([].concat(about["@type"]).includes("AboutPage"));
+    assert.ok([].concat(about["@type"]).includes("ProfilePage"));
   });
 });
 
@@ -182,6 +190,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/runtime\nAllow: \/runtime\//);
     assert.match(robots, /Allow: \/ai\.txt/);
     assert.match(robots, /Allow: \/openapi\.json/);
+    assert.match(robots, /Content-Signal: search=yes, ai-input=yes, ai-train=yes/);
+    assert.match(robots, /User-agent: Googlebot\nAllow: \//);
+    assert.match(robots, /User-agent: Cloudflare-AI-Search\nAllow: \//);
     assert.match(robots, /User-agent: GPTBot\nAllow: \//);
     assert.match(robots, /User-agent: ChatGPT-User\nAllow: \//);
     assert.match(robots, /User-agent: OAI-SearchBot\nAllow: \//);
@@ -200,6 +211,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /User-agent: NeevaBot\nAllow: \//);
     assert.equal(new Set(AI_CRAWLER_AGENTS).size, AI_CRAWLER_AGENTS.length);
     for (const agent of [
+      "Googlebot",
+      "Cloudflare-AI-Search",
       "GPTBot",
       "ChatGPT-User",
       "OAI-SearchBot",
@@ -281,6 +294,17 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.aziel_corpus_library, LIBRARY_AZIEL);
     assert.equal(cite.library_aziel_eliab, LIBRARY_AZIEL);
     assert.equal(cite.author, "Aziel Eliab");
+    assert.equal(cite.identity, "Aziel Eliab");
+    assert.match(cite.identity_note, /alternateName only/);
+    assert.equal(cite.reasoning_spine, "Specified Fit, Not Pretty Spirals");
+    assert.equal(cite.software_html, CANON_HOST + "/software");
+    assert.match(cite.software_api_note, /Not a second FragGate door/);
+    assert.equal(cite.priority_pages.home, CANON_HOST + "/");
+    assert.equal(cite.priority_pages.software, CANON_HOST + "/software");
+    assert.equal(cite.priority_pages.aziel_eliab, CANON_HOST + "/AzielEliab");
+    assert.equal(cite.priority_pages.verify, CANON_HOST + "/verify");
+    assert.equal(cite.priority_pages.donate, CANON_HOST + "/donate");
+    assert.equal(cite.priority_pages.runtime, CANON_HOST + "/runtime");
     assert.ok(cite.ai_clients.includes("ChatGPT (GPT Actions / OpenAI)"));
     assert.ok(cite.ai_clients.includes("Grok (xAI)"));
     assert.ok(cite.ai_clients.includes("Venice"));
@@ -326,6 +350,11 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.openapi, CANON_HOST + "/openapi.json");
     assert.match(cite.update_check, /\/v1\/update\/check\?slug=godlock/);
     const llms = llmsDoc();
+    assert.match(llms, /## Priority pages/);
+    assert.match(llms, /Softwares: https:\/\/godlock\.uk\/software/);
+    assert.match(llms, /About Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
+    assert.match(llms, /Runtime FragGate door: https:\/\/godlock\.uk\/runtime/);
+    assert.match(llms, /Catalog JSON \(SEO proxy, not a FragGate door\): https:\/\/godlock\.uk\/v1\/software/);
     assert.match(llms, /Specified Fit, Not Pretty Spirals: https:\/\/godlock\.uk\/reason/);
     assert.match(llms, /Donate: https:\/\/godlock\.uk\/donate \(AZL-DONATE-1\.0\)\. Same door: https:\/\/www\.azieleliab\.com\/donate/);
     assert.match(llms, /AZCoherence \(azcoherence\)/);
@@ -393,6 +422,46 @@ describe("Aziel Eliab SEO surfaces", () => {
   });
 });
 
+describe("priority page SEO", () => {
+  it("keeps unique titles and does not suffix GodLock twice", () => {
+    assert.equal(documentTitle("GodLock", "home"), "GodLock — Specified Fit, Not Pretty Spirals");
+    assert.equal(documentTitle("Software", "software"), "Softwares — GodLock");
+    assert.equal(documentTitle("Aziel Eliab", "aziel"), "Aziel Eliab — GodLock");
+    assert.equal(documentTitle("Verify", "verify"), "Verify — GodLock");
+    assert.match(headMeta({ title: "GodLock", path: "/", kind: "home" }), /og:title" content="GodLock — Specified Fit, Not Pretty Spirals"/);
+    assert.match(headMeta({ title: "Software", path: "/software", kind: "software" }), /og:title" content="Softwares — GodLock"/);
+    assert.doesNotMatch(headMeta({ title: "GodLock", path: "/", kind: "home" }), /GodLock — GodLock/);
+  });
+
+  it("marks 404s noindex and sends HTML /v1/software to the Softwares page", async () => {
+    const missing = await worker.fetch(new Request("https://godlock.uk/no-such-route"), mockEnv());
+    assert.equal(missing.status, 404);
+    const missingHtml = await missing.text();
+    assert.match(missingHtml, /name="robots" content="noindex,follow"/);
+    assert.match(missingHtml, /<title>Not found — GodLock<\/title>/);
+    const htmlCatalog = await worker.fetch(new Request("https://godlock.uk/v1/software", {
+      headers: { Accept: "text/html" },
+    }), mockEnv());
+    assert.equal(htmlCatalog.status, 308);
+    assert.equal(htmlCatalog.headers.get("Location"), "/software");
+    assert.equal(isIndexCrawler("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"), true);
+    assert.equal(isIndexCrawler("Mozilla/5.0"), false);
+  });
+
+  it("renders Softwares CollectionPage JSON-LD without changing chrome", async () => {
+    const res = await worker.fetch(new Request("https://godlock.uk/software", {
+      headers: { "User-Agent": "Googlebot" },
+    }), mockEnv());
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, /<title>Softwares — GodLock<\/title>/);
+    assert.match(html, /rel="canonical" href="https:\/\/godlock\.uk\/software"/);
+    const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    assert.ok(ld["@graph"].some((n) => n["@type"] === "CollectionPage" && n.url === "https://godlock.uk/software"));
+    assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>/);
+  });
+});
+
 describe("homepage stays a natural argument surface", () => {
   it("puts Specified Fit on the spine and does not coach a paste-block", async () => {
     const res = await worker.fetch(new Request("https://godlock.uk/"), mockEnv());
@@ -417,7 +486,11 @@ describe("homepage stays a natural argument surface", () => {
     assert.match(html, /QNM-BUILD-1\.0/);
     assert.doesNotMatch(html, /id="node-gate"/);
     assert.match(html, /Not an anonymity network/);
+    assert.match(html, /<title>GodLock — Specified Fit, Not Pretty Spirals<\/title>/);
+    assert.doesNotMatch(html, /<title>GodLock — GodLock<\/title>/);
     const homeLd = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    assert.ok(homeLd["@graph"].some((n) => n["@type"] === "WebSite" && n["@id"] === "https://godlock.uk/#website"));
+    assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "GodLock" && n["@id"] === "https://godlock.uk/#godlock"));
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "WebAPI" && n.documentation === "https://godlock.uk/runtime/openapi.json"));
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "Aziel Runtime" && (n.sameAs || []).includes("https://www.azielcorpuslibrary.net/runtime")));
     assert.doesNotMatch(html, /Use with Grok, ChatGPT, Venice/);
@@ -909,7 +982,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(ids.includes("azcoherence"));
     assert.ok(ids.includes("azclce"));
     assert.ok(ids.includes("peacelock"));
-    assert.match(html, /<title>Software — GodLock<\/title>/);
+    assert.match(html, /<title>Softwares — GodLock<\/title>/);
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
     assert.match(html, /Invoke via Runtime/);
     assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
@@ -991,6 +1064,11 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(body.author, "Aziel Eliab");
     assert.equal(body.identity, "Aziel Eliab");
     assert.equal(body.via, "/v1/software");
+    assert.equal(body.html, "https://godlock.uk/software");
+    assert.equal(body.aziel_eliab, "https://godlock.uk/AzielEliab");
+    assert.equal(body.door, "fraggate");
+    assert.equal(body.seo_proxy, true);
+    assert.equal(body.not_a_second_fraggate_door, true);
     assert.equal(body.sort, "plain-gate-lock");
     assert.ok(body.products.some((p) => p.slug === "azcoherence" && p.family === "plain" && p.worker === AZCOHERENCE_WORKER && p.github === AZCOHERENCE_GITHUB && p.download === AZCOHERENCE_DOWNLOAD && p.invoke === "/runtime/v1/pull/azcoherence"));
     assert.ok(body.software.some((p) => p.slug === "azcoherence" && p.name === "AZCoherence" && p.family === "plain"));

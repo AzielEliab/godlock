@@ -197,10 +197,10 @@ ${body}
       var locked=r.locked!=null?r.locked:0;
       var isolated=r.isolated!=null?r.isolated:0;
       meshEl.textContent=on
-        ?("Suite mesh: on · live "+live+" · locked "+locked+" · isolated "+isolated+". Not an anonymity network.")
+        ?("Suite mesh: on · live "+live+" · locked "+locked+" · isolated "+isolated+". QNS-CD-1.0. Not an anonymity network.")
         :(j.mesh.status==="unavailable"
-          ?"Suite mesh: off (unavailable). QNM-BUILD-1.0. Not an anonymity network."
-          :"Suite mesh: off (default). QNM-BUILD-1.0. Not an anonymity network.");
+          ?"Suite mesh: off (unavailable). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network."
+          :"Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.");
     }
   }
   function beat(){

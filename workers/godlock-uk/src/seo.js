@@ -103,14 +103,18 @@ export function personNode() {
     "@type": "Person",
     "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#aziel-eliab",
     name: AUTHOR,
+    givenName: "Aziel",
+    familyName: "Eliab",
     alternateName: [AUTHOR_AKA],
     identifier: AUTHOR,
     url: CANON_HOST + AZIEL_ELIAB_PATH,
     image: SIGIL,
     jobTitle: "Author",
+    hasOccupation: { "@type": "Occupation", name: "Author" },
     description: "Author of GodLock. Identity is Aziel Eliab only. Aziel Elroi Eliab is SEO alternateName only.",
     knowsAbout: [SITE, "FragGate", "Aziel Runtime"],
     sameAs: [LIBRARY_AZIEL, AUTHOR_GITHUB, GITHUB],
+    mainEntityOfPage: CANON_HOST + AZIEL_ELIAB_PATH,
   };
 }
 
@@ -196,7 +200,7 @@ export function defaultDescription(kind) {
   if (kind === "receipt") return hideInternalDetermination("A GodLock.uk receipt. Append-only. Author Aziel Eliab.");
   if (kind === "aziel") {
     return hideInternalDetermination(
-      "About Aziel Eliab, author of GodLock. Specified Fit, Not Pretty Spirals. A debate with no record becomes a pulpit. Receipt, intelligent design stress-test. Identity is Aziel Eliab only.",
+      "About Aziel Eliab, author of GodLock. Specified Fit, Not Pretty Spirals. A debate with no record becomes a pulpit. Receipt, intelligent design stress-test. Identity is Aziel Eliab only. Aziel Elroi Eliab is SEO alternateName only.",
     );
   }
   if (kind === "reason") {
@@ -223,10 +227,13 @@ export function defaultDescription(kind) {
 }
 
 function defaultKeywords(kind) {
-  if (kind === "aziel") return "Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test";
+  if (kind === "aziel") return "Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test, About Aziel Eliab";
   if (kind === "reason") return "Specified Fit, Not Pretty Spirals, Aziel Eliab, GodLock, code+reader";
   if (kind === "donate") return "Donate, Aziel Eliab, GodLock, Bitcoin, Ethereum, Litecoin, XRP, Dogecoin";
-  if (kind === "software" || kind === "runtime" || kind === "home") {
+  if (kind === "software") {
+    return "Aziel Eliab Softwares, GodLock.uk, FragGate, Aziel Runtime, catalog, Plain A-Z, Gate, Lock, download tracker";
+  }
+  if (kind === "runtime" || kind === "home") {
     return "GodLock, Aziel Eliab, Runtime, FragGate, MCP, OpenAPI, ChatGPT, Grok, Venice, Claude, Cursor, Glama, Perplexity, Copilot, Gemini, Mistral, Meta AI, Apple Intelligence, Amazon Q, DuckAssist, You.com, Cohere";
   }
   return "";
@@ -294,20 +301,49 @@ function godlockSoftwareNode(person) {
   };
 }
 
-function softwareItemList(products) {
+function breadcrumbList(id, crumbs) {
+  return {
+    "@type": "BreadcrumbList",
+    "@id": id,
+    itemListElement: crumbs.map((c, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: c.name,
+      item: c.item,
+    })),
+  };
+}
+
+function softwareItemList(products, person) {
   const items = softwareIndexItems(products);
   return {
     "@type": "ItemList",
     "@id": CANON_HOST + SOFTWARE_PATH + "#catalog",
     name: AUTHOR + " Softwares",
+    description: "Plain A–Z → Gate A–Z → Lock A–Z catalog. Clock is not Lock. FragGate is the single door.",
     itemListOrder: "https://schema.org/ItemListOrderAscending",
     numberOfItems: items.length,
-    itemListElement: items.map((p, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      url: CANON_HOST + SOFTWARE_PATH + "#" + p.slug,
-      name: p.name,
-    })),
+    author: { "@id": person["@id"] },
+    itemListElement: items.map((p, i) => {
+      const url = CANON_HOST + SOFTWARE_PATH + "#" + p.slug;
+      return {
+        "@type": "ListItem",
+        position: i + 1,
+        url,
+        name: p.name,
+        item: {
+          "@type": "SoftwareApplication",
+          "@id": url,
+          name: p.name,
+          url,
+          identifier: p.slug,
+          applicationCategory: "DeveloperApplication",
+          operatingSystem: "Web",
+          author: { "@id": person["@id"] },
+          isPartOf: { "@id": CANON_HOST + SOFTWARE_PATH + "#catalog" },
+        },
+      };
+    }),
   };
 }
 
@@ -333,20 +369,33 @@ function jsonLd(title, path, description, kind, products) {
     });
   }
   if (kind === "software") {
-    const list = softwareItemList(products);
-    graph.push(list, {
+    const list = softwareItemList(products, person);
+    const crumbs = breadcrumbList(CANON_HOST + SOFTWARE_PATH + "#breadcrumb", [
+      { name: SITE, item: CANON_HOST + "/" },
+      { name: AUTHOR + " Softwares", item: CANON_HOST + SOFTWARE_PATH },
+    ]);
+    graph.push(list, crumbs, {
       "@type": "CollectionPage",
       "@id": CANON_HOST + SOFTWARE_PATH + "#page",
       name: AUTHOR + " Softwares",
+      headline: AUTHOR + " Softwares catalog",
       url: CANON_HOST + SOFTWARE_PATH,
       description: defaultDescription("software"),
       inLanguage: "en",
+      identifier: "aziel-eliab-softwares",
+      keywords: defaultKeywords("software"),
+      image: SIGIL,
       author: person,
       publisher: person,
+      copyrightHolder: person,
       isPartOf: { "@id": website["@id"] },
-      about: { "@id": person["@id"] },
+      about: [{ "@id": person["@id"] }, { "@id": website["@id"] }],
       mainEntity: { "@id": list["@id"] },
-      relatedLink: [PUBLIC_RUNTIME, CANON_HOST + "/v1/software", LIBRARY_RUNTIME],
+      breadcrumb: { "@id": crumbs["@id"] },
+      hasPart: { "@id": software["@id"] },
+      relatedLink: [PUBLIC_RUNTIME, CANON_HOST + "/v1/software", LIBRARY_RUNTIME, CANON_HOST + AZIEL_ELIAB_PATH],
+      significantLink: [PUBLIC_RUNTIME, CANON_HOST + "/v1/software", LIBRARY_RUNTIME],
+      sameAs: [LIBRARY_RUNTIME],
     });
   }
   if (kind === "reason") {
@@ -358,7 +407,11 @@ function jsonLd(title, path, description, kind, products) {
     });
   }
   if (kind === "aziel") {
-    graph.push({
+    const crumbs = breadcrumbList(CANON_HOST + AZIEL_ELIAB_PATH + "#breadcrumb", [
+      { name: SITE, item: CANON_HOST + "/" },
+      { name: "About " + AUTHOR, item: CANON_HOST + AZIEL_ELIAB_PATH },
+    ]);
+    graph.push(crumbs, {
       "@type": ["AboutPage", "ProfilePage"],
       "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#page",
       name: "About " + AUTHOR,
@@ -366,16 +419,24 @@ function jsonLd(title, path, description, kind, products) {
       url: CANON_HOST + AZIEL_ELIAB_PATH,
       description: defaultDescription("aziel"),
       inLanguage: "en",
+      identifier: "about-aziel-eliab",
+      keywords: defaultKeywords("aziel"),
       image: SIGIL,
       about: { "@id": person["@id"] },
       mainEntity: { "@id": person["@id"] },
+      breadcrumb: { "@id": crumbs["@id"] },
       isPartOf: { "@id": website["@id"] },
       author: person,
       publisher: person,
+      copyrightHolder: person,
+      sameAs: [LIBRARY_AZIEL, AUTHOR_GITHUB],
       relatedLink: [LIBRARY_AZIEL, CANON_HOST + REASON_PATH, CANON_HOST + SOFTWARE_PATH, AUTHOR_GITHUB],
+      significantLink: [LIBRARY_AZIEL, CANON_HOST + REASON_PATH, CANON_HOST + SOFTWARE_PATH],
+      subjectOf: { "@type": "CreativeWork", name: "Specified Fit, Not Pretty Spirals", url: CANON_HOST + REASON_PATH },
       mentions: [
         { "@type": "CreativeWork", name: "Specified Fit, Not Pretty Spirals", url: CANON_HOST + REASON_PATH },
         { "@id": software["@id"] },
+        { "@type": "CollectionPage", "@id": CANON_HOST + SOFTWARE_PATH + "#page", name: AUTHOR + " Softwares", url: CANON_HOST + SOFTWARE_PATH },
       ],
     });
   }
@@ -490,15 +551,21 @@ export const AI_CRAWLER_AGENTS = uniquePreserve([
   "Venice",
   "Googlebot",
   "Googlebot-Image",
+  "Googlebot-News",
+  "Googlebot-Video",
   "Google-InspectionTool",
   "Storebot-Google",
   "Google-Extended",
   "GoogleOther",
+  "GoogleOther-Image",
   "Google-CloudVertexBot",
+  "Google-Read-Aloud",
+  "DuplexWeb-Google",
   "Cloudflare-AI-Search",
   "ClaudeBot",
   "Claude-SearchBot",
   "Claude-User",
+  "Claude-Web",
   "anthropic-ai",
   "PerplexityBot",
   "Perplexity-User",
@@ -513,6 +580,12 @@ export const AI_CRAWLER_AGENTS = uniquePreserve([
   "DuckAssistBot",
   "DuckAssist",
   "xAI",
+  "xAI-Grok",
+  "DeepSeekBot",
+  "Qwenbot",
+  "Kimi",
+  "Moonshot",
+  "BraveBot",
   "MistralAI-User",
   "YouBot",
   "CCBot",

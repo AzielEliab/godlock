@@ -145,7 +145,7 @@ describe("Aziel Eliab page chrome", () => {
     assert.match(html, /<title>About Aziel Eliab — GodLock<\/title>/);
     assert.match(html, /name="robots" content="index,follow"/);
     assert.match(html, /rel="canonical" href="https:\/\/godlock\.uk\/AzielEliab"/);
-    assert.match(html, /name="keywords" content="Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test"/);
+    assert.match(html, /name="keywords" content="Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test, About Aziel Eliab"/);
     assert.ok(html.includes(AZIEL_MANIFESTO[0]));
     assert.ok(html.includes("— Aziel Eliab"));
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab">Aziel Eliab — Digital Library<\/a>/);
@@ -170,7 +170,13 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok((about.relatedLink || []).includes(CANON_HOST + "/reason"));
     assert.ok((about.mentions || []).some((m) => m && m.name === "Specified Fit, Not Pretty Spirals"));
     assert.equal(person.identifier, "Aziel Eliab");
+    assert.equal(person.givenName, "Aziel");
+    assert.equal(person.familyName, "Eliab");
     assert.ok((person.knowsAbout || []).includes("GodLock"));
+    assert.equal(about.identifier, "about-aziel-eliab");
+    assert.ok((about.significantLink || []).includes(LIBRARY_AZIEL));
+    assert.ok((about.mentions || []).some((m) => m && m["@id"] === "https://godlock.uk/software#page"));
+    assert.ok(ld["@graph"].some((n) => n["@type"] === "BreadcrumbList"));
   });
 });
 
@@ -199,6 +205,10 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Content-Signal: search=yes, ai-input=yes, ai-train=yes/);
     assert.match(robots, /User-agent: Googlebot\nAllow: \//);
     assert.match(robots, /User-agent: Googlebot-Image\nAllow: \//);
+    assert.match(robots, /User-agent: Googlebot-News\nAllow: \//);
+    assert.match(robots, /User-agent: Claude-Web\nAllow: \//);
+    assert.match(robots, /User-agent: xAI-Grok\nAllow: \//);
+    assert.match(robots, /User-agent: DeepSeekBot\nAllow: \//);
     assert.match(robots, /User-agent: DuckAssist\nAllow: \//);
     assert.match(robots, /User-agent: Cloudflare-AI-Search\nAllow: \//);
     assert.match(robots, /Sitemap: https:\/\/aziel-runtime\.vibelock\.workers\.dev\/sitemap\.xml/);
@@ -222,8 +232,18 @@ describe("Aziel Eliab SEO surfaces", () => {
     for (const agent of [
       "Googlebot",
       "Googlebot-Image",
+      "Googlebot-News",
+      "Googlebot-Video",
+      "Google-Read-Aloud",
+      "Claude-Web",
       "DuckAssist",
       "xAI",
+      "xAI-Grok",
+      "DeepSeekBot",
+      "Qwenbot",
+      "Kimi",
+      "Moonshot",
+      "BraveBot",
       "Cloudflare-AI-Search",
       "GPTBot",
       "ChatGPT-User",
@@ -475,13 +495,24 @@ describe("priority page SEO", () => {
     assert.match(html, /<title>Aziel Eliab Softwares — GodLock<\/title>/);
     assert.match(html, /rel="canonical" href="https:\/\/godlock\.uk\/software"/);
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
-    assert.ok(ld["@graph"].some((n) => n["@type"] === "CollectionPage" && n.url === "https://godlock.uk/software" && n.name === "Aziel Eliab Softwares"));
+    const collection = ld["@graph"].find((n) => n["@type"] === "CollectionPage" && n.url === "https://godlock.uk/software" && n.name === "Aziel Eliab Softwares");
+    assert.ok(collection);
+    assert.equal(collection.identifier, "aziel-eliab-softwares");
+    assert.ok((collection.significantLink || []).includes("https://godlock.uk/runtime"));
+    assert.ok((collection.relatedLink || []).includes("https://godlock.uk/AzielEliab"));
+    assert.ok(ld["@graph"].some((n) => n["@type"] === "BreadcrumbList"));
     const list = ld["@graph"].find((n) => n["@type"] === "ItemList");
     assert.ok(list);
     assert.ok(list.numberOfItems >= 30);
     assert.ok((list.itemListElement || []).some((it) => it.url === "https://godlock.uk/software#godlock"));
     assert.ok((list.itemListElement || []).some((it) => it.url === "https://godlock.uk/software#fraggate"));
+    assert.ok((list.itemListElement || []).some((it) => it.item && it.item["@type"] === "SoftwareApplication" && it.item.identifier === "godlock"));
     assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>/);
+    assert.match(html, /name="keywords" content="Aziel Eliab Softwares, GodLock.uk/);
+    const aboutMeta = headMeta({ title: "Aziel Eliab", path: "/AzielEliab", kind: "aziel" });
+    assert.doesNotMatch(aboutMeta, /Aziel Eliab Softwares, GodLock.uk/);
+    assert.doesNotMatch(html, /<title>GodLock — GodLock<\/title>/);
+    assert.doesNotMatch(html, /<title>Aziel Eliab — GodLock<\/title>/);
   });
 });
 
@@ -564,7 +595,10 @@ describe("major AI client list", () => {
     assert.match(homeLine, /href="\/software#aznet">AZNet<\/a>/);
     const softwareMeta = defaultDescription("software");
     assert.match(softwareMeta, /Claude \(Anthropic\)/);
-    assert.match(headMeta({ title: "Software", path: "/software", kind: "software" }), /Claude, Cursor, Glama, Perplexity/);
+    const softwareHead = headMeta({ title: "Software", path: "/software", kind: "software" });
+    assert.match(softwareHead, /Claude \(Anthropic\), Cursor \(MCP\), Glama \(MCP\), Perplexity/);
+    assert.match(softwareHead, /name="keywords" content="Aziel Eliab Softwares, GodLock.uk/);
+    assert.match(headMeta({ title: "GodLock", path: "/", kind: "home" }), /Claude, Cursor, Glama, Perplexity/);
   });
 });
 

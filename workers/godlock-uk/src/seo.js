@@ -22,6 +22,8 @@ export const AZIEL_CORPUS_PATH = "/AzielCorpusLibrary";
 export const REASON_PATH = "/reason";
 export const SOFTWARE_PATH = "/software";
 export const RUNTIME_PATH = "/runtime";
+export const DONATE_PATH = "/donate";
+export const DONATE_CANONICAL = "https://www.azieleliab.com/donate";
 export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
 export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
 export const RUNTIME_NAME = "Aziel Runtime";
@@ -121,12 +123,18 @@ export function defaultDescription(kind) {
       "Aziel Runtime (aziel-runtime) on GodLock.uk. Same-origin /runtime/* proxies the live catalog door. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. Suite mesh (QNM-BUILD-1.0, default off; live|locked|isolated counts only): " + PUBLIC_RUNTIME + "/v1/mesh. API uses log: " + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
+  if (kind === "donate") {
+    return hideInternalDetermination(
+      "Donate. Nothing is free. This work has no corporate backer. No grant. No product that unlocks when you pay. Payment is not a key. Author Aziel Eliab. Same door " + DONATE_CANONICAL + ".",
+    );
+  }
   return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Aziel Runtime door: " + PUBLIC_RUNTIME + " (aziel-runtime). Suite mesh default off (QNM-BUILD-1.0 live|locked|isolated counts only; no Node Gate; no auto-heal): " + PUBLIC_RUNTIME + "/v1/mesh. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. " + AI_CLIENTS_SENTENCE);
 }
 
 function defaultKeywords(kind) {
   if (kind === "aziel") return "Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test";
   if (kind === "reason") return "Specified Fit, Not Pretty Spirals, Aziel Eliab, GodLock, code+reader";
+  if (kind === "donate") return "Donate, Aziel Eliab, GodLock, Bitcoin, Ethereum, Litecoin, XRP, Dogecoin";
   if (kind === "software" || kind === "runtime" || kind === "home") {
     return "GodLock, Aziel Eliab, Runtime, FragGate, MCP, OpenAPI, ChatGPT, Grok, Venice, Claude, Cursor, Glama, Perplexity, Copilot, Gemini, Mistral, Meta AI, Apple Intelligence, Amazon Q, DuckAssist, You.com, Cohere";
   }
@@ -179,7 +187,7 @@ function jsonLd(_title, _path, description, kind) {
     license: "https://www.apache.org/licenses/LICENSE-2.0",
   };
   const graph = [website, software, person];
-  if (kind !== "aziel" && kind !== "reason" && kind !== "verify" && kind !== "receipt") {
+  if (kind !== "aziel" && kind !== "reason" && kind !== "verify" && kind !== "receipt" && kind !== "donate") {
     graph.push(runtimeSoftwareNode(person), runtimeWebApiNode(person));
   }
   if (kind === "reason") {
@@ -196,6 +204,15 @@ function jsonLd(_title, _path, description, kind) {
       name: AUTHOR,
       url: CANON_HOST + AZIEL_ELIAB_PATH,
       mainEntity: { "@id": person["@id"] },
+    });
+  }
+  if (kind === "donate") {
+    graph.push({
+      "@type": "WebPage",
+      name: "Donate",
+      url: CANON_HOST + DONATE_PATH,
+      author: person,
+      sameAs: [DONATE_CANONICAL],
     });
   }
   return { "@context": "https://schema.org", "@graph": graph };
@@ -349,6 +366,7 @@ export const PUBLIC_ALLOW = [
   "/software",
   "/runtime",
   "/runtime/",
+  "/donate",
   "/AzielEliab",
   "/cite.json",
   "/llms.txt",
@@ -392,6 +410,8 @@ export async function sitemapXml(env) {
     PUBLIC_RUNTIME + "/v1/skill",
     CANON_HOST + "/openapi.json",
     CANON_HOST + REASON_PATH,
+    CANON_HOST + DONATE_PATH,
+    DONATE_CANONICAL,
     CANON_HOST + AZIEL_ELIAB_PATH,
     CANON_HOST + "/health",
     CANON_HOST + "/mesh",
@@ -430,6 +450,9 @@ export function citeDoc() {
     github: GITHUB,
     download: DOWNLOAD,
     verify: CANON_HOST + "/verify",
+    donate: CANON_HOST + DONATE_PATH,
+    donate_canonical: DONATE_CANONICAL,
+    donate_spec: "AZL-DONATE-1.0",
     software: CANON_HOST + SOFTWARE_PATH,
     software_catalog: PUBLIC_RUNTIME + "/v1/software",
     software_catalog_origin: CATALOG + "/v1/software",
@@ -507,6 +530,7 @@ export function llmsDoc() {
     + "Digital Library identity: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n"
+    + "Donate: " + CANON_HOST + DONATE_PATH + " (AZL-DONATE-1.0). Same door: " + DONATE_CANONICAL + "\n"
     + "Software lists the full live aziel-runtime catalog. Aziel Runtime (aziel-runtime) and FragGate are separate cards, matching Digital Library Software completeness. New catalog slugs are included automatically. AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (azbrowser-download-tracker, aznet-download-tracker, azhub-download-tracker, azinterface-download-tracker). Never nest AZHub with AZInterface. FragGate is its own Gate card (fraggate-download-tracker Download/Worker, A–Z with DecisionGATE). Each product is tethered to its Worker, GitHub, and /runtime. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
     + "Live software catalog: " + PUBLIC_RUNTIME + "/v1/software\n"
     + "Origin software: " + CATALOG + "/v1/software\n"
@@ -568,6 +592,7 @@ export function siteOpenApi() {
     paths: {
       "/health": { get: { operationId: "godlockUkHealth", summary: "Liveness", responses: { "200": { description: "OK" } } } },
       "/software": { get: { operationId: "godlockUkSoftware", summary: "Live Aziel Eliab software suite (Plain → Gate → Lock)", responses: { "200": { description: "HTML or JSON" } } } },
+      "/donate": { get: { operationId: "godlockUkDonate", summary: "AZL-DONATE-1.0 door (static rails; no KV; payment is not a key)", responses: { "200": { description: "HTML or JSON" } } } },
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
       "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record", responses: { "200": { description: "OK" } } } },
       "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief", responses: { "200": { description: "OK" } } } },

@@ -2,6 +2,9 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   QNM_SPEC,
+  QNS_CD_SPEC,
+  QNS_CD,
+  MESH_NOTE,
   MESH_DEFAULT_OFF,
   MESH_ANONYMITY_NETWORK,
   MESH_NODE_GATE,
@@ -47,6 +50,20 @@ function mockDbEnv(extra) {
 describe("mesh contract", () => {
   it("documents join/heartbeat/list/enable/disable and stays default off", () => {
     assert.equal(QNM_SPEC, "QNM-BUILD-1.0");
+    assert.equal(QNS_CD_SPEC, "QNS-CD-1.0");
+    assert.equal(QNS_CD.spec, "QNS-CD-1.0");
+    assert.equal(QNS_CD.name, "photon QNS1 packet transfer");
+    assert.equal(QNS_CD.kind, "hub-cite");
+    assert.equal(QNS_CD.softwares_tab, false);
+    assert.equal(QNS_CD.public_proxy, false);
+    assert.equal(QNS_CD.qnsd_implemented_here, false);
+    assert.equal(QNS_CD.node_gate, false);
+    assert.equal(QNS_CD.default_off, true);
+    assert.equal(QNS_CD.qnsd, "https://github.com/AzielEliab/qnm-node");
+    assert.equal(QNS_CD.runtime, "https://github.com/AzielEliab/aziel-runtime");
+    assert.equal(QNS_CD.pair_custody, "https://github.com/AzielEliab/azinterface");
+    assert.match(MESH_NOTE, /QNS-CD-1\.0/);
+    assert.match(MESH_NOTE, /photon QNS1 packet transfer/);
     assert.equal(MESH_DEFAULT_OFF, true);
     assert.equal(MESH_ANONYMITY_NETWORK, false);
     assert.equal(MESH_NODE_GATE, false);
@@ -64,6 +81,10 @@ describe("mesh contract", () => {
     assert.equal(destFromRuntimePath("/runtime/v1/mesh/join", ""), "/v1/mesh/join");
     const ops = meshOpsDoc();
     assert.equal(ops.spec, "QNM-BUILD-1.0");
+    assert.equal(ops.qns_cd_spec, "QNS-CD-1.0");
+    assert.equal(ops.qns_cd.spec, "QNS-CD-1.0");
+    assert.equal(ops.qns_cd.public_proxy, false);
+    assert.equal(ops.qns_cd.softwares_tab, false);
     assert.equal(ops.default_off, true);
     assert.equal(ops.anonymity_network, false);
     assert.equal(ops.node_gate, false);
@@ -83,6 +104,9 @@ describe("parseMeshDoc", () => {
     const empty = emptyMesh();
     assert.equal(empty.enabled, false);
     assert.equal(empty.spec, "QNM-BUILD-1.0");
+    assert.equal(empty.qns_cd.spec, "QNS-CD-1.0");
+    assert.equal(empty.qns_cd.public_proxy, false);
+    assert.match(empty.note, /QNS-CD-1\.0/);
     assert.equal(empty.live_nodes, 0);
     assert.deepEqual(empty.rollup, { live: 0, locked: 0, isolated: 0 });
     assert.equal(empty.status, "off");
@@ -144,6 +168,8 @@ describe("parseMeshDoc", () => {
     assert.equal(qnm.auto_heal, false);
     const pub = publicMesh(qnm);
     assert.equal(pub.spec, "QNM-BUILD-1.0");
+    assert.equal(pub.qns_cd.spec, "QNS-CD-1.0");
+    assert.equal(pub.qns_cd.kind, "hub-cite");
     assert.deepEqual(pub.rollup, { live: 2, locked: 1, isolated: 3 });
     assert.equal(pub.nodes, undefined);
     assert.equal(pub.node_gate, false);
@@ -176,6 +202,8 @@ describe("publicMesh and status line", () => {
     assert.deepEqual(pub.rollup, { live: 2, locked: 0, isolated: 0 });
     assert.equal(pub.nodes, undefined);
     assert.equal(pub.spec, "QNM-BUILD-1.0");
+    assert.equal(pub.qns_cd.spec, "QNS-CD-1.0");
+    assert.equal(pub.qns_cd.qnsd, "https://github.com/AzielEliab/qnm-node");
     assert.equal(pub.author, "Aziel Eliab");
     assert.equal(pub.identity, "Aziel Eliab");
     assert.equal(pub.mcp, "/runtime/mcp");
@@ -291,6 +319,10 @@ describe("GodLock.uk mesh routes", () => {
     const mesh = await (await worker.fetch(new Request("https://godlock.uk/mesh"), env)).json();
     assert.equal(mesh.ok, true);
     assert.equal(mesh.spec, "QNM-BUILD-1.0");
+    assert.equal(mesh.qns_cd.spec, "QNS-CD-1.0");
+    assert.equal(mesh.qns_cd.public_proxy, false);
+    assert.equal(mesh.qns_cd.softwares_tab, false);
+    assert.equal(mesh.mesh.qns_cd.spec, "QNS-CD-1.0");
     assert.equal(mesh.author, "Aziel Eliab");
     assert.equal(mesh.identity, "Aziel Eliab");
     assert.equal(mesh.anonymity_network, false);
@@ -366,6 +398,7 @@ describe("GodLock.uk mesh routes", () => {
     assert.match(html, /id="mesh-status"/);
     assert.match(html, /Suite mesh: off/);
     assert.match(html, /QNM-BUILD-1\.0/);
+    assert.match(html, /QNS-CD-1\.0/);
     assert.match(html, /Not an anonymity network/);
     assert.doesNotMatch(html, /id="node-gate"/);
     assert.doesNotMatch(html, /ffmpeg farm/);

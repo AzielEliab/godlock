@@ -3,17 +3,19 @@
  * Live fetch via AZIEL_RUNTIME service binding, then HTTPS origin / library,
  * then this snapshot so the page never drops to two GitHub links.
  * Snapshot is a fallback floor, not a 27-only cap — live catalog slugs
- * (peacelock, azmail, azhub, azinterface, …) are included automatically. Do not invent slugs.
+ * (peacelock, azmail, azhub, azinterface, azcoherence, …) are included automatically. Do not invent slugs.
  * Sort: Plain A–Z → Gate A–Z → Lock A–Z. Clock ≠ Lock. Author: Aziel Eliab.
  */
 import { hideInternalDetermination } from "./publicCopy.js";
 import {
-  AUTHOR, CATALOG, LIBRARY, RUNTIME_PATH, RUNTIME_NAME, RUNTIME_SLUG, RUNTIME_VERSION, GITHUB_RUNTIME,
+  AUTHOR, CATALOG, LIBRARY, RUNTIME_PATH, PUBLIC_RUNTIME, RUNTIME_NAME, RUNTIME_SLUG, RUNTIME_VERSION, GITHUB_RUNTIME,
   FRAGGATE_KERNEL, FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, FRAGGATE_COUNT,
   AZBROWSER_DOWNLOAD, AZBROWSER_WORKER, AZBROWSER_COUNT,
   AZNET_DOWNLOAD, AZNET_WORKER, AZNET_COUNT, AZNET_GITHUB,
   AZHUB_DOWNLOAD, AZHUB_WORKER, AZHUB_COUNT, AZHUB_GITHUB,
   AZINTERFACE_DOWNLOAD, AZINTERFACE_WORKER, AZINTERFACE_COUNT, AZINTERFACE_GITHUB,
+  AZCOHERENCE_DOWNLOAD, AZCOHERENCE_WORKER, AZCOHERENCE_COUNT, AZCOHERENCE_GITHUB,
+  AZCOHERENCE_SLUG, AZCOHERENCE_NAME, AZCOHERENCE_VERSION, AZCOHERENCE_ONE_LINE,
   DOWNLOAD, GITHUB,
 } from "./seo.js";
 
@@ -181,6 +183,9 @@ export function hubProductCopy(raw) {
   if (slug === "azinterface") {
     return { name: "AZInterface", one_line: collapseCombinedAzhubBranding(one_line, "AZInterface", "AZHub") };
   }
+  if (slug === AZCOHERENCE_SLUG) {
+    return { name: AZCOHERENCE_NAME, one_line: one_line || AZCOHERENCE_ONE_LINE };
+  }
   const combined = slug === "azbrowser"
     || /azbrowser\s*\/\s*aznet/i.test(name)
     || /azbrowser\s*\/\s*aznet/i.test(one_line)
@@ -211,6 +216,7 @@ export const CATALOG_FALLBACK_PRODUCTS = [
   { slug: "chronolock", name: "ChronoLock", version: "0.1.0", one_line: "Advisory temporal window 08:30–10:30 local. Distinct from TemporalLock.", github: "https://github.com/AzielEliab/chronolock", download: "https://chronolock-download-tracker.vibelock.workers.dev/download" },
   { slug: "postking", name: "Post-King Chess", version: "0.1.0", one_line: "Continuity chess. The goal is not to win. The goal is to remain.", github: "https://github.com/AzielEliab/postking-chess", download: "https://postking-download-tracker.vibelock.workers.dev/download" },
   { slug: "azclce", name: "AZ-CLCE", version: "0.3.0", one_line: "Jaccard triple / pairwise / CLCE+. Detects inconsistency, not intent.", github: "https://github.com/AzielEliab/az-clce", download: "https://azclce-download-tracker.vibelock.workers.dev/download" },
+  { slug: AZCOHERENCE_SLUG, name: AZCOHERENCE_NAME, version: AZCOHERENCE_VERSION, one_line: AZCOHERENCE_ONE_LINE, github: AZCOHERENCE_GITHUB, download: AZCOHERENCE_DOWNLOAD, worker: AZCOHERENCE_WORKER, worker_home: AZCOHERENCE_WORKER, count: AZCOHERENCE_COUNT },
   { slug: "ark", name: "The ARK", version: "0.1.0", one_line: "Mode E heuristics sweep. Not a kernel. Hosted never unlocks or stores vaults.", github: "https://github.com/AzielEliab/ark", download: "https://ark-download-tracker.vibelock.workers.dev/download" },
   { slug: "azai", name: "AZAI", version: "0.3.1", one_line: "Local OpenAI-compatible runtime. Not a new foundation model. Jeeves is not sovereign.", github: "https://github.com/AzielEliab/azai", download: "https://azai-download-tracker.vibelock.workers.dev/download" },
   { slug: "spectrallock", name: "SpectralLock", version: "0.3.0", one_line: "Overlay preview modes. 256px hosted preview, not a spectrometer.", github: "https://github.com/AzielEliab/spectrallock", download: "https://spectrallock-download-tracker.vibelock.workers.dev/download" },
@@ -269,6 +275,19 @@ export const AZHUB_CARD = {
   worker: AZHUB_WORKER,
   worker_home: AZHUB_WORKER,
   count: AZHUB_COUNT,
+};
+
+/** Own Plain card. Second-pass triad coherence. Peer AZ-CLCE. Not AKM-TRIAD. */
+export const AZCOHERENCE_CARD = {
+  slug: AZCOHERENCE_SLUG,
+  name: AZCOHERENCE_NAME,
+  version: AZCOHERENCE_VERSION,
+  one_line: AZCOHERENCE_ONE_LINE,
+  github: AZCOHERENCE_GITHUB,
+  download: AZCOHERENCE_DOWNLOAD,
+  worker: AZCOHERENCE_WORKER,
+  worker_home: AZCOHERENCE_WORKER,
+  count: AZCOHERENCE_COUNT,
 };
 
 /** Own Plain card. Custodial page cycles. Separate from AZHub. */
@@ -365,15 +384,18 @@ export function compactProduct(raw) {
   if (!slug || omitUntilWorker(slug)) return null;
   const copy = hubProductCopy({ ...raw, slug });
   const countUrl = looksLikeUrl(raw.count) ? String(raw.count) : "";
+  const download = looksLikeUrl(raw.download) ? String(raw.download) : (looksLikeUrl(raw.download_url) ? String(raw.download_url) : "");
+  const worker = looksLikeUrl(raw.worker) ? String(raw.worker) : "";
+  const workerHome = looksLikeUrl(raw.worker_home) ? String(raw.worker_home) : "";
   return {
     slug,
     name: copy.name || slug,
     version: raw.version != null && raw.version !== "" ? String(raw.version) : "",
     one_line: stripRuntimeFragGateMash(copy.one_line),
     github: raw.github ? String(raw.github) : "",
-    download: raw.download ? String(raw.download) : "",
-    worker: raw.worker ? String(raw.worker) : "",
-    worker_home: raw.worker_home ? String(raw.worker_home) : "",
+    download,
+    worker,
+    worker_home: workerHome,
     count: countUrl,
     downloads: firstNum(raw.downloads, raw.download_count, !looksLikeUrl(raw.count) ? raw.count : null),
     views: firstNum(raw.views, raw.view_count),
@@ -576,6 +598,7 @@ export async function attachCatalogCounters(products, env, deps = {}) {
   if (!seen.has(AZNET_CARD.slug)) incoming.push({ ...AZNET_CARD });
   if (!seen.has(AZHUB_CARD.slug)) incoming.push({ ...AZHUB_CARD });
   if (!seen.has(AZINTERFACE_CARD.slug)) incoming.push({ ...AZINTERFACE_CARD });
+  if (!seen.has(AZCOHERENCE_CARD.slug)) incoming.push({ ...AZCOHERENCE_CARD });
   const list = incoming.filter((p) => p && p.slug && !omitUntilWorker(p.slug));
   const httpFetch = deps.counterFetch || deps.fetch || globalThis.fetch;
   const timeoutMs = deps.timeoutMs != null ? deps.timeoutMs : 5000;
@@ -681,6 +704,15 @@ export function softwareSuite(products, extras = {}) {
       if (!card.count) card.count = AZINTERFACE_CARD.count;
       if (!card.github) card.github = AZINTERFACE_CARD.github;
     }
+    if (card.slug === AZCOHERENCE_SLUG) {
+      if (!card.download) card.download = AZCOHERENCE_CARD.download;
+      if (!card.worker) card.worker = AZCOHERENCE_CARD.worker;
+      if (!card.worker_home) card.worker_home = AZCOHERENCE_CARD.worker_home;
+      if (!card.count) card.count = AZCOHERENCE_CARD.count;
+      if (!card.github) card.github = AZCOHERENCE_CARD.github;
+      if (!card.name || card.name === card.slug) card.name = AZCOHERENCE_CARD.name;
+      if (!card.one_line) card.one_line = AZCOHERENCE_CARD.one_line;
+    }
     out.push(card);
   };
   push({ ...RUNTIME_CARD, uses: extras.runtimeUses != null ? extras.runtimeUses : RUNTIME_CARD.uses });
@@ -689,7 +721,43 @@ export function softwareSuite(products, extras = {}) {
   if (!seen.has(AZNET_CARD.slug)) push(AZNET_CARD);
   if (!seen.has(AZHUB_CARD.slug)) push(AZHUB_CARD);
   if (!seen.has(AZINTERFACE_CARD.slug)) push(AZINTERFACE_CARD);
+  if (!seen.has(AZCOHERENCE_CARD.slug)) push(AZCOHERENCE_CARD);
   return sortSoftwareSuite(out);
+}
+
+export function softwareNameList(products) {
+  return (Array.isArray(products) ? products : []).map((p) => {
+    if (!p || !p.slug) return null;
+    return {
+      name: p.name || p.slug,
+      slug: p.slug,
+      url: workerHref(p) || invokeHref(p),
+      family: suiteFamily(p),
+    };
+  }).filter(Boolean);
+}
+
+export function softwareApiDoc(products, extras = {}) {
+  const list = softwareSuite(products, extras);
+  return {
+    ok: true,
+    product: "GodLock",
+    author: AUTHOR,
+    identity: AUTHOR,
+    source: extras.source || "fallback",
+    via: SOFTWARE_JSON_PATH,
+    catalog: PUBLIC_RUNTIME + SOFTWARE_JSON_PATH,
+    catalog_origin: SOFTWARE_ORIGIN_URL,
+    catalog_fallback: FRAGGATE_LIST_ORIGIN_URL,
+    catalog_fraggate: PUBLIC_RUNTIME + FRAGGATE_LIST_PATH,
+    catalog_json: PUBLIC_RUNTIME + CATALOG_JSON_PATH,
+    sort: "plain-gate-lock",
+    clock_is_not_lock: true,
+    product_count: list.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "fraggate").length,
+    suite_count: list.length,
+    products: list.map(publicProduct).filter(Boolean),
+    software: softwareNameList(list),
+  };
 }
 
 export function catalogSlugList(products) {

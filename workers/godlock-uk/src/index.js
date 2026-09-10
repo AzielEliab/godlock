@@ -18,7 +18,7 @@ import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
   PUBLIC_RUNTIME, permanentIdentityRedirect,
 } from "./seo.js";
-import { fetchCatalogProducts, attachCatalogCounters, softwareSuite, publicProduct } from "./catalog.js";
+import { fetchCatalogProducts, attachCatalogCounters, softwareSuite, publicProduct, softwareApiDoc } from "./catalog.js";
 import {
   START, shouldIsolate, answerChallenge, clampScore, residualOf, hashReceipt,
 } from "./engine.js";
@@ -582,6 +582,12 @@ export default {
         });
       }
 
+      if (path === "/v1/software") {
+        const fetched = await fetchCatalogProducts(env);
+        const extras = { version: fetched.version, source: fetched.source };
+        return json(softwareApiDoc(fetched.products, extras), 200, extraHeadersFor(nodeId));
+      }
+
       if (path === SOFTWARE_PATH) {
         const fetched = await fetchCatalogProducts(env);
         const counted = await attachCatalogCounters(fetched.products, env);
@@ -653,10 +659,18 @@ export default {
         }
         const prior = await publicReceipts(env, 24);
         const priorFiltered = latest ? prior.filter((p) => p.id !== latest.id) : prior;
+        const fetched = await fetchCatalogProducts(env);
+        const extras = { version: fetched.version };
         if (wantsJson(request, url)) {
-          return json({ ok: true, stats, latest: latest ? publicPayload(latest) : null, receipts: priorFiltered.map(publicPayload) });
+          return json({
+            ok: true,
+            stats,
+            latest: latest ? publicPayload(latest) : null,
+            receipts: priorFiltered.map(publicPayload),
+            software: softwareApiDoc(fetched.products, { ...extras, source: fetched.source }),
+          });
         }
-        return html(page("GodLock", homeBody({ stats, latest, prior: priorFiltered }), { path: "/", kind: "home" }), {
+        return html(page("GodLock", homeBody({ stats, latest, prior: priorFiltered, products: fetched.products, extras }), { path: "/", kind: "home" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

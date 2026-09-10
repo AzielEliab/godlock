@@ -48,6 +48,15 @@ export const AZINTERFACE_DOWNLOAD = "https://azinterface-download-tracker.vibelo
 export const AZINTERFACE_WORKER = "https://azinterface-download-tracker.vibelock.workers.dev/";
 export const AZINTERFACE_COUNT = "https://azinterface-download-tracker.vibelock.workers.dev/count";
 export const AZINTERFACE_GITHUB = "https://github.com/AzielEliab/azinterface";
+export const AZCOHERENCE_DOWNLOAD = "https://azcoherence-download-tracker.vibelock.workers.dev/download";
+export const AZCOHERENCE_WORKER = "https://azcoherence-download-tracker.vibelock.workers.dev/";
+export const AZCOHERENCE_COUNT = "https://azcoherence-download-tracker.vibelock.workers.dev/count";
+export const AZCOHERENCE_GITHUB = "https://github.com/AzielEliab/AZCoherence";
+export const AZCOHERENCE_SLUG = "azcoherence";
+export const AZCOHERENCE_NAME = "AZCoherence";
+export const AZCOHERENCE_VERSION = "0.1.0";
+export const AZCOHERENCE_PEER = "azclce";
+export const AZCOHERENCE_ONE_LINE = "AZCoherence: second-pass triad coherence review (primary vs alternate → PASS/FLAG/NEUTRALIZE/REFUSE). Never invents evidence. Confidence ≠ truth. Not AKM-TRIAD.";
 
 export const AI_CLIENTS = [
   "ChatGPT (GPT Actions / OpenAI)",
@@ -363,8 +372,9 @@ export const PUBLIC_ALLOW = [
   "/",
   "/verify",
   "/reason",
-  "/software",
-  "/runtime",
+    "/software",
+    "/v1/software",
+    "/runtime",
   "/runtime/",
   "/donate",
   "/AzielEliab",
@@ -394,7 +404,10 @@ export async function sitemapXml(env) {
     CANON_HOST + SOFTWARE_PATH + "#aznet",
     CANON_HOST + SOFTWARE_PATH + "#azhub",
     CANON_HOST + SOFTWARE_PATH + "#azinterface",
+    CANON_HOST + SOFTWARE_PATH + "#azcoherence",
+    CANON_HOST + SOFTWARE_PATH + "#azclce",
     CANON_HOST + SOFTWARE_PATH + "#godlock",
+    CANON_HOST + "/v1/software",
     PUBLIC_RUNTIME,
     PUBLIC_RUNTIME + "/v1/software",
     PUBLIC_RUNTIME + "/v1/mesh",
@@ -459,8 +472,22 @@ export function citeDoc() {
     software_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/list",
     software_fraggate_origin: CATALOG + "/v1/fraggate/list",
     software_catalog_json: PUBLIC_RUNTIME + "/v1/catalog.json",
-    software_suite: "Live aziel-runtime /v1/software (fallback /v1/fraggate/list). Aziel Runtime and FragGate are separate cards. GitHub and runtime drops refresh the tab without hand copy. Same completeness as the Digital Library Software hub.",
+    software_suite: "Live aziel-runtime /v1/software (fallback /v1/fraggate/list). Aziel Runtime and FragGate are separate cards. GitHub and runtime drops refresh the tab without hand copy. Same completeness as the Digital Library Software hub. AZCoherence (azcoherence) is Plain A–Z with peer AZ-CLCE. Not AKM-TRIAD. FragGate single door.",
+    software_api: CANON_HOST + "/v1/software",
     software_product_count: null,
+    azcoherence: CANON_HOST + SOFTWARE_PATH + "#" + AZCOHERENCE_SLUG,
+    azcoherence_name: AZCOHERENCE_NAME,
+    azcoherence_slug: AZCOHERENCE_SLUG,
+    azcoherence_version: AZCOHERENCE_VERSION,
+    azcoherence_one_line: AZCOHERENCE_ONE_LINE,
+    azcoherence_worker: AZCOHERENCE_WORKER,
+    azcoherence_github: AZCOHERENCE_GITHUB,
+    azcoherence_download: AZCOHERENCE_DOWNLOAD,
+    azcoherence_runtime: PUBLIC_RUNTIME + "/v1/pull/" + AZCOHERENCE_SLUG,
+    azcoherence_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/describe?slug=" + AZCOHERENCE_SLUG,
+    azcoherence_catalog: CATALOG + "/p/" + AZCOHERENCE_SLUG + "/",
+    azcoherence_peer: AZCOHERENCE_PEER,
+    azcoherence_note: "Second-pass triad coherence review. Peer AZ-CLCE (azclce). Not AKM-TRIAD. FragGate single door. Author Aziel Eliab.",
     openapi: CANON_HOST + "/openapi.json",
     update_check: CATALOG + "/v1/update/check?slug=godlock&version=0.1.0",
     update_download: DOWNLOAD,
@@ -531,7 +558,14 @@ export function llmsDoc() {
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n"
     + "Donate: " + CANON_HOST + DONATE_PATH + " (AZL-DONATE-1.0). Same door: " + DONATE_CANONICAL + "\n"
-    + "Software lists the full live aziel-runtime catalog. Aziel Runtime (aziel-runtime) and FragGate are separate cards, matching Digital Library Software completeness. New catalog slugs are included automatically. AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (azbrowser-download-tracker, aznet-download-tracker, azhub-download-tracker, azinterface-download-tracker). Never nest AZHub with AZInterface. FragGate is its own Gate card (fraggate-download-tracker Download/Worker, A–Z with DecisionGATE). Each product is tethered to its Worker, GitHub, and /runtime. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
+    + "Software lists the full live aziel-runtime catalog. Aziel Runtime (aziel-runtime) and FragGate are separate cards, matching Digital Library Software completeness. New catalog slugs are included automatically. AZBrowser, AZNet, AZHub, AZInterface, and AZCoherence are separate Plain cards (azbrowser-download-tracker, aznet-download-tracker, azhub-download-tracker, azinterface-download-tracker, azcoherence-download-tracker). Never nest AZHub with AZInterface. AZCoherence is peer to AZ-CLCE (azclce), not AKM-TRIAD. FragGate is its own Gate card (fraggate-download-tracker Download/Worker, A–Z with DecisionGATE). Each product is tethered to its Worker, GitHub, and /runtime. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
+    + "AZCoherence (azcoherence): second-pass triad coherence review (primary vs alternate → PASS/FLAG/NEUTRALIZE/REFUSE). Never invents evidence. Confidence ≠ truth. Not AKM-TRIAD. Peer AZ-CLCE. FragGate single door. Author Aziel Eliab.\n"
+    + "AZCoherence Worker: " + AZCOHERENCE_WORKER + "\n"
+    + "AZCoherence GitHub: " + AZCOHERENCE_GITHUB + "\n"
+    + "AZCoherence download: " + AZCOHERENCE_DOWNLOAD + "\n"
+    + "AZCoherence runtime: " + PUBLIC_RUNTIME + "/v1/pull/" + AZCOHERENCE_SLUG + "\n"
+    + "AZCoherence FragGate: " + PUBLIC_RUNTIME + "/v1/fraggate/describe?slug=" + AZCOHERENCE_SLUG + "\n"
+    + "Software API: " + CANON_HOST + "/v1/software\n"
     + "Live software catalog: " + PUBLIC_RUNTIME + "/v1/software\n"
     + "Origin software: " + CATALOG + "/v1/software\n"
     + "FragGate list fallback: " + PUBLIC_RUNTIME + "/v1/fraggate/list\n"
@@ -592,6 +626,7 @@ export function siteOpenApi() {
     paths: {
       "/health": { get: { operationId: "godlockUkHealth", summary: "Liveness", responses: { "200": { description: "OK" } } } },
       "/software": { get: { operationId: "godlockUkSoftware", summary: "Live Aziel Eliab software suite (Plain → Gate → Lock)", responses: { "200": { description: "HTML or JSON" } } } },
+      "/v1/software": { get: { operationId: "godlockUkSoftwareApi", summary: "Same-origin Softwares catalog (Plain A–Z includes AZCoherence; live catalog or local fallback)", responses: { "200": { description: "OK" } } } },
       "/donate": { get: { operationId: "godlockUkDonate", summary: "AZL-DONATE-1.0 door (static rails; no KV; payment is not a key)", responses: { "200": { description: "HTML or JSON" } } } },
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
       "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record", responses: { "200": { description: "OK" } } } },

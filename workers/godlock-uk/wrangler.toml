@@ -26,6 +26,15 @@ database_id = "a499ef56-ad02-4431-a3e4-e23f96f500f0"
 binding = "RUNTIME_USES"
 id = "39527eecfc294ddd86af99c806baaa45"
 
+# Solid black-on-white donate payment-URI QRs. html_handling=none so
+# public/donate/qr/*.png cannot 308 /donate to /donate/.
+# run_worker_first keeps the Donate HTML door on this Worker.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+html_handling = "none"
+run_worker_first = ["/donate"]
+
 # Zone godlock.uk is not in this Cloudflare account (API 10082).
 # Apex https://godlock.uk is proxied to this origin separately.
 # [[routes]]

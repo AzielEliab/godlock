@@ -2,15 +2,27 @@
  * AZL-DONATE-1.0 — static Donate door. Same copy and rails on /donate
  * and the homepage block. No KV, no D1 write, no unlock. Author: Aziel Eliab.
  * Donate signature is — Aziel. Site chrome stays Aziel Eliab.
+ * Payment-URI QRs are solid black-on-white PNGs under /donate/qr/{id}.png.
  */
-import { qrSvg } from "./donateQr.js";
-
 export const DONATE_SPEC = "AZL-DONATE-1.0";
 export const DONATE_PATH = "/donate";
+export const DONATE_QR_DIR = "/donate/qr";
 export const DONATE_CANONICAL = "https://www.azieleliab.com/donate";
 export const DONATE_TITLE = "Donate";
 export const DONATE_SIGNATURE = "— Aziel";
 export const DONATE_NETWORK_NOTE = "Send only on this network.";
+
+export function donateQrSrc(id) {
+  return DONATE_QR_DIR + "/" + String(id || "") + ".png";
+}
+
+export function donateQrIdFromPath(path) {
+  const p = String(path || "");
+  const prefix = DONATE_QR_DIR + "/";
+  if (!p.startsWith(prefix) || !p.endsWith(".png")) return "";
+  const id = p.slice(prefix.length, -4);
+  return /^[a-z0-9]+$/.test(id) ? id : "";
+}
 
 export const DONATE_COPY = [
   "Nothing is free.",
@@ -105,6 +117,7 @@ export function publicRails(rails = DONATE_RAILS) {
     extra: !!r.extra,
     note: r.note || "",
     network_note: DONATE_NETWORK_NOTE,
+    qr: donateQrSrc(r.id),
   }));
 }
 
@@ -137,9 +150,13 @@ export function donateRailHtml(rail) {
   const r = rail || {};
   const addr = String(r.address || "");
   const uri = String(r.uri || "");
-  const qr = uri ? qrSvg(uri, { size: 128, label: r.symbol + " payment URI" }) : "";
+  const src = r.id ? donateQrSrc(r.id) : "";
   const extra = r.extra ? `<span class="pill">extra</span>` : "";
   const note = r.note ? `<p class="muted">${esc(r.note)}</p>` : "";
+  const alt = esc(r.symbol) + " payment URI";
+  const qr = src
+    ? `<div class="donate-qr"><img src="${esc(src)}" width="128" height="128" alt="${alt}" decoding="async"></div>`
+    : "";
   return `<article class="donate-rail soft-card" id="donate-${esc(r.id)}" data-rail="${esc(r.id)}">
   <h3>${esc(r.symbol)} <span class="muted">${esc(r.label)}</span> ${extra}</h3>
   <p class="hash donate-addr">${esc(addr)}</p>
@@ -149,7 +166,7 @@ export function donateRailHtml(rail) {
     <button type="button" class="button ghost" data-copy="${esc(addr)}">Copy</button>
     <a class="button ghost" href="${esc(uri)}">Open in wallet</a>
   </div>
-  ${qr ? `<div class="donate-qr" aria-hidden="true">${qr}</div>` : ""}
+  ${qr}
 </article>`;
 }
 

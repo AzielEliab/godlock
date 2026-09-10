@@ -74,6 +74,7 @@ footer{margin-top:36px;color:var(--muted);font-size:14px}
 .donate-rails{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 18px}
 .donate-rail h3{margin:0 0 8px;font-size:18px}
 .donate-addr{margin:0 0 10px}
+.wallet-hint{margin:12px 0 14px;color:var(--muted);font-size:14px;line-height:1.45}
 .donate-actions{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
 .donate-qr{margin:12px 0 0;width:128px;height:128px;padding:0;background:#fff;border-radius:4px;overflow:hidden}
 .donate-qr img{display:block;width:128px;height:128px;background:#fff}

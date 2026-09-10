@@ -162,10 +162,10 @@ export function topNav(path) {
   }).join("")}</nav>`;
 }
 
-export function page(title, body, { path, kind, extraHeaders, indexable } = {}) {
+export function page(title, body, { path, kind, extraHeaders, indexable, products } = {}) {
   const p = path || "/";
   const docTitle = documentTitle(title, kind);
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(docTitle)}</title>${headMeta({ title, path: p, kind, indexable })}<style>${CSS}</style></head><body><div class="wrap">
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(docTitle)}</title>${headMeta({ title, path: p, kind, indexable, products })}<style>${CSS}</style></head><body><div class="wrap">
 <div class="brandrow"><div class="brand">GodLock</div><span class="pill">HTTPS engine</span></div>
 <p class="author">Author Aziel Eliab</p>
 ${topNav(p)}

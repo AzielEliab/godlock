@@ -437,7 +437,9 @@ export default {
         return new Response(robotsTxt(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/sitemap.xml") {
-        const xml = await sitemapXml(env);
+        const fetched = await fetchCatalogProducts(env);
+        const products = softwareSuite(fetched.products, { version: fetched.version });
+        const xml = await sitemapXml(env, { products });
         return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/cite.json") {
@@ -631,7 +633,7 @@ export default {
             products: products.map(publicProduct).filter(Boolean),
           }, 200, extraHeadersFor(nodeId));
         }
-        return html(page("Software", softwareBody({ products: counted.products, extras }), { path: SOFTWARE_PATH, kind: "software" }), {
+        return html(page("Software", softwareBody({ products: counted.products, extras }), { path: SOFTWARE_PATH, kind: "software", products }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

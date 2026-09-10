@@ -1,5 +1,8 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync, existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import worker from "./src/index.js";
 import {
   DONATE_COPY,
@@ -14,10 +17,15 @@ import {
   donateDoc,
   donateText,
   donateTouchesStorage,
+  donateQrSrc,
   publicRails,
 } from "./src/donate.js";
 import { homeBody, page, topNav } from "./src/ui.js";
 import { defaultDescription, citeDoc } from "./src/seo.js";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const QR_DIR = join(HERE, "public", "donate", "qr");
+const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 const THEATER = /tip.?jar|buy me a coffee|patron|unlocks? a feature|thank you for (your )?generosit|progress bar|name on a wall of fame/i;
 const BANNED = /Collin Horton|GodLock\.AZ|\+25|10\.5281\/zenodo|support my custody/i;
@@ -38,6 +46,16 @@ function mockEnv() {
       async batch() { return []; },
     },
     RUNTIME_USES: { get: boom, put: boom, list: boom },
+    ASSETS: {
+      async fetch(request) {
+        const url = new URL(request.url);
+        const name = url.pathname.split("/").pop() || "";
+        const file = join(QR_DIR, name);
+        if (!existsSync(file)) return new Response("missing", { status: 404 });
+        const body = readFileSync(file);
+        return new Response(body, { status: 200, headers: { "Content-Type": "image/png" } });
+      },
+    },
   };
 }
 
@@ -81,6 +99,19 @@ describe("AZL-DONATE-1.0 copy and rails", () => {
     assert.equal(byId.trx.address, "TJXb1YhZ9pAYsEW6UKUAzxFUzH6Tzcacyy");
     assert.equal(byId.trx.extra, true);
     assert.equal(publicRails().length, 7);
+    for (const rail of publicRails()) {
+      assert.equal(rail.qr, donateQrSrc(rail.id));
+    }
+  });
+
+  it("ships a solid PNG payment-URI QR for every rail", () => {
+    for (const rail of DONATE_RAILS) {
+      const file = join(QR_DIR, rail.id + ".png");
+      assert.equal(existsSync(file), true, file);
+      const body = readFileSync(file);
+      assert.ok(body.length > 32, rail.id + " bytes");
+      assert.deepEqual(body.subarray(0, 8), PNG_MAGIC);
+    }
   });
 
   it("renders Copy, Open-in-wallet, QR, and network note on each rail", () => {
@@ -91,7 +122,12 @@ describe("AZL-DONATE-1.0 copy and rails", () => {
       assert.ok(html.includes('data-copy="' + rail.address + '"'), rail.id + " copy");
     }
     assert.equal(html.split(DONATE_NETWORK_NOTE).length - 1, DONATE_RAILS.length);
-    assert.equal(html.split("<svg ").length - 1, DONATE_RAILS.length);
+    assert.doesNotMatch(html, /<svg[\s>]/);
+    assert.doesNotMatch(html, /<rect[\s>]/);
+    assert.equal(html.split("<img ").length - 1, DONATE_RAILS.length);
+    for (const rail of DONATE_RAILS) {
+      assert.ok(html.includes('src="/donate/qr/' + rail.id + '.png"'), rail.id + " png");
+    }
     assert.match(html, /Open in wallet/);
     assert.match(html, />Copy</);
     assert.match(html, /No destination tag required/);
@@ -119,6 +155,12 @@ describe("Donate door and homepage block", () => {
     assert.ok(ld["@graph"].some((n) => n["@type"] === "WebPage" && n.url === "https://godlock.uk/donate"));
     assert.ok(ld["@graph"].some((n) => n["@type"] === "Person" && n.name === "Aziel Eliab"));
     assert.doesNotMatch(html, THEATER);
+    assert.doesNotMatch(html, /<svg[\s>]/);
+    assert.doesNotMatch(html, /<rect[\s>]/);
+    assert.equal(html.split("<img ").length - 1, DONATE_RAILS.length);
+    assert.ok(html.includes('src="/donate/qr/btc.png"'));
+    assert.ok(html.includes('src="/donate/qr/sol.png"'));
+    assert.ok(html.includes('src="/donate/qr/trx.png"'));
   });
 
   it("returns JSON when asked without inventing unlock state", async () => {
@@ -148,7 +190,11 @@ describe("Donate door and homepage block", () => {
     for (const rail of DONATE_RAILS) {
       assert.ok(home.includes(rail.address));
       assert.ok(home.includes(rail.uri));
+      assert.ok(home.includes('src="/donate/qr/' + rail.id + '.png"'));
+      assert.ok(door.includes('src="/donate/qr/' + rail.id + '.png"'));
     }
+    assert.doesNotMatch(home, /<svg[\s>]/);
+    assert.doesNotMatch(door, /<svg[\s>]/);
     assert.match(home, /href="\/donate">Donate door</);
     assert.match(donateHomeBlock(), /id="donate"/);
     assert.match(topNav("/"), /href="\/donate">Donate<\/a>/);
@@ -156,5 +202,18 @@ describe("Donate door and homepage block", () => {
     assert.match(wrapped, /href="\/donate">Donate<\/a>/);
     assert.match(defaultDescription("donate"), /Nothing is free/);
     assert.equal(citeDoc().donate, "https://godlock.uk/donate");
+  });
+
+  it("serves each donate QR PNG without touching KV", async () => {
+    const env = mockEnv();
+    for (const rail of DONATE_RAILS) {
+      const res = await worker.fetch(new Request("https://godlock.uk" + donateQrSrc(rail.id)), env);
+      assert.equal(res.status, 200, rail.id);
+      assert.match(res.headers.get("Content-Type") || "", /image\/png/);
+      const buf = Buffer.from(await res.arrayBuffer());
+      assert.deepEqual(buf.subarray(0, 8), PNG_MAGIC);
+    }
+    const missing = await worker.fetch(new Request("https://godlock.uk/donate/qr/nope.png"), env);
+    assert.equal(missing.status, 404);
   });
 });

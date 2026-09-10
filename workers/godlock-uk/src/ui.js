@@ -75,8 +75,8 @@ footer{margin-top:36px;color:var(--muted);font-size:14px}
 .donate-rail h3{margin:0 0 8px;font-size:18px}
 .donate-addr{margin:0 0 10px}
 .donate-actions{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
-.donate-qr{margin:12px 0 0;width:128px;height:128px}
-.donate-qr svg{display:block;width:128px;height:128px}
+.donate-qr{margin:12px 0 0;width:128px;height:128px;padding:0;background:#fff;border-radius:4px;overflow:hidden}
+.donate-qr img{display:block;width:128px;height:128px;background:#fff}
 .donate-home{margin:18px 0 0}
 @media (max-width:720px){
   .wrap{padding:16px 14px 72px}

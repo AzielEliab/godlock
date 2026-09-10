@@ -8,7 +8,7 @@
  */
 import { hideInternalDetermination } from "./publicCopy.js";
 import {
-  AUTHOR, CATALOG, LIBRARY, RUNTIME_PATH, PUBLIC_RUNTIME, RUNTIME_NAME, RUNTIME_SLUG, RUNTIME_VERSION, GITHUB_RUNTIME,
+  AUTHOR, CANON_HOST, CATALOG, LIBRARY, RUNTIME_PATH, SOFTWARE_PATH, AZIEL_ELIAB_PATH, PUBLIC_RUNTIME, RUNTIME_NAME, RUNTIME_SLUG, RUNTIME_VERSION, GITHUB_RUNTIME,
   FRAGGATE_KERNEL, FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, FRAGGATE_COUNT,
   AZBROWSER_DOWNLOAD, AZBROWSER_WORKER, AZBROWSER_COUNT,
   AZNET_DOWNLOAD, AZNET_WORKER, AZNET_COUNT, AZNET_GITHUB,
@@ -568,7 +568,11 @@ export async function fetchCatalogProducts(env, deps = {}) {
   if (hasBinding) {
     for (const url of BINDING_CATALOG_URLS) {
       try {
-        const res = await env.AZIEL_RUNTIME.fetch(new Request(url, { method: "GET", headers: UA }));
+        const res = await fetchJson((dest, init) => env.AZIEL_RUNTIME.fetch(new Request(dest, {
+          method: "GET",
+          headers: init && init.headers ? init.headers : UA,
+          signal: init && init.signal,
+        })), url, timeoutMs);
         const parsed = await productsFromResponse(res);
         if (parsed.products.length) {
           return { products: mergeLiveOverFallback(parsed.products), source: "service-binding", version: parsed.version };
@@ -746,6 +750,11 @@ export function softwareApiDoc(products, extras = {}) {
     identity: AUTHOR,
     source: extras.source || "fallback",
     via: SOFTWARE_JSON_PATH,
+    html: CANON_HOST + SOFTWARE_PATH,
+    aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,
+    door: "fraggate",
+    seo_proxy: true,
+    not_a_second_fraggate_door: true,
     catalog: PUBLIC_RUNTIME + SOFTWARE_JSON_PATH,
     catalog_origin: SOFTWARE_ORIGIN_URL,
     catalog_fallback: FRAGGATE_LIST_ORIGIN_URL,

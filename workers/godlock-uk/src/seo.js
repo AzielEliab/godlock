@@ -24,7 +24,9 @@ export const SOFTWARE_PATH = "/software";
 export const RUNTIME_PATH = "/runtime";
 export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
 export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
-export const RUNTIME_VERSION = "1.6.8";
+export const RUNTIME_NAME = "Aziel Runtime";
+export const RUNTIME_SLUG = "aziel-runtime";
+export const RUNTIME_VERSION = "1.6.15";
 export const FRAGGATE_KERNEL = "https://github.com/AzielEliab/fraggate";
 export const FRAGGATE_DOWNLOAD = "https://fraggate-download-tracker.vibelock.workers.dev/download";
 export const FRAGGATE_WORKER = "https://fraggate-download-tracker.vibelock.workers.dev/";
@@ -111,15 +113,15 @@ export function defaultDescription(kind) {
   }
   if (kind === "software") {
     return hideInternalDetermination(
-      "Full Aziel Eliab software suite on GodLock.uk: every live aziel-runtime catalog engine plus aziel-runtime / FragGate. Worker, GitHub, and /runtime FragGate/MCP tethers. Uses and download counters when published. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (never nest Hub with Interface). FragGate is its own Gate card. Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " Suite mesh default off via /runtime/v1/mesh/* (QNM-BUILD-1.0; live|locked|isolated counts only; no Node Gate; no auto-heal; not an anonymity network). anon-broadcast is not a publish path on godlock.uk. Author Aziel Eliab.",
+      "Downloadable Aziel Eliab software on GodLock.uk: aziel-runtime (Aziel Runtime) and the live catalog. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). FragGate is its own Gate card. Worker, GitHub, and /runtime tethers. Uses and download counters when published. Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
   if (kind === "runtime") {
     return hideInternalDetermination(
-      "Aziel Eliab Runtime " + RUNTIME_VERSION + " FragGate door on GodLock.uk. Same-origin /runtime/* proxies the live engine-runtime. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. Suite mesh (QNM-BUILD-1.0, default off; live|locked|isolated counts only): " + PUBLIC_RUNTIME + "/v1/mesh. API uses log: " + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
+      "Aziel Runtime (aziel-runtime) on GodLock.uk. Same-origin /runtime/* proxies the live catalog door. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. Suite mesh (QNM-BUILD-1.0, default off; live|locked|isolated counts only): " + PUBLIC_RUNTIME + "/v1/mesh. API uses log: " + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
-  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Runtime door: " + PUBLIC_RUNTIME + " (FragGate " + RUNTIME_VERSION + "). Suite mesh default off (QNM-BUILD-1.0 live|locked|isolated counts only; no Node Gate; no auto-heal): " + PUBLIC_RUNTIME + "/v1/mesh. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. " + AI_CLIENTS_SENTENCE);
+  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Aziel Runtime door: " + PUBLIC_RUNTIME + " (aziel-runtime). Suite mesh default off (QNM-BUILD-1.0 live|locked|isolated counts only; no Node Gate; no auto-heal): " + PUBLIC_RUNTIME + "/v1/mesh. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. " + AI_CLIENTS_SENTENCE);
 }
 
 function defaultKeywords(kind) {
@@ -139,7 +141,7 @@ export function runtimeSoftwareNode(person) {
   return {
     "@type": "SoftwareApplication",
     "@id": PUBLIC_RUNTIME + "#runtime",
-    name: "Aziel Eliab Runtime",
+    name: RUNTIME_NAME,
     applicationCategory: "DeveloperApplication",
     operatingSystem: "Cloudflare Workers",
     softwareVersion: RUNTIME_VERSION,
@@ -156,11 +158,11 @@ export function runtimeWebApiNode(person) {
   return {
     "@type": "WebAPI",
     "@id": PUBLIC_RUNTIME + "#webapi",
-    name: "Aziel Eliab Runtime",
+    name: RUNTIME_NAME,
     url: PUBLIC_RUNTIME,
     documentation: PUBLIC_RUNTIME + "/openapi.json",
     provider: person,
-    description: "FragGate " + RUNTIME_VERSION + " door. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json. MCP POST " + PUBLIC_RUNTIME + "/mcp. API uses " + PUBLIC_RUNTIME + "/v1/uses.",
+    description: "aziel-runtime door. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json. MCP POST " + PUBLIC_RUNTIME + "/mcp. API uses " + PUBLIC_RUNTIME + "/v1/uses.",
   };
 }
 
@@ -434,7 +436,7 @@ export function citeDoc() {
     software_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/list",
     software_fraggate_origin: CATALOG + "/v1/fraggate/list",
     software_catalog_json: PUBLIC_RUNTIME + "/v1/catalog.json",
-    software_suite: "Live aziel-runtime /v1/software (fallback /v1/fraggate/list) plus aziel-runtime / FragGate. GitHub and runtime drops refresh the tab without hand copy. Same completeness as the Digital Library Software hub.",
+    software_suite: "Live aziel-runtime /v1/software (fallback /v1/fraggate/list). Aziel Runtime and FragGate are separate cards. GitHub and runtime drops refresh the tab without hand copy. Same completeness as the Digital Library Software hub.",
     software_product_count: null,
     openapi: CANON_HOST + "/openapi.json",
     update_check: CATALOG + "/v1/update/check?slug=godlock&version=0.1.0",
@@ -505,7 +507,7 @@ export function llmsDoc() {
     + "Digital Library identity: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "Software: " + CANON_HOST + SOFTWARE_PATH + "\n"
-    + "Software lists the full live aziel-runtime catalog plus aziel-runtime / FragGate, matching Digital Library Software completeness. New catalog slugs are included automatically. AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (azbrowser-download-tracker, aznet-download-tracker, azhub-download-tracker, azinterface-download-tracker). Never nest AZHub with AZInterface. FragGate is its own Gate card (fraggate-download-tracker Download/Worker, A–Z with DecisionGATE). Each product is tethered to its Worker, GitHub, and /runtime FragGate/MCP. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
+    + "Software lists the full live aziel-runtime catalog. Aziel Runtime (aziel-runtime) and FragGate are separate cards, matching Digital Library Software completeness. New catalog slugs are included automatically. AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (azbrowser-download-tracker, aznet-download-tracker, azhub-download-tracker, azinterface-download-tracker). Never nest AZHub with AZInterface. FragGate is its own Gate card (fraggate-download-tracker Download/Worker, A–Z with DecisionGATE). Each product is tethered to its Worker, GitHub, and /runtime. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
     + "Live software catalog: " + PUBLIC_RUNTIME + "/v1/software\n"
     + "Origin software: " + CATALOG + "/v1/software\n"
     + "FragGate list fallback: " + PUBLIC_RUNTIME + "/v1/fraggate/list\n"
@@ -514,7 +516,7 @@ export function llmsDoc() {
     + "OpenAPI: " + CANON_HOST + "/openapi.json\n"
     + "Update check: " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, use counted " + DOWNLOAD + " (no silent overwrite).\n\n"
     + "## Runtime (FragGate door)\n\n"
-    + "GodLock → Runtime. Same-origin Aziel Eliab Runtime " + RUNTIME_VERSION + " on GodLock.uk. One door — discover, route, refuse. Kernel: " + FRAGGATE_KERNEL + " (FG-0.1).\n"
+    + "GodLock → Runtime. Same-origin Aziel Runtime (aziel-runtime) on GodLock.uk. One door — discover, route, refuse. Kernel: " + FRAGGATE_KERNEL + " (FG-0.1).\n"
     + "Door: " + PUBLIC_RUNTIME + "\n"
     + "Health: " + PUBLIC_RUNTIME + "/v1/health\n"
     + "Manifest: " + PUBLIC_RUNTIME + "/v1/runtime.json\n"

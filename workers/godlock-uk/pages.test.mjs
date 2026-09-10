@@ -62,6 +62,7 @@ import {
   compactProduct,
   hubProductCopy,
   omitUntilWorker,
+  stripRuntimeFragGateMash,
 } from "./src/catalog.js";
 import {
   FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, AZBROWSER_DOWNLOAD, AZBROWSER_WORKER,
@@ -366,7 +367,7 @@ describe("homepage stays a natural argument surface", () => {
     assert.match(html, /Not an anonymity network/);
     const homeLd = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "WebAPI" && n.documentation === "https://godlock.uk/runtime/openapi.json"));
-    assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "Aziel Eliab Runtime" && (n.sameAs || []).includes("https://www.azielcorpuslibrary.net/runtime")));
+    assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "Aziel Runtime" && (n.sameAs || []).includes("https://www.azielcorpuslibrary.net/runtime")));
     assert.doesNotMatch(html, /Use with Grok, ChatGPT, Venice/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock|paste-block|how the argument works/i);
     assert.doesNotMatch(html, /\bABAD\b/);
@@ -404,8 +405,8 @@ describe("major AI client list", () => {
     assert.equal(AI_CLIENTS.length, 16);
     assert.match(AI_CLIENTS_SENTENCE, /other MCP\/OpenAPI-capable assistants/);
     const software = softwareBody({ products: [] });
-    assert.match(software, /Works with ChatGPT \(GPT Actions \/ OpenAI\), Grok \(xAI\), Venice, Claude \(Anthropic\)/);
-    assert.match(software, /Amazon Q tooling, DuckAssist, You\.com, Cohere/);
+    assert.match(software, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+    assert.doesNotMatch(software, /Works with ChatGPT \(GPT Actions \/ OpenAI\)/);
     assert.doesNotMatch(software, /Use with Grok, ChatGPT, Venice/);
     const home = homeBody({ stats: {}, latest: null, prior: [] });
     assert.match(home, /Works with ChatGPT \(GPT Actions \/ OpenAI\)/);
@@ -530,7 +531,10 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(CATALOG_SLUGS.includes("azinterface"));
     assert.ok(!CATALOG_SLUGS.includes("aziel-runtime"));
     assert.equal(RUNTIME_CARD.slug, "aziel-runtime");
+    assert.equal(RUNTIME_CARD.name, "Aziel Runtime");
     assert.match(RUNTIME_CARD.one_line, /FragGate/);
+    assert.doesNotMatch(RUNTIME_CARD.one_line, /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
+    assert.doesNotMatch(RUNTIME_CARD.name, /FragGate/);
     assert.equal(FRAGGATE_CARD.slug, "fraggate");
     assert.equal(FRAGGATE_CARD.download, FRAGGATE_DOWNLOAD);
     assert.equal(FRAGGATE_CARD.worker, FRAGGATE_WORKER);
@@ -638,7 +642,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(ids.length >= CATALOG_PRODUCT_COUNT, "cards " + ids.length);
     assert.ok(names.length >= CATALOG_PRODUCT_COUNT, "h3 " + names.length);
     assert.ok(names.includes("GodLock"));
-    assert.ok(names.includes("Aziel Eliab Runtime"));
+    assert.ok(names.includes("Aziel Runtime"));
+    assert.ok(!names.includes("Aziel Eliab Runtime"));
     assert.ok(names.includes("AZHub"));
     assert.ok(names.includes("AZInterface"));
     assert.ok(ids.includes("aziel-runtime"));
@@ -673,12 +678,12 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /40 downloads/);
     assert.match(html, /7 uses/);
     assert.match(html, /42 uses/);
-    assert.match(html, /Sorted Plain A–Z → Gate A–Z → Lock A–Z/);
-    assert.match(html, /Full Aziel Eliab suite/);
-    assert.match(html, /Suite mesh default off/);
-    assert.match(html, /href="\/runtime\/v1\/mesh"/);
-    assert.match(html, /anon-broadcast is a local communique style tool/);
-    assert.match(html, /not a publish path on godlock\.uk/);
+    assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+    assert.doesNotMatch(html, /<h2>Runtime<\/h2>/);
+    assert.doesNotMatch(html, /Full Aziel Eliab suite/);
+    assert.doesNotMatch(html, /catalog engines plus/);
+    assert.doesNotMatch(html, /Suite: <a href="#aziel-runtime">/);
+    assert.doesNotMatch(html, /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
     assert.doesNotMatch(html, /href="https:\/\/github\.com\/AzielEliab\/anon-broadcast"/);
     assert.match(topNav("/software"), /href="\/runtime">Runtime<\/a>/);
     assert.match(html, /Specified Fit \/ GodLock score/);
@@ -845,14 +850,16 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /<title>Software — GodLock<\/title>/);
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
     assert.match(html, /Invoke via Runtime/);
-    assert.match(html, /every live aziel-runtime catalog engine plus aziel-runtime \/ FragGate/);
+    assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+    assert.match(html, /aziel-runtime \(Aziel Runtime\)/);
     assert.match(html, /href="\/runtime\/mcp">MCP<\/a>/);
-    assert.match(html, /Suite mesh default off/);
-    assert.match(html, /href="\/runtime\/v1\/mesh">\/runtime\/v1\/mesh<\/a>/);
     assert.match(html, /QNM-BUILD-1\.0/);
-    assert.match(html, /anon-broadcast is a local communique style tool/);
-    assert.match(html, /not a publish path on godlock\.uk/);
-    assert.match(html, /no ffmpeg farm/);
+    assert.doesNotMatch(html, /<h2>Runtime<\/h2>/);
+    assert.doesNotMatch(html, /every live aziel-runtime catalog engine plus aziel-runtime \/ FragGate/);
+    assert.doesNotMatch(html, /catalog engines plus/);
+    assert.doesNotMatch(html, /Suite: <a href="#aziel-runtime">/);
+    assert.doesNotMatch(html, /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
+    assert.doesNotMatch(html, /Aziel Eliab Runtime \d+\.\d+(?:\.\d+)? FragGate/);
     assert.doesNotMatch(html, /href="https:\/\/github\.com\/AzielEliab\/anon-broadcast"/);
     assert.match(html, /Worker<\/a>/);
     assert.doesNotMatch(html, /Catalog unavailable/);
@@ -904,7 +911,9 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(cite.software_product_count >= CATALOG_PRODUCT_COUNT);
     const llms = llmsDoc();
     assert.match(llms, /Software lists the full live aziel-runtime catalog/);
-    assert.match(defaultDescription("software"), /every live aziel-runtime catalog engine plus aziel-runtime \/ FragGate/);
+    assert.match(defaultDescription("software"), /aziel-runtime \(Aziel Runtime\)/);
+    assert.doesNotMatch(defaultDescription("software"), /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
+    assert.doesNotMatch(defaultDescription("runtime"), /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
   });
 
   it("parses uses and download counters when the Worker publishes them", async () => {
@@ -913,7 +922,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.deepEqual(parseCounterDoc({ project: "azbrowser", views: 7, downloads: 2, total: 2 }), { downloads: 2, views: 7, uses: null });
     const counted = await attachCatalogCounters([
       { slug: "godlock", name: "GodLock", download: "https://godlock-download-tracker.vibelock.workers.dev/download" },
-      { slug: "aziel-runtime", name: "Aziel Eliab Runtime" },
+      { slug: "aziel-runtime", name: "Aziel Runtime" },
     ], {}, {
       runtimeUses: 12,
       counterFetch: async (url) => {
@@ -1223,5 +1232,32 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /<h3>AZNet<\/h3>/);
     assert.match(html, /Separate software; functional-order pair with AZBrowser\./);
     assert.doesNotMatch(html, /Separate engine/);
+  });
+
+  it("names aziel-runtime Aziel Runtime and never mashes runtime version with FragGate", () => {
+    assert.equal(stripRuntimeFragGateMash("Aziel Eliab Runtime 1.6.15 FragGate door"), "Aziel Runtime");
+    assert.equal(stripRuntimeFragGateMash("runtime 1.6.15 FragGate"), "aziel-runtime");
+    assert.equal(stripRuntimeFragGateMash("FragGate 1.6.15 door"), "aziel-runtime door");
+    const mashed = hubProductCopy({
+      slug: "aziel-runtime",
+      name: "Aziel Eliab Runtime",
+      one_line: "Aziel Eliab Runtime 1.6.15 FragGate door. One door — discover, route, refuse.",
+    });
+    assert.equal(mashed.name, "Aziel Runtime");
+    assert.equal(mashed.one_line, "Aziel Runtime. One door — discover, route, refuse.");
+    assert.doesNotMatch(mashed.one_line, /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
+    const html = softwareBody({
+      products: [{ slug: "aziel-runtime", name: "Aziel Eliab Runtime", one_line: "runtime 1.6.15 FragGate mash" }],
+    });
+    assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+    assert.match(html, /<h3>Aziel Runtime<\/h3>/);
+    assert.doesNotMatch(html, /Aziel Eliab Runtime/);
+    assert.doesNotMatch(html, /runtime 1\.6\.15 FragGate/i);
+    const families = softwareSuite(CATALOG_FALLBACK_PRODUCTS).map((p) => p.family);
+    const lastPlain = families.lastIndexOf("plain");
+    const firstGate = families.indexOf("gate");
+    const firstLock = families.indexOf("lock");
+    assert.ok(lastPlain < firstGate);
+    assert.ok(firstGate < firstLock);
   });
 });

@@ -4,12 +4,12 @@
  */
 import {
   headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
-  AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH, PUBLIC_RUNTIME,
-  AI_CLIENTS_SENTENCE, RUNTIME_VERSION, LIBRARY_RUNTIME, FRAGGATE_KERNEL, GITHUB_RUNTIME,
+  AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
+  AI_CLIENTS_SENTENCE,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
-import { softwareSuite, invokeHref, workerHref } from "./catalog.js";
+import { softwareSuite, invokeHref, workerHref, stripRuntimeFragGateMash } from "./catalog.js";
 
 export const CSS = `
 :root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
@@ -28,6 +28,7 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;lin
 .about-aziel a{color:var(--royal)}
 .about-aziel a:hover{color:var(--gold)}
 .about-sign{font-weight:700;margin-top:18px}
+.soft-heading{margin:4px 0 14px;font-size:22px;letter-spacing:-.02em}
 .soft-grid{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 18px}
 .soft-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
 .soft-card h3{margin:0 0 6px;font-size:18px}
@@ -352,8 +353,6 @@ export function azielEliabText() {
 export function softwareBody({ products, extras } = {}) {
   const list = softwareSuite(products, extras);
   const featured = new Set(["godlock", "aziel-runtime", "fraggate", "azieltether"]);
-  const catalogN = list.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "fraggate").length;
-  const jumps = list.map((p) => `<a href="#${esc(p.slug)}">${esc(p.slug)}</a>`).join(" · ");
   const cards = list.map((p) => {
     const slug = String(p.slug || "");
     const feat = featured.has(slug);
@@ -374,21 +373,9 @@ export function softwareBody({ products, extras } = {}) {
       `<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>`,
       kernel,
     ].filter(Boolean).join(" ");
-    return `<article class="soft-card${feat ? " featured" : ""}" id="${esc(slug)}" data-family="${esc(family)}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(p.name || slug)}</h3><div class="soft-meta">${ver}${dl}${views}${uses}</div><p>${esc(hideInternalDetermination(p.one_line || ""))}</p><p class="soft-links">${links}</p></article>`;
+    return `<article class="soft-card${feat ? " featured" : ""}" id="${esc(slug)}" data-family="${esc(family)}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(stripRuntimeFragGateMash(p.name || slug))}</h3><div class="soft-meta">${ver}${dl}${views}${uses}</div><p>${esc(stripRuntimeFragGateMash(hideInternalDetermination(p.one_line || "")))}</p><p class="soft-links">${links}</p></article>`;
   }).join("");
-  const countLine = catalogN
-    ? ` ${esc(catalogN)} catalog engines plus aziel-runtime / FragGate.`
-    : "";
-  return `<div class="card"><h2>Runtime</h2>
-<p>Invoke Aziel Eliab software through the same-origin FragGate door (${esc(RUNTIME_VERSION)}). OpenAPI and MCP live at <a href="${esc(RUNTIME_PATH)}">${esc(PUBLIC_RUNTIME)}</a>. Related: <a href="${esc(LIBRARY_RUNTIME)}">library /runtime</a> · <a href="${esc(CATALOG + "/")}">origin catalog</a> · kernel <a href="${esc(FRAGGATE_KERNEL)}">FragGate</a>.</p>
-<p class="actions"><a class="button" href="${esc(RUNTIME_PATH)}">Invoke via Runtime</a>
-<a class="button ghost" href="${esc(RUNTIME_PATH + "/openapi.json")}">OpenAPI</a>
-<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>
-<a class="button ghost" href="${esc(RUNTIME_PATH + "/v1/skill")}">Skill</a>
-<a class="button ghost" href="${esc(GITHUB_RUNTIME)}">aziel-runtime</a>
-<a class="button ghost" href="${esc(FRAGGATE_KERNEL)}">FragGate</a></p></div>
-<p class="muted">Full Aziel Eliab suite from the live <a href="${esc(RUNTIME_PATH + "/v1/software")}">same-origin /v1/software</a> catalog (origin <a href="${esc(CATALOG + "/v1/software")}">aziel-runtime /v1/software</a>; fallback <a href="${esc(RUNTIME_PATH + "/v1/fraggate/list")}">FragGate list</a>), matching Digital Library Software completeness. GitHub and runtime drops refresh this tab without hand copy. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). AZBrowser, AZNet, AZHub, and AZInterface are separate Plain cards (never nest Hub with Interface). FragGate is its own Gate card (A–Z with DecisionGATE). ${esc(AI_CLIENTS_SENTENCE)} Suite mesh default off (QNM-BUILD-1.0; live|locked|isolated counts only; no Node Gate; no auto-heal; not an anonymity network). MCP/FragGate: <a href="${esc(RUNTIME_PATH + "/v1/mesh")}">/runtime/v1/mesh</a> · <a href="${esc(RUNTIME_PATH + "/mcp")}">/runtime/mcp</a>. anon-broadcast is a local communique style tool — not a publish path on godlock.uk, not hosted here, no ffmpeg farm. Counted downloads and views stay on each product Worker <code>/count</code>; API uses show when the Worker or <a href="${esc(RUNTIME_PATH + "/v1/uses")}">/runtime/v1/uses</a> publishes them.${countLine} Identity is Aziel Eliab only.</p>
-<p class="muted">Suite: ${jumps}</p>
+  return `<h2 class="soft-heading">Downloadable software</h2>
 <div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
 }
 

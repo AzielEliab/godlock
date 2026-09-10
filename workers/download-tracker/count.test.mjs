@@ -144,6 +144,8 @@ describe("SEO / MCP discoverability", () => {
     assert.match(sitemap, /\/llms\.txt/);
     assert.match(sitemap, /aziel-runtime\.vibelock\.workers\.dev\/v1\/software/);
     assert.match(sitemap, /aziel-runtime\.vibelock\.workers\.dev\/v1\/mesh/);
+    assert.match(sitemap, /aziel-runtime\.vibelock\.workers\.dev\/v1\/mesh\/status/);
+    assert.match(sitemap, /aziel-runtime\.vibelock\.workers\.dev\/v1\/mesh\/nodes/);
     assert.match(sitemap, /godlock\.uk\/mesh/);
     assert.match(llms, /Live software catalog/);
     assert.match(llms, /Suite mesh \(default off\)/);
@@ -159,6 +161,8 @@ describe("SEO / MCP discoverability", () => {
     assert.ok(sitemapXml().includes("/cite.json"));
     assert.equal(citeDoc().software_catalog, "https://aziel-runtime.vibelock.workers.dev/v1/software");
     assert.equal(citeDoc().mesh, "https://aziel-runtime.vibelock.workers.dev/v1/mesh");
+    assert.equal(citeDoc().mesh_status, "https://aziel-runtime.vibelock.workers.dev/v1/mesh/status");
+    assert.equal(citeDoc().mesh_nodes, "https://aziel-runtime.vibelock.workers.dev/v1/mesh/nodes");
     assert.equal(citeDoc().mesh_spec, "QNM-BUILD-1.0");
     assert.equal(citeDoc().mesh_default_off, true);
     assert.equal(citeDoc().mesh_node_gate, false);

@@ -104,24 +104,87 @@ export function personNode() {
     "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#aziel-eliab",
     name: AUTHOR,
     alternateName: [AUTHOR_AKA],
+    identifier: AUTHOR,
     url: CANON_HOST + AZIEL_ELIAB_PATH,
+    image: SIGIL,
+    jobTitle: "Author",
+    description: "Author of GodLock. Identity is Aziel Eliab only. Aziel Elroi Eliab is SEO alternateName only.",
+    knowsAbout: [SITE, "FragGate", "Aziel Runtime"],
     sameAs: [LIBRARY_AZIEL, AUTHOR_GITHUB, GITHUB],
   };
 }
 
 /** Unique <title> / OG / Twitter strings. Home must not render "GodLock — GodLock". */
 export function documentTitle(title, kind) {
-  if (kind === "home" || title === SITE) return SITE + " — Specified Fit, Not Pretty Spirals";
-  if (kind === "software") return "Softwares — " + SITE;
-  if (kind === "aziel") return AUTHOR + " — " + SITE;
+  if (kind === "home" || title === SITE) return SITE + " by " + AUTHOR + " — Specified Fit, Not Pretty Spirals";
+  if (kind === "software") return AUTHOR + " Softwares — " + SITE;
+  if (kind === "aziel") return "About " + AUTHOR + " — " + SITE;
   if (kind === "reason") return "Specified Fit, Not Pretty Spirals — " + SITE;
   if (kind === "verify") return "Verify — " + SITE;
   if (kind === "donate") return "Donate — " + SITE;
-  if (kind === "runtime") return "Runtime — " + SITE;
+  if (kind === "runtime") return "Aziel Runtime FragGate door — " + SITE;
   if (kind === "notfound") return "Not found — " + SITE;
   const raw = String(title || SITE).trim();
+  if (new RegExp("\\b" + SITE + "\\b", "i").test(raw) && new RegExp(AUTHOR, "i").test(raw)) return raw;
   if (new RegExp("\\b" + SITE + "\\b", "i").test(raw)) return raw;
   return raw + " — " + SITE;
+}
+
+/** Softwares-tab slugs for sitemap anchors + CollectionPage ItemList. Not a second FragGate door. */
+export const SOFTWARE_INDEX = [
+  ["aziel-runtime", "Aziel Runtime"],
+  ["fraggate", "FragGate"],
+  ["4dmap", "4DMap"],
+  ["embryolock", "EmbryoLock"],
+  ["azchat", "AZChat"],
+  ["vibelock", "VibeLock"],
+  ["veillock", "VeilLock"],
+  ["codelock", "CodeLock"],
+  ["godlock", "GodLock"],
+  ["shadowlock", "ShadowLock"],
+  ["temporallock", "TemporalLock"],
+  ["forgereceipts", "ForgeReceipts"],
+  ["decisiongate", "DecisionGATE"],
+  ["zsolver", "ZionPattern Solver"],
+  ["azos", "AZ-OS"],
+  ["glossafilter", "Glossa Filter"],
+  ["miragegrid", "MirageGrid"],
+  ["staticclock", "StaticClock"],
+  ["chronolock", "ChronoLock"],
+  ["postking", "Post-King Chess"],
+  ["azclce", "AZ-CLCE"],
+  ["azcoherence", "AZCoherence"],
+  ["ark", "The ARK"],
+  ["azai", "AZAI"],
+  ["spectrallock", "SpectralLock"],
+  ["azbot", "AZBot"],
+  ["employeelock", "EmployeeLock"],
+  ["foldlock", "FoldLock"],
+  ["whistlelock", "WhistleLock"],
+  ["trajectorylock", "TrajectoryLock"],
+  ["mialock", "M.I.A.Lock"],
+  ["azieltether", "AzielTether"],
+  ["peacelock", "PeaceLock"],
+  ["azmail", "AZMail"],
+  ["azbrowser", "AZBrowser"],
+  ["aznet", "AZNet"],
+  ["azhub", "AZHub"],
+  ["azinterface", "AZInterface"],
+  ["aziel-corpus", "Aziel Digital Library"],
+].map(([slug, name]) => ({ slug, name }));
+
+export function softwareIndexItems(products) {
+  const seen = new Set();
+  const out = [];
+  const push = (slug, name) => {
+    const s = String(slug || "").trim();
+    if (!s || seen.has(s)) return;
+    seen.add(s);
+    out.push({ slug: s, name: String(name || s) });
+  };
+  for (const p of SOFTWARE_INDEX) push(p.slug, p.name);
+  for (const p of Array.isArray(products) ? products : []) push(p && p.slug, p && p.name);
+  return out;
 }
 
 export function isIndexCrawler(ua) {
@@ -129,11 +192,11 @@ export function isIndexCrawler(ua) {
 }
 
 export function defaultDescription(kind) {
-  if (kind === "verify") return hideInternalDetermination("Verify the GodLock.uk hash-chained ledger. Author Aziel Eliab.");
+  if (kind === "verify") return hideInternalDetermination("Verify the public GodLock.uk hash-chained ledger. Append-only receipts. Author Aziel Eliab.");
   if (kind === "receipt") return hideInternalDetermination("A GodLock.uk receipt. Append-only. Author Aziel Eliab.");
   if (kind === "aziel") {
     return hideInternalDetermination(
-      "Aziel Eliab on GodLock. Specified Fit, Not Pretty Spirals. A debate with no record becomes a pulpit. Receipt, intelligent design stress-test. Identity is Aziel Eliab only.",
+      "About Aziel Eliab, author of GodLock. Specified Fit, Not Pretty Spirals. A debate with no record becomes a pulpit. Receipt, intelligent design stress-test. Identity is Aziel Eliab only.",
     );
   }
   if (kind === "reason") {
@@ -143,7 +206,7 @@ export function defaultDescription(kind) {
   }
   if (kind === "software") {
     return hideInternalDetermination(
-      "Downloadable Aziel Eliab software on GodLock.uk: aziel-runtime (Aziel Runtime) and the live catalog. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock). FragGate is its own Gate card. Worker, GitHub, and /runtime tethers. Uses and download counters when published. Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
+      "Aziel Eliab Softwares on GodLock.uk. Live catalog Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock): aziel-runtime (Aziel Runtime), FragGate, and every hosted card. Worker, GitHub, and /runtime tethers. Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
   if (kind === "runtime") {
@@ -231,7 +294,24 @@ function godlockSoftwareNode(person) {
   };
 }
 
-function jsonLd(title, path, description, kind) {
+function softwareItemList(products) {
+  const items = softwareIndexItems(products);
+  return {
+    "@type": "ItemList",
+    "@id": CANON_HOST + SOFTWARE_PATH + "#catalog",
+    name: AUTHOR + " Softwares",
+    itemListOrder: "https://schema.org/ItemListOrderAscending",
+    numberOfItems: items.length,
+    itemListElement: items.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: CANON_HOST + SOFTWARE_PATH + "#" + p.slug,
+      name: p.name,
+    })),
+  };
+}
+
+function jsonLd(title, path, description, kind, products) {
   const person = personNode();
   const website = websiteNode(person, description);
   const software = godlockSoftwareNode(person);
@@ -247,20 +327,26 @@ function jsonLd(title, path, description, kind) {
       url: CANON_HOST + "/",
       description,
       isPartOf: { "@id": website["@id"] },
-      about: { "@id": software["@id"] },
+      about: [{ "@id": software["@id"] }, { "@id": person["@id"] }],
       author: person,
+      publisher: person,
     });
   }
   if (kind === "software") {
-    graph.push({
+    const list = softwareItemList(products);
+    graph.push(list, {
       "@type": "CollectionPage",
       "@id": CANON_HOST + SOFTWARE_PATH + "#page",
-      name: "Softwares",
+      name: AUTHOR + " Softwares",
       url: CANON_HOST + SOFTWARE_PATH,
       description: defaultDescription("software"),
+      inLanguage: "en",
       author: person,
+      publisher: person,
       isPartOf: { "@id": website["@id"] },
-      mainEntity: { "@id": software["@id"] },
+      about: { "@id": person["@id"] },
+      mainEntity: { "@id": list["@id"] },
+      relatedLink: [PUBLIC_RUNTIME, CANON_HOST + "/v1/software", LIBRARY_RUNTIME],
     });
   }
   if (kind === "reason") {
@@ -275,20 +361,29 @@ function jsonLd(title, path, description, kind) {
     graph.push({
       "@type": ["AboutPage", "ProfilePage"],
       "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#page",
-      name: AUTHOR,
+      name: "About " + AUTHOR,
+      headline: AUTHOR,
       url: CANON_HOST + AZIEL_ELIAB_PATH,
       description: defaultDescription("aziel"),
+      inLanguage: "en",
+      image: SIGIL,
       about: { "@id": person["@id"] },
       mainEntity: { "@id": person["@id"] },
       isPartOf: { "@id": website["@id"] },
       author: person,
+      publisher: person,
+      relatedLink: [LIBRARY_AZIEL, CANON_HOST + REASON_PATH, CANON_HOST + SOFTWARE_PATH, AUTHOR_GITHUB],
+      mentions: [
+        { "@type": "CreativeWork", name: "Specified Fit, Not Pretty Spirals", url: CANON_HOST + REASON_PATH },
+        { "@id": software["@id"] },
+      ],
     });
   }
   if (kind === "verify") {
     graph.push({
       "@type": "WebPage",
       "@id": CANON_HOST + "/verify#page",
-      name: "Verify",
+      name: documentTitle("Verify", "verify"),
       url: CANON_HOST + "/verify",
       description: defaultDescription("verify"),
       isPartOf: { "@id": website["@id"] },
@@ -315,7 +410,7 @@ export function headMeta(opts) {
   const docTitle = documentTitle(title, kind);
   const description = hideInternalDetermination(opts.description || defaultDescription(kind));
   const url = CANON_HOST + path;
-  const ld = jsonLd(title, path, description, kind);
+  const ld = jsonLd(title, path, description, kind, opts.products);
   const ldOpen = "<" + "script type=" + Q + "application/ld+json" + Q + ">";
   const ldClose = "</" + "script>";
   const keywords = defaultKeywords(kind);
@@ -394,6 +489,9 @@ export const AI_CRAWLER_AGENTS = uniquePreserve([
   "Grok",
   "Venice",
   "Googlebot",
+  "Googlebot-Image",
+  "Google-InspectionTool",
+  "Storebot-Google",
   "Google-Extended",
   "GoogleOther",
   "Google-CloudVertexBot",
@@ -413,6 +511,8 @@ export const AI_CRAWLER_AGENTS = uniquePreserve([
   "Amazonbot",
   "DuckDuckBot",
   "DuckAssistBot",
+  "DuckAssist",
+  "xAI",
   "MistralAI-User",
   "YouBot",
   "CCBot",
@@ -488,68 +588,94 @@ export function robotsTxt() {
     "Content-Signal: search=yes, ai-input=yes, ai-train=yes",
   ].concat(PUBLIC_ALLOW.filter((p) => p !== "/").map((p) => "Allow: " + p));
   const bots = AI_CRAWLER_AGENTS.flatMap((agent) => ["", "User-agent: " + agent, "Allow: /"]);
-  return header.concat(star).concat(bots).concat(["", "Sitemap: " + CANON_HOST + "/sitemap.xml", ""]).join("\n");
+  const maps = uniquePreserve([
+    CANON_HOST + "/sitemap.xml",
+    CATALOG + "/sitemap.xml",
+    CATALOG + "/sitemap-index.xml",
+    LIBRARY + "/sitemap.xml",
+    "https://www.azieleliab.com/sitemap.xml",
+    "https://godlock-download-tracker.vibelock.workers.dev/sitemap.xml",
+  ].concat(SOFTWARE_INDEX.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "aziel-corpus" && p.slug !== "azchat").map((p) => {
+    return "https://" + p.slug + "-download-tracker.vibelock.workers.dev/sitemap.xml";
+  })));
+  return header.concat(star).concat(bots).concat([""]).concat(maps.map((u) => "Sitemap: " + u)).concat([""]).join("\n");
 }
 
-export async function sitemapXml(env) {
-  const locs = [
-    CANON_HOST + "/",
-    CANON_HOST + "/verify",
-    CANON_HOST + SOFTWARE_PATH,
-    CANON_HOST + SOFTWARE_PATH + "#aziel-runtime",
-    CANON_HOST + SOFTWARE_PATH + "#fraggate",
-    CANON_HOST + SOFTWARE_PATH + "#azbrowser",
-    CANON_HOST + SOFTWARE_PATH + "#aznet",
-    CANON_HOST + SOFTWARE_PATH + "#azhub",
-    CANON_HOST + SOFTWARE_PATH + "#azinterface",
-    CANON_HOST + SOFTWARE_PATH + "#azcoherence",
-    CANON_HOST + SOFTWARE_PATH + "#azclce",
-    CANON_HOST + SOFTWARE_PATH + "#godlock",
-    CANON_HOST + "/v1/software",
-    PUBLIC_RUNTIME,
-    PUBLIC_RUNTIME + "/v1/software",
-    PUBLIC_RUNTIME + "/v1/mesh",
-    PUBLIC_RUNTIME + "/v1/mesh/status",
-    PUBLIC_RUNTIME + "/v1/mesh/nodes",
-    PUBLIC_RUNTIME + "/v1/fraggate/list",
-    PUBLIC_RUNTIME + "/v1/update/check",
-    PUBLIC_RUNTIME + "/v1/runtime.json",
-    PUBLIC_RUNTIME + "/v1/uses",
-    PUBLIC_RUNTIME + "/openapi.json",
-    PUBLIC_RUNTIME + "/llms.txt",
-    PUBLIC_RUNTIME + "/cite.json",
-    PUBLIC_RUNTIME + "/mcp",
-    PUBLIC_RUNTIME + "/v1/skill",
-    CANON_HOST + "/openapi.json",
-    CANON_HOST + REASON_PATH,
-    CANON_HOST + DONATE_PATH,
-    DONATE_CANONICAL,
-    CANON_HOST + AZIEL_ELIAB_PATH,
-    CANON_HOST + "/health",
-    CANON_HOST + "/mesh",
-    CANON_HOST + "/cite.json",
-    CANON_HOST + "/llms.txt",
-    CANON_HOST + "/ai.txt",
-    GITHUB,
-    DOWNLOAD,
-    LIBRARY + "/",
-    LIBRARY_AZIEL,
-    LIBRARY_RUNTIME,
-    CATALOG + "/",
-    CATALOG + "/v1/software",
-    CATALOG + "/v1/fraggate/list",
-    CATALOG + "/v1/update/check",
-    CATALOG + "/v1/catalog.json",
-  ];
+function sitemapUrl(loc, lastmod, changefreq, priority) {
+  return [
+    "  <url>",
+    "    <loc>" + loc + "</loc>",
+    "    <lastmod>" + lastmod + "</lastmod>",
+    "    <changefreq>" + changefreq + "</changefreq>",
+    "    <priority>" + priority + "</priority>",
+    "  </url>",
+  ].join("\n");
+}
+
+export async function sitemapXml(env, extras = {}) {
+  const lastmod = new Date().toISOString().slice(0, 10);
+  const seen = new Set();
+  const rows = [];
+  const add = (loc, priority, changefreq) => {
+    if (!loc || seen.has(loc)) return;
+    seen.add(loc);
+    rows.push(sitemapUrl(loc, lastmod, changefreq || "weekly", priority || "0.5"));
+  };
+  add(CANON_HOST + "/", "1.0", "daily");
+  add(CANON_HOST + SOFTWARE_PATH, "0.95", "daily");
+  add(CANON_HOST + AZIEL_ELIAB_PATH, "0.95", "weekly");
+  add(CANON_HOST + "/verify", "0.85", "daily");
+  add(CANON_HOST + DONATE_PATH, "0.7", "monthly");
+  add(CANON_HOST + "/cite.json", "0.8", "weekly");
+  add(CANON_HOST + "/llms.txt", "0.8", "weekly");
+  add(CANON_HOST + "/ai.txt", "0.8", "weekly");
+  add(CANON_HOST + REASON_PATH, "0.8", "weekly");
+  add(CANON_HOST + "/v1/software", "0.7", "daily");
+  add(CANON_HOST + "/openapi.json", "0.6", "weekly");
+  add(CANON_HOST + "/robots.txt", "0.4", "weekly");
+  add(CANON_HOST + "/health", "0.3", "daily");
+  add(CANON_HOST + "/mesh", "0.4", "daily");
+  add(DONATE_CANONICAL, "0.5", "monthly");
+  add(PUBLIC_RUNTIME, "0.9", "daily");
+  add(PUBLIC_RUNTIME + "/v1/software", "0.85", "daily");
+  add(PUBLIC_RUNTIME + "/v1/fraggate/list", "0.8", "daily");
+  add(PUBLIC_RUNTIME + "/v1/mesh", "0.5", "daily");
+  add(PUBLIC_RUNTIME + "/v1/mesh/status", "0.45", "daily");
+  add(PUBLIC_RUNTIME + "/v1/mesh/nodes", "0.45", "daily");
+  add(PUBLIC_RUNTIME + "/v1/update/check", "0.5", "daily");
+  add(PUBLIC_RUNTIME + "/v1/runtime.json", "0.6", "weekly");
+  add(PUBLIC_RUNTIME + "/v1/uses", "0.4", "daily");
+  add(PUBLIC_RUNTIME + "/openapi.json", "0.7", "weekly");
+  add(PUBLIC_RUNTIME + "/llms.txt", "0.6", "weekly");
+  add(PUBLIC_RUNTIME + "/cite.json", "0.6", "weekly");
+  add(PUBLIC_RUNTIME + "/mcp", "0.7", "weekly");
+  add(PUBLIC_RUNTIME + "/v1/skill", "0.6", "weekly");
+  add(GITHUB, "0.5", "weekly");
+  add(DOWNLOAD, "0.6", "weekly");
+  add(LIBRARY + "/", "0.6", "weekly");
+  add(LIBRARY_AZIEL, "0.7", "weekly");
+  add(LIBRARY_RUNTIME, "0.6", "weekly");
+  add(CATALOG + "/", "0.6", "daily");
+  add(CATALOG + "/v1/software", "0.7", "daily");
+  add(CATALOG + "/v1/fraggate/list", "0.6", "daily");
+  add(CATALOG + "/v1/update/check", "0.4", "daily");
+  add(CATALOG + "/v1/catalog.json", "0.5", "daily");
+  for (const p of softwareIndexItems(extras.products)) {
+    add(CANON_HOST + SOFTWARE_PATH + "#" + p.slug, "0.55", "weekly");
+    add(PUBLIC_RUNTIME + "/v1/fraggate/describe?slug=" + encodeURIComponent(p.slug), "0.45", "weekly");
+    add(PUBLIC_RUNTIME + "/v1/pull/" + encodeURIComponent(p.slug), "0.4", "weekly");
+    if (p.slug !== "aziel-runtime" && p.slug !== "aziel-corpus" && p.slug !== "azchat") {
+      add("https://" + p.slug + "-download-tracker.vibelock.workers.dev/", "0.35", "weekly");
+    }
+  }
   try {
-    const rows = (await env.DB.prepare(
+    const recs = (await env.DB.prepare(
       "SELECT id FROM receipts WHERE isolated=0 ORDER BY created_utc DESC LIMIT 200"
     ).all()).results || [];
-    for (const r of rows) locs.push(CANON_HOST + "/receipt/" + encodeURIComponent(r.id));
+    for (const r of recs) add(CANON_HOST + "/receipt/" + encodeURIComponent(r.id), "0.3", "monthly");
   } catch { /* empty db is fine */ }
-  const lastmod = new Date().toISOString().slice(0, 10);
   return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    + locs.map((u) => "  <url><loc>" + u + "</loc><lastmod>" + lastmod + "</lastmod></url>").join("\n")
+    + rows.join("\n")
     + "\n</urlset>\n";
 }
 

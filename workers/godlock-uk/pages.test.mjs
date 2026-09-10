@@ -142,7 +142,7 @@ describe("Aziel Eliab page chrome", () => {
 
   it("renders crawlable manifesto HTML with a Digital Library cross-link", () => {
     const html = page("Aziel Eliab", azielEliabBody(), { path: AZIEL_ELIAB_PATH, kind: "aziel" });
-    assert.match(html, /<title>Aziel Eliab — GodLock<\/title>/);
+    assert.match(html, /<title>About Aziel Eliab — GodLock<\/title>/);
     assert.match(html, /name="robots" content="index,follow"/);
     assert.match(html, /rel="canonical" href="https:\/\/godlock\.uk\/AzielEliab"/);
     assert.match(html, /name="keywords" content="Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test"/);
@@ -165,6 +165,12 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(about);
     assert.ok([].concat(about["@type"]).includes("AboutPage"));
     assert.ok([].concat(about["@type"]).includes("ProfilePage"));
+    assert.equal(about.name, "About Aziel Eliab");
+    assert.ok((about.relatedLink || []).includes(LIBRARY_AZIEL));
+    assert.ok((about.relatedLink || []).includes(CANON_HOST + "/reason"));
+    assert.ok((about.mentions || []).some((m) => m && m.name === "Specified Fit, Not Pretty Spirals"));
+    assert.equal(person.identifier, "Aziel Eliab");
+    assert.ok((person.knowsAbout || []).includes("GodLock"));
   });
 });
 
@@ -173,7 +179,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(defaultDescription("aziel"), /Aziel Eliab/);
     const meta = headMeta({ title: "Aziel Eliab", path: "/AzielEliab", kind: "aziel" });
     assert.match(meta, /name="robots" content="index,follow"/);
-    assert.match(meta, /og:title" content="Aziel Eliab — GodLock"/);
+    assert.match(meta, /og:title" content="About Aziel Eliab — GodLock"/);
     const person = personNode();
     assert.deepEqual(person.sameAs, [LIBRARY_AZIEL, AUTHOR_GITHUB, GITHUB]);
   });
@@ -192,7 +198,10 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/openapi\.json/);
     assert.match(robots, /Content-Signal: search=yes, ai-input=yes, ai-train=yes/);
     assert.match(robots, /User-agent: Googlebot\nAllow: \//);
+    assert.match(robots, /User-agent: Googlebot-Image\nAllow: \//);
+    assert.match(robots, /User-agent: DuckAssist\nAllow: \//);
     assert.match(robots, /User-agent: Cloudflare-AI-Search\nAllow: \//);
+    assert.match(robots, /Sitemap: https:\/\/aziel-runtime\.vibelock\.workers\.dev\/sitemap\.xml/);
     assert.match(robots, /User-agent: GPTBot\nAllow: \//);
     assert.match(robots, /User-agent: ChatGPT-User\nAllow: \//);
     assert.match(robots, /User-agent: OAI-SearchBot\nAllow: \//);
@@ -212,6 +221,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(new Set(AI_CRAWLER_AGENTS).size, AI_CRAWLER_AGENTS.length);
     for (const agent of [
       "Googlebot",
+      "Googlebot-Image",
+      "DuckAssist",
+      "xAI",
       "Cloudflare-AI-Search",
       "GPTBot",
       "ChatGPT-User",
@@ -256,7 +268,13 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/donate"));
     assert.ok(xml.includes("https://www.azieleliab.com/donate"));
     assert.ok(xml.includes(CANON_HOST + "/AzielEliab"));
+    assert.ok(xml.includes("<changefreq>daily</changefreq>"));
+    assert.ok(xml.includes("<priority>1.0</priority>"));
+    assert.ok((xml.match(/<loc>/g) || []).length >= 80);
     assert.ok(xml.includes(CANON_HOST + "/software#fraggate"));
+    assert.ok(xml.includes(CANON_HOST + "/software#peacelock"));
+    assert.ok(xml.includes(CANON_HOST + "/software#4dmap"));
+    assert.ok(xml.includes(CANON_HOST + "/software#embryolock"));
     assert.ok(xml.includes(CANON_HOST + "/software#azbrowser"));
     assert.ok(xml.includes(CANON_HOST + "/software#aznet"));
     assert.ok(xml.includes(CANON_HOST + "/software#azhub"));
@@ -424,12 +442,12 @@ describe("Aziel Eliab SEO surfaces", () => {
 
 describe("priority page SEO", () => {
   it("keeps unique titles and does not suffix GodLock twice", () => {
-    assert.equal(documentTitle("GodLock", "home"), "GodLock — Specified Fit, Not Pretty Spirals");
-    assert.equal(documentTitle("Software", "software"), "Softwares — GodLock");
-    assert.equal(documentTitle("Aziel Eliab", "aziel"), "Aziel Eliab — GodLock");
+    assert.equal(documentTitle("GodLock", "home"), "GodLock by Aziel Eliab — Specified Fit, Not Pretty Spirals");
+    assert.equal(documentTitle("Software", "software"), "Aziel Eliab Softwares — GodLock");
+    assert.equal(documentTitle("Aziel Eliab", "aziel"), "About Aziel Eliab — GodLock");
     assert.equal(documentTitle("Verify", "verify"), "Verify — GodLock");
-    assert.match(headMeta({ title: "GodLock", path: "/", kind: "home" }), /og:title" content="GodLock — Specified Fit, Not Pretty Spirals"/);
-    assert.match(headMeta({ title: "Software", path: "/software", kind: "software" }), /og:title" content="Softwares — GodLock"/);
+    assert.match(headMeta({ title: "GodLock", path: "/", kind: "home" }), /og:title" content="GodLock by Aziel Eliab — Specified Fit, Not Pretty Spirals"/);
+    assert.match(headMeta({ title: "Software", path: "/software", kind: "software" }), /og:title" content="Aziel Eliab Softwares — GodLock"/);
     assert.doesNotMatch(headMeta({ title: "GodLock", path: "/", kind: "home" }), /GodLock — GodLock/);
   });
 
@@ -454,10 +472,15 @@ describe("priority page SEO", () => {
     }), mockEnv());
     assert.equal(res.status, 200);
     const html = await res.text();
-    assert.match(html, /<title>Softwares — GodLock<\/title>/);
+    assert.match(html, /<title>Aziel Eliab Softwares — GodLock<\/title>/);
     assert.match(html, /rel="canonical" href="https:\/\/godlock\.uk\/software"/);
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
-    assert.ok(ld["@graph"].some((n) => n["@type"] === "CollectionPage" && n.url === "https://godlock.uk/software"));
+    assert.ok(ld["@graph"].some((n) => n["@type"] === "CollectionPage" && n.url === "https://godlock.uk/software" && n.name === "Aziel Eliab Softwares"));
+    const list = ld["@graph"].find((n) => n["@type"] === "ItemList");
+    assert.ok(list);
+    assert.ok(list.numberOfItems >= 30);
+    assert.ok((list.itemListElement || []).some((it) => it.url === "https://godlock.uk/software#godlock"));
+    assert.ok((list.itemListElement || []).some((it) => it.url === "https://godlock.uk/software#fraggate"));
     assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>/);
   });
 });
@@ -486,7 +509,7 @@ describe("homepage stays a natural argument surface", () => {
     assert.match(html, /QNM-BUILD-1\.0/);
     assert.doesNotMatch(html, /id="node-gate"/);
     assert.match(html, /Not an anonymity network/);
-    assert.match(html, /<title>GodLock — Specified Fit, Not Pretty Spirals<\/title>/);
+    assert.match(html, /<title>GodLock by Aziel Eliab — Specified Fit, Not Pretty Spirals<\/title>/);
     assert.doesNotMatch(html, /<title>GodLock — GodLock<\/title>/);
     const homeLd = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "WebSite" && n["@id"] === "https://godlock.uk/#website"));
@@ -569,7 +592,7 @@ describe("Aziel Eliab routes", () => {
     const res = await worker.fetch(new Request("https://godlock.uk/AzielEliab"), mockEnv());
     assert.equal(res.status, 200);
     const html = await res.text();
-    assert.match(html, /<title>Aziel Eliab — GodLock<\/title>/);
+    assert.match(html, /<title>About Aziel Eliab — GodLock<\/title>/);
     assert.match(html, /index,follow/);
     assert.ok(html.includes(AZIEL_MANIFESTO[3]));
     assert.match(html, /Specified Fit, Not Pretty Spirals/);
@@ -982,7 +1005,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(ids.includes("azcoherence"));
     assert.ok(ids.includes("azclce"));
     assert.ok(ids.includes("peacelock"));
-    assert.match(html, /<title>Softwares — GodLock<\/title>/);
+    assert.match(html, /<title>Aziel Eliab Softwares — GodLock<\/title>/);
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
     assert.match(html, /Invoke via Runtime/);
     assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);

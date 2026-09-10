@@ -11,8 +11,11 @@ import {
   MESH_AUTO_HEAL,
   MESH_OPS,
   MESH_PATH,
+  MESH_STATUS_PATH,
+  MESH_NODES_PATH,
   MESH_LIST_PATH,
   MESH_JOIN_PATH,
+  MESH_LEAVE_PATH,
   MESH_HEARTBEAT_PATH,
   MESH_ENABLE_PATH,
   MESH_DISABLE_PATH,
@@ -43,6 +46,7 @@ function mockDbEnv(extra) {
       prepare() { return stmt; },
       async batch() { return []; },
     },
+    MESH_PROBE_ORIGIN: false,
     ...(extra || {}),
   };
 }
@@ -68,16 +72,20 @@ describe("mesh contract", () => {
     assert.equal(MESH_ANONYMITY_NETWORK, false);
     assert.equal(MESH_NODE_GATE, false);
     assert.equal(MESH_AUTO_HEAL, false);
-    assert.deepEqual(MESH_OPS, ["join", "heartbeat", "list", "enable", "disable"]);
+    assert.deepEqual(MESH_OPS, ["status", "nodes", "join", "heartbeat", "leave", "enable", "disable"]);
     assert.equal(MESH_PATH, "/v1/mesh");
-    assert.equal(MESH_LIST_PATH, "/v1/mesh/list");
+    assert.equal(MESH_STATUS_PATH, "/v1/mesh/status");
+    assert.equal(MESH_NODES_PATH, "/v1/mesh/nodes");
+    assert.equal(MESH_LIST_PATH, "/v1/mesh/nodes");
     assert.equal(MESH_JOIN_PATH, "/v1/mesh/join");
+    assert.equal(MESH_LEAVE_PATH, "/v1/mesh/leave");
     assert.equal(MESH_HEARTBEAT_PATH, "/v1/mesh/heartbeat");
     assert.equal(MESH_ENABLE_PATH, "/v1/mesh/enable");
     assert.equal(MESH_DISABLE_PATH, "/v1/mesh/disable");
     assert.equal(PUBLIC_MESH, "https://godlock.uk/runtime/v1/mesh");
     assert.equal(ANON_BROADCAST, "https://github.com/AzielEliab/anon-broadcast");
-    assert.equal(destFromRuntimePath("/runtime/v1/mesh/list", ""), "/v1/mesh/list");
+    assert.equal(destFromRuntimePath("/runtime/v1/mesh/status", ""), "/v1/mesh/status");
+    assert.equal(destFromRuntimePath("/runtime/v1/mesh/nodes", ""), "/v1/mesh/nodes");
     assert.equal(destFromRuntimePath("/runtime/v1/mesh/join", ""), "/v1/mesh/join");
     const ops = meshOpsDoc();
     assert.equal(ops.spec, "QNM-BUILD-1.0");
@@ -156,6 +164,20 @@ describe("parseMeshDoc", () => {
   });
 
   it("reads QNM-BUILD-1.0 live|locked|isolated counts and does not invent a peer-list rollup", () => {
+    const liveOk = parseMeshDoc({
+      ok: true,
+      code: "MESH-OK",
+      op: "status",
+      enabled: true,
+      bearers: ["suite-presence"],
+      rollup: { live: 37, locked: 0, isolated: 0 },
+      live_nodes: 37,
+      products: ["godlock", "azhub", "azinterface"],
+    });
+    assert.equal(liveOk.enabled, true);
+    assert.equal(liveOk.live_nodes, 37);
+    assert.deepEqual(liveOk.rollup, { live: 37, locked: 0, isolated: 0 });
+
     const qnm = parseMeshDoc({
       spec: "QNM-BUILD-1.0",
       enabled: true,
@@ -208,7 +230,10 @@ describe("publicMesh and status line", () => {
     assert.equal(pub.identity, "Aziel Eliab");
     assert.equal(pub.mcp, "/runtime/mcp");
     assert.equal(pub.fraggate, "/runtime/v1/fraggate/call");
-    assert.equal(pub.list, "https://godlock.uk/runtime/v1/mesh/list");
+    assert.equal(pub.status, "on");
+    assert.equal(pub.status_url, "https://godlock.uk/runtime/v1/mesh/status");
+    assert.equal(pub.list, "https://godlock.uk/runtime/v1/mesh/nodes");
+    assert.equal(pub.leave, "https://godlock.uk/runtime/v1/mesh/leave");
     assert.match(meshStatusLine(pub), /Suite mesh: on · live 2 · locked 0 · isolated 0/);
     assert.match(meshStatusLine(emptyMesh()), /Suite mesh: off \(default\)\. QNM-BUILD-1\.0/);
     assert.match(meshStatusLine(emptyMesh({ status: "unavailable" })), /unavailable/);
@@ -222,8 +247,8 @@ describe("fetchMeshSnapshot", () => {
       AZIEL_RUNTIME: {
         async fetch(req) {
           urls.push(String(req && req.url));
-          if (String(req && req.url).endsWith("/v1/mesh")) {
-            return new Response(JSON.stringify({ error: "not found" }), { status: 404 });
+          if (String(req && req.url).endsWith("/v1/mesh/list")) {
+            return new Response(JSON.stringify({ ok: false, code: "MESH-NOT-FOUND", spec: "QNM-BUILD-1.0" }), { status: 404 });
           }
           return new Response(JSON.stringify({
             enabled: true,
@@ -241,7 +266,84 @@ describe("fetchMeshSnapshot", () => {
     assert.equal(snap.enabled, true);
     assert.equal(snap.live_nodes, 5);
     assert.equal(snap.source, "service-binding");
-    assert.ok(urls[0].includes("/v1/mesh"));
+    assert.ok(urls[0].includes("/v1/mesh/status"));
+    assert.ok(urls.every((u) => !/\/v1\/mesh\/(enable|disable|join|heartbeat|leave|broadcast)/.test(u)));
+  });
+
+  it("prefers LIVE origin /v1/mesh/status over a stale binding rollup", async () => {
+    const env = {
+      AZIEL_RUNTIME: {
+        async fetch() {
+          return new Response(JSON.stringify({
+            code: "MESH-OK",
+            enabled: true,
+            live_nodes: 2,
+            rollup: { live: 2, locked: 0, isolated: 0 },
+          }), { headers: { "Content-Type": "application/json" } });
+        },
+      },
+    };
+    const originUrls = [];
+    const snap = await fetchMeshSnapshot(env, {
+      fetch: async (url) => {
+        originUrls.push(String(url));
+        return new Response(JSON.stringify({
+          ok: true,
+          code: "MESH-OK",
+          op: "status",
+          enabled: true,
+          bearers: ["suite-presence"],
+          live_nodes: 37,
+          rollup: { live: 37, locked: 0, isolated: 0 },
+        }), { headers: { "Content-Type": "application/json" } });
+      },
+    });
+    assert.equal(snap.enabled, true);
+    assert.equal(snap.live_nodes, 37);
+    assert.deepEqual(snap.rollup, { live: 37, locked: 0, isolated: 0 });
+    assert.equal(snap.source, "origin");
+    assert.ok(originUrls[0].includes("/v1/mesh/status"));
+    assert.ok(originUrls.every((u) => !u.includes("/enable")));
+  });
+
+  it("skips MESH-NOT-FOUND /list and reads /status", async () => {
+    const urls = [];
+    const env = {
+      AZIEL_RUNTIME: {
+        async fetch(req) {
+          const u = String(req && req.url);
+          urls.push(u);
+          if (u.includes("/v1/mesh/list")) {
+            return new Response(JSON.stringify({
+              ok: false,
+              code: "MESH-NOT-FOUND",
+              spec: "QNM-BUILD-1.0",
+              hint: "GET /v1/mesh /status /nodes",
+            }), { status: 404 });
+          }
+          if (u.includes("/v1/mesh/status")) {
+            return new Response(JSON.stringify({
+              ok: true,
+              code: "MESH-OK",
+              op: "status",
+              enabled: true,
+              live_nodes: 40,
+              rollup: { live: 40, locked: 0, isolated: 0 },
+            }), { headers: { "Content-Type": "application/json" } });
+          }
+          return new Response(JSON.stringify({ error: "not found" }), { status: 404 });
+        },
+      },
+    };
+    const snap = await fetchMeshSnapshot(env, {
+      fetch: async () => {
+        throw new Error("binding present");
+      },
+    });
+    assert.equal(snap.enabled, true);
+    assert.equal(snap.live_nodes, 40);
+    assert.ok(urls.some((u) => u.includes("/v1/mesh/status")));
+    assert.ok(!urls.some((u) => u.includes("/enable")));
   });
 
   it("probes HTTPS only when a fetch is injected and no binding is present", async () => {

@@ -99,6 +99,7 @@ function mockEnv() {
         return [];
       },
     },
+    MESH_PROBE_ORIGIN: false,
   };
 }
 
@@ -259,7 +260,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/runtime/mcp"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/software"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/mesh"));
-    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/mesh/list"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/mesh/status"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/mesh/nodes"));
+    assert.ok(!xml.includes(CANON_HOST + "/runtime/v1/mesh/list"));
     assert.ok(xml.includes(CANON_HOST + "/mesh"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/list"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/update/check"));
@@ -289,7 +292,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.runtime_openapi, CANON_HOST + "/runtime/openapi.json");
     assert.equal(cite.runtime_mcp, CANON_HOST + "/runtime/mcp");
     assert.equal(cite.runtime_mesh, CANON_HOST + "/runtime/v1/mesh");
-    assert.equal(cite.runtime_mesh_list, CANON_HOST + "/runtime/v1/mesh/list");
+    assert.equal(cite.runtime_mesh_status, CANON_HOST + "/runtime/v1/mesh/status");
+    assert.equal(cite.runtime_mesh_nodes, CANON_HOST + "/runtime/v1/mesh/nodes");
+    assert.equal(cite.runtime_mesh_list, CANON_HOST + "/runtime/v1/mesh/nodes");
     assert.equal(cite.mesh, CANON_HOST + "/mesh");
     assert.equal(cite.mesh_spec, "QNM-BUILD-1.0");
     assert.equal(cite.mesh_default_off, true);
@@ -340,6 +345,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /OpenAPI: https:\/\/godlock\.uk\/runtime\/openapi\.json/);
     assert.match(llms, /MCP: POST https:\/\/godlock\.uk\/runtime\/mcp/);
     assert.match(llms, /Suite mesh \(default off\): https:\/\/godlock\.uk\/runtime\/v1\/mesh/);
+    assert.match(llms, /GET \/v1\/mesh never enables/);
+    assert.match(llms, /Mesh status: https:\/\/godlock\.uk\/runtime\/v1\/mesh\/status/);
+    assert.match(llms, /Mesh nodes: https:\/\/godlock\.uk\/runtime\/v1\/mesh\/nodes/);
     assert.match(llms, /QNM-BUILD-1\.0 rollup: live\|locked\|isolated counts only/);
     assert.match(llms, /No Node Gate/);
     assert.match(llms, /No auto-heal/);
@@ -361,7 +369,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(spec.paths["/donate"]);
     assert.ok(spec.paths["/runtime/v1/software"]);
     assert.ok(spec.paths["/runtime/v1/mesh"]);
-    assert.ok(spec.paths["/runtime/v1/mesh/list"]);
+    assert.ok(spec.paths["/runtime/v1/mesh/status"]);
+    assert.ok(spec.paths["/runtime/v1/mesh/nodes"]);
+    assert.ok(!spec.paths["/runtime/v1/mesh/list"]);
     assert.ok(spec.paths["/runtime/v1/mesh/join"]);
     assert.ok(spec.paths["/mesh"]);
     assert.ok(spec.paths["/runtime/v1/update/check"]);

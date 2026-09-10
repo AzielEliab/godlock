@@ -45,6 +45,7 @@ function mockEnv() {
       prepare() { return stmt; },
       async batch() { return []; },
     },
+    MESH_PROBE_ORIGIN: false,
     RUNTIME_USES: { get: boom, put: boom, list: boom },
     ASSETS: {
       async fetch(request) {

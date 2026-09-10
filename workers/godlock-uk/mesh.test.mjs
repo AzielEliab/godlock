@@ -29,6 +29,10 @@ import {
   compactMeshNode,
   fetchMeshSnapshot,
   meshOpsDoc,
+  isOriginMeshReadPath,
+  originMeshWriteRefused,
+  hubMeshStatusDoc,
+  ORIGIN_MESH_READ_PATHS,
 } from "./src/mesh.js";
 import { destFromRuntimePath } from "./src/runtimeRoot.js";
 import { AUTHOR } from "./src/seo.js";
@@ -75,6 +79,12 @@ describe("mesh contract", () => {
     assert.deepEqual(MESH_OPS, ["status", "nodes", "join", "heartbeat", "leave", "enable", "disable"]);
     assert.equal(MESH_PATH, "/v1/mesh");
     assert.equal(MESH_STATUS_PATH, "/v1/mesh/status");
+    assert.deepEqual(ORIGIN_MESH_READ_PATHS, ["/v1/mesh", "/v1/mesh/status"]);
+    assert.equal(isOriginMeshReadPath("/v1/mesh"), true);
+    assert.equal(isOriginMeshReadPath("/v1/mesh/status"), true);
+    assert.equal(isOriginMeshReadPath("/v1/mesh/enable"), false);
+    assert.equal(originMeshWriteRefused().get_never_enables, true);
+    assert.equal(originMeshWriteRefused().enabled, false);
     assert.equal(MESH_NODES_PATH, "/v1/mesh/nodes");
     assert.equal(MESH_LIST_PATH, "/v1/mesh/nodes");
     assert.equal(MESH_JOIN_PATH, "/v1/mesh/join");
@@ -504,5 +514,96 @@ describe("GodLock.uk mesh routes", () => {
     assert.match(html, /Not an anonymity network/);
     assert.doesNotMatch(html, /id="node-gate"/);
     assert.doesNotMatch(html, /ffmpeg farm/);
+  });
+});
+
+describe("GodLock.uk origin /v1/mesh proxies", () => {
+  function meshEnv(extra) {
+    return mockDbEnv({
+      AZIEL_RUNTIME: {
+        async fetch(req) {
+          const u = String(req && req.url);
+          const method = String((req && req.method) || "GET").toUpperCase();
+          if (method !== "GET" && method !== "HEAD") {
+            return new Response(JSON.stringify({ ok: false, error: "writes stay on runtime" }), { status: 405 });
+          }
+          if (u.includes("/v1/mesh/enable") || u.includes("/v1/mesh/join")) {
+            return new Response(JSON.stringify({ ok: false, error: "GET never enables" }), { status: 404 });
+          }
+          if (u.includes("/v1/mesh")) {
+            return new Response(JSON.stringify({
+              ok: true,
+              code: "MESH-OK",
+              op: u.includes("/status") ? "status" : "mesh",
+              enabled: true,
+              default_off: true,
+              get_never_enables: true,
+              live_nodes: 11,
+              rollup: { live: 11, locked: 0, isolated: 0 },
+              author: "Aziel Eliab",
+              identity: "Aziel Eliab",
+            }), { headers: { "Content-Type": "application/json" } });
+          }
+          return new Response(JSON.stringify({ error: "not found" }), { status: 404 });
+        },
+      },
+      ...(extra || {}),
+    });
+  }
+
+  it("serves GET /v1/mesh and /v1/mesh/status for Live Nodes clients", async () => {
+    const env = meshEnv();
+    const status = await (await worker.fetch(new Request("https://godlock.uk/v1/mesh/status"), env)).json();
+    assert.equal(status.ok, true);
+    assert.equal(status.enabled, true);
+    assert.equal(status.live_nodes, 11);
+    assert.deepEqual(status.rollup, { live: 11, locked: 0, isolated: 0 });
+    assert.equal(status.author, "Aziel Eliab");
+    assert.equal(status.identity, "Aziel Eliab");
+    assert.notEqual(status.get_never_enables, false);
+
+    const mesh = await (await worker.fetch(new Request("https://godlock.uk/v1/mesh"), env)).json();
+    assert.equal(mesh.ok, true);
+    assert.equal(mesh.enabled, true);
+    assert.equal(mesh.author, "Aziel Eliab");
+    assert.equal(mesh.identity, "Aziel Eliab");
+  });
+
+  it("refuses POST on apex mesh reads and never enables", async () => {
+    const env = meshEnv();
+    const denied = await worker.fetch(new Request("https://godlock.uk/v1/mesh/status", { method: "POST" }), env);
+    assert.equal(denied.status, 405);
+    const body = await denied.json();
+    assert.equal(body.get_never_enables, true);
+    assert.equal(body.enabled, false);
+    assert.equal(body.default_off, true);
+    assert.equal(body.author, "Aziel Eliab");
+    assert.equal(body.identity, "Aziel Eliab");
+
+    const enable = await worker.fetch(new Request("https://godlock.uk/v1/mesh/enable", { method: "POST" }), env);
+    assert.equal(enable.status, 404);
+  });
+
+  it("falls back to a remain-OFF hub snapshot when the runtime proxy is down", async () => {
+    const env = mockDbEnv({
+      AZIEL_RUNTIME: {
+        async fetch() {
+          return new Response("nope", { status: 502 });
+        },
+      },
+    });
+    const status = await (await worker.fetch(new Request("https://godlock.uk/v1/mesh/status"), env)).json();
+    assert.equal(status.ok, true);
+    assert.equal(status.get_never_enables, true);
+    assert.equal(status.default_off, true);
+    assert.equal(status.enabled, false);
+    assert.equal(status.author, "Aziel Eliab");
+    assert.equal(status.identity, "Aziel Eliab");
+    assert.equal(status.spec, "QNM-BUILD-1.0");
+    assert.deepEqual(status.rollup, { live: 0, locked: 0, isolated: 0 });
+    const fallback = hubMeshStatusDoc({ mesh: emptyMesh(), site_live_nodes: 2 }, "/v1/mesh/status");
+    assert.equal(fallback.enabled, false);
+    assert.equal(fallback.get_never_enables, true);
+    assert.equal(fallback.live_nodes, 0);
   });
 });

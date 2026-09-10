@@ -66,7 +66,31 @@ export const MESH_DISABLE_PATH = "/v1/mesh/disable";
 export const MESH_LIST_PATH = MESH_NODES_PATH;
 
 export const MESH_READ_PATHS = [MESH_STATUS_PATH, MESH_NODES_PATH, MESH_PATH];
+/** Same-origin apex proxies for Live Nodes clients (parity with azieleliab.com / corpus). GET only. */
+export const ORIGIN_MESH_READ_PATHS = [MESH_PATH, MESH_STATUS_PATH];
 export const MESH_OPS = ["status", "nodes", "join", "heartbeat", "leave", "enable", "disable"];
+
+export function isOriginMeshReadPath(pathname) {
+  const p = String(pathname || "").replace(/\/+$/, "") || "/";
+  return ORIGIN_MESH_READ_PATHS.includes(p);
+}
+
+export function originMeshWriteRefused() {
+  return {
+    ok: false,
+    error: "method not allowed",
+    get_never_enables: true,
+    default_off: true,
+    default: "off",
+    enabled: false,
+    author: AUTHOR,
+    identity: AUTHOR,
+    spec: QNM_SPEC,
+    note: "GET never enables. Remain-OFF. Enable/join/leave stay on /runtime/v1/mesh/{enable|join|leave}.",
+    door: PUBLIC_MESH,
+    enable: PUBLIC_MESH_ENABLE,
+  };
+}
 
 export const PUBLIC_MESH = PUBLIC_RUNTIME + MESH_PATH;
 export const PUBLIC_MESH_STATUS = PUBLIC_RUNTIME + MESH_STATUS_PATH;
@@ -434,6 +458,55 @@ export async function fetchMeshSnapshot(env, deps = {}) {
     return parseMeshDoc({ ...chosen.hit.body, source: chosen.source });
   }
   return emptyMesh({ status: "unavailable", source: "fallback" });
+}
+
+/**
+ * Hub-local remain-OFF snapshot when the runtime proxy is down.
+ * GET /v1/mesh and /v1/mesh/status never enable.
+ */
+export function hubMeshStatusDoc(stats, path) {
+  const mesh = publicMesh(stats && stats.mesh);
+  const enabled = !!mesh.enabled;
+  const rollup = enabled ? meshRollup(mesh) : emptyRollup();
+  return {
+    ok: true,
+    product: "GodLock",
+    site: "godlock.uk",
+    author: AUTHOR,
+    identity: AUTHOR,
+    via: path || MESH_STATUS_PATH,
+    get_never_enables: true,
+    default_off: true,
+    default: "off",
+    mesh_default: "off",
+    enabled,
+    mesh: enabled ? "on" : "off",
+    status: mesh.status,
+    live_nodes: enabled ? rollup.live : 0,
+    locked_nodes: enabled ? rollup.locked : 0,
+    isolated_nodes: enabled ? rollup.isolated : 0,
+    rollup,
+    site_live_nodes: stats && stats.site_live_nodes != null ? stats.site_live_nodes : 0,
+    spec: QNM_SPEC,
+    qns_cd: QNS_CD,
+    qns_cd_spec: QNS_CD_SPEC,
+    node_gate: false,
+    auto_heal: false,
+    anonymity_network: false,
+    note: enabled ? MESH_NOTE_ON : MESH_NOTE,
+    mesh_status: PUBLIC_MESH_STATUS,
+    mesh_status_local: "https://godlock.uk" + MESH_STATUS_PATH,
+    mesh_status_runtime: PUBLIC_MESH_STATUS,
+    mesh_nodes: PUBLIC_MESH_NODES,
+    mesh_nodes_runtime: PUBLIC_MESH_NODES,
+    door: PUBLIC_MESH,
+    ...meshOpsDoc(),
+    enabled,
+    default_off: true,
+    get_never_enables: true,
+    author: AUTHOR,
+    identity: AUTHOR,
+  };
 }
 
 export function meshOpsDoc() {

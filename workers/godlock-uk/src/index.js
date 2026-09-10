@@ -16,9 +16,12 @@ import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
-  PUBLIC_RUNTIME, permanentIdentityRedirect, isIndexCrawler,
+  PUBLIC_RUNTIME, RUNTIME_PATH, permanentIdentityRedirect,
 } from "./seo.js";
-import { fetchCatalogProducts, attachCatalogCounters, softwareSuite, publicProduct, softwareApiDoc } from "./catalog.js";
+import {
+  fetchCatalogProducts, softwareSuite, publicProduct, softwareApiDoc,
+  loadCatalogForHtml, scheduleCatalogRefresh, SOFTWARE_HTML_CACHE_CONTROL,
+} from "./catalog.js";
 import {
   START, shouldIsolate, answerChallenge, clampScore, residualOf, hashReceipt,
 } from "./engine.js";
@@ -34,6 +37,9 @@ import {
   alignLiveNodes,
   publicMesh,
   meshOpsDoc,
+  isOriginMeshReadPath,
+  originMeshWriteRefused,
+  hubMeshStatusDoc,
 } from "./mesh.js";
 
 const TEXT_MAX = 8000;
@@ -497,6 +503,27 @@ export default {
         }, 200, extraHeadersFor(nodeId));
       }
 
+      if (isOriginMeshReadPath(path)) {
+        if (request.method !== "GET" && request.method !== "HEAD") {
+          return json(originMeshWriteRefused(), 405, extraHeadersFor(nodeId));
+        }
+        const runtimeUrl = new URL(request.url);
+        runtimeUrl.pathname = RUNTIME_PATH + path;
+        try {
+          const proxied = await handleRuntimeRoot(
+            new Request(runtimeUrl.toString(), { method: request.method, headers: request.headers }),
+            runtimeUrl,
+            env,
+            ctx,
+          );
+          if (proxied && proxied.status >= 200 && proxied.status < 400) {
+            return proxied;
+          }
+        } catch { /* remain-OFF local snapshot; GET never enables */ }
+        const stats = await gatherStats(env, { wrote });
+        return json(hubMeshStatusDoc(stats, path), 200, extraHeadersFor(nodeId));
+      }
+
       if (path === "/mesh") {
         const stats = await gatherStats(env, { wrote });
         return json({
@@ -605,14 +632,10 @@ export default {
       }
 
       if (path === SOFTWARE_PATH) {
-        const fetched = await fetchCatalogProducts(env);
-        const crawler = isIndexCrawler(request.headers.get("User-Agent"));
-        const counted = crawler
-          ? { products: fetched.products, runtimeUses: null, countersFetched: 0 }
-          : await attachCatalogCounters(fetched.products, env, { timeoutMs: 1500 });
-        const extras = { version: fetched.version, runtimeUses: counted.runtimeUses };
-        const products = softwareSuite(counted.products, extras);
         if (wantsJson(request, url)) {
+          const fetched = await fetchCatalogProducts(env);
+          const extras = { version: fetched.version };
+          const products = softwareSuite(fetched.products, extras);
           return json({
             ok: true,
             product: "GodLock",
@@ -629,12 +652,16 @@ export default {
             clock_is_not_lock: true,
             product_count: products.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "fraggate").length,
             suite_count: products.length,
-            counters_fetched: counted.countersFetched,
+            counters_fetched: 0,
             products: products.map(publicProduct).filter(Boolean),
           }, 200, extraHeadersFor(nodeId));
         }
-        return html(page("Software", softwareBody({ products: counted.products, extras }), { path: SOFTWARE_PATH, kind: "software", products }), {
-          extraHeaders: extraHeadersFor(nodeId),
+        const fetched = await loadCatalogForHtml(env);
+        scheduleCatalogRefresh(ctx, env);
+        const extras = { version: fetched.version };
+        const products = softwareSuite(fetched.products, extras);
+        return html(page("Software", softwareBody({ products: fetched.products, extras }), { path: SOFTWARE_PATH, kind: "software", products }), {
+          extraHeaders: extraHeadersFor(nodeId, { "Cache-Control": SOFTWARE_HTML_CACHE_CONTROL }),
         });
       }
 

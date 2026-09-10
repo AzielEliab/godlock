@@ -775,3 +775,93 @@ export function catalogSlugList(products) {
   }
   return CATALOG_SLUGS.slice();
 }
+
+/** Packed Softwares snapshot (RL-WP-0.1-runtime style). HTML must not wait on slow upstream. */
+export const CATALOG_PACKED_TTL_MS = 5 * 60 * 1000;
+export const PACKED_CATALOG_CACHE_URL = "https://godlock.uk/__edge/packed-catalog";
+export const SOFTWARE_HTML_CACHE_CONTROL = "public, max-age=60, s-maxage=300, stale-while-revalidate=600";
+
+let catalogMemory = null;
+
+export function packedCatalogSnapshot() {
+  return {
+    products: CATALOG_FALLBACK_PRODUCTS.map((p) => compactProduct(p)).filter(Boolean),
+    source: "packed",
+    version: "",
+  };
+}
+
+export function peekCatalogCache() {
+  return catalogMemory;
+}
+
+export function resetCatalogCache() {
+  catalogMemory = null;
+}
+
+async function readEdgeCatalog() {
+  try {
+    if (typeof caches === "undefined" || !caches.default) return null;
+    const hit = await caches.default.match(PACKED_CATALOG_CACHE_URL);
+    if (!hit || !hit.ok) return null;
+    const body = await hit.json();
+    if (body && Array.isArray(body.products) && body.products.length) return body;
+  } catch { /* isolate without Cache API */ }
+  return null;
+}
+
+async function writeEdgeCatalog(doc) {
+  try {
+    if (typeof caches === "undefined" || !caches.default || !doc) return;
+    await caches.default.put(PACKED_CATALOG_CACHE_URL, new Response(JSON.stringify(doc), {
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "public, max-age=300",
+      },
+    }));
+  } catch { /* optional */ }
+}
+
+function rememberCatalog(doc) {
+  if (!doc || !Array.isArray(doc.products) || !doc.products.length) return;
+  catalogMemory = { ...doc, at: Date.now() };
+}
+
+/**
+ * Softwares HTML: packed or edge-cached catalog only. Never block on upstream
+ * or per-card /count fan-out. Live refresh belongs in waitUntil.
+ */
+export async function loadCatalogForHtml(env, deps = {}) {
+  const now = Date.now();
+  if (catalogMemory && Array.isArray(catalogMemory.products) && catalogMemory.products.length) {
+    if (now - catalogMemory.at < CATALOG_PACKED_TTL_MS || deps.allowStale !== false) {
+      return catalogMemory;
+    }
+  }
+  const edge = await readEdgeCatalog();
+  if (edge && Array.isArray(edge.products) && edge.products.length) {
+    rememberCatalog(edge);
+    return catalogMemory;
+  }
+  return { ...packedCatalogSnapshot(), at: now };
+}
+
+export async function refreshCatalogCache(env, deps = {}) {
+  try {
+    const timeoutMs = deps.timeoutMs != null ? deps.timeoutMs : 2500;
+    const live = await fetchCatalogProducts(env, { ...deps, timeoutMs });
+    if (live && Array.isArray(live.products) && live.products.length) {
+      rememberCatalog(live);
+      await writeEdgeCatalog(catalogMemory);
+    }
+    return catalogMemory || packedCatalogSnapshot();
+  } catch {
+    return catalogMemory || packedCatalogSnapshot();
+  }
+}
+
+export function scheduleCatalogRefresh(ctx, env, deps) {
+  if (!ctx || typeof ctx.waitUntil !== "function") return false;
+  ctx.waitUntil(refreshCatalogCache(env, deps));
+  return true;
+}

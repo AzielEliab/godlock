@@ -8,7 +8,7 @@ One input. Submit a challenge (including intelligent-design / design-flaw attack
 
 Every submission is hash-chained into an append-only ledger. Isolated gibberish is stored but not scored and not shown on the public feed. High-effort intelligent-design challenges are never isolated.
 
-**This is a public HTTPS bootstrap surface.** Suite mesh is **QNM-BUILD-1.0**: opt-in on the runtime door (`/runtime/v1/mesh/*`) and **default off** until operator/runtime enable. Public rollup is **live|locked|isolated counts only**. No Node Gate. No auto-heal. Not an anonymity network. No Cloudflare Tunnel. Author: **Aziel Eliab**.
+**This is a public HTTPS bootstrap surface.** Suite mesh is **QNM-BUILD-1.0**: opt-in on the runtime door (`/runtime/v1/mesh/*`) and **default off** until operator/runtime enable. Public rollup is **live|locked|isolated counts only**. No Node Gate. No auto-heal. Not an anonymity network. **QNS-CD-1.0** (photon QNS1 packet transfer) is a hub cite / Worker mesh cross-map only — local qnsd in [qnm-node](https://github.com/AzielEliab/qnm-node), runtime cites in [aziel-runtime](https://github.com/AzielEliab/aziel-runtime), pair custody on [AZInterface](https://github.com/AzielEliab/azinterface). Not a Softwares-tab product. No public qnsd proxy. No Cloudflare Tunnel. Author: **Aziel Eliab**.
 
 GodLock is a product name, not an identity.
 
@@ -26,7 +26,7 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 - `POST /heartbeat` live-node ping; JSON includes `live_nodes`, `mesh`, and `uses` so the homepage can update
 - `GET /stats` JSON: `live_nodes`, `site_live_nodes`, `mesh`, `uses`, views, downloads, score (site counters; not the download-tracker)
 - `GET /count` JSON: `{ live_nodes, site_live_nodes, mesh_enabled, mesh_live_nodes, mesh_locked, mesh_isolated, uses }` (site presence + optional QNM rollup + ledger-backed Uses; not downloads)
-- `GET /mesh` JSON snapshot of QNM-BUILD-1.0 suite mesh (`rollup.live|locked|isolated` counts only; default off; empty/disabled when runtime `/v1/mesh/*` is missing)
+- `GET /mesh` JSON snapshot of QNM-BUILD-1.0 suite mesh (`rollup.live|locked|isolated` counts only; default off; empty/disabled when runtime `/v1/mesh/*` is missing). Payload includes the **QNS-CD-1.0** hub cite / Worker mesh cross-map (`qns_cd`; photon QNS1 packet transfer; no public qnsd proxy)
 - `/verify` walk the ledger
 - `/software` full live aziel-runtime catalog from `GET /v1/software` (fallback `GET /v1/fraggate/list`, then catalog.json / snapshot) plus aziel-runtime, AZBrowser (Plain), AZNet (Plain, `aznet-download-tracker`), AZHub (Plain, `azhub-download-tracker`, Blank Key / AIH-WP-1.0), AZInterface (Plain, `azinterface-download-tracker`, custodial page cycles / AIH-WP-1.0), and a dedicated FragGate Gate card (`fraggate-download-tracker` Download/Worker, not GitHub-only), A–Z with DecisionGATE. Service-bind `AZIEL_RUNTIME` first, then HTTPS origin / library, then a snapshot fallback so the page never goes empty. New catalog slugs are included automatically. Each card tethers Worker, GitHub, and `/runtime` FragGate/MCP, with download/view counters from Worker `/count` and uses when published. AZBrowser, AZNet, AZHub, and AZInterface stay separate cards. Never nest Hub with Interface. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock).
 - `/runtime` and `/runtime/*` same-origin FragGate door (service-bind or HTTPS proxy to aziel-runtime 1.6.8)

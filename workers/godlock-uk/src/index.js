@@ -16,7 +16,7 @@ import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
-  PUBLIC_RUNTIME, permanentIdentityRedirect,
+  PUBLIC_RUNTIME, permanentIdentityRedirect, isIndexCrawler,
 } from "./seo.js";
 import { fetchCatalogProducts, attachCatalogCounters, softwareSuite, publicProduct, softwareApiDoc } from "./catalog.js";
 import {
@@ -425,7 +425,7 @@ export default {
       const wrote = hb.wrote;
 
       if (path === "/internal" || path.startsWith("/internal/")) {
-        return html(page("Not found", `<div class="card"><h2>Not found</h2><p><a href="/">Back</a></p></div>`, { path }), { status: 404 });
+        return html(page("Not found", `<div class="card"><h2>Not found</h2><p><a href="/">Back</a></p></div>`, { path, kind: "notfound" }), { status: 404 });
       }
 
       if (isRuntimeRequest(url.pathname) || isRuntimeRequest(path)) {
@@ -437,7 +437,9 @@ export default {
         return new Response(robotsTxt(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/sitemap.xml") {
-        const xml = await sitemapXml(env);
+        const fetched = await fetchCatalogProducts(env);
+        const products = softwareSuite(fetched.products, { version: fetched.version });
+        const xml = await sitemapXml(env, { products });
         return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/cite.json") {
@@ -591,6 +593,12 @@ export default {
       }
 
       if (path === "/v1/software") {
+        if (!wantsJson(request, url) && (request.headers.get("Accept") || "").toLowerCase().includes("text/html")) {
+          return new Response(null, {
+            status: 308,
+            headers: { Location: SOFTWARE_PATH, ...corsHeaders(), ...extraHeadersFor(nodeId) },
+          });
+        }
         const fetched = await fetchCatalogProducts(env);
         const extras = { version: fetched.version, source: fetched.source };
         return json(softwareApiDoc(fetched.products, extras), 200, extraHeadersFor(nodeId));
@@ -598,7 +606,10 @@ export default {
 
       if (path === SOFTWARE_PATH) {
         const fetched = await fetchCatalogProducts(env);
-        const counted = await attachCatalogCounters(fetched.products, env);
+        const crawler = isIndexCrawler(request.headers.get("User-Agent"));
+        const counted = crawler
+          ? { products: fetched.products, runtimeUses: null, countersFetched: 0 }
+          : await attachCatalogCounters(fetched.products, env, { timeoutMs: 1500 });
         const extras = { version: fetched.version, runtimeUses: counted.runtimeUses };
         const products = softwareSuite(counted.products, extras);
         if (wantsJson(request, url)) {
@@ -622,7 +633,7 @@ export default {
             products: products.map(publicProduct).filter(Boolean),
           }, 200, extraHeadersFor(nodeId));
         }
-        return html(page("Software", softwareBody({ products: counted.products, extras }), { path: SOFTWARE_PATH, kind: "software" }), {
+        return html(page("Software", softwareBody({ products: counted.products, extras }), { path: SOFTWARE_PATH, kind: "software", products }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }
@@ -632,7 +643,7 @@ export default {
         const row = await getReceipt(env, id);
         if (!row || Number(row.isolated)) {
           if (wantsJson(request, url)) return json({ ok: false, error: "not found" }, 404);
-          return html(page("Receipt", receiptBody({ id, row: null, entries: [] }), { path: "/receipt/" + id, kind: "receipt" }), { status: 404 });
+          return html(page("Receipt", receiptBody({ id, row: null, entries: [] }), { path: "/receipt/" + id, kind: "receipt", indexable: false }), { status: 404 });
         }
         const entries = await ledgerEntriesForId(env, id);
         if (wantsJson(request, url)) return json({ ok: true, receipt: publicPayload(row), ledger: entries });
@@ -687,7 +698,7 @@ export default {
         return new Response(null, { status: 303, headers: { Location: "/", ...corsHeaders() } });
       }
 
-      return html(page("Not found", `<div class="card"><h2>Not found</h2><p><a href="/">Back</a></p></div>`, { path }), { status: 404 });
+      return html(page("Not found", `<div class="card"><h2>Not found</h2><p><a href="/">Back</a></p></div>`, { path, kind: "notfound" }), { status: 404 });
     } catch (err) {
       return json({ ok: false, error: String(err && err.message ? err.message : err), author: AUTHOR, banner: BANNER }, 500);
     }

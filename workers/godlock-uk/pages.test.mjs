@@ -6,6 +6,7 @@ import {
   REASON_PATH,
   SOFTWARE_PATH,
   RUNTIME_PATH,
+  DONATE_PATH,
   AZIEL_MANIFESTO,
   AZIEL_SIGNATURE,
   azielEliabBody,
@@ -104,6 +105,7 @@ describe("Aziel Eliab page chrome", () => {
     assert.equal(REASON_PATH, "/reason");
     assert.equal(SOFTWARE_PATH, "/software");
     assert.equal(RUNTIME_PATH, "/runtime");
+    assert.equal(DONATE_PATH, "/donate");
   });
 
   it("keeps the manifesto paragraphs and signature exactly", () => {
@@ -117,7 +119,7 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(text.endsWith("— Aziel Eliab\n"));
   });
 
-  it("orders nav Engine | Reason | Software | Runtime | Verify | Aziel Eliab | Aziel Corpus Library", () => {
+  it("orders nav Engine | Reason | Software | Runtime | Verify | Donate | Aziel Eliab | Aziel Corpus Library", () => {
     const nav = topNav("/verify");
     assert.match(
       nav,
@@ -125,7 +127,7 @@ describe("Aziel Eliab page chrome", () => {
     );
     assert.match(
       nav,
-      /href="\/verify"[^>]*>Verify<\/a><span class="sep">\|<\/span><a href="\/AzielEliab" class="aziel">Aziel Eliab<\/a><span class="sep">\|<\/span><a href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab" class="aziel">Aziel Corpus Library<\/a>/,
+      /href="\/verify"[^>]*>Verify<\/a><span class="sep">\|<\/span><a href="\/donate">Donate<\/a><span class="sep">\|<\/span><a href="\/AzielEliab" class="aziel">Aziel Eliab<\/a><span class="sep">\|<\/span><a href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab" class="aziel">Aziel Corpus Library<\/a>/,
     );
     assert.match(CSS, /--royal:#6b3fa0/);
     assert.match(CSS, /--royal-deep:#4a2870/);
@@ -167,6 +169,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     const robots = robotsTxt();
     assert.match(robots, /Allow: \/AzielEliab/);
     assert.match(robots, /Allow: \/reason/);
+    assert.match(robots, /Allow: \/donate/);
     assert.doesNotMatch(robots, /Allow: \/AzielCorpusLibrary/);
     assert.match(robots, /Allow: \/software/);
     assert.match(robots, /Allow: \/mesh/);
@@ -231,6 +234,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     }
     const xml = await sitemapXml({});
     assert.ok(xml.includes(CANON_HOST + "/reason"));
+    assert.ok(xml.includes(CANON_HOST + "/donate"));
+    assert.ok(xml.includes("https://www.azieleliab.com/donate"));
     assert.ok(xml.includes(CANON_HOST + "/AzielEliab"));
     assert.ok(xml.includes(CANON_HOST + "/software#fraggate"));
     assert.ok(xml.includes(CANON_HOST + "/software#azbrowser"));
@@ -258,6 +263,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     const cite = citeDoc();
     assert.equal(cite.specified_fit, CANON_HOST + "/reason");
     assert.equal(cite.reason, CANON_HOST + "/reason");
+    assert.equal(cite.donate, CANON_HOST + "/donate");
+    assert.equal(cite.donate_canonical, "https://www.azieleliab.com/donate");
+    assert.equal(cite.donate_spec, "AZL-DONATE-1.0");
     assert.equal(cite.aziel_eliab, CANON_HOST + "/AzielEliab");
     assert.equal(cite.aziel_corpus_library, LIBRARY_AZIEL);
     assert.equal(cite.library_aziel_eliab, LIBRARY_AZIEL);
@@ -295,6 +303,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(cite.update_check, /\/v1\/update\/check\?slug=godlock/);
     const llms = llmsDoc();
     assert.match(llms, /Specified Fit, Not Pretty Spirals: https:\/\/godlock\.uk\/reason/);
+    assert.match(llms, /Donate: https:\/\/godlock\.uk\/donate \(AZL-DONATE-1\.0\)\. Same door: https:\/\/www\.azieleliab\.com\/donate/);
     assert.match(llms, /Live software catalog: https:\/\/godlock\.uk\/runtime\/v1\/software/);
     assert.match(llms, /FragGate list fallback: https:\/\/godlock\.uk\/runtime\/v1\/fraggate\/list/);
     assert.match(llms, /Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
@@ -322,6 +331,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     const spec = await openapiRes.json();
     assert.equal(spec.openapi, "3.1.0");
     assert.ok(spec.paths["/software"]);
+    assert.ok(spec.paths["/donate"]);
     assert.ok(spec.paths["/runtime/v1/software"]);
     assert.ok(spec.paths["/runtime/v1/mesh"]);
     assert.ok(spec.paths["/runtime/v1/mesh/list"]);

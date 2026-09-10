@@ -5,11 +5,12 @@
 import {
   headMeta, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
-  AI_CLIENTS_SENTENCE,
+  DONATE_PATH, AI_CLIENTS_SENTENCE,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import { softwareSuite, invokeHref, workerHref, stripRuntimeFragGateMash } from "./catalog.js";
+import { donateBody as donatePageBody, donateHomeBlock } from "./donate.js";
 
 export const CSS = `
 :root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
@@ -69,6 +70,14 @@ pre.verify{white-space:pre-wrap;word-break:break-word;background:#16130f;border:
 .bad{color:var(--no);font-weight:700}
 a{color:var(--gold)}
 footer{margin-top:36px;color:var(--muted);font-size:14px}
+.donate-sign{font-weight:700;margin-top:18px}
+.donate-rails{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 18px}
+.donate-rail h3{margin:0 0 8px;font-size:18px}
+.donate-addr{margin:0 0 10px}
+.donate-actions{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.donate-qr{margin:12px 0 0;width:128px;height:128px}
+.donate-qr svg{display:block;width:128px;height:128px}
+.donate-home{margin:18px 0 0}
 @media (max-width:720px){
   .wrap{padding:16px 14px 72px}
   .stats{grid-template-columns:1fr 1fr}
@@ -101,7 +110,7 @@ function pillClass(label) {
   return "review";
 }
 
-export { AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH };
+export { AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH, DONATE_PATH };
 
 export function navItems() {
   return [
@@ -110,6 +119,7 @@ export function navItems() {
     { href: SOFTWARE_PATH, label: "Software" },
     { href: RUNTIME_PATH, label: "Runtime" },
     { href: "/verify", label: "Verify" },
+    { href: DONATE_PATH, label: "Donate" },
     { href: AZIEL_ELIAB_PATH, label: "Aziel Eliab", aziel: true },
     { href: LIBRARY_AZIEL, label: "Aziel Corpus Library", aziel: true },
   ];
@@ -156,7 +166,7 @@ export function page(title, body, { path, kind, extraHeaders } = {}) {
 ${topNav(p)}
 <div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
 ${body}
-<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Software</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a></footer>
+<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Software</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a></footer>
 </div>
 <script>
 (function(){
@@ -266,9 +276,11 @@ ${err}
     <a class="button ghost" href="${esc(SOFTWARE_PATH)}">Software</a>
     <a class="button" href="${esc(RUNTIME_PATH)}">Runtime</a>
     <a class="button ghost" href="${esc(DOWNLOAD)}">Download</a>
+    <a class="button ghost" href="${esc(DONATE_PATH)}">Donate</a>
   </div>
 </form>
 ${latestHtml}
+${donateHomeBlock()}
 <h2>Prior receipts</h2>
 <ul class="prior">${list}</ul>
 `;
@@ -377,6 +389,10 @@ export function softwareBody({ products, extras } = {}) {
   }).join("");
   return `<h2 class="soft-heading">Downloadable software</h2>
 <div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
+}
+
+export function donateBody() {
+  return donatePageBody();
 }
 
 export function receiptBody({ id, row, entries }) {

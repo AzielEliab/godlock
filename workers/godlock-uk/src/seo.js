@@ -398,7 +398,8 @@ export async function sitemapXml(env) {
     PUBLIC_RUNTIME,
     PUBLIC_RUNTIME + "/v1/software",
     PUBLIC_RUNTIME + "/v1/mesh",
-    PUBLIC_RUNTIME + "/v1/mesh/list",
+    PUBLIC_RUNTIME + "/v1/mesh/status",
+    PUBLIC_RUNTIME + "/v1/mesh/nodes",
     PUBLIC_RUNTIME + "/v1/fraggate/list",
     PUBLIC_RUNTIME + "/v1/update/check",
     PUBLIC_RUNTIME + "/v1/runtime.json",
@@ -472,9 +473,12 @@ export function citeDoc() {
     runtime_openapi: PUBLIC_RUNTIME + "/openapi.json",
     runtime_mcp: PUBLIC_RUNTIME + "/mcp",
     runtime_mesh: PUBLIC_RUNTIME + "/v1/mesh",
-    runtime_mesh_list: PUBLIC_RUNTIME + "/v1/mesh/list",
+    runtime_mesh_status: PUBLIC_RUNTIME + "/v1/mesh/status",
+    runtime_mesh_nodes: PUBLIC_RUNTIME + "/v1/mesh/nodes",
+    runtime_mesh_list: PUBLIC_RUNTIME + "/v1/mesh/nodes",
     runtime_mesh_join: PUBLIC_RUNTIME + "/v1/mesh/join",
     runtime_mesh_heartbeat: PUBLIC_RUNTIME + "/v1/mesh/heartbeat",
+    runtime_mesh_leave: PUBLIC_RUNTIME + "/v1/mesh/leave",
     runtime_mesh_enable: PUBLIC_RUNTIME + "/v1/mesh/enable",
     runtime_mesh_disable: PUBLIC_RUNTIME + "/v1/mesh/disable",
     mesh: CANON_HOST + "/mesh",
@@ -550,8 +554,10 @@ export function llmsDoc() {
     + "MCP: POST " + PUBLIC_RUNTIME + "/mcp\n"
     + "Suite mesh (default off): " + PUBLIC_RUNTIME + "/v1/mesh\n"
     + "QNM-BUILD-1.0 rollup: live|locked|isolated counts only. No Node Gate. No auto-heal.\n"
-    + "Mesh list: " + PUBLIC_RUNTIME + "/v1/mesh/list\n"
-    + "Mesh join / heartbeat / enable / disable: POST " + PUBLIC_RUNTIME + "/v1/mesh/{join|heartbeat|enable|disable}\n"
+    + "GET /v1/mesh never enables. Display rollup only.\n"
+    + "Mesh status: " + PUBLIC_RUNTIME + "/v1/mesh/status\n"
+    + "Mesh nodes: " + PUBLIC_RUNTIME + "/v1/mesh/nodes\n"
+    + "Mesh join / heartbeat / leave / enable / disable: POST " + PUBLIC_RUNTIME + "/v1/mesh/{join|heartbeat|leave|enable|disable}\n"
     + "Site mesh snapshot: " + CANON_HOST + "/mesh\n"
     + "Mesh is not an anonymity network. Identity Aziel Eliab only.\n"
     + "anon-broadcast is not a publish path on godlock.uk. Local communique style tool (not hosted here; no ffmpeg farm): " + ANON_BROADCAST + "\n"
@@ -600,8 +606,9 @@ export function siteOpenApi() {
       "/runtime/mcp": { post: { operationId: "godlockUkRuntimeMcp", summary: "Same-origin FragGate MCP door", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/software": { get: { operationId: "godlockUkRuntimeSoftware", summary: "Live software catalog proxy", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/fraggate/list": { get: { operationId: "godlockUkRuntimeFraggateList", summary: "FragGate list fallback catalog", responses: { "200": { description: "OK" } } } },
-      "/runtime/v1/mesh": { get: { operationId: "godlockUkRuntimeMesh", summary: "QNM-BUILD-1.0 suite mesh status (default off; live|locked|isolated counts only; no Node Gate; no auto-heal; not an anonymity network)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
-      "/runtime/v1/mesh/list": { get: { operationId: "godlockUkRuntimeMeshList", summary: "QNM-BUILD-1.0 rollup live|locked|isolated counts only (not a peer-list publish path; empty when off)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
+      "/runtime/v1/mesh": { get: { operationId: "godlockUkRuntimeMesh", summary: "QNM-BUILD-1.0 suite mesh status (default off; live|locked|isolated counts only; GET never enables; no Node Gate; no auto-heal; not an anonymity network)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
+      "/runtime/v1/mesh/status": { get: { operationId: "godlockUkRuntimeMeshStatus", summary: "LIVE QNM-BUILD-1.0 suite rollup (enabled?, bearers, live|locked|isolated). GET never enables.", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
+      "/runtime/v1/mesh/nodes": { get: { operationId: "godlockUkRuntimeMeshNodes", summary: "QNM roster with live|locked|isolated presence (5-minute TTL). Not a peer-list publish path. GET never enables.", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
       "/runtime/v1/mesh/join": { post: { operationId: "godlockUkRuntimeMeshJoin", summary: "Join suite mesh (runtime proxy)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
       "/runtime/v1/mesh/heartbeat": { post: { operationId: "godlockUkRuntimeMeshHeartbeat", summary: "Suite mesh heartbeat (runtime proxy)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },
       "/runtime/v1/mesh/enable": { post: { operationId: "godlockUkRuntimeMeshEnable", summary: "Enable suite mesh (runtime proxy; default off)", responses: { "200": { description: "OK or graceful empty/disabled" } } } },

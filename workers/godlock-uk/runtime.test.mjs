@@ -30,6 +30,7 @@ function mockDbEnv(extra) {
       prepare() { return stmt; },
       async batch() { return []; },
     },
+    MESH_PROBE_ORIGIN: false,
     ...(extra || {}),
   };
 }
@@ -63,7 +64,8 @@ describe("runtime path mapping", () => {
     assert.equal(destFromRuntimePath("/runtime/v1/health", ""), "/v1/health");
     assert.equal(destFromRuntimePath("/runtime/v1/fraggate/list", ""), "/v1/fraggate/list");
     assert.equal(destFromRuntimePath("/runtime/v1/mesh", ""), "/v1/mesh");
-    assert.equal(destFromRuntimePath("/runtime/v1/mesh/list", ""), "/v1/mesh/list");
+    assert.equal(destFromRuntimePath("/runtime/v1/mesh/status", ""), "/v1/mesh/status");
+    assert.equal(destFromRuntimePath("/runtime/v1/mesh/nodes", ""), "/v1/mesh/nodes");
     assert.equal(destFromRuntimePath("/runtime/v1/mesh/join", ""), "/v1/mesh/join");
     assert.equal(destFromRuntimePath("/runtime/openapi.json", ""), "/openapi.json");
     assert.equal(destFromRuntimePath("/runtime/mcp", ""), "/mcp");

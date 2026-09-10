@@ -55,32 +55,39 @@ export const MESH_NOTE_ON =
   "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in qnm-node; no public proxy). Suite mesh is on. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network.";
 
 export const MESH_PATH = "/v1/mesh";
-export const MESH_LIST_PATH = "/v1/mesh/list";
+export const MESH_STATUS_PATH = "/v1/mesh/status";
+export const MESH_NODES_PATH = "/v1/mesh/nodes";
 export const MESH_JOIN_PATH = "/v1/mesh/join";
 export const MESH_HEARTBEAT_PATH = "/v1/mesh/heartbeat";
+export const MESH_LEAVE_PATH = "/v1/mesh/leave";
 export const MESH_ENABLE_PATH = "/v1/mesh/enable";
 export const MESH_DISABLE_PATH = "/v1/mesh/disable";
+/** @deprecated LIVE QNM rollup is GET /v1/mesh/status and /v1/mesh/nodes. /list 404s. */
+export const MESH_LIST_PATH = MESH_NODES_PATH;
 
-export const MESH_OPS = ["join", "heartbeat", "list", "enable", "disable"];
+export const MESH_READ_PATHS = [MESH_STATUS_PATH, MESH_NODES_PATH, MESH_PATH];
+export const MESH_OPS = ["status", "nodes", "join", "heartbeat", "leave", "enable", "disable"];
 
 export const PUBLIC_MESH = PUBLIC_RUNTIME + MESH_PATH;
-export const PUBLIC_MESH_LIST = PUBLIC_RUNTIME + MESH_LIST_PATH;
+export const PUBLIC_MESH_STATUS = PUBLIC_RUNTIME + MESH_STATUS_PATH;
+export const PUBLIC_MESH_NODES = PUBLIC_RUNTIME + MESH_NODES_PATH;
+export const PUBLIC_MESH_LIST = PUBLIC_MESH_NODES;
 export const PUBLIC_MESH_JOIN = PUBLIC_RUNTIME + MESH_JOIN_PATH;
 export const PUBLIC_MESH_HEARTBEAT = PUBLIC_RUNTIME + MESH_HEARTBEAT_PATH;
+export const PUBLIC_MESH_LEAVE = PUBLIC_RUNTIME + MESH_LEAVE_PATH;
 export const PUBLIC_MESH_ENABLE = PUBLIC_RUNTIME + MESH_ENABLE_PATH;
 export const PUBLIC_MESH_DISABLE = PUBLIC_RUNTIME + MESH_DISABLE_PATH;
 
-export const BINDING_MESH_URLS = [
-  "https://aziel-runtime" + MESH_PATH,
-  "https://aziel-runtime" + MESH_LIST_PATH,
-  CATALOG + MESH_PATH,
-  CATALOG + MESH_LIST_PATH,
-];
+export const BINDING_MESH_HOSTS = ["https://aziel-runtime", CATALOG];
+export const HTTPS_MESH_HOSTS = [CATALOG];
 
-export const HTTPS_MESH_URLS = [
-  CATALOG + MESH_PATH,
-  CATALOG + MESH_LIST_PATH,
-];
+export const BINDING_MESH_URLS = BINDING_MESH_HOSTS.flatMap((host) => (
+  MESH_READ_PATHS.map((p) => host + p)
+));
+
+export const HTTPS_MESH_URLS = HTTPS_MESH_HOSTS.flatMap((host) => (
+  MESH_READ_PATHS.map((p) => host + p)
+));
 
 export { ANON_BROADCAST };
 export const ANON_BROADCAST_NOTE =
@@ -264,9 +271,11 @@ export function publicMesh(mesh) {
     author: AUTHOR,
     identity: AUTHOR,
     door: PUBLIC_MESH,
-    list: PUBLIC_MESH_LIST,
+    status_url: PUBLIC_MESH_STATUS,
+    list: PUBLIC_MESH_NODES,
     join: PUBLIC_MESH_JOIN,
     heartbeat: PUBLIC_MESH_HEARTBEAT,
+    leave: PUBLIC_MESH_LEAVE,
     enable: PUBLIC_MESH_ENABLE,
     disable: PUBLIC_MESH_DISABLE,
     mcp: RUNTIME_PATH + "/mcp",
@@ -334,6 +343,10 @@ async function fetchJson(fetcher, url, ms) {
 
 function looksLikeMeshDoc(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return false;
+  if (body.code === "MESH-NOT-FOUND") return false;
+  if (body.ok === false && !truthyEnabled(body.enabled) && body.rollup == null && body.live_nodes == null) {
+    return false;
+  }
   if (body.error && !body.enabled && !body.mesh && !body.nodes && !body.list && !body.rollup) return false;
   return body.enabled != null
     || body.mesh_enabled != null
@@ -347,43 +360,79 @@ function looksLikeMeshDoc(body) {
     || body.peers != null
     || body.status === "on"
     || body.status === "off"
+    || body.code === "MESH-OK"
+    || body.op === "status"
+    || body.op === "nodes"
     || body.default_off != null
     || body.spec === QNM_SPEC
     || body.door === "mesh";
 }
 
+function isWriteMeshUrl(url) {
+  const u = String(url || "");
+  return /\/v1\/mesh\/(enable|disable|join|heartbeat|leave|broadcast)(?:\?|$)/.test(u);
+}
+
+async function readMeshCandidate(fetcher, url, timeoutMs) {
+  if (isWriteMeshUrl(url)) return null;
+  const res = await fetcher(url, timeoutMs);
+  const body = await readJsonResponse(res);
+  if (!looksLikeMeshDoc(body)) return null;
+  return { url, body };
+}
+
+async function firstMeshCandidate(fetcher, urls, timeoutMs) {
+  for (const url of urls) {
+    try {
+      const hit = await readMeshCandidate(fetcher, url, timeoutMs);
+      if (hit) return hit;
+    } catch { /* try next dest */ }
+  }
+  return null;
+}
+
+/**
+ * Display rollup only. GET /v1/mesh, /status, and /nodes never enable.
+ * Prefer the LIVE origin (aziel-runtime.vibelock.workers.dev) when it answers,
+ * because the same-account binding can serve a stale isolate. qnm-node stays
+ * local. Not a Softwares-tab product. FragGate remains the single write door.
+ */
 export async function fetchMeshSnapshot(env, deps = {}) {
-  const httpFetch = deps.fetch || globalThis.fetch;
   const timeoutMs = deps.timeoutMs != null ? deps.timeoutMs : 3500;
   const hasBinding = !!(env && env.AZIEL_RUNTIME && typeof env.AZIEL_RUNTIME.fetch === "function");
+  const probeOrigin = deps.probeOrigin != null ? !!deps.probeOrigin : !!deps.fetch;
+  const httpFetch = deps.fetch || (probeOrigin ? globalThis.fetch : null);
 
-  if (hasBinding) {
-    for (const url of BINDING_MESH_URLS) {
-      try {
-        const res = await env.AZIEL_RUNTIME.fetch(new Request(url, { method: "GET", headers: UA }));
-        const body = await readJsonResponse(res);
-        if (looksLikeMeshDoc(body)) {
-          return parseMeshDoc({ ...body, source: "service-binding" });
-        }
-      } catch { /* try next binding dest */ }
-    }
-    return emptyMesh({ status: "unavailable", source: "fallback" });
+  const bindingFetch = hasBinding
+    ? async (url) => env.AZIEL_RUNTIME.fetch(new Request(url, { method: "GET", headers: UA }))
+    : null;
+  const originFetch = probeOrigin && typeof httpFetch === "function"
+    ? async (url, ms) => fetchJson(httpFetch, url, ms != null ? ms : timeoutMs)
+    : null;
+
+  const jobs = [];
+  if (bindingFetch) {
+    jobs.push(
+      firstMeshCandidate(bindingFetch, BINDING_MESH_URLS, timeoutMs)
+        .then((hit) => ({ source: "service-binding", hit }))
+        .catch(() => ({ source: "service-binding", hit: null })),
+    );
+  }
+  if (originFetch) {
+    jobs.push(
+      firstMeshCandidate(originFetch, HTTPS_MESH_URLS, timeoutMs)
+        .then((hit) => ({ source: "origin", hit }))
+        .catch(() => ({ source: "origin", hit: null })),
+    );
   }
 
-  /* No binding: only probe HTTPS when a fetch is injected (tests / explicit).
-   * Live Nodes run on every homepage/heartbeat — do not stall on origin 404. */
-  if (deps.fetch && typeof httpFetch === "function") {
-    for (const url of HTTPS_MESH_URLS) {
-      try {
-        const res = await fetchJson(httpFetch, url, timeoutMs);
-        const body = await readJsonResponse(res);
-        if (looksLikeMeshDoc(body)) {
-          return parseMeshDoc({ ...body, source: "origin" });
-        }
-      } catch { /* try next */ }
-    }
+  const found = jobs.length ? await Promise.all(jobs) : [];
+  const origin = found.find((row) => row.source === "origin" && row.hit);
+  const binding = found.find((row) => row.source === "service-binding" && row.hit);
+  const chosen = origin || binding;
+  if (chosen && chosen.hit && chosen.hit.body) {
+    return parseMeshDoc({ ...chosen.hit.body, source: chosen.source });
   }
-
   return emptyMesh({ status: "unavailable", source: "fallback" });
 }
 
@@ -391,9 +440,12 @@ export function meshOpsDoc() {
   return {
     spec: QNM_SPEC,
     door: PUBLIC_MESH,
-    list: PUBLIC_MESH_LIST,
+    status_url: PUBLIC_MESH_STATUS,
+    nodes_url: PUBLIC_MESH_NODES,
+    list: PUBLIC_MESH_NODES,
     join: PUBLIC_MESH_JOIN,
     heartbeat: PUBLIC_MESH_HEARTBEAT,
+    leave: PUBLIC_MESH_LEAVE,
     enable: PUBLIC_MESH_ENABLE,
     disable: PUBLIC_MESH_DISABLE,
     mcp: PUBLIC_RUNTIME + "/mcp",

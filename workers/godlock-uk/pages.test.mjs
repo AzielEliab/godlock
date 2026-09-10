@@ -16,6 +16,7 @@ import {
   CSS,
   softwareBody,
   homeBody,
+  homeSoftwareLine,
 } from "./src/ui.js";
 import {
   robotsTxt,
@@ -45,6 +46,8 @@ import {
   AZNET_CARD,
   AZHUB_CARD,
   AZINTERFACE_CARD,
+  AZCOHERENCE_CARD,
+  softwareApiDoc,
   BINDING_CATALOG_URLS,
   BINDING_SOFTWARE_URLS,
   HTTPS_CATALOG_TRIES,
@@ -69,6 +72,7 @@ import {
   FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, AZBROWSER_DOWNLOAD, AZBROWSER_WORKER,
   AZNET_DOWNLOAD, AZNET_WORKER,
   AZHUB_DOWNLOAD, AZHUB_WORKER, AZINTERFACE_DOWNLOAD, AZINTERFACE_WORKER,
+  AZCOHERENCE_DOWNLOAD, AZCOHERENCE_WORKER, AZCOHERENCE_GITHUB, AZCOHERENCE_SLUG,
 } from "./src/seo.js";
 
 function mockEnv() {
@@ -172,6 +176,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/donate/);
     assert.doesNotMatch(robots, /Allow: \/AzielCorpusLibrary/);
     assert.match(robots, /Allow: \/software/);
+    assert.match(robots, /Allow: \/v1\/software/);
     assert.match(robots, /Allow: \/mesh/);
     assert.match(robots, /Allow: \/runtime\nAllow: \/runtime\//);
     assert.match(robots, /Allow: \/ai\.txt/);
@@ -242,6 +247,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/software#aznet"));
     assert.ok(xml.includes(CANON_HOST + "/software#azhub"));
     assert.ok(xml.includes(CANON_HOST + "/software#azinterface"));
+    assert.ok(xml.includes(CANON_HOST + "/software#azcoherence"));
+    assert.ok(xml.includes(CANON_HOST + "/software#azclce"));
+    assert.ok(xml.includes(CANON_HOST + "/v1/software"));
     assert.ok(xml.includes(CANON_HOST + "/runtime"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/runtime.json"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/uses"));
@@ -298,12 +306,30 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(cite.sameAs.includes(CANON_HOST + "/runtime"));
     assert.equal(cite.door, "fraggate");
     assert.equal(cite.software_catalog, CANON_HOST + "/runtime/v1/software");
+    assert.equal(cite.software_api, CANON_HOST + "/v1/software");
+    assert.equal(cite.azcoherence, CANON_HOST + "/software#azcoherence");
+    assert.equal(cite.azcoherence_name, "AZCoherence");
+    assert.equal(cite.azcoherence_slug, "azcoherence");
+    assert.equal(cite.azcoherence_worker, AZCOHERENCE_WORKER);
+    assert.equal(cite.azcoherence_github, AZCOHERENCE_GITHUB);
+    assert.equal(cite.azcoherence_download, AZCOHERENCE_DOWNLOAD);
+    assert.equal(cite.azcoherence_runtime, CANON_HOST + "/runtime/v1/pull/azcoherence");
+    assert.equal(cite.azcoherence_fraggate, CANON_HOST + "/runtime/v1/fraggate/describe?slug=azcoherence");
+    assert.equal(cite.azcoherence_peer, "azclce");
+    assert.match(cite.azcoherence_note, /Not AKM-TRIAD/);
     assert.equal(cite.software_fraggate, CANON_HOST + "/runtime/v1/fraggate/list");
     assert.equal(cite.openapi, CANON_HOST + "/openapi.json");
     assert.match(cite.update_check, /\/v1\/update\/check\?slug=godlock/);
     const llms = llmsDoc();
     assert.match(llms, /Specified Fit, Not Pretty Spirals: https:\/\/godlock\.uk\/reason/);
     assert.match(llms, /Donate: https:\/\/godlock\.uk\/donate \(AZL-DONATE-1\.0\)\. Same door: https:\/\/www\.azieleliab\.com\/donate/);
+    assert.match(llms, /AZCoherence \(azcoherence\)/);
+    assert.match(llms, /AZCoherence Worker: https:\/\/azcoherence-download-tracker\.vibelock\.workers\.dev\//);
+    assert.match(llms, /AZCoherence GitHub: https:\/\/github\.com\/AzielEliab\/AZCoherence/);
+    assert.match(llms, /AZCoherence runtime: https:\/\/godlock\.uk\/runtime\/v1\/pull\/azcoherence/);
+    assert.match(llms, /AZCoherence FragGate: https:\/\/godlock\.uk\/runtime\/v1\/fraggate\/describe\?slug=azcoherence/);
+    assert.match(llms, /Software API: https:\/\/godlock\.uk\/v1\/software/);
+    assert.match(llms, /Not AKM-TRIAD/);
     assert.match(llms, /Live software catalog: https:\/\/godlock\.uk\/runtime\/v1\/software/);
     assert.match(llms, /FragGate list fallback: https:\/\/godlock\.uk\/runtime\/v1\/fraggate\/list/);
     assert.match(llms, /Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
@@ -331,6 +357,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     const spec = await openapiRes.json();
     assert.equal(spec.openapi, "3.1.0");
     assert.ok(spec.paths["/software"]);
+    assert.ok(spec.paths["/v1/software"]);
     assert.ok(spec.paths["/donate"]);
     assert.ok(spec.paths["/runtime/v1/software"]);
     assert.ok(spec.paths["/runtime/v1/mesh"]);
@@ -370,6 +397,11 @@ describe("homepage stays a natural argument surface", () => {
     assert.match(html, /Cursor \(MCP\), Glama \(MCP\), Perplexity/);
     assert.match(html, /other MCP\/OpenAPI-capable assistants/);
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
+    assert.match(html, /<h2>Software<\/h2>/);
+    assert.match(html, /id="software"/);
+    assert.match(html, /href="\/software#azcoherence">AZCoherence<\/a>/);
+    assert.match(html, /href="\/software#azclce">AZ-CLCE<\/a>/);
+    assert.match(html, /href="\/v1\/software">Software API<\/a>/);
     assert.match(html, /id="mesh-status"/);
     assert.match(html, /Suite mesh: off/);
     assert.match(html, /QNM-BUILD-1\.0/);
@@ -420,6 +452,10 @@ describe("major AI client list", () => {
     assert.doesNotMatch(software, /Use with Grok, ChatGPT, Venice/);
     const home = homeBody({ stats: {}, latest: null, prior: [] });
     assert.match(home, /Works with ChatGPT \(GPT Actions \/ OpenAI\)/);
+    assert.match(home, /href="\/software#azcoherence">AZCoherence<\/a>/);
+    const homeLine = homeSoftwareLine({ products: [] });
+    assert.match(homeLine, /href="\/software#azcoherence">AZCoherence<\/a>/);
+    assert.match(homeLine, /href="\/software#aznet">AZNet<\/a>/);
     const softwareMeta = defaultDescription("software");
     assert.match(softwareMeta, /Claude \(Anthropic\)/);
     assert.match(headMeta({ title: "Software", path: "/software", kind: "software" }), /Claude, Cursor, Glama, Perplexity/);
@@ -561,6 +597,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       assert.ok(suite.some((p) => p.slug === slug), slug);
     }
     const slugs = suite.map((p) => p.slug);
+    assert.ok(slugs.indexOf("azcoherence") < slugs.indexOf("azhub"), "Plain A–Z: AZCoherence before AZHub");
     assert.ok(slugs.indexOf("azbrowser") < slugs.indexOf("azhub"), "Plain A–Z: AZBrowser before AZHub");
     assert.ok(slugs.indexOf("azhub") < slugs.indexOf("azinterface"), "Plain A–Z: AZHub before AZInterface");
     assert.ok(slugs.indexOf("azinterface") < slugs.indexOf("aznet"), "Plain A–Z: AZInterface before AZNet");
@@ -587,6 +624,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(suiteFamily({ slug: "aznet" }), "plain");
     assert.equal(suiteFamily({ slug: "azhub" }), "plain");
     assert.equal(suiteFamily({ slug: "azinterface" }), "plain");
+    assert.equal(suiteFamily({ slug: "azcoherence" }), "plain");
     const ordered = sortSoftwareSuite([
       { slug: "godlock", name: "GodLock" },
       { slug: "staticclock", name: "StaticClock" },
@@ -601,7 +639,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       { slug: "decisiongate", name: "DecisionGATE" },
       { slug: "azai", name: "AZAI" },
     ]);
-    assert.deepEqual(suite.map((p) => p.slug), ["aziel-runtime", "azai", "azhub", "azinterface", "aznet", "staticclock", "decisiongate", "fraggate", "godlock"]);
+    assert.deepEqual(suite.map((p) => p.slug), ["aziel-runtime", "azai", "azcoherence", "azhub", "azinterface", "aznet", "staticclock", "decisiongate", "fraggate", "godlock"]);
     assert.equal(suite.find((p) => p.slug === "staticclock").family, "plain");
     assert.equal(suite.find((p) => p.slug === "godlock").family, "lock");
   });
@@ -663,6 +701,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(ids.includes("aznet"));
     assert.ok(ids.includes("azhub"));
     assert.ok(ids.includes("azinterface"));
+    assert.ok(ids.includes("azcoherence"));
+    assert.ok(ids.includes("azclce"));
     assert.ok(ids.includes("peacelock"));
     for (const slug of CATALOG_SLUGS) {
       assert.ok(ids.includes(slug), slug);
@@ -856,6 +896,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(ids.includes("aznet"));
     assert.ok(ids.includes("azhub"));
     assert.ok(ids.includes("azinterface"));
+    assert.ok(ids.includes("azcoherence"));
+    assert.ok(ids.includes("azclce"));
     assert.ok(ids.includes("peacelock"));
     assert.match(html, /<title>Software — GodLock<\/title>/);
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
@@ -893,8 +935,11 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(body.products.some((p) => p.slug === "aznet" && p.download === AZNET_DOWNLOAD && p.worker === AZNET_WORKER && p.family === "plain"));
     assert.ok(body.products.some((p) => p.slug === "azhub" && p.download === AZHUB_DOWNLOAD && p.worker === AZHUB_WORKER && p.family === "plain"));
     assert.ok(body.products.some((p) => p.slug === "azinterface" && p.download === AZINTERFACE_DOWNLOAD && p.worker === AZINTERFACE_WORKER && p.family === "plain"));
+    assert.ok(body.products.some((p) => p.slug === "azcoherence" && p.download === AZCOHERENCE_DOWNLOAD && p.worker === AZCOHERENCE_WORKER && p.family === "plain" && p.github === AZCOHERENCE_GITHUB));
     const listed = body.products.map((p) => p.slug);
-    assert.ok(listed.indexOf("azbrowser") < listed.indexOf("azhub"));
+    assert.ok(listed.indexOf("azclce") < listed.indexOf("azbrowser"));
+    assert.ok(listed.indexOf("azbrowser") < listed.indexOf("azcoherence"));
+    assert.ok(listed.indexOf("azcoherence") < listed.indexOf("azhub"));
     assert.ok(listed.indexOf("azhub") < listed.indexOf("azinterface"));
     assert.ok(listed.indexOf("azinterface") < listed.indexOf("aznet"));
     assert.ok(listed.indexOf("aznet") < listed.indexOf("decisiongate"));
@@ -916,6 +961,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(cite.software_slugs.includes("aznet"));
     assert.ok(cite.software_slugs.includes("azhub"));
     assert.ok(cite.software_slugs.includes("azinterface"));
+    assert.ok(cite.software_slugs.includes("azcoherence"));
+    assert.ok(cite.software_slugs.includes("azclce"));
     assert.ok(cite.software_slugs.includes("peacelock"));
     assert.ok(cite.software_slugs.length >= CATALOG_PRODUCT_COUNT);
     assert.ok(cite.software_product_count >= CATALOG_PRODUCT_COUNT);
@@ -924,6 +971,38 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(defaultDescription("software"), /aziel-runtime \(Aziel Runtime\)/);
     assert.doesNotMatch(defaultDescription("software"), /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
     assert.doesNotMatch(defaultDescription("runtime"), /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
+  });
+
+  it("serves GET /v1/software with AZCoherence in Plain A–Z even from the local fallback", async () => {
+    const res = await worker.fetch(new Request("https://godlock.uk/v1/software"), mockEnv());
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.ok, true);
+    assert.equal(body.author, "Aziel Eliab");
+    assert.equal(body.identity, "Aziel Eliab");
+    assert.equal(body.via, "/v1/software");
+    assert.equal(body.sort, "plain-gate-lock");
+    assert.ok(body.products.some((p) => p.slug === "azcoherence" && p.family === "plain" && p.worker === AZCOHERENCE_WORKER && p.github === AZCOHERENCE_GITHUB && p.download === AZCOHERENCE_DOWNLOAD && p.invoke === "/runtime/v1/pull/azcoherence"));
+    assert.ok(body.software.some((p) => p.slug === "azcoherence" && p.name === "AZCoherence" && p.family === "plain"));
+    assert.ok(body.software.some((p) => p.slug === "azclce"));
+    const names = body.software.filter((p) => p.family === "plain").map((p) => p.name);
+    assert.ok(names.indexOf("AZ-CLCE") < names.indexOf("AZCoherence"));
+    assert.ok(names.indexOf("AZCoherence") < names.indexOf("AZHub"));
+    const mapped = compactProduct({
+      slug: "azcoherence",
+      name: "AZCoherence",
+      download_url: AZCOHERENCE_DOWNLOAD,
+      worker_home: AZCOHERENCE_WORKER,
+      worker: "azcoherence-download-tracker",
+      github: AZCOHERENCE_GITHUB,
+      one_line: AZCOHERENCE_CARD.one_line,
+    });
+    assert.equal(mapped.download, AZCOHERENCE_DOWNLOAD);
+    assert.equal(mapped.worker, "");
+    assert.equal(mapped.worker_home, AZCOHERENCE_WORKER);
+    const api = softwareApiDoc([], { source: "fallback" });
+    assert.ok(api.products.some((p) => p.slug === AZCOHERENCE_SLUG));
+    assert.equal(omitUntilWorker("azcoherence"), false);
   });
 
   it("parses uses and download counters when the Worker publishes them", async () => {

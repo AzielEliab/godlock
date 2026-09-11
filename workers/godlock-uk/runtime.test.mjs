@@ -111,12 +111,18 @@ describe("runtime path mapping", () => {
     assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime"/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0"/);
     assert.match(html, />Runtime</);
-    assert.match(html, /www\.azielcorpuslibrary\.net\/runtime/);
+    assert.match(html, /www\.azielcorpuslibrary\.net\//);
     assert.match(html, /aziel-runtime\.vibelock\.workers\.dev/);
     assert.doesNotMatch(html, /Specified Fit|INTERNAL_CRITERIA/i);
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     assert.ok(ld["@graph"].some((n) => n["@type"] === "Person" && n["@id"] === "https://www.azieleliab.com/#aziel"));
     assert.ok(ld["@graph"].some((n) => n.author && n.author["@id"] === "https://www.azieleliab.com/#aziel"));
+    const runtime = ld["@graph"].find((n) => n["@type"] === "SoftwareApplication");
+    assert.equal(runtime["@id"], "https://www.azieleliab.com/runtime#runtime");
+    assert.deepEqual(runtime.sameAs, [
+      "https://github.com/AzielEliab/aziel-runtime",
+      "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime",
+    ]);
     assert.match(html, /rel="canonical" href="https:\/\/godlock\.uk\/runtime\/"/);
   });
 });

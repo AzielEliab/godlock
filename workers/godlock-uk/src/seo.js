@@ -11,10 +11,15 @@ export const CATALOG = "https://aziel-runtime.vibelock.workers.dev";
 export const LIBRARY = "https://www.azielcorpuslibrary.net";
 export const LIBRARY_AZIEL = LIBRARY + "/AzielEliab";
 export const LIBRARY_RUNTIME = LIBRARY + "/runtime";
+export const LIBRARY_HOME = LIBRARY + "/";
 export const SIGIL = LIBRARY + "/sigil.png";
 export const SITE = "GodLock";
 export const AUTHOR = "Aziel Eliab";
 export const AUTHOR_AKA = "Aziel Elroi Eliab";
+/** Shared public Person @id. Satellite sites reference this; they do not mint a competing primary. */
+export const AZIEL_OFFICIAL = "https://www.azieleliab.com/";
+export const AZIEL_PERSON_ID = "https://www.azieleliab.com/#aziel";
+export const LOCAL_PERSON_STUB_ID = CANON_HOST + "/AzielEliab#aziel-eliab";
 export const BANNER = "Public HTTPS engine. QNM-BUILD-1.0. Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. Author Aziel Eliab.";
 export const ANON_BROADCAST = "https://github.com/AzielEliab/anon-broadcast";
 export const AZIEL_ELIAB_PATH = "/AzielEliab";
@@ -97,6 +102,22 @@ export function runtimeDistribution({ sameOrigin = false } = {}) {
   ];
 }
 
+/** Visible ecosystem block (footer/nav). Not inserted between Softwares heading and list. */
+export function ecosystemLinks() {
+  return [
+    { id: "official", label: "Official site", href: AZIEL_OFFICIAL },
+    { id: "library", label: "Aziel Corpus Library", href: LIBRARY_HOME },
+    { id: "runtime-github", label: "Aziel Runtime on GitHub", href: GITHUB_RUNTIME },
+    { id: "runtime", label: "Aziel Runtime", href: CATALOG + "/", secondary: true },
+    { id: "glama", label: "Try on Glama", href: GLAMA_RUNTIME },
+  ];
+}
+
+/** Exact JSON-LD Person reference used by author / creator / publisher. */
+export function personRef() {
+  return { "@id": AZIEL_PERSON_ID };
+}
+
 export function citeRuntimeVersion(live) {
   const v = String(live == null ? "" : live).trim();
   return v || RUNTIME_VERSION;
@@ -123,20 +144,29 @@ function linkRel(rel, href, extra) {
 export function personNode() {
   return {
     "@type": "Person",
-    "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#aziel-eliab",
+    "@id": AZIEL_PERSON_ID,
     name: AUTHOR,
     givenName: "Aziel",
     familyName: "Eliab",
     alternateName: [AUTHOR_AKA],
     identifier: AUTHOR,
-    url: CANON_HOST + AZIEL_ELIAB_PATH,
+    url: AZIEL_OFFICIAL,
     image: SIGIL,
     jobTitle: "Author",
     hasOccupation: { "@type": "Occupation", name: "Author" },
     description: "Author of GodLock. Identity is Aziel Eliab only. Aziel Elroi Eliab is SEO alternateName only.",
     knowsAbout: [SITE, "FragGate", "Aziel Runtime"],
-    sameAs: [LIBRARY_AZIEL, AUTHOR_GITHUB, GITHUB],
+    sameAs: [CANON_HOST + AZIEL_ELIAB_PATH, LIBRARY_AZIEL, LIBRARY_HOME, AUTHOR_GITHUB, GITHUB],
     mainEntityOfPage: CANON_HOST + AZIEL_ELIAB_PATH,
+  };
+}
+
+/** Local fragment is a stub, never a competing primary Person @id. */
+export function personLocalStub() {
+  return {
+    "@id": LOCAL_PERSON_STUB_ID,
+    sameAs: personRef(),
+    url: CANON_HOST + AZIEL_ELIAB_PATH,
   };
 }
 
@@ -290,7 +320,7 @@ export function runtimeSoftwareNode(person, products) {
     softwareVersion: liveRuntimeVersion(products),
     url: PUBLIC_RUNTIME,
     description: defaultDescription("runtime"),
-    author: person,
+    author: personRef(),
     license: "https://www.apache.org/licenses/LICENSE-2.0",
     codeRepository: GITHUB_RUNTIME,
     documentation: RUNTIME_DOCS_2_0,
@@ -305,12 +335,13 @@ export function runtimeWebApiNode(person) {
     name: RUNTIME_NAME,
     url: PUBLIC_RUNTIME,
     documentation: PUBLIC_RUNTIME + "/openapi.json",
-    provider: person,
+    provider: personRef(),
     description: defaultDescription("runtime"),
   };
 }
 
-function websiteNode(person, description) {
+function websiteNode(description) {
+  const who = personRef();
   return {
     "@type": "WebSite",
     "@id": CANON_HOST + "/#website",
@@ -318,12 +349,13 @@ function websiteNode(person, description) {
     url: CANON_HOST + "/",
     description,
     inLanguage: "en",
-    author: person,
-    publisher: person,
+    author: who,
+    publisher: who,
+    creator: who,
   };
 }
 
-function godlockSoftwareNode(person) {
+function godlockSoftwareNode() {
   return {
     "@type": "SoftwareApplication",
     "@id": CANON_HOST + "/#godlock",
@@ -332,7 +364,7 @@ function godlockSoftwareNode(person) {
     operatingSystem: "Web",
     url: CANON_HOST + "/",
     description: hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals."),
-    author: person,
+    author: personRef(),
     license: "https://www.apache.org/licenses/LICENSE-2.0",
     codeRepository: GITHUB,
     isPartOf: { "@id": CANON_HOST + "/#website" },
@@ -361,7 +393,7 @@ function softwareItemList(products, person) {
     description: "Plain A–Z → Gate A–Z → Lock A–Z catalog. Clock is not Lock. FragGate is the single door.",
     itemListOrder: "https://schema.org/ItemListOrderAscending",
     numberOfItems: items.length,
-    author: { "@id": person["@id"] },
+    author: personRef(),
     itemListElement: items.map((p, i) => {
       const url = CANON_HOST + SOFTWARE_PATH + "#" + p.slug;
       return {
@@ -377,7 +409,7 @@ function softwareItemList(products, person) {
           identifier: p.slug,
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Web",
-          author: { "@id": person["@id"] },
+          author: personRef(),
           isPartOf: { "@id": CANON_HOST + SOFTWARE_PATH + "#catalog" },
         },
       };
@@ -387,9 +419,10 @@ function softwareItemList(products, person) {
 
 function jsonLd(title, path, description, kind, products) {
   const person = personNode();
-  const website = websiteNode(person, description);
-  const software = godlockSoftwareNode(person);
-  const graph = [website, software, person];
+  const website = websiteNode(description);
+  const software = godlockSoftwareNode();
+  const who = personRef();
+  const graph = [website, software, person, personLocalStub()];
   if (kind !== "aziel" && kind !== "reason" && kind !== "verify" && kind !== "receipt" && kind !== "donate" && kind !== "notfound") {
     graph.push(runtimeSoftwareNode(person, products), runtimeWebApiNode(person));
   }
@@ -401,9 +434,10 @@ function jsonLd(title, path, description, kind, products) {
       url: CANON_HOST + "/",
       description,
       isPartOf: { "@id": website["@id"] },
-      about: [{ "@id": software["@id"] }, { "@id": person["@id"] }],
-      author: person,
-      publisher: person,
+      about: [{ "@id": software["@id"] }, who],
+      author: who,
+      publisher: who,
+      creator: who,
     });
   }
   if (kind === "software") {
@@ -423,11 +457,12 @@ function jsonLd(title, path, description, kind, products) {
       identifier: "aziel-eliab-softwares",
       keywords: defaultKeywords("software"),
       image: SIGIL,
-      author: person,
-      publisher: person,
-      copyrightHolder: person,
+      author: who,
+      publisher: who,
+      copyrightHolder: who,
+      creator: who,
       isPartOf: { "@id": website["@id"] },
-      about: [{ "@id": person["@id"] }, { "@id": website["@id"] }],
+      about: [who, { "@id": website["@id"] }],
       mainEntity: { "@id": list["@id"] },
       breadcrumb: { "@id": crumbs["@id"] },
       hasPart: { "@id": software["@id"] },
@@ -441,7 +476,7 @@ function jsonLd(title, path, description, kind, products) {
       "@type": "ScholarlyArticle",
       name: "Specified Fit, Not Pretty Spirals",
       url: CANON_HOST + REASON_PATH,
-      author: person,
+      author: who,
     });
   }
   if (kind === "aziel") {
@@ -460,13 +495,14 @@ function jsonLd(title, path, description, kind, products) {
       identifier: "about-aziel-eliab",
       keywords: defaultKeywords("aziel"),
       image: SIGIL,
-      about: { "@id": person["@id"] },
-      mainEntity: { "@id": person["@id"] },
+      about: who,
+      mainEntity: who,
       breadcrumb: { "@id": crumbs["@id"] },
       isPartOf: { "@id": website["@id"] },
-      author: person,
-      publisher: person,
-      copyrightHolder: person,
+      author: who,
+      publisher: who,
+      copyrightHolder: who,
+      creator: who,
       sameAs: [LIBRARY_AZIEL, AUTHOR_GITHUB],
       relatedLink: [LIBRARY_AZIEL, CANON_HOST + REASON_PATH, CANON_HOST + SOFTWARE_PATH, AUTHOR_GITHUB],
       significantLink: [LIBRARY_AZIEL, CANON_HOST + REASON_PATH, CANON_HOST + SOFTWARE_PATH],
@@ -486,7 +522,7 @@ function jsonLd(title, path, description, kind, products) {
       url: CANON_HOST + "/verify",
       description: defaultDescription("verify"),
       isPartOf: { "@id": website["@id"] },
-      author: person,
+      author: who,
     });
   }
   if (kind === "donate") {
@@ -494,7 +530,8 @@ function jsonLd(title, path, description, kind, products) {
       "@type": "WebPage",
       name: "Donate",
       url: CANON_HOST + DONATE_PATH,
-      author: person,
+      author: who,
+      creator: who,
       sameAs: [DONATE_CANONICAL],
     });
   }
@@ -801,8 +838,12 @@ export async function sitemapXml(env, extras = {}) {
 export function citeDoc() {
   return {
     author: AUTHOR,
+    author_id: AZIEL_PERSON_ID,
     identity: AUTHOR,
-    identity_note: "Aziel Eliab only. Aziel Elroi Eliab is SEO alternateName only.",
+    identity_note: "Aziel Eliab only. Aziel Elroi Eliab is SEO alternateName only. Shared Person @id is https://www.azieleliab.com/#aziel.",
+    person_id: AZIEL_PERSON_ID,
+    official_site: AZIEL_OFFICIAL,
+    ecosystem: ecosystemLinks(),
     alternateName: AUTHOR_AKA,
     title: SITE,
     reasoning_spine: "Specified Fit, Not Pretty Spirals",
@@ -920,6 +961,14 @@ export function llmsDoc() {
     + "Author: Aziel Eliab\n"
     + "Also known as: Aziel Elroi Eliab\n"
     + "Primary credit: Aziel Eliab\n"
+    + "Person @id: " + AZIEL_PERSON_ID + "\n"
+    + "Official site: " + AZIEL_OFFICIAL + "\n"
+    + "Part of the Aziel Eliab ecosystem\n"
+    + "Official site: " + AZIEL_OFFICIAL + "\n"
+    + "Aziel Corpus Library: " + LIBRARY_HOME + "\n"
+    + "Aziel Runtime on GitHub: " + GITHUB_RUNTIME + "\n"
+    + "Aziel Runtime: " + CATALOG + "/\n"
+    + "Try on Glama: " + GLAMA_RUNTIME + "\n"
     + "Site: " + CANON_HOST + "/\n"
     + "GitHub: " + GITHUB + "\n"
     + "Download: " + DOWNLOAD + "\n"

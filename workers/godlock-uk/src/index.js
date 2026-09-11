@@ -16,7 +16,7 @@ import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
-  PUBLIC_RUNTIME, RUNTIME_PATH, permanentIdentityRedirect,
+  PUBLIC_RUNTIME, RUNTIME_PATH, permanentIdentityRedirect, citeRuntimeVersion,
 } from "./seo.js";
 import {
   fetchCatalogProducts, softwareSuite, publicProduct, softwareApiDoc,
@@ -452,11 +452,13 @@ export default {
         const fetched = await fetchCatalogProducts(env);
         const products = softwareSuite(fetched.products, { version: fetched.version });
         const catalogN = products.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "fraggate").length;
+        const runtime = products.find((p) => p && p.slug === "aziel-runtime");
         return json({
           ...citeDoc(),
           software_product_count: catalogN,
           software_slugs: products.map((p) => p.slug),
           software_source: fetched.source,
+          runtime_version: citeRuntimeVersion((runtime && runtime.version) || fetched.version),
         });
       }
       if (path === "/llms.txt") {

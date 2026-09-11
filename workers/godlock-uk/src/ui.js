@@ -5,7 +5,7 @@
 import {
   headMeta, documentTitle, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
-  DONATE_PATH, AI_CLIENTS_SENTENCE,
+  DONATE_PATH, AI_CLIENTS_SENTENCE, runtimeDistribution,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
@@ -397,14 +397,25 @@ export function softwareBody({ products, extras } = {}) {
     const kernel = p.kernel
       ? `<a class="button ghost" href="${esc(p.kernel)}">FragGate</a>`
       : "";
-    const links = [
-      p.download ? `<a class="button" href="${esc(p.download)}">Download</a>` : "",
-      worker ? `<a class="button ghost" href="${esc(worker)}">Worker</a>` : "",
-      p.github ? `<a class="button ghost" href="${esc(p.github)}">GitHub</a>` : "",
-      `<a class="button ghost" href="${esc(invokeHref(p))}">Invoke via Runtime</a>`,
-      `<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>`,
-      kernel,
-    ].filter(Boolean).join(" ");
+    const dist = slug === "aziel-runtime"
+      ? runtimeDistribution({ sameOrigin: true }).map((b, i) => (
+        `<a class="button${i ? " ghost" : ""}" href="${esc(b.href)}">${esc(b.label)}</a>`
+      )).join(" ")
+      : "";
+    const links = slug === "aziel-runtime"
+      ? [
+          dist,
+          `<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>`,
+          kernel,
+        ].filter(Boolean).join(" ")
+      : [
+          p.download ? `<a class="button" href="${esc(p.download)}">Download</a>` : "",
+          worker ? `<a class="button ghost" href="${esc(worker)}">Worker</a>` : "",
+          p.github ? `<a class="button ghost" href="${esc(p.github)}">GitHub</a>` : "",
+          `<a class="button ghost" href="${esc(invokeHref(p))}">Invoke via Runtime</a>`,
+          `<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>`,
+          kernel,
+        ].filter(Boolean).join(" ");
     return `<article class="soft-card${feat ? " featured" : ""}" id="${esc(slug)}" data-family="${esc(family)}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(stripRuntimeFragGateMash(p.name || slug))}</h3><div class="soft-meta">${ver}${dl}${views}${uses}</div><p>${esc(stripRuntimeFragGateMash(hideInternalDetermination(p.one_line || "")))}</p><p class="soft-links">${links}</p></article>`;
   }).join("");
   return `<h2 class="soft-heading">Downloadable software</h2>

@@ -77,4 +77,19 @@ describe("hideInternalDetermination", () => {
     assert.equal(hideInternalDetermination("weighing internals: do not publish"), "do not publish");
     assert.match(hideInternalDetermination("Submit a challenge about specified complexity."), /specified complexity/);
   });
+
+  it("rewrites observational phrasing instead of leaving broken English", () => {
+    assert.equal(
+      hideInternalDetermination("the relationship between the limits of observation and the data"),
+      "the relationship between observational limits and the data",
+    );
+    assert.doesNotMatch(
+      hideInternalDetermination("the relationship between the limits of observation and the data"),
+      /relationship between and/,
+    );
+    assert.equal(
+      hideInternalDetermination("Observation of the codon table is enough to state the claim."),
+      "Observation of the codon table is enough to state the claim.",
+    );
+  });
 });

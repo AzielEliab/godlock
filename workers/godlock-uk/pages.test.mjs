@@ -378,11 +378,15 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(cite.runtime_docs, /docs\/2\.0/);
     assert.ok(Array.isArray(cite.runtime_distribution));
     assert.deepEqual(cite.runtime_distribution.map((b) => b.label), [
+      "Try on Glama",
       "Official Runtime",
       "Source on GitHub",
-      "Try on Glama",
       "Documentation/Architecture",
     ]);
+    assert.equal(cite.runtime_distribution[0].id, "glama");
+    assert.equal(cite.runtime_distribution[0].primary, true);
+    assert.equal(cite.runtime_distribution[1].id, "official");
+    assert.notEqual(cite.runtime_distribution[1].primary, true);
     assert.equal(cite.runtime_openapi, CANON_HOST + "/runtime/openapi.json");
     assert.equal(cite.runtime_mcp, CANON_HOST + "/runtime/mcp");
     assert.equal(cite.runtime_mesh, CANON_HOST + "/runtime/v1/mesh");
@@ -445,10 +449,11 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /## Runtime \(FragGate door\)/);
     assert.ok(llms.indexOf(RUNTIME_ABSTRACT) < llms.indexOf("Live version: 2.0.0-rc1"));
     assert.ok(llms.indexOf("## Runtime (FragGate door)") < llms.indexOf(RUNTIME_ABSTRACT));
+    assert.match(llms, /Try on Glama: https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime/);
     assert.match(llms, /Official Runtime: https:\/\/godlock\.uk\/runtime/);
     assert.match(llms, /Source on GitHub: https:\/\/github\.com\/AzielEliab\/aziel-runtime/);
-    assert.match(llms, /Try on Glama: https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime/);
     assert.match(llms, /Documentation\/Architecture: https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0/);
+    assert.ok(llms.indexOf("Try on Glama:") < llms.indexOf("Official Runtime:"));
     assert.doesNotMatch(llms, /glama\.ai\/mcp\/servers\/@[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+/);
     assert.match(llms, /Door: https:\/\/godlock\.uk\/runtime/);
     assert.match(llms, /OpenAPI: https:\/\/godlock\.uk\/runtime\/openapi\.json/);
@@ -899,9 +904,9 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       assert.ok(ids.includes(slug), slug);
       assert.match(html, new RegExp('id="' + slug + '"'));
     }
-    assert.match(html, /href="\/runtime">Official Runtime<\/a>/);
+    assert.match(html, /class="button" href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
+    assert.match(html, /class="button ghost" href="\/runtime">Official Runtime<\/a>/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Source on GitHub<\/a>/);
-    assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0">Documentation\/Architecture<\/a>/);
     assert.doesNotMatch(html, /glama\.ai\/mcp\/servers\/@[A-Za-z0-9_-]+/);
     assert.match(html, /href="\/runtime\/v1\/pull\/godlock">Invoke via Runtime<\/a>/);
@@ -1097,7 +1102,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /<title>Aziel Eliab Softwares — GodLock<\/title>/);
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
     assert.match(html, /Invoke via Runtime/);
-    assert.match(html, /href="\/runtime">Official Runtime<\/a>/);
+    assert.match(html, /class="button" href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
+    assert.match(html, /class="button ghost" href="\/runtime">Official Runtime<\/a>/);
     assert.match(html, /Try on Glama/);
     assert.match(html, /Documentation\/Architecture/);
     assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
@@ -1229,6 +1235,9 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(body.runtime_glama, "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime");
     assert.equal(body.runtime_docs, "https://github.com/AzielEliab/aziel-runtime/tree/main/docs/2.0");
     assert.ok(body.runtime_distribution.some((b) => b.label === "Official Runtime" && b.href === "https://godlock.uk/runtime"));
+    assert.equal(body.runtime_distribution[0].label, "Try on Glama");
+    assert.equal(body.runtime_distribution[0].href, "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime");
+    assert.equal(body.runtime_distribution[0].primary, true);
     assert.equal(body.sort, "plain-gate-lock");
     assert.ok(body.products.some((p) => p.slug === "azcoherence" && p.family === "plain" && p.worker === AZCOHERENCE_WORKER && p.github === AZCOHERENCE_GITHUB && p.download === AZCOHERENCE_DOWNLOAD && p.invoke === "/runtime/v1/pull/azcoherence"));
     assert.ok(body.software.some((p) => p.slug === "azcoherence" && p.name === "AZCoherence" && p.family === "plain"));
@@ -1621,6 +1630,9 @@ describe("Phase F Aziel Runtime 2.0.0-rc1 hub cite", () => {
     assert.match(html, />Source on GitHub</);
     assert.match(html, />Try on Glama</);
     assert.match(html, />Documentation\/Architecture</);
+    assert.match(html, /class="button" href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
+    assert.match(html, /class="button ghost" href="\/runtime">Official Runtime<\/a>/);
+    assert.ok(html.indexOf("Try on Glama") < html.indexOf("Official Runtime"));
     assert.doesNotMatch(html, /glama\.ai\/mcp\/servers\/[0-9a-f]{8,}/i);
   });
 });

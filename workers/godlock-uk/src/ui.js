@@ -398,8 +398,8 @@ export function softwareBody({ products, extras } = {}) {
       ? `<a class="button ghost" href="${esc(p.kernel)}">FragGate</a>`
       : "";
     const dist = slug === "aziel-runtime"
-      ? runtimeDistribution({ sameOrigin: true }).map((b, i) => (
-        `<a class="button${i ? " ghost" : ""}" href="${esc(b.href)}">${esc(b.label)}</a>`
+      ? runtimeDistribution({ sameOrigin: true }).map((b) => (
+        `<a class="button${b.primary ? "" : " ghost"}" href="${esc(b.href)}">${esc(b.label)}</a>`
       )).join(" ")
       : "";
     const links = slug === "aziel-runtime"

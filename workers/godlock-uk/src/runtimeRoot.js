@@ -148,10 +148,11 @@ export function runtimeChromeNav() {
     const link = `<a href="${it.href}" style="color:${color};text-decoration:none">${it.label}</a>`;
     return i ? `<span style="color:#9aa3b2"> | </span>${link}` : link;
   }).join("");
-  const dist = runtimeDistribution({ sameOrigin: true }).map((b, i) => {
-    const bg = i === 0 ? "#c9a227" : "transparent";
-    const fg = i === 0 ? "#14110a" : "#efe6d6";
-    const border = i === 0 ? "none" : "1px solid #3a3228";
+  const dist = runtimeDistribution({ sameOrigin: true }).map((b) => {
+    const primary = !!b.primary;
+    const bg = primary ? "#c9a227" : "transparent";
+    const fg = primary ? "#14110a" : "#efe6d6";
+    const border = primary ? "none" : "1px solid #3a3228";
     return `<a href="${b.href}" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border-radius:12px;font:700 14px/1.2 system-ui,sans-serif;text-decoration:none;background:${bg};color:${fg};border:${border}">${b.label}</a>`;
   }).join("");
   return `<nav aria-label="GodLock" style="font:14px/1.45 system-ui,sans-serif;margin:0 0 .75rem;padding:0 0 .85rem;border-bottom:1px solid #2a3140"><a href="/" style="color:#efe6d6;font-weight:800;text-decoration:none;margin-right:.75rem">GodLock</a>${links}</nav><div id="godlock-runtime-dist" aria-label="Aziel Runtime distribution" style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 1.2rem">${dist}</div>`;

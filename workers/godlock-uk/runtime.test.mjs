@@ -102,6 +102,9 @@ describe("runtime path mapping", () => {
     assert.match(html, />Source on GitHub</);
     assert.match(html, />Try on Glama</);
     assert.match(html, />Documentation\/Architecture</);
+    assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime"[^>]*>Try on Glama</);
+    assert.match(html, /background:#c9a227[^"]*"[^>]*>Try on Glama</);
+    assert.match(html, /background:transparent[^"]*"[^>]*>Official Runtime</);
     assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime"/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0"/);
     assert.match(html, />Runtime</);
@@ -300,9 +303,9 @@ describe("software CTA and nav", () => {
   it("offers Official Runtime distribution on the runtime card and Invoke via Runtime on catalog cards", () => {
     const html = softwareBody({ products: [] });
     assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
-    assert.match(html, /href="\/runtime">Official Runtime<\/a>/);
+    assert.match(html, /class="button" href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
+    assert.match(html, /class="button ghost" href="\/runtime">Official Runtime<\/a>/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Source on GitHub<\/a>/);
-    assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0">Documentation\/Architecture<\/a>/);
     assert.doesNotMatch(html, /glama\.ai\/mcp\/servers\/@[A-Za-z0-9_-]+/);
     assert.match(html, /Invoke via Runtime/);

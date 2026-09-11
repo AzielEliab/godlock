@@ -8,6 +8,7 @@ import {
   AUTHOR, CANON_HOST, CATALOG, LIBRARY_RUNTIME, PUBLIC_RUNTIME, RUNTIME_PATH,
   RUNTIME_VERSION, FRAGGATE_KERNEL, runtimeSameAs, runtimeSoftwareNode,
   runtimeWebApiNode, personNode, defaultDescription, runtimeDistribution,
+  ecosystemLinks, personRef, AZIEL_PERSON_ID,
 } from "./seo.js";
 import { navItems } from "./ui.js";
 import {
@@ -155,7 +156,11 @@ export function runtimeChromeNav() {
     const border = primary ? "none" : "1px solid #3a3228";
     return `<a href="${b.href}" style="display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border-radius:12px;font:700 14px/1.2 system-ui,sans-serif;text-decoration:none;background:${bg};color:${fg};border:${border}">${b.label}</a>`;
   }).join("");
-  return `<nav aria-label="GodLock" style="font:14px/1.45 system-ui,sans-serif;margin:0 0 .75rem;padding:0 0 .85rem;border-bottom:1px solid #2a3140"><a href="/" style="color:#efe6d6;font-weight:800;text-decoration:none;margin-right:.75rem">GodLock</a>${links}</nav><div id="godlock-runtime-dist" aria-label="Aziel Runtime distribution" style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 1.2rem">${dist}</div>`;
+  const eco = ecosystemLinks().map((it) => {
+    const color = it.secondary ? "#9aa3b2" : "#c9a227";
+    return `<a href="${it.href}" style="color:${color};text-decoration:none">${it.label}</a>`;
+  }).join(`<span style="color:#9aa3b2"> · </span>`);
+  return `<nav aria-label="GodLock" style="font:14px/1.45 system-ui,sans-serif;margin:0 0 .75rem;padding:0 0 .85rem;border-bottom:1px solid #2a3140"><a href="/" style="color:#efe6d6;font-weight:800;text-decoration:none;margin-right:.75rem">GodLock</a>${links}</nav><nav aria-label="Aziel Eliab ecosystem" style="font:13px/1.45 system-ui,sans-serif;margin:0 0 .85rem;color:#9aa3b2"><p style="margin:0 0 4px">Part of the Aziel Eliab ecosystem</p>${eco}</nav><div id="godlock-runtime-dist" aria-label="Aziel Runtime distribution" style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 1.2rem">${dist}</div>`;
 }
 
 function injectRuntimeChrome(html) {
@@ -185,24 +190,37 @@ function mergeSameAs(node) {
   return node;
 }
 
+function rewriteIdentityNode(node) {
+  if (!node || typeof node !== "object") return node;
+  const out = { ...node };
+  if (out["@type"] === "Person") {
+    out["@id"] = AZIEL_PERSON_ID;
+  }
+  for (const key of ["author", "publisher", "creator", "provider", "copyrightHolder"]) {
+    if (out[key]) out[key] = personRef();
+  }
+  return out;
+}
+
 function addRuntimeGraphNodes(ld) {
   const person = personNode();
-  const extras = [runtimeSoftwareNode(person), runtimeWebApiNode(person)];
+  const extras = [person, runtimeSoftwareNode(person), runtimeWebApiNode(person)];
   if (ld && Array.isArray(ld["@graph"])) {
+    ld["@graph"] = ld["@graph"].map((n) => {
+      if (!n || typeof n !== "object") return n;
+      let next = rewriteIdentityNode(n);
+      if (next["@type"] === "SoftwareApplication" || next["@type"] === "WebAPI" || next["@type"] === "WebSite") {
+        next = mergeSameAs(next);
+      }
+      return next;
+    });
     const types = new Set(ld["@graph"].map((n) => (n && n["@id"]) || ""));
     for (const n of extras) {
       if (!types.has(n["@id"])) ld["@graph"].push(n);
     }
-    ld["@graph"] = ld["@graph"].map((n) => {
-      if (!n || typeof n !== "object") return n;
-      if (n["@type"] === "SoftwareApplication" || n["@type"] === "WebAPI" || n["@type"] === "WebSite") {
-        return mergeSameAs({ ...n });
-      }
-      return n;
-    });
     return ld;
   }
-  if (ld && typeof ld === "object") return mergeSameAs({ ...ld });
+  if (ld && typeof ld === "object") return mergeSameAs(rewriteIdentityNode({ ...ld }));
   return ld;
 }
 

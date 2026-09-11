@@ -13,6 +13,7 @@ import {
   azielEliabText,
   page,
   topNav,
+  ecosystemNav,
   CSS,
   softwareBody,
   homeBody,
@@ -27,6 +28,9 @@ import {
   defaultDescription,
   headMeta,
   personNode,
+  personRef,
+  personLocalStub,
+  ecosystemLinks,
   documentTitle,
   isIndexCrawler,
   permanentIdentityRedirect,
@@ -34,6 +38,9 @@ import {
   LIBRARY_AZIEL,
   AUTHOR_GITHUB,
   GITHUB,
+  AZIEL_PERSON_ID,
+  AZIEL_OFFICIAL,
+  LOCAL_PERSON_STUB_ID,
   AI_CRAWLER_AGENTS,
   AI_CLIENTS,
   AI_CLIENTS_SENTENCE,
@@ -161,9 +168,11 @@ describe("Aziel Eliab page chrome", () => {
     assert.doesNotMatch(html, /MCP|OpenAPI|runtime_session|Workers AI/i);
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     const person = ld["@graph"].find((n) => n["@type"] === "Person");
+    assert.equal(person["@id"], AZIEL_PERSON_ID);
     assert.equal(person.name, "Aziel Eliab");
     assert.deepEqual(person.alternateName, ["Aziel Elroi Eliab"]);
-    assert.equal(person.url, "https://godlock.uk/AzielEliab");
+    assert.equal(person.url, AZIEL_OFFICIAL);
+    assert.ok(person.sameAs.includes("https://godlock.uk/AzielEliab"));
     assert.ok(person.sameAs.includes(LIBRARY_AZIEL));
     assert.ok(person.sameAs.includes(AUTHOR_GITHUB));
     assert.ok(person.sameAs.includes(GITHUB));
@@ -196,7 +205,15 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(meta, /name="robots" content="index,follow"/);
     assert.match(meta, /og:title" content="About Aziel Eliab — GodLock"/);
     const person = personNode();
-    assert.deepEqual(person.sameAs, [LIBRARY_AZIEL, AUTHOR_GITHUB, GITHUB]);
+    assert.equal(person["@id"], AZIEL_PERSON_ID);
+    assert.deepEqual(personRef(), { "@id": "https://www.azieleliab.com/#aziel" });
+    assert.deepEqual(person.sameAs, [
+      CANON_HOST + "/AzielEliab",
+      LIBRARY_AZIEL,
+      "https://www.azielcorpuslibrary.net/",
+      AUTHOR_GITHUB,
+      GITHUB,
+    ]);
   });
 
   it("lists identity and library pages in robots, sitemap, cite, llms, and ai", async () => {
@@ -346,6 +363,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.aziel_corpus_library, LIBRARY_AZIEL);
     assert.equal(cite.library_aziel_eliab, LIBRARY_AZIEL);
     assert.equal(cite.author, "Aziel Eliab");
+    assert.equal(cite.author_id, AZIEL_PERSON_ID);
+    assert.equal(cite.person_id, "https://www.azieleliab.com/#aziel");
+    assert.equal(cite.official_site, AZIEL_OFFICIAL);
     assert.equal(cite.identity, "Aziel Eliab");
     assert.match(cite.identity_note, /alternateName only/);
     assert.equal(cite.reasoning_spine, "Specified Fit, Not Pretty Spirals");
@@ -1634,5 +1654,105 @@ describe("Phase F Aziel Runtime 2.0.0-rc1 hub cite", () => {
     assert.match(html, /class="button ghost" href="\/runtime">Official Runtime<\/a>/);
     assert.ok(html.indexOf("Try on Glama") < html.indexOf("Official Runtime"));
     assert.doesNotMatch(html, /glama\.ai\/mcp\/servers\/[0-9a-f]{8,}/i);
+  });
+});
+
+function graphLd(html) {
+  return JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+}
+
+function isSharedPersonRef(value) {
+  return !!value && value["@id"] === "https://www.azieleliab.com/#aziel" && Object.keys(value).length === 1;
+}
+
+describe("Aziel Public Entity Graph Phases B–D", () => {
+  it("uses the shared hub Person @id and never a competing primary", () => {
+    assert.equal(AZIEL_PERSON_ID, "https://www.azieleliab.com/#aziel");
+    assert.deepEqual(personRef(), { "@id": "https://www.azieleliab.com/#aziel" });
+    const person = personNode();
+    assert.equal(person["@id"], "https://www.azieleliab.com/#aziel");
+    assert.equal(person.url, "https://www.azieleliab.com/");
+    assert.ok(person.sameAs.includes("https://godlock.uk/AzielEliab"));
+    const stub = personLocalStub();
+    assert.equal(stub["@id"], LOCAL_PERSON_STUB_ID);
+    assert.equal(stub["@type"], undefined);
+    assert.deepEqual(stub.sameAs, { "@id": "https://www.azieleliab.com/#aziel" });
+  });
+
+  it("keeps WebSite and GodLock SoftwareApplication project-specific with shared author/creator", async () => {
+    const res = await worker.fetch(new Request("https://godlock.uk/"), mockEnv());
+    const html = await res.text();
+    const ld = graphLd(html);
+    const site = ld["@graph"].find((n) => n["@type"] === "WebSite");
+    const godlock = ld["@graph"].find((n) => n["@type"] === "SoftwareApplication" && n.name === "GodLock");
+    const persons = ld["@graph"].filter((n) => n["@type"] === "Person");
+    assert.equal(site["@id"], "https://godlock.uk/#website");
+    assert.ok(isSharedPersonRef(site.author));
+    assert.ok(isSharedPersonRef(site.publisher));
+    assert.ok(isSharedPersonRef(site.creator));
+    assert.equal(godlock["@id"], "https://godlock.uk/#godlock");
+    assert.ok(isSharedPersonRef(godlock.author));
+    assert.equal(persons.length, 1);
+    assert.equal(persons[0]["@id"], "https://www.azieleliab.com/#aziel");
+    assert.ok(ld["@graph"].some((n) => n["@id"] === LOCAL_PERSON_STUB_ID && n.sameAs && n.sameAs["@id"] === AZIEL_PERSON_ID && !n["@type"]));
+    assert.ok(!ld["@graph"].some((n) => n["@type"] === "Person" && n["@id"] === LOCAL_PERSON_STUB_ID));
+    for (const node of ld["@graph"]) {
+      for (const key of ["author", "publisher", "creator", "provider", "copyrightHolder"]) {
+        if (node[key]) assert.ok(isSharedPersonRef(node[key]), key + " on " + node["@type"]);
+      }
+    }
+  });
+
+  it("puts the ecosystem block in footer/nav, not between Softwares heading and list", async () => {
+    const links = ecosystemLinks();
+    assert.deepEqual(links.map((l) => [l.label, l.href, !!l.secondary]), [
+      ["Official site", "https://www.azieleliab.com/", false],
+      ["Aziel Corpus Library", "https://www.azielcorpuslibrary.net/", false],
+      ["Aziel Runtime on GitHub", "https://github.com/AzielEliab/aziel-runtime", false],
+      ["Aziel Runtime", "https://aziel-runtime.vibelock.workers.dev/", true],
+      ["Try on Glama", "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime", false],
+    ]);
+    const eco = ecosystemNav();
+    assert.match(eco, /Part of the Aziel Eliab ecosystem/);
+    assert.match(eco, /href="https:\/\/www\.azieleliab\.com\/">Official site<\/a>/);
+    assert.match(eco, /href="https:\/\/www\.azielcorpuslibrary\.net\/">Aziel Corpus Library<\/a>/);
+    assert.match(eco, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Aziel Runtime on GitHub<\/a>/);
+    assert.match(eco, /href="https:\/\/aziel-runtime\.vibelock\.workers\.dev\/" class="secondary">Aziel Runtime<\/a>/);
+    assert.match(eco, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
+    const software = softwareBody({ products: [] });
+    assert.match(software, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+    assert.doesNotMatch(software, /Part of the Aziel Eliab ecosystem/);
+    const html = page("Software", software, { path: "/software", kind: "software" });
+    assert.match(html, /<nav class="nav2">[\s\S]*?<nav class="ecosystem"/);
+    assert.match(html, /<footer>[\s\S]*Part of the Aziel Eliab ecosystem/);
+    const between = html.match(/<h2 class="soft-heading">Downloadable software<\/h2>([\s\S]*?)<div class="soft-grid">/);
+    assert.ok(between);
+    assert.doesNotMatch(between[1], /Part of the Aziel Eliab ecosystem/);
+    const live = await worker.fetch(new Request("https://godlock.uk/software"), mockEnv());
+    const liveHtml = await live.text();
+    assert.match(liveHtml, /Part of the Aziel Eliab ecosystem/);
+    assert.match(liveHtml, />Try on Glama</);
+    assert.match(liveHtml, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+  });
+
+  it("self-canonicals godlock.uk pages to themselves and leaves Remain-OFF untouched", async () => {
+    const paths = ["/", "/software", "/AzielEliab", "/reason", "/verify", "/donate"];
+    for (const path of paths) {
+      const res = await worker.fetch(new Request("https://godlock.uk" + path), mockEnv());
+      assert.equal(res.status, 200, path);
+      const html = await res.text();
+      const expected = "https://godlock.uk" + path;
+      assert.match(html, new RegExp('rel="canonical" href="' + expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + '"'), path);
+      assert.doesNotMatch(html, /rel="canonical" href="https:\/\/www\.azieleliab\.com\//);
+      assert.doesNotMatch(html, /rel="canonical" href="https:\/\/www\.azielcorpuslibrary\.net/);
+      assert.doesNotMatch(html, /rel="canonical" href="https:\/\/aziel-runtime\.vibelock\.workers\.dev/);
+    }
+    const cite = citeDoc();
+    assert.equal(cite.mesh_default_off, true);
+    assert.equal(cite.mesh_get_never_enables, true);
+    assert.equal(cite.mesh_auto_heal, false);
+    assert.equal(cite.mesh_node_gate, false);
+    assert.match(llmsDoc(), /Person @id: https:\/\/www\.azieleliab\.com\/#aziel/);
+    assert.match(llmsDoc(), /Part of the Aziel Eliab ecosystem/);
   });
 });

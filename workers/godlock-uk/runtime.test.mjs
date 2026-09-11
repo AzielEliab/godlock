@@ -101,6 +101,9 @@ describe("runtime path mapping", () => {
     assert.match(html, />Official Runtime</);
     assert.match(html, />Source on GitHub</);
     assert.match(html, />Try on Glama</);
+    assert.match(html, /Part of the Aziel Eliab ecosystem/);
+    assert.match(html, /href="https:\/\/www\.azieleliab\.com\/"[^>]*>Official site</);
+    assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime"[^>]*>Try on Glama</);
     assert.match(html, />Documentation\/Architecture</);
     assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime"[^>]*>Try on Glama</);
     assert.match(html, /background:#c9a227[^"]*"[^>]*>Try on Glama</);
@@ -111,6 +114,10 @@ describe("runtime path mapping", () => {
     assert.match(html, /www\.azielcorpuslibrary\.net\/runtime/);
     assert.match(html, /aziel-runtime\.vibelock\.workers\.dev/);
     assert.doesNotMatch(html, /Specified Fit|INTERNAL_CRITERIA/i);
+    const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    assert.ok(ld["@graph"].some((n) => n["@type"] === "Person" && n["@id"] === "https://www.azieleliab.com/#aziel"));
+    assert.ok(ld["@graph"].some((n) => n.author && n.author["@id"] === "https://www.azieleliab.com/#aziel"));
+    assert.match(html, /rel="canonical" href="https:\/\/godlock\.uk\/runtime\/"/);
   });
 });
 

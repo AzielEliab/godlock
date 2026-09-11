@@ -37,6 +37,11 @@ import {
   AI_CRAWLER_AGENTS,
   AI_CLIENTS,
   AI_CLIENTS_SENTENCE,
+  RUNTIME_VERSION,
+  RUNTIME_ABSTRACT,
+  GLAMA_RUNTIME,
+  RUNTIME_DOCS_2_0,
+  GITHUB_RUNTIME,
 } from "./src/seo.js";
 import worker from "./src/index.js";
 import {
@@ -324,6 +329,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/v1/mesh/status"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/list"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/update/check"));
+    assert.ok(xml.includes("https://github.com/AzielEliab/aziel-runtime/tree/main/docs/2.0"));
+    assert.ok(xml.includes("https://glama.ai/mcp/servers/AzielEliab/aziel-runtime"));
     assert.ok(xml.includes(CANON_HOST + "/openapi.json"));
     assert.ok(xml.includes("https://aziel-runtime.vibelock.workers.dev/v1/software"));
     assert.ok(xml.includes("https://www.azielcorpuslibrary.net/runtime"));
@@ -358,6 +365,24 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(cite.ai_clients.includes("other MCP/OpenAPI-capable assistants"));
     assert.ok(cite.ai_clients.length >= 16);
     assert.equal(cite.runtime, CANON_HOST + "/runtime");
+    assert.equal(cite.runtime_version, "2.0.0-rc1");
+    assert.equal(cite.runtime_version, RUNTIME_VERSION);
+    assert.equal(cite.runtime_abstract, RUNTIME_ABSTRACT);
+    assert.equal(cite.seo_abstract_leads, true);
+    assert.equal(cite.runtime_official, CANON_HOST + "/runtime");
+    assert.equal(cite.runtime_github, GITHUB_RUNTIME);
+    assert.equal(cite.runtime_glama, GLAMA_RUNTIME);
+    assert.equal(cite.runtime_glama, "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime");
+    assert.match(cite.runtime_glama_note, /Not an invented Glama server UUID/);
+    assert.equal(cite.runtime_docs, RUNTIME_DOCS_2_0);
+    assert.match(cite.runtime_docs, /docs\/2\.0/);
+    assert.ok(Array.isArray(cite.runtime_distribution));
+    assert.deepEqual(cite.runtime_distribution.map((b) => b.label), [
+      "Official Runtime",
+      "Source on GitHub",
+      "Try/Deploy on Glama",
+      "Documentation/Architecture",
+    ]);
     assert.equal(cite.runtime_openapi, CANON_HOST + "/runtime/openapi.json");
     assert.equal(cite.runtime_mcp, CANON_HOST + "/runtime/mcp");
     assert.equal(cite.runtime_mesh, CANON_HOST + "/runtime/v1/mesh");
@@ -418,6 +443,13 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Aziel Corpus Library: https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab/);
     assert.doesNotMatch(llms, /Aziel Corpus Library: https:\/\/godlock\.uk\/AzielCorpusLibrary/);
     assert.match(llms, /## Runtime \(FragGate door\)/);
+    assert.ok(llms.indexOf(RUNTIME_ABSTRACT) < llms.indexOf("Live version: 2.0.0-rc1"));
+    assert.ok(llms.indexOf("## Runtime (FragGate door)") < llms.indexOf(RUNTIME_ABSTRACT));
+    assert.match(llms, /Official Runtime: https:\/\/godlock\.uk\/runtime/);
+    assert.match(llms, /Source on GitHub: https:\/\/github\.com\/AzielEliab\/aziel-runtime/);
+    assert.match(llms, /Try\/Deploy on Glama: https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime/);
+    assert.match(llms, /Documentation\/Architecture: https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0/);
+    assert.doesNotMatch(llms, /glama\.ai\/mcp\/servers\/@[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+/);
     assert.match(llms, /Door: https:\/\/godlock\.uk\/runtime/);
     assert.match(llms, /OpenAPI: https:\/\/godlock\.uk\/runtime\/openapi\.json/);
     assert.match(llms, /MCP: POST https:\/\/godlock\.uk\/runtime\/mcp/);
@@ -560,7 +592,7 @@ describe("homepage stays a natural argument surface", () => {
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "WebSite" && n["@id"] === "https://godlock.uk/#website"));
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "GodLock" && n["@id"] === "https://godlock.uk/#godlock"));
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "WebAPI" && n.documentation === "https://godlock.uk/runtime/openapi.json"));
-    assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "Aziel Runtime" && (n.sameAs || []).includes("https://www.azielcorpuslibrary.net/runtime")));
+    assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "Aziel Runtime" && n.softwareVersion === "2.0.0-rc1" && (n.sameAs || []).includes("https://www.azielcorpuslibrary.net/runtime") && (n.sameAs || []).includes("https://glama.ai/mcp/servers/AzielEliab/aziel-runtime")));
     assert.doesNotMatch(html, /Use with Grok, ChatGPT, Venice/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock|paste-block|how the argument works/i);
     assert.doesNotMatch(html, /\bABAD\b/);
@@ -608,7 +640,12 @@ describe("major AI client list", () => {
     assert.match(homeLine, /href="\/software#azcoherence">AZCoherence<\/a>/);
     assert.match(homeLine, /href="\/software#aznet">AZNet<\/a>/);
     const softwareMeta = defaultDescription("software");
+    assert.ok(softwareMeta.startsWith("Aziel Runtime is not merely an API orchestrator"));
+    assert.match(softwareMeta, /2\.0\.0-rc1/);
     assert.match(softwareMeta, /Claude \(Anthropic\)/);
+    assert.ok(defaultDescription("runtime").startsWith("Aziel Runtime is not merely an API orchestrator"));
+    assert.match(defaultDescription("runtime"), /2\.0\.0-rc1/);
+    assert.match(defaultDescription("runtime"), /GET \/v1\/mesh never enables/);
     const softwareHead = headMeta({ title: "Software", path: "/software", kind: "software" });
     assert.match(softwareHead, /Claude \(Anthropic\), Cursor \(MCP\), Glama \(MCP\), Perplexity/);
     assert.match(softwareHead, /name="keywords" content="Aziel Eliab Softwares, GodLock.uk/);
@@ -862,7 +899,11 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       assert.ok(ids.includes(slug), slug);
       assert.match(html, new RegExp('id="' + slug + '"'));
     }
-    assert.match(html, /href="\/runtime">Invoke via Runtime<\/a>/);
+    assert.match(html, /href="\/runtime">Official Runtime<\/a>/);
+    assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Source on GitHub<\/a>/);
+    assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try\/Deploy on Glama<\/a>/);
+    assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0">Documentation\/Architecture<\/a>/);
+    assert.doesNotMatch(html, /glama\.ai\/mcp\/servers\/@[A-Za-z0-9_-]+/);
     assert.match(html, /href="\/runtime\/v1\/pull\/godlock">Invoke via Runtime<\/a>/);
     assert.match(html, /href="\/runtime\/mcp">MCP<\/a>/);
     assert.match(html, /href="https:\/\/godlock-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
@@ -1056,6 +1097,9 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /<title>Aziel Eliab Softwares — GodLock<\/title>/);
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
     assert.match(html, /Invoke via Runtime/);
+    assert.match(html, /href="\/runtime">Official Runtime<\/a>/);
+    assert.match(html, /Try\/Deploy on Glama/);
+    assert.match(html, /Documentation\/Architecture/);
     assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
     assert.match(res.headers.get("Cache-Control") || "", /s-maxage=300/);
     assert.match(html, /aziel-runtime \(Aziel Runtime\)/);
@@ -1156,7 +1200,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     const html = await res.text();
     assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
     assert.match(html, /<title>Aziel Eliab Softwares — GodLock<\/title>/);
-    assert.match(html, /name="description" content="Aziel Eliab Softwares/);
+    assert.match(html, /name="description" content="Aziel Runtime is not merely an API orchestrator/);
+    assert.match(html, /Aziel Eliab Softwares catalog/);
     assert.doesNotMatch(html, /<h2>Runtime<\/h2>/);
     assert.doesNotMatch(html, /Full Aziel Eliab suite/);
     const ids = softCardIds(html);
@@ -1180,6 +1225,10 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(body.door, "fraggate");
     assert.equal(body.seo_proxy, true);
     assert.equal(body.not_a_second_fraggate_door, true);
+    assert.equal(body.runtime_version, "2.0.0-rc1");
+    assert.equal(body.runtime_glama, "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime");
+    assert.equal(body.runtime_docs, "https://github.com/AzielEliab/aziel-runtime/tree/main/docs/2.0");
+    assert.ok(body.runtime_distribution.some((b) => b.label === "Official Runtime" && b.href === "https://godlock.uk/runtime"));
     assert.equal(body.sort, "plain-gate-lock");
     assert.ok(body.products.some((p) => p.slug === "azcoherence" && p.family === "plain" && p.worker === AZCOHERENCE_WORKER && p.github === AZCOHERENCE_GITHUB && p.download === AZCOHERENCE_DOWNLOAD && p.invoke === "/runtime/v1/pull/azcoherence"));
     assert.ok(body.software.some((p) => p.slug === "azcoherence" && p.name === "AZCoherence" && p.family === "plain"));
@@ -1539,6 +1588,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     });
     assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
     assert.match(html, /<h3>Aziel Runtime<\/h3>/);
+    assert.match(html, /v2\.0\.0-rc1/);
+    assert.match(html, /Official Runtime/);
     assert.doesNotMatch(html, /Aziel Eliab Runtime/);
     assert.doesNotMatch(html, /runtime 1\.6\.15 FragGate/i);
     const families = softwareSuite(CATALOG_FALLBACK_PRODUCTS).map((p) => p.family);
@@ -1547,5 +1598,29 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     const firstLock = families.indexOf("lock");
     assert.ok(lastPlain < firstGate);
     assert.ok(firstGate < firstLock);
+  });
+});
+
+describe("Phase F Aziel Runtime 2.0.0-rc1 hub cite", () => {
+  it("leads Softwares and runtime SEO with the crawler abstract and cites live 2.0.0-rc1", () => {
+    assert.equal(RUNTIME_VERSION, "2.0.0-rc1");
+    assert.match(RUNTIME_ABSTRACT, /not merely an API orchestrator or software aggregator/);
+    const software = defaultDescription("software");
+    const runtime = defaultDescription("runtime");
+    assert.ok(software.startsWith(RUNTIME_ABSTRACT.slice(0, 80)));
+    assert.ok(runtime.startsWith(RUNTIME_ABSTRACT.slice(0, 80)));
+    assert.ok(software.indexOf(RUNTIME_ABSTRACT.slice(0, 40)) < software.indexOf("Aziel Eliab Softwares catalog"));
+    assert.ok(runtime.indexOf(RUNTIME_ABSTRACT.slice(0, 40)) < runtime.indexOf("2.0.0-rc1"));
+    assert.match(runtime, /GET \/v1\/mesh never enables/);
+    assert.match(runtime, /Remain-OFF/);
+    const html = softwareBody({ products: [] });
+    assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+    assert.doesNotMatch(html, /<h2>Runtime<\/h2>/);
+    assert.doesNotMatch(html, /Full Aziel Eliab suite/);
+    assert.match(html, />Official Runtime</);
+    assert.match(html, />Source on GitHub</);
+    assert.match(html, />Try\/Deploy on Glama</);
+    assert.match(html, />Documentation\/Architecture</);
+    assert.doesNotMatch(html, /glama\.ai\/mcp\/servers\/[0-9a-f]{8,}/i);
   });
 });

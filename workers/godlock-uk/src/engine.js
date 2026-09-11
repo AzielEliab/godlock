@@ -177,6 +177,96 @@ function clampDelta(n) {
   return Math.max(-3, Math.min(3, Math.round(x * 10) / 10));
 }
 
+const HOLDS_RE = /holds|valid|correct|gap|not a proof|heuristic|design flaw|category/i;
+
+function outputBlob(out) {
+  return [out && out.explanation, out && out.summary, out && out.weighing]
+    .map((s) => String(s || ""))
+    .join(" ");
+}
+
+function outputSaysSuperseded(out) {
+  return String(outputBlob(out)).toUpperCase().includes("SUPERSEDED");
+}
+
+export function outputSaysHolds(out) {
+  return HOLDS_RE.test(outputBlob(out));
+}
+
+export function challengeHolds(text, out) {
+  const t = String(text || "");
+  if (isSpiralOnlyChallenge(t)) return false;
+  if (specifiedFitHolds(t)) return true;
+  if (out && outputSaysHolds(out)) return true;
+  return false;
+}
+
+export function receiptScoreDelta(before, after) {
+  const b = Number(before);
+  const a = Number(after);
+  if (!Number.isFinite(b) || !Number.isFinite(a)) return 0;
+  return Math.round((a - b) * 10) / 10;
+}
+
+function finalizeScoreFields(out, currentScore) {
+  const next = clampScore(currentScore + Number(out.score_delta || 0));
+  out.score_delta = receiptScoreDelta(currentScore, next);
+  out.residual = residualOf(next);
+  return out;
+}
+
+function protocolForcedDelta(text, out) {
+  const t = String(text || "");
+  if (specifiedFitHolds(t)) return -1.0;
+  if (hasSpecifiedFitClaim(t)) return -0.5;
+  if (out && outputSaysHolds(out)) return -0.5;
+  if (ID_RE.test(t)) return -0.3;
+  return 0.3;
+}
+
+/**
+ * Locked scoring after AI or fallback. Let's review is delta 0 (ambiguous /
+ * short / non-English only). High-effort ID / specified-fit / design-flaw
+ * answers labeled Yes / No / Interesting must move the score. Holding
+ * challenges go down; spiral-only / phi-as-physics do not.
+ */
+export function enforceProtocolScore(text, out, currentScore) {
+  const t = String(text || "");
+  const result = out && typeof out === "object" ? out : {};
+  let label = normalizeLabel(result.label) || "Let's review";
+  let delta = clampDelta(result.score_delta);
+  const superseded = outputSaysSuperseded(result);
+
+  if (label === "Let's review" && isHighEffortChallenge(t) && !isAmbiguous(t) && looksEnglish(t)) {
+    label = "Interesting";
+    result.weighing = (result.weighing ? String(result.weighing) + " " : "")
+      + "Protocol: high-effort challenge remapped from Let's review to Interesting.";
+  }
+
+  if (label === "Let's review") {
+    delta = 0;
+  } else if (!superseded) {
+    const scored = label === "Yes" || label === "No" || label === "Interesting";
+    const spiralOnly = isSpiralOnlyChallenge(t);
+    const holds = challengeHolds(t, result);
+
+    if (spiralOnly) {
+      if (delta < 0) delta = 0;
+      if (delta > 0.3) delta = 0.3;
+    } else if (holds) {
+      if (!(delta < 0)) delta = protocolForcedDelta(t, result);
+      delta = clampDelta(delta);
+    } else if (scored && isHighEffortChallenge(t) && delta === 0) {
+      const idClass = hasSpecifiedFitClaim(t) || ID_RE.test(t);
+      delta = idClass ? protocolForcedDelta(t, result) : 0.3;
+    }
+  }
+
+  result.label = label;
+  result.score_delta = delta;
+  return finalizeScoreFields(result, currentScore);
+}
+
 function extractJson(raw) {
   const s = String(raw || "").trim();
   if (!s) return null;
@@ -250,16 +340,14 @@ export function parseModelOutput(raw, currentScore) {
   if (!label) label = "Let's review";
   if (!summary) summary = "The engine recorded the challenge under the locked protocol.";
   if (!explanation) explanation = summary;
-  const next = clampScore(currentScore + score_delta);
-  const actualDelta = Math.round((next - currentScore) * 10) / 10;
-  return {
+  const parsed = {
     label,
     summary: summary.slice(0, 600),
     explanation: explanation.slice(0, 8000),
-    score_delta: actualDelta,
-    weighing: (weighing || ("delta " + actualDelta)).slice(0, 800),
-    residual: residualOf(next),
+    score_delta,
+    weighing: (weighing || ("delta " + score_delta)).slice(0, 800),
   };
+  return finalizeScoreFields(parsed, currentScore);
 }
 
 export function systemPrompt(currentScore, priorNodes) {
@@ -425,17 +513,14 @@ export function fallbackAnswer(text, currentScore, priorNodes) {
   }
 
   if (label === "Let's review") delta = 0;
-  const next = clampScore(currentScore + delta);
-  const actual = Math.round((next - currentScore) * 10) / 10;
-  return {
+  return enforceProtocolScore(t, {
     label,
     summary,
     explanation,
-    score_delta: actual,
+    score_delta: delta,
     weighing,
-    residual: residualOf(next),
     model: "godlock-local-scorer-0.1",
-  };
+  }, currentScore);
 }
 
 export async function answerChallenge(env, text, currentScore, priorNodes) {
@@ -448,20 +533,7 @@ export async function answerChallenge(env, text, currentScore, priorNodes) {
       out.explanation = out.explanation + " (Workers AI unavailable; local scorer used.)";
     }
   }
-  if (out.label === "Let's review" && !isAmbiguous(t) && isHighEffortChallenge(t)) {
-    out.label = "Interesting";
-    if (!out.score_delta) {
-      const blob = String(out.explanation || "") + " " + String(out.summary || "");
-      const holds = /holds|valid|correct|gap|not a proof|heuristic|design flaw|category/i.test(blob);
-      out.score_delta = holds ? -0.5 : 0.3;
-      out.weighing = (out.weighing ? out.weighing + " " : "") + "Protocol: high-effort challenge remapped from Let's review to Interesting.";
-    }
-  }
-  if (out.label === "Let's review") out.score_delta = 0;
-  const next = clampScore(currentScore + Number(out.score_delta || 0));
-  out.score_delta = Math.round((next - currentScore) * 10) / 10;
-  out.residual = residualOf(next);
-  return out;
+  return enforceProtocolScore(t, out, currentScore);
 }
 
 export function receiptContent(row) {

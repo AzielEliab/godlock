@@ -5,7 +5,7 @@
 import {
   headMeta, documentTitle, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
-  DONATE_PATH, AI_CLIENTS_SENTENCE, runtimeDistribution,
+  DONATE_PATH, AI_CLIENTS_SENTENCE, runtimeDistribution, ecosystemLinks,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
@@ -24,6 +24,11 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;lin
 .nav2 .sep{color:var(--muted);margin:0 8px}
 .nav2 a.aziel,.nav2 a.aziel:visited{color:var(--royal);font-weight:700}
 .nav2 a.aziel:hover{color:var(--royal-deep)}
+.ecosystem{margin:0 0 16px;font-size:13px;color:var(--muted)}
+.ecosystem p{margin:0 0 6px}
+.ecosystem ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 14px}
+.ecosystem a.secondary{color:var(--muted);font-weight:400}
+footer .ecosystem{margin:16px 0 0}
 .about-aziel,.about-aziel p,.about-prose,.about-sign{color:var(--royal)}
 .about-aziel h1,.about-aziel h2{color:var(--royal)}
 .about-aziel a{color:var(--royal)}
@@ -162,6 +167,14 @@ export function topNav(path) {
   }).join("")}</nav>`;
 }
 
+export function ecosystemNav() {
+  const items = ecosystemLinks().map((it) => {
+    const cls = it.secondary ? ' class="secondary"' : "";
+    return `<li><a href="${esc(it.href)}"${cls}>${esc(it.label)}</a></li>`;
+  }).join("");
+  return `<nav class="ecosystem" aria-label="Aziel Eliab ecosystem"><p>Part of the Aziel Eliab ecosystem</p><ul>${items}</ul></nav>`;
+}
+
 export function page(title, body, { path, kind, extraHeaders, indexable, products } = {}) {
   const p = path || "/";
   const docTitle = documentTitle(title, kind);
@@ -169,9 +182,12 @@ export function page(title, body, { path, kind, extraHeaders, indexable, product
 <div class="brandrow"><div class="brand">GodLock</div><span class="pill">HTTPS engine</span></div>
 <p class="author">Author Aziel Eliab</p>
 ${topNav(p)}
+${ecosystemNav()}
 <div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
 ${body}
-<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Software</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a></footer>
+<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Software</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
+${ecosystemNav()}
+</footer>
 </div>
 <script>
 (function(){

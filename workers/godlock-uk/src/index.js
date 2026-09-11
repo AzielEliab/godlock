@@ -24,6 +24,7 @@ import {
 } from "./catalog.js";
 import {
   START, shouldIsolate, answerChallenge, clampScore, residualOf, hashReceipt,
+  receiptScoreDelta,
 } from "./engine.js";
 import {
   PRESENCE_TTL_MS,
@@ -205,6 +206,7 @@ async function fetchDownloads(env) {
   return views + uses;
 }
 
+/** Public feed only: isolated=0, newest first. */
 async function publicReceipts(env, limit) {
   const n = Math.min(Math.max(Number(limit) || 24, 1), 100);
   const res = await env.DB.prepare(
@@ -257,16 +259,20 @@ async function readChallengeText(request) {
   return String(raw || "").slice(0, TEXT_MAX);
 }
 
-function publicPayload(row) {
+export function publicPayload(row) {
   const safe = publicSafeFields(row);
+  const score_before = safe.score_before;
+  const score_after = safe.score_after;
+  const delta = receiptScoreDelta(score_before, score_after);
   return {
     id: safe.id,
     created_utc: safe.created_utc,
     label: safe.label,
     summary: hideInternalDetermination(safe.summary),
     explanation: hideInternalDetermination(safe.explanation),
-    score_before: safe.score_before,
-    score_after: safe.score_after,
+    score_before,
+    score_after,
+    delta,
     residual: safe.residual,
     text_sha256: safe.text_sha256,
     content_sha256: safe.content_sha256,
@@ -335,14 +341,15 @@ async function processSubmit(env, text) {
     score_after,
     residual,
   });
+  const delta = receiptScoreDelta(score_before, score_after);
   await appendLedger(env, "SCORE", {
     receipt_id: id,
     score_before,
     score_after,
     residual,
-    delta: Math.round((score_after - score_before) * 10) / 10,
+    delta,
   });
-  if (score_after !== score_before) await metaSet(env, "current_score", String(score_after));
+  if (delta !== 0) await metaSet(env, "current_score", String(score_after));
   const uses = await usesCount(env);
   try { if (uses > 0) await metaSet(env, "uses", String(uses)); } catch { /* keep prior floor */ }
   return row;

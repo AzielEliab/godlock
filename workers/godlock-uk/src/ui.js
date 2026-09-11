@@ -9,6 +9,7 @@ import {
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
+import { receiptScoreDelta } from "./engine.js";
 import { softwareSuite, invokeHref, workerHref, stripRuntimeFragGateMash } from "./catalog.js";
 import { donateBody as donatePageBody, donateHomeBlock } from "./donate.js";
 
@@ -222,6 +223,10 @@ ${ecosystemNav()}
     if(usesEl&&j.uses!=null)usesEl.textContent=String(j.uses);
     if(views&&j.views!=null)views.textContent=String(j.views);
     if(dl&&j.downloads!=null)dl.textContent=String(j.downloads);
+    var scoreEl=document.getElementById("stat-current-score");
+    var residualEl=document.getElementById("stat-residual");
+    if(scoreEl&&j.current_score!=null)scoreEl.textContent=String(j.current_score)+"%";
+    if(residualEl&&j.residual!=null)residualEl.textContent=String(j.residual)+"%";
     if(meshEl&&j.mesh){
       var on=!!j.mesh.enabled;
       var r=j.mesh.rollup||{};
@@ -291,8 +296,8 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
 </div>
 <p class="muted" id="mesh-status">${esc(meshLine)}</p>
 <div class="scorebox">
-  <div><div class="n">${esc(score)}%</div><div class="k">Current confidence</div></div>
-  <div><div class="n">${esc(residual)}%</div><div class="k">Residual uncertainty</div></div>
+  <div><div class="n" id="stat-current-score">${esc(score)}%</div><div class="k">Current confidence</div></div>
+  <div><div class="n" id="stat-residual">${esc(residual)}%</div><div class="k">Residual uncertainty</div></div>
 </div>
 <div class="card">
   <h2>${esc(SPECIFIED_FIT_TITLE)}</h2>
@@ -324,7 +329,7 @@ ${donateHomeBlock()}
 
 export function answerCard(row, latest) {
   if (!row) return "";
-  const delta = Math.round((Number(row.score_after) - Number(row.score_before)) * 10) / 10;
+  const delta = receiptScoreDelta(row.score_before, row.score_after);
   const sign = delta > 0 ? "+" : "";
   const title = latest ? "Latest answer" : "Receipt";
   return `<article class="answer">

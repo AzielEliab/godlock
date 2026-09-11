@@ -15,6 +15,11 @@ import {
   isSpiralOnlyChallenge,
   hasSpecifiedFitClaim,
   specifiedFitHolds,
+  parseModelOutput,
+  answerChallenge,
+  enforceProtocolScore,
+  challengeHolds,
+  receiptScoreDelta,
 } from "./src/engine.js";
 import { hideInternalDetermination as hideCopy, publicSafeFields } from "./src/publicCopy.js";
 
@@ -114,5 +119,111 @@ describe("publicSafeFields", () => {
     assert.match(safe.summary, /Specified Fit, Not Pretty Spirals/);
     assert.doesNotMatch(safe.explanation, /bootstrap lock|ABAD framework/i);
     assert.equal(hideCopy("weighing internals: x"), "x");
+  });
+
+  it("does not mangle ordinary observation sentences", () => {
+    assert.equal(
+      hideCopy("The relationship between observation and the data remains open."),
+      "The relationship between observation and the data remains open.",
+    );
+    assert.equal(
+      hideCopy("the relationship between the limits of observation and the measured result"),
+      "the relationship between observational limits and the measured result",
+    );
+    assert.equal(
+      hideCopy("There are limits of observation in any empirical study."),
+      "There are observational limits in any empirical study.",
+    );
+    assert.match(hideCopy("Submit a challenge about specified complexity."), /specified complexity/);
+  });
+});
+
+function aiEnv(payload) {
+  return {
+    AI: {
+      async run() {
+        return { response: typeof payload === "string" ? payload : JSON.stringify(payload) };
+      },
+    },
+  };
+}
+
+describe("answerChallenge score enforcement", () => {
+  it("moves a holding Specified Fit Yes off a stuck equal before/after score", async () => {
+    const parsed = parseModelOutput({
+      label: "Yes",
+      summary: "The challenge holds.",
+      explanation: "The specified-fit objection holds and is valid. Residual stays explicit.",
+      score_delta: 0,
+    }, 50.5);
+    assert.equal(parsed.label, "Yes");
+    assert.equal(parsed.score_delta, 0, "parser still reports the model delta");
+
+    const before = 50.5;
+    const out = await answerChallenge(aiEnv({
+      label: "Yes",
+      summary: "The challenge holds.",
+      explanation: "The specified-fit objection holds and is valid. Residual stays explicit.",
+      score_delta: 0,
+    }), SPECIFIED_FIT, before, []);
+    assert.equal(out.label, "Yes");
+    assert.ok(out.score_delta < 0, "holding challenge must lower confidence");
+    assert.ok(out.score_delta >= -3 && out.score_delta <= -0.5);
+    const after = clampScore(before + out.score_delta);
+    assert.notEqual(after, before);
+    assert.equal(receiptScoreDelta(before, after), out.score_delta);
+    assert.equal(after, 49.5);
+    assert.equal(out.score_delta, -1);
+  });
+
+  it("does not rely only on the Let's-review remap branch", async () => {
+    const out = enforceProtocolScore(SPECIFIED_FIT, {
+      label: "Interesting",
+      summary: "Recorded. The objection holds.",
+      explanation: "The challenge holds under the locked protocol.",
+      score_delta: 0,
+    }, 50);
+    assert.equal(out.label, "Interesting");
+    assert.ok(out.score_delta < 0);
+    assert.equal(challengeHolds(SPECIFIED_FIT, out), true);
+  });
+
+  it("remaps Let's review on a complete high-effort challenge and still moves the score", async () => {
+    const out = await answerChallenge(aiEnv({
+      label: "Let's review",
+      summary: "Need more.",
+      explanation: "The engine parked a complete specified-fit challenge.",
+      score_delta: 0,
+    }), SPECIFIED_FIT, 50, []);
+    assert.notEqual(out.label, "Let's review");
+    assert.ok(["Yes", "No", "Interesting"].includes(out.label));
+    assert.ok(out.score_delta < 0);
+  });
+
+  it("keeps Let's review at delta 0 for short ambiguous English", async () => {
+    const short = "ok";
+    const out = await answerChallenge({}, short, 50, []);
+    assert.equal(out.label, "Let's review");
+    assert.equal(out.score_delta, 0);
+  });
+
+  it("does not lower spiral-only / phi-as-physics much", async () => {
+    const out = await answerChallenge(aiEnv({
+      label: "Yes",
+      summary: "Pretty spirals prove design.",
+      explanation: "Phi as physics.",
+      score_delta: 0,
+    }), SPIRAL_ONLY, 50, []);
+    assert.ok(out.label === "Yes" || out.label === "No" || out.label === "Interesting");
+    assert.ok(out.score_delta >= 0, "spiral-only must not be treated as a steel hold");
+    assert.ok(Math.abs(out.score_delta) <= 0.3);
+  });
+
+  it("fallback Specified Fit still reports a real negative delta", () => {
+    const before = 50.5;
+    const out = fallbackAnswer(SPECIFIED_FIT, before, []);
+    assert.notEqual(out.label, "Let's review");
+    assert.ok(out.score_delta < 0, "honest scoring when the steel challenge holds");
+    assert.notEqual(clampScore(before + out.score_delta), before);
   });
 });

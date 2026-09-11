@@ -50,7 +50,7 @@ import {
   RUNTIME_DOCS_2_0,
   GITHUB_RUNTIME,
 } from "./src/seo.js";
-import worker from "./src/index.js";
+import worker, { publicPayload } from "./src/index.js";
 import {
   CATALOG_FALLBACK_PRODUCTS,
   CATALOG_SLUGS,
@@ -1790,5 +1790,53 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.match(llmsDoc(), /Runtime @id: https:\/\/www\.azieleliab\.com\/runtime#runtime/);
     assert.match(llmsDoc(), /GodLock Runtime tool: https:\/\/www\.azieleliab\.com\/runtime#godlock/);
     assert.match(llmsDoc(), /Part of the Aziel Eliab ecosystem/);
+  });
+});
+
+describe("receipts UI and public payload", () => {
+  it("lists prior public receipts in caller order (newest-first from publicReceipts)", () => {
+    const prior = [
+      { id: "new", label: "Yes", summary: "Newer hold", created_utc: "2026-09-11T12:00:00.000Z", content_sha256: "aa" },
+      { id: "old", label: "Interesting", summary: "Older row", created_utc: "2026-09-10T12:00:00.000Z", content_sha256: "bb" },
+    ];
+    const home = homeBody({ stats: { current_score: 49.5, residual: 50.5, uses: 3 }, latest: null, prior });
+    assert.match(home, /<h2>Prior receipts<\/h2>/);
+    const newerAt = home.indexOf("/receipt/new");
+    const olderAt = home.indexOf("/receipt/old");
+    assert.ok(newerAt > 0 && olderAt > newerAt);
+    assert.match(home, /id="stat-current-score">49\.5%/);
+    assert.match(home, /id="stat-residual">50\.5%/);
+    assert.match(home, /id="stat-uses">3</);
+  });
+
+  it("refreshes scorebox from gatherStats fields in the homepage script", () => {
+    const html = page("GodLock", homeBody({ stats: { current_score: 50, residual: 50, uses: 0 }, latest: null, prior: [] }), { path: "/", kind: "home" });
+    assert.match(html, /id="stat-current-score"/);
+    assert.match(html, /id="stat-residual"/);
+    assert.match(html, /if\(j&&j\.stats\)\{applyStats\(j\.stats\);\}/);
+    assert.match(html, /scoreEl&&j\.current_score!=null/);
+    assert.match(html, /residualEl&&j\.residual!=null/);
+    assert.match(html, /usesEl&&j\.uses!=null/);
+  });
+
+  it("exposes score_before, score_after, and delta on public JSON receipts", () => {
+    const payload = publicPayload({
+      id: "r1",
+      created_utc: "2026-09-11T12:00:00.000Z",
+      label: "Yes",
+      summary: "The challenge holds.",
+      explanation: "Score moved down.",
+      score_before: 50.5,
+      score_after: 49.5,
+      residual: 50.5,
+      text_sha256: "t",
+      content_sha256: "c",
+      isolated: 0,
+    });
+    assert.equal(payload.score_before, 50.5);
+    assert.equal(payload.score_after, 49.5);
+    assert.equal(payload.delta, -1);
+    assert.equal(payload.isolated, 0);
+    assert.equal("weighing" in payload, false);
   });
 });

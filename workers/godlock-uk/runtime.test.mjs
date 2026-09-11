@@ -97,6 +97,13 @@ describe("runtime path mapping", () => {
     assert.match(html, /href="https:\/\/godlock\.uk\/runtime\/"/);
     assert.match(html, /href="\/runtime\/v1\/health"/);
     assert.match(html, /godlock-runtime-chrome/);
+    assert.match(html, /godlock-runtime-dist/);
+    assert.match(html, />Official Runtime</);
+    assert.match(html, />Source on GitHub</);
+    assert.match(html, />Try\/Deploy on Glama</);
+    assert.match(html, />Documentation\/Architecture</);
+    assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime"/);
+    assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0"/);
     assert.match(html, />Runtime</);
     assert.match(html, /www\.azielcorpuslibrary\.net\/runtime/);
     assert.match(html, /aziel-runtime\.vibelock\.workers\.dev/);
@@ -290,8 +297,14 @@ describe("runtime API use tracker", () => {
 });
 
 describe("software CTA and nav", () => {
-  it("offers Invoke via Runtime next to the catalog", () => {
+  it("offers Official Runtime distribution on the runtime card and Invoke via Runtime on catalog cards", () => {
     const html = softwareBody({ products: [] });
+    assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+    assert.match(html, /href="\/runtime">Official Runtime<\/a>/);
+    assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Source on GitHub<\/a>/);
+    assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try\/Deploy on Glama<\/a>/);
+    assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0">Documentation\/Architecture<\/a>/);
+    assert.doesNotMatch(html, /glama\.ai\/mcp\/servers\/@[A-Za-z0-9_-]+/);
     assert.match(html, /Invoke via Runtime/);
     assert.match(html, /href="\/runtime"/);
     assert.match(html, /FragGate/);

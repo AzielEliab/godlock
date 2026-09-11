@@ -9,6 +9,7 @@
 import { hideInternalDetermination } from "./publicCopy.js";
 import {
   AUTHOR, CANON_HOST, CATALOG, LIBRARY, RUNTIME_PATH, SOFTWARE_PATH, AZIEL_ELIAB_PATH, PUBLIC_RUNTIME, RUNTIME_NAME, RUNTIME_SLUG, RUNTIME_VERSION, GITHUB_RUNTIME,
+  citeRuntimeVersion, runtimeDistribution, GLAMA_RUNTIME, RUNTIME_DOCS_2_0,
   FRAGGATE_KERNEL, FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, FRAGGATE_COUNT,
   AZBROWSER_DOWNLOAD, AZBROWSER_WORKER, AZBROWSER_COUNT,
   AZNET_DOWNLOAD, AZNET_WORKER, AZNET_COUNT, AZNET_GITHUB,
@@ -743,12 +744,17 @@ export function softwareNameList(products) {
 
 export function softwareApiDoc(products, extras = {}) {
   const list = softwareSuite(products, extras);
+  const runtime = list.find((p) => p && p.slug === RUNTIME_SLUG);
   return {
     ok: true,
     product: "GodLock",
     author: AUTHOR,
     identity: AUTHOR,
     source: extras.source || "fallback",
+    runtime_version: citeRuntimeVersion((runtime && runtime.version) || extras.version),
+    runtime_distribution: runtimeDistribution(),
+    runtime_glama: GLAMA_RUNTIME,
+    runtime_docs: RUNTIME_DOCS_2_0,
     via: SOFTWARE_JSON_PATH,
     html: CANON_HOST + SOFTWARE_PATH,
     aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,

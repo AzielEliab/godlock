@@ -28,7 +28,14 @@ export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
 export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
-export const RUNTIME_VERSION = "1.6.15";
+/** Live origin GET /v1/health + /v1/runtime.json (2026-09-11). Changelog stays below the abstract. */
+export const RUNTIME_VERSION = "2.0.0-rc1";
+/** Crawler lead copy (1.7.11+). Do not bury this under version history. */
+export const RUNTIME_ABSTRACT =
+  "Aziel Runtime is not merely an API orchestrator or software aggregator; it is a node-meshed orchestration suite of MCP-connected software designed to coordinate specialized tools through a shared, security-gated runtime while preserving provenance, chain-of-custody, temporal integrity, and auditable execution. It functions as a digital forensic, investigative, verification, research, intelligence-support, and systems-auditing environment in which individual engines can analyze evidence, validate records, inspect trajectories and patterns, track lineage, enforce capability boundaries, generate receipts, and exchange structured results without collapsing into one opaque model or unrestricted control plane. Its architecture emphasizes compartmentalization, deterministic routing, explicit refusal states, append-only evidence handling, and machine-readable metadata, making it suitable for distributed analysis workflows where trust, reproducibility, attribution, and post-hoc auditability matter as much as the result itself.";
+/** Verified Glama listing (HTTP 200). GitHub-path id AzielEliab/aziel-runtime — not an invented UUID. */
+export const GLAMA_RUNTIME = "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime";
+export const RUNTIME_DOCS_2_0 = GITHUB_RUNTIME + "/tree/main/docs/2.0";
 export const FRAGGATE_KERNEL = "https://github.com/AzielEliab/fraggate";
 export const FRAGGATE_DOWNLOAD = "https://fraggate-download-tracker.vibelock.workers.dev/download";
 export const FRAGGATE_WORKER = "https://fraggate-download-tracker.vibelock.workers.dev/";
@@ -79,6 +86,21 @@ export const AI_CLIENTS = [
 
 export const AI_CLIENTS_SENTENCE =
   "Works with " + AI_CLIENTS.join(", ") + ", and other MCP/OpenAPI-capable assistants.";
+
+/** Softwares /runtime distribution buttons. Official door, source, verified Glama listing, docs/2.0. */
+export function runtimeDistribution({ sameOrigin = false } = {}) {
+  return [
+    { id: "official", label: "Official Runtime", href: sameOrigin ? RUNTIME_PATH : PUBLIC_RUNTIME },
+    { id: "github", label: "Source on GitHub", href: GITHUB_RUNTIME },
+    { id: "glama", label: "Try/Deploy on Glama", href: GLAMA_RUNTIME },
+    { id: "docs", label: "Documentation/Architecture", href: RUNTIME_DOCS_2_0 },
+  ];
+}
+
+export function citeRuntimeVersion(live) {
+  const v = String(live == null ? "" : live).trim();
+  return v || RUNTIME_VERSION;
+}
 
 const Q = String.fromCharCode(34);
 
@@ -210,12 +232,21 @@ export function defaultDescription(kind) {
   }
   if (kind === "software") {
     return hideInternalDetermination(
-      "Aziel Eliab Softwares on GodLock.uk. Live catalog Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock): aziel-runtime (Aziel Runtime), FragGate, and every hosted card. Worker, GitHub, and /runtime tethers. Same completeness as the Digital Library Software hub. " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
+      RUNTIME_ABSTRACT
+        + " Live " + RUNTIME_NAME + " " + RUNTIME_VERSION
+        + " on GodLock.uk Softwares. Aziel Eliab Softwares catalog Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock): aziel-runtime (Aziel Runtime), FragGate, and every hosted card. Worker, GitHub, and /runtime tethers. Same completeness as the Digital Library Software hub. "
+        + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
   if (kind === "runtime") {
     return hideInternalDetermination(
-      "Aziel Runtime (aziel-runtime) on GodLock.uk. Same-origin /runtime/* proxies the live catalog door. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. Suite mesh (QNM-BUILD-1.0, default off; live|locked|isolated counts only): " + PUBLIC_RUNTIME + "/v1/mesh. API uses log: " + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). " + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
+      RUNTIME_ABSTRACT
+        + " " + RUNTIME_NAME + " " + RUNTIME_VERSION
+        + " (aziel-runtime) on GodLock.uk. Same-origin /runtime/* proxies the live catalog door. OpenAPI "
+        + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. Suite mesh (QNM-BUILD-1.0, default off; live|locked|isolated counts only): "
+        + PUBLIC_RUNTIME + "/v1/mesh. GET /v1/mesh never enables. Remain-OFF. API uses log: "
+        + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). "
+        + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
   if (kind === "donate") {
@@ -240,22 +271,29 @@ function defaultKeywords(kind) {
 }
 
 export function runtimeSameAs() {
-  return [PUBLIC_RUNTIME, LIBRARY_RUNTIME, CATALOG + "/"];
+  return [PUBLIC_RUNTIME, LIBRARY_RUNTIME, CATALOG + "/", GITHUB_RUNTIME, GLAMA_RUNTIME];
 }
 
-export function runtimeSoftwareNode(person) {
+export function liveRuntimeVersion(products) {
+  const list = Array.isArray(products) ? products : [];
+  const rt = list.find((p) => p && String(p.slug || "") === RUNTIME_SLUG);
+  return citeRuntimeVersion(rt && rt.version);
+}
+
+export function runtimeSoftwareNode(person, products) {
   return {
     "@type": "SoftwareApplication",
     "@id": PUBLIC_RUNTIME + "#runtime",
     name: RUNTIME_NAME,
     applicationCategory: "DeveloperApplication",
     operatingSystem: "Cloudflare Workers",
-    softwareVersion: RUNTIME_VERSION,
+    softwareVersion: liveRuntimeVersion(products),
     url: PUBLIC_RUNTIME,
     description: defaultDescription("runtime"),
     author: person,
     license: "https://www.apache.org/licenses/LICENSE-2.0",
     codeRepository: GITHUB_RUNTIME,
+    documentation: RUNTIME_DOCS_2_0,
     sameAs: runtimeSameAs(),
   };
 }
@@ -268,7 +306,7 @@ export function runtimeWebApiNode(person) {
     url: PUBLIC_RUNTIME,
     documentation: PUBLIC_RUNTIME + "/openapi.json",
     provider: person,
-    description: "aziel-runtime door. OpenAPI " + PUBLIC_RUNTIME + "/openapi.json. MCP POST " + PUBLIC_RUNTIME + "/mcp. API uses " + PUBLIC_RUNTIME + "/v1/uses.",
+    description: defaultDescription("runtime"),
   };
 }
 
@@ -353,7 +391,7 @@ function jsonLd(title, path, description, kind, products) {
   const software = godlockSoftwareNode(person);
   const graph = [website, software, person];
   if (kind !== "aziel" && kind !== "reason" && kind !== "verify" && kind !== "receipt" && kind !== "donate" && kind !== "notfound") {
-    graph.push(runtimeSoftwareNode(person), runtimeWebApiNode(person));
+    graph.push(runtimeSoftwareNode(person, products), runtimeWebApiNode(person));
   }
   if (kind === "home") {
     graph.push({
@@ -729,6 +767,9 @@ export async function sitemapXml(env, extras = {}) {
   add(PUBLIC_RUNTIME + "/mcp", "0.7", "weekly");
   add(PUBLIC_RUNTIME + "/v1/skill", "0.6", "weekly");
   add(GITHUB, "0.5", "weekly");
+  add(GITHUB_RUNTIME, "0.55", "weekly");
+  add(RUNTIME_DOCS_2_0, "0.55", "weekly");
+  add(GLAMA_RUNTIME, "0.45", "weekly");
   add(DOWNLOAD, "0.6", "weekly");
   add(LIBRARY + "/", "0.6", "weekly");
   add(LIBRARY_AZIEL, "0.7", "weekly");
@@ -811,6 +852,15 @@ export function citeDoc() {
     update_check: CATALOG + "/v1/update/check?slug=godlock&version=0.1.0",
     update_download: DOWNLOAD,
     runtime: PUBLIC_RUNTIME,
+    runtime_abstract: RUNTIME_ABSTRACT,
+    seo_abstract_leads: true,
+    runtime_official: PUBLIC_RUNTIME,
+    runtime_github: GITHUB_RUNTIME,
+    runtime_glama: GLAMA_RUNTIME,
+    runtime_glama_note: "Verified Glama listing for AzielEliab/aziel-runtime. Not an invented Glama server UUID. Origin /glama.json is optional metadata and may 404; Gate 4 uses repo glama.json + GitHub topics.",
+    runtime_docs: RUNTIME_DOCS_2_0,
+    runtime_docs_note: "Aziel Runtime 2.0.0-rc1 certification pack (docs/2.0/). Public contract, compatibility, receipt schema, refusal contract, breaking-change policy. Changelog stays below the abstract.",
+    runtime_distribution: runtimeDistribution(),
     runtime_health: PUBLIC_RUNTIME + "/v1/health",
     runtime_manifest: PUBLIC_RUNTIME + "/v1/runtime.json",
     runtime_skill: PUBLIC_RUNTIME + "/v1/skill",
@@ -912,6 +962,12 @@ export function llmsDoc() {
     + "OpenAPI: " + CANON_HOST + "/openapi.json\n"
     + "Update check: " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, use counted " + DOWNLOAD + " (no silent overwrite).\n\n"
     + "## Runtime (FragGate door)\n\n"
+    + RUNTIME_ABSTRACT + "\n\n"
+    + "Live version: " + RUNTIME_VERSION + " (certification-point freeze). Changelog stays below this abstract.\n"
+    + "Official Runtime: " + PUBLIC_RUNTIME + "\n"
+    + "Source on GitHub: " + GITHUB_RUNTIME + "\n"
+    + "Try/Deploy on Glama: " + GLAMA_RUNTIME + " (verified listing AzielEliab/aziel-runtime; not an invented server id)\n"
+    + "Documentation/Architecture: " + RUNTIME_DOCS_2_0 + "\n"
     + "GodLock → Runtime. Same-origin Aziel Runtime (aziel-runtime) on GodLock.uk. One door — discover, route, refuse. Kernel: " + FRAGGATE_KERNEL + " (FG-0.1).\n"
     + "Door: " + PUBLIC_RUNTIME + "\n"
     + "Health: " + PUBLIC_RUNTIME + "/v1/health\n"

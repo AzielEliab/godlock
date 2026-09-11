@@ -165,7 +165,11 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(html.includes(AZIEL_MANIFESTO[0]));
     assert.ok(html.includes("— Aziel Eliab"));
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab">Aziel Eliab — Digital Library<\/a>/);
-    assert.doesNotMatch(html, /MCP|OpenAPI|runtime_session|Workers AI/i);
+    const manifesto = html.match(/<section class="about-aziel"[\s\S]*?<\/section>/)[0];
+    assert.doesNotMatch(manifesto, /MCP|OpenAPI|runtime_session|Workers AI/i);
+    assert.doesNotMatch(azielEliabBody(), /MCP|OpenAPI|runtime_session|Workers AI/i);
+    assert.match(html, /Part of the Aziel Eliab ecosystem/);
+    assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     const person = ld["@graph"].find((n) => n["@type"] === "Person");
     assert.equal(person["@id"], AZIEL_PERSON_ID);

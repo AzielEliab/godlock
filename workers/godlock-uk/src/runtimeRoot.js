@@ -8,7 +8,7 @@ import {
   AUTHOR, CANON_HOST, CATALOG, LIBRARY_RUNTIME, PUBLIC_RUNTIME, RUNTIME_PATH,
   RUNTIME_VERSION, FRAGGATE_KERNEL, runtimeSameAs, runtimeSoftwareNode,
   runtimeWebApiNode, personNode, defaultDescription, runtimeDistribution,
-  ecosystemLinks, personRef, AZIEL_PERSON_ID,
+  ecosystemLinks, personRef, AZIEL_PERSON_ID, HUB_RUNTIME_ID, runtimeEntitySameAs,
 } from "./seo.js";
 import { navItems } from "./ui.js";
 import {
@@ -183,7 +183,20 @@ function unique(list) {
   return out;
 }
 
+function isRuntimeProduct(node) {
+  if (!node || typeof node !== "object") return false;
+  if (node["@id"] === HUB_RUNTIME_ID || node["@id"] === PUBLIC_RUNTIME + "#runtime") return true;
+  const name = String(node.name || "").replace(/\s+/g, " ").trim();
+  return node["@type"] === "SoftwareApplication" && (name === "Aziel Runtime" || name === "Aziel Eliab Runtime");
+}
+
 function mergeSameAs(node) {
+  if (isRuntimeProduct(node)) {
+    node["@id"] = HUB_RUNTIME_ID;
+    node.sameAs = unique(runtimeEntitySameAs());
+    node.author = personRef();
+    return node;
+  }
   const extra = runtimeSameAs();
   const cur = Array.isArray(node.sameAs) ? node.sameAs : (node.sameAs ? [node.sameAs] : []);
   node.sameAs = unique(cur.concat(extra));
@@ -195,6 +208,11 @@ function rewriteIdentityNode(node) {
   const out = { ...node };
   if (out["@type"] === "Person") {
     out["@id"] = AZIEL_PERSON_ID;
+  }
+  if (isRuntimeProduct(out)) {
+    out["@id"] = HUB_RUNTIME_ID;
+    out.name = "Aziel Runtime";
+    out.sameAs = unique(runtimeEntitySameAs());
   }
   for (const key of ["author", "publisher", "creator", "provider", "copyrightHolder"]) {
     if (out[key]) out[key] = personRef();

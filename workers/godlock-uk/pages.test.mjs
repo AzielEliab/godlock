@@ -389,6 +389,13 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(cite.ai_clients.includes("other MCP/OpenAPI-capable assistants"));
     assert.ok(cite.ai_clients.length >= 16);
     assert.equal(cite.runtime, CANON_HOST + "/runtime");
+    assert.equal(cite.runtime_id, "https://www.azieleliab.com/runtime#runtime");
+    assert.equal(cite.runtime_parent, "https://www.azieleliab.com/runtime#runtime");
+    assert.equal(cite.godlock_runtime_tool, "https://www.azieleliab.com/runtime#godlock");
+    assert.deepEqual(cite.runtime_entity_sameAs, [
+      "https://github.com/AzielEliab/aziel-runtime",
+      "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime",
+    ]);
     assert.equal(cite.runtime_version, "2.0.0-rc1");
     assert.equal(cite.runtime_version, RUNTIME_VERSION);
     assert.equal(cite.runtime_abstract, RUNTIME_ABSTRACT);
@@ -621,7 +628,7 @@ describe("homepage stays a natural argument surface", () => {
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "WebSite" && n["@id"] === "https://godlock.uk/#website"));
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "GodLock" && n["@id"] === "https://godlock.uk/#godlock"));
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "WebAPI" && n.documentation === "https://godlock.uk/runtime/openapi.json"));
-    assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "Aziel Runtime" && n.softwareVersion === "2.0.0-rc1" && (n.sameAs || []).includes("https://www.azielcorpuslibrary.net/runtime") && (n.sameAs || []).includes("https://glama.ai/mcp/servers/AzielEliab/aziel-runtime")));
+    assert.ok(homeLd["@graph"].some((n) => n["@type"] === "SoftwareApplication" && n.name === "Aziel Runtime" && n["@id"] === "https://www.azieleliab.com/runtime#runtime" && n.softwareVersion === "2.0.0-rc1" && (n.sameAs || []).includes("https://github.com/AzielEliab/aziel-runtime") && (n.sameAs || []).includes("https://glama.ai/mcp/servers/AzielEliab/aziel-runtime") && !(n.sameAs || []).includes("https://www.azielcorpuslibrary.net/runtime")));
     assert.doesNotMatch(html, /Use with Grok, ChatGPT, Venice/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock|paste-block|how the argument works/i);
     assert.doesNotMatch(html, /\bABAD\b/);
@@ -1696,6 +1703,22 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.ok(isSharedPersonRef(site.creator));
     assert.equal(godlock["@id"], "https://godlock.uk/#godlock");
     assert.ok(isSharedPersonRef(godlock.author));
+    const parts = [].concat(godlock.isPartOf || []);
+    assert.ok(parts.some((p) => p && p["@id"] === "https://godlock.uk/#website"));
+    assert.ok(parts.some((p) => p && p["@id"] === "https://www.azieleliab.com/runtime#godlock"));
+    const runtime = ld["@graph"].find((n) => n["@type"] === "SoftwareApplication" && n.name === "Aziel Runtime");
+    assert.equal(runtime["@id"], "https://www.azieleliab.com/runtime#runtime");
+    assert.deepEqual(runtime.sameAs, [
+      "https://github.com/AzielEliab/aziel-runtime",
+      "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime",
+    ]);
+    assert.ok(isSharedPersonRef(runtime.author));
+    assert.ok(!ld["@graph"].some((n) => n["@id"] === "https://godlock.uk/runtime#runtime"));
+    const mcpOps = ld["@graph"].filter((n) => {
+      const types = [].concat(n["@type"] || []);
+      return types.includes("Action") || types.includes("EntryPoint") || types.includes("HowTo") || types.includes("ControlAction");
+    });
+    assert.equal(mcpOps.length, 0);
     assert.equal(persons.length, 1);
     assert.equal(persons[0]["@id"], "https://www.azieleliab.com/#aziel");
     assert.ok(ld["@graph"].some((n) => n["@id"] === LOCAL_PERSON_STUB_ID && n.sameAs && n.sameAs["@id"] === AZIEL_PERSON_ID && !n["@type"]));
@@ -1737,6 +1760,13 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.match(liveHtml, /Part of the Aziel Eliab ecosystem/);
     assert.match(liveHtml, />Try on Glama</);
     assert.match(liveHtml, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+    const liveLd = graphLd(liveHtml);
+    const list = liveLd["@graph"].find((n) => n["@type"] === "ItemList");
+    const godItem = (list.itemListElement || []).find((it) => it.item && it.item.identifier === "godlock");
+    assert.ok(godItem);
+    const toolParts = [].concat(godItem.item.isPartOf || []);
+    assert.ok(toolParts.some((p) => p && p["@id"] === "https://www.azieleliab.com/runtime#godlock"));
+    assert.ok(isSharedPersonRef(godItem.item.author));
   });
 
   it("self-canonicals godlock.uk pages to themselves and leaves Remain-OFF untouched", async () => {
@@ -1757,6 +1787,8 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.equal(cite.mesh_auto_heal, false);
     assert.equal(cite.mesh_node_gate, false);
     assert.match(llmsDoc(), /Person @id: https:\/\/www\.azieleliab\.com\/#aziel/);
+    assert.match(llmsDoc(), /Runtime @id: https:\/\/www\.azieleliab\.com\/runtime#runtime/);
+    assert.match(llmsDoc(), /GodLock Runtime tool: https:\/\/www\.azieleliab\.com\/runtime#godlock/);
     assert.match(llmsDoc(), /Part of the Aziel Eliab ecosystem/);
   });
 });

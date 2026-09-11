@@ -20,6 +20,10 @@ export const AUTHOR_AKA = "Aziel Elroi Eliab";
 export const AZIEL_OFFICIAL = "https://www.azieleliab.com/";
 export const AZIEL_PERSON_ID = "https://www.azieleliab.com/#aziel";
 export const LOCAL_PERSON_STUB_ID = CANON_HOST + "/AzielEliab#aziel-eliab";
+/** Hub parent Runtime product. Satellites reference this; they do not mint a competing Runtime @id. */
+export const HUB_RUNTIME_URL = AZIEL_OFFICIAL.replace(/\/$/, "") + "/runtime";
+export const HUB_RUNTIME_ID = HUB_RUNTIME_URL + "#runtime";
+export const HUB_GODLOCK_TOOL_ID = HUB_RUNTIME_URL + "#godlock";
 export const BANNER = "Public HTTPS engine. QNM-BUILD-1.0. Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. Author Aziel Eliab.";
 export const ANON_BROADCAST = "https://github.com/AzielEliab/anon-broadcast";
 export const AZIEL_ELIAB_PATH = "/AzielEliab";
@@ -300,8 +304,22 @@ function defaultKeywords(kind) {
   return "";
 }
 
+/** Related Runtime doors (cite/llms). Not the Runtime entity sameAs. */
 export function runtimeSameAs() {
   return [PUBLIC_RUNTIME, LIBRARY_RUNTIME, CATALOG + "/", GITHUB_RUNTIME, GLAMA_RUNTIME];
+}
+
+/** Runtime SoftwareApplication sameAs — GitHub + Glama only (Integrated Plan v2). */
+export function runtimeEntitySameAs() {
+  return [GITHUB_RUNTIME, GLAMA_RUNTIME];
+}
+
+export function runtimeRef() {
+  return { "@id": HUB_RUNTIME_ID };
+}
+
+export function godlockHubToolRef() {
+  return { "@id": HUB_GODLOCK_TOOL_ID };
 }
 
 export function liveRuntimeVersion(products) {
@@ -313,18 +331,18 @@ export function liveRuntimeVersion(products) {
 export function runtimeSoftwareNode(person, products) {
   return {
     "@type": "SoftwareApplication",
-    "@id": PUBLIC_RUNTIME + "#runtime",
+    "@id": HUB_RUNTIME_ID,
     name: RUNTIME_NAME,
     applicationCategory: "DeveloperApplication",
     operatingSystem: "Cloudflare Workers",
     softwareVersion: liveRuntimeVersion(products),
-    url: PUBLIC_RUNTIME,
+    url: HUB_RUNTIME_URL,
     description: defaultDescription("runtime"),
     author: personRef(),
     license: "https://www.apache.org/licenses/LICENSE-2.0",
     codeRepository: GITHUB_RUNTIME,
     documentation: RUNTIME_DOCS_2_0,
-    sameAs: runtimeSameAs(),
+    sameAs: runtimeEntitySameAs(),
   };
 }
 
@@ -367,7 +385,10 @@ function godlockSoftwareNode() {
     author: personRef(),
     license: "https://www.apache.org/licenses/LICENSE-2.0",
     codeRepository: GITHUB,
-    isPartOf: { "@id": CANON_HOST + "/#website" },
+    isPartOf: [
+      { "@id": CANON_HOST + "/#website" },
+      godlockHubToolRef(),
+    ],
   };
 }
 
@@ -410,7 +431,9 @@ function softwareItemList(products, person) {
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Web",
           author: personRef(),
-          isPartOf: { "@id": CANON_HOST + SOFTWARE_PATH + "#catalog" },
+          isPartOf: p.slug === "godlock"
+            ? [{ "@id": CANON_HOST + SOFTWARE_PATH + "#catalog" }, godlockHubToolRef()]
+            : { "@id": CANON_HOST + SOFTWARE_PATH + "#catalog" },
         },
       };
     }),
@@ -893,6 +916,10 @@ export function citeDoc() {
     update_check: CATALOG + "/v1/update/check?slug=godlock&version=0.1.0",
     update_download: DOWNLOAD,
     runtime: PUBLIC_RUNTIME,
+    runtime_id: HUB_RUNTIME_ID,
+    runtime_parent: HUB_RUNTIME_ID,
+    godlock_runtime_tool: HUB_GODLOCK_TOOL_ID,
+    runtime_entity_sameAs: runtimeEntitySameAs(),
     runtime_abstract: RUNTIME_ABSTRACT,
     seo_abstract_leads: true,
     runtime_official: PUBLIC_RUNTIME,
@@ -962,6 +989,8 @@ export function llmsDoc() {
     + "Also known as: Aziel Elroi Eliab\n"
     + "Primary credit: Aziel Eliab\n"
     + "Person @id: " + AZIEL_PERSON_ID + "\n"
+    + "Runtime @id: " + HUB_RUNTIME_ID + "\n"
+    + "GodLock Runtime tool: " + HUB_GODLOCK_TOOL_ID + "\n"
     + "Official site: " + AZIEL_OFFICIAL + "\n"
     + "Part of the Aziel Eliab ecosystem\n"
     + "Official site: " + AZIEL_OFFICIAL + "\n"

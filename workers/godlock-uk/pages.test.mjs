@@ -380,7 +380,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.deepEqual(cite.runtime_distribution.map((b) => b.label), [
       "Official Runtime",
       "Source on GitHub",
-      "Try/Deploy on Glama",
+      "Try on Glama",
       "Documentation/Architecture",
     ]);
     assert.equal(cite.runtime_openapi, CANON_HOST + "/runtime/openapi.json");
@@ -447,7 +447,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(llms.indexOf("## Runtime (FragGate door)") < llms.indexOf(RUNTIME_ABSTRACT));
     assert.match(llms, /Official Runtime: https:\/\/godlock\.uk\/runtime/);
     assert.match(llms, /Source on GitHub: https:\/\/github\.com\/AzielEliab\/aziel-runtime/);
-    assert.match(llms, /Try\/Deploy on Glama: https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime/);
+    assert.match(llms, /Try on Glama: https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime/);
     assert.match(llms, /Documentation\/Architecture: https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0/);
     assert.doesNotMatch(llms, /glama\.ai\/mcp\/servers\/@[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+/);
     assert.match(llms, /Door: https:\/\/godlock\.uk\/runtime/);
@@ -901,7 +901,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     }
     assert.match(html, /href="\/runtime">Official Runtime<\/a>/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Source on GitHub<\/a>/);
-    assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try\/Deploy on Glama<\/a>/);
+    assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0">Documentation\/Architecture<\/a>/);
     assert.doesNotMatch(html, /glama\.ai\/mcp\/servers\/@[A-Za-z0-9_-]+/);
     assert.match(html, /href="\/runtime\/v1\/pull\/godlock">Invoke via Runtime<\/a>/);
@@ -1098,7 +1098,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
     assert.match(html, /Invoke via Runtime/);
     assert.match(html, /href="\/runtime">Official Runtime<\/a>/);
-    assert.match(html, /Try\/Deploy on Glama/);
+    assert.match(html, /Try on Glama/);
     assert.match(html, /Documentation\/Architecture/);
     assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
     assert.match(res.headers.get("Cache-Control") || "", /s-maxage=300/);
@@ -1619,7 +1619,7 @@ describe("Phase F Aziel Runtime 2.0.0-rc1 hub cite", () => {
     assert.doesNotMatch(html, /Full Aziel Eliab suite/);
     assert.match(html, />Official Runtime</);
     assert.match(html, />Source on GitHub</);
-    assert.match(html, />Try\/Deploy on Glama</);
+    assert.match(html, />Try on Glama</);
     assert.match(html, />Documentation\/Architecture</);
     assert.doesNotMatch(html, /glama\.ai\/mcp\/servers\/[0-9a-f]{8,}/i);
   });

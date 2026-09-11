@@ -92,7 +92,7 @@ export function runtimeDistribution({ sameOrigin = false } = {}) {
   return [
     { id: "official", label: "Official Runtime", href: sameOrigin ? RUNTIME_PATH : PUBLIC_RUNTIME },
     { id: "github", label: "Source on GitHub", href: GITHUB_RUNTIME },
-    { id: "glama", label: "Try/Deploy on Glama", href: GLAMA_RUNTIME },
+    { id: "glama", label: "Try on Glama", href: GLAMA_RUNTIME },
     { id: "docs", label: "Documentation/Architecture", href: RUNTIME_DOCS_2_0 },
   ];
 }
@@ -966,7 +966,7 @@ export function llmsDoc() {
     + "Live version: " + RUNTIME_VERSION + " (certification-point freeze). Changelog stays below this abstract.\n"
     + "Official Runtime: " + PUBLIC_RUNTIME + "\n"
     + "Source on GitHub: " + GITHUB_RUNTIME + "\n"
-    + "Try/Deploy on Glama: " + GLAMA_RUNTIME + " (verified listing AzielEliab/aziel-runtime; not an invented server id)\n"
+    + "Try on Glama: " + GLAMA_RUNTIME + " (verified listing AzielEliab/aziel-runtime; not an invented server id)\n"
     + "Documentation/Architecture: " + RUNTIME_DOCS_2_0 + "\n"
     + "GodLock → Runtime. Same-origin Aziel Runtime (aziel-runtime) on GodLock.uk. One door — discover, route, refuse. Kernel: " + FRAGGATE_KERNEL + " (FG-0.1).\n"
     + "Door: " + PUBLIC_RUNTIME + "\n"

@@ -147,11 +147,11 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(text.endsWith("— Aziel Eliab\n"));
   });
 
-  it("orders nav Engine | Reason | Software | Runtime | Verify | Donate | Aziel Eliab | Aziel Corpus Library", () => {
+  it("orders nav Engine | Reason | Softwares | Runtime | Verify | Donate | Aziel Eliab | Aziel Corpus Library", () => {
     const nav = topNav("/verify");
     assert.match(
       nav,
-      /href="\/">Engine<\/a><span class="sep">\|<\/span><a href="\/reason">Reason<\/a><span class="sep">\|<\/span><a href="\/software">Software<\/a><span class="sep">\|<\/span><a href="\/runtime">Runtime<\/a><span class="sep">\|<\/span><a href="\/verify"/,
+      /href="\/">Engine<\/a><span class="sep">\|<\/span><a href="\/reason">Reason<\/a><span class="sep">\|<\/span><a href="\/software">Softwares<\/a><span class="sep">\|<\/span><a href="\/runtime">Runtime<\/a><span class="sep">\|<\/span><a href="\/verify"/,
     );
     assert.match(
       nav,
@@ -482,6 +482,11 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
     assert.match(llms, /Aziel Corpus Library: https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab/);
     assert.doesNotMatch(llms, /Aziel Corpus Library: https:\/\/godlock\.uk\/AzielCorpusLibrary/);
+    assert.match(llms, /GodLock Softwares lists suite doors available from GodLock/);
+    assert.doesNotMatch(llms, /Digital Library identity/);
+    assert.doesNotMatch(llms, /matching Digital Library Software completeness/);
+    assert.doesNotMatch(llms, /same completeness as the Digital Library/);
+    assert.doesNotMatch(llms, /Aziel Eliab Softwares catalog/);
     assert.match(llms, /## Runtime \(FragGate door\)/);
     assert.ok(llms.indexOf(RUNTIME_ABSTRACT) < llms.indexOf("Live version: 2.0.0-rc1"));
     assert.ok(llms.indexOf("## Runtime (FragGate door)") < llms.indexOf(RUNTIME_ABSTRACT));

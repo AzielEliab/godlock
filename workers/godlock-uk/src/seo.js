@@ -1018,7 +1018,7 @@ export function llmsDoc() {
     + "Catalog JSON (SEO proxy, not a FragGate door): " + CANON_HOST + "/v1/software\n"
     + "Runtime FragGate door: " + PUBLIC_RUNTIME + "\n"
     + "\n"
-    + "Aziel Corpus Library (separate official site): " + LIBRARY_AZIEL + "\n"
+    + "Aziel Corpus Library: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "GodLock Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
     + "Donate: " + CANON_HOST + DONATE_PATH + " (AZL-DONATE-1.0). Same door: " + DONATE_CANONICAL + "\n"

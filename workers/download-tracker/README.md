@@ -49,7 +49,8 @@ custom DNS is ready. This tree documents the intended public URL
 
 | Method | Path | Behavior |
 |--------|------|----------|
-| GET | `/` | Index page with the GitHub Releases link |
+| GET | `/` | Index page with the rose-star brand mark top-left (`/sigil.png`, empty alt; not "everblooming sigil" wording) |
+| GET | `/sigil.png` | Same-origin rose-star brand mark (Aziel Eliab) |
 | GET | `/download?repo=&tag=&asset=` | Increment KV, 302 to the hosted asset (default: `godlock-0.1.0.tar.gz`) |
 | GET | `/count` | `{ project, views, downloads, total }` — `total` is the download tally (same as `downloads`), matching sibling product Workers |
 | GET | `/stats` | JSON totals plus per-repo and per-branch breakdown |

@@ -19,6 +19,12 @@ import {
   shouldCountRuntimeUse,
   stampRuntimeVia,
 } from "./runtimeUses.js";
+import {
+  alignPublicMeshSurface,
+  isMeshDisablePath,
+  isPublicMeshJsonPath,
+  meshDisableRefused,
+} from "./mesh.js";
 
 export const RUNTIME_ORIGIN = CATALOG;
 const UA = "Mozilla/5.0";
@@ -319,7 +325,12 @@ async function finishProxy(request, res, via) {
     return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
   }
   const text = await res.text();
-  const rewritten = rewriteRuntimeBody(text, ct);
+  let rewritten = rewriteRuntimeBody(text, ct);
+  if (ct.toLowerCase().includes("json") && isPublicMeshJsonPath(new URL(request.url).pathname)) {
+    try {
+      rewritten = JSON.stringify(alignPublicMeshSurface(JSON.parse(rewritten)), null, 2);
+    } catch { /* leave rewritten text */ }
+  }
   headers.delete("content-length");
   return new Response(rewritten, { status: res.status, statusText: res.statusText, headers });
 }
@@ -339,6 +350,9 @@ export async function handleRuntimeRoot(request, url, env, ctx) {
   const dest = destFromRuntimePath(url.pathname, url.search);
   if (dest == null) return null;
   const destPath = String(dest).split("?")[0];
+  if (isMeshDisablePath(destPath) || isMeshDisablePath(url.pathname)) {
+    return jsonError(meshDisableRefused(), 405);
+  }
   if (isRuntimeUsesPath(destPath)) {
     if (request.method === "GET" || request.method === "HEAD") {
       return handleRuntimeUses(request, env);

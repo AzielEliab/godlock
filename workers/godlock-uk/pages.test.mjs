@@ -442,7 +442,10 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.mesh_status_local, CANON_HOST + "/v1/mesh/status");
     assert.equal(cite.mesh_get_never_enables, true);
     assert.equal(cite.mesh_spec, "QNM-BUILD-1.0");
-    assert.equal(cite.mesh_default_off, true);
+    assert.equal(cite.mesh_default, "on");
+    assert.equal(cite.mesh_readonly, true);
+    assert.equal(cite.mesh_default_off, undefined);
+    assert.equal(cite.runtime_mesh_disable, undefined);
     assert.equal(cite.mesh_anonymity_network, false);
     assert.equal(cite.mesh_node_gate, false);
     assert.equal(cite.mesh_auto_heal, false);
@@ -508,7 +511,10 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Door: https:\/\/godlock\.uk\/runtime/);
     assert.match(llms, /OpenAPI: https:\/\/godlock\.uk\/runtime\/openapi\.json/);
     assert.match(llms, /MCP: POST https:\/\/godlock\.uk\/runtime\/mcp/);
-    assert.match(llms, /Suite mesh \(default off\): https:\/\/godlock\.uk\/runtime\/v1\/mesh/);
+    assert.match(llms, /Suite mesh \(read-only, on\): https:\/\/godlock\.uk\/runtime\/v1\/mesh/);
+    assert.doesNotMatch(llms, /default off/i);
+    assert.doesNotMatch(llms, /Remain-OFF/);
+    assert.doesNotMatch(llms, /enable \/ disable/);
     assert.match(llms, /GET \/v1\/mesh never enables/);
     assert.match(llms, /Same-origin mesh \(Live Nodes clients\): https:\/\/godlock\.uk\/v1\/mesh/);
     assert.match(llms, /Same-origin mesh status: https:\/\/godlock\.uk\/v1\/mesh\/status/);
@@ -541,6 +547,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(spec.paths["/runtime/v1/mesh/nodes"]);
     assert.ok(!spec.paths["/runtime/v1/mesh/list"]);
     assert.ok(spec.paths["/runtime/v1/mesh/join"]);
+    assert.ok(!spec.paths["/runtime/v1/mesh/disable"]);
     assert.ok(spec.paths["/mesh"]);
     assert.ok(spec.paths["/runtime/v1/update/check"]);
     assert.doesNotMatch(JSON.stringify(spec), /\bABAD\b/);
@@ -650,7 +657,8 @@ describe("homepage stays a natural argument surface", () => {
     assert.match(html, /<h2>Prior receipts<\/h2>/);
     assert.match(html, /class="scorebox"/);
     assert.match(html, /id="mesh-status"/);
-    assert.match(html, /Suite mesh: off/);
+    assert.match(html, /Suite mesh: on \(read-only suite presence\)/);
+    assert.doesNotMatch(html, /Suite mesh: off/);
     assert.match(html, /QNM-BUILD-1\.0/);
     assert.doesNotMatch(html, /id="node-gate"/);
     assert.match(html, /Not an anonymity network/);
@@ -1697,7 +1705,9 @@ describe("Phase F Aziel Runtime 2.0.0-rc1 hub cite", () => {
     assert.doesNotMatch(software, /Aziel Eliab Softwares catalog/);
     assert.ok(runtime.indexOf(RUNTIME_ABSTRACT.slice(0, 40)) < runtime.indexOf("2.0.0-rc1"));
     assert.match(runtime, /GET \/v1\/mesh never enables/);
-    assert.match(runtime, /Remain-OFF/);
+    assert.match(runtime, /Read-only suite presence/);
+    assert.doesNotMatch(runtime, /Remain-OFF/);
+    assert.doesNotMatch(runtime, /default off/i);
     const html = softwareBody({ products: [] });
     assert.match(html, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.doesNotMatch(html, /<h2>Runtime<\/h2>/);
@@ -1817,7 +1827,7 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.ok(isSharedPersonRef(godItem.item.author));
   });
 
-  it("self-canonicals godlock.uk pages to themselves and leaves Remain-OFF untouched", async () => {
+  it("self-canonicals godlock.uk pages to themselves and presents read-only mesh ON", async () => {
     const paths = ["/", "/software", "/AzielEliab", "/reason", "/verify", "/donate"];
     for (const path of paths) {
       const res = await worker.fetch(new Request("https://godlock.uk" + path), mockEnv());
@@ -1830,7 +1840,9 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
       assert.doesNotMatch(html, /rel="canonical" href="https:\/\/aziel-runtime\.vibelock\.workers\.dev/);
     }
     const cite = citeDoc();
-    assert.equal(cite.mesh_default_off, true);
+    assert.equal(cite.mesh_default, "on");
+    assert.equal(cite.mesh_readonly, true);
+    assert.equal(cite.mesh_default_off, undefined);
     assert.equal(cite.mesh_get_never_enables, true);
     assert.equal(cite.mesh_auto_heal, false);
     assert.equal(cite.mesh_node_gate, false);

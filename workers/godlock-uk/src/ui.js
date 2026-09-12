@@ -264,8 +264,8 @@ ${ecosystemNav()}
       meshEl.textContent=on
         ?("Suite mesh: on · live "+live+" · locked "+locked+" · isolated "+isolated+". QNS-CD-1.0. Not an anonymity network.")
         :(j.mesh.status==="unavailable"
-          ?"Suite mesh: off (unavailable). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network."
-          :"Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.");
+          ?"Suite mesh: on (read-only suite presence). Rollup unavailable. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network."
+          :"Suite mesh: on (read-only suite presence). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.");
     }
   }
   function beat(){

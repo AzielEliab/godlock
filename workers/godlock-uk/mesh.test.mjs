@@ -5,7 +5,9 @@ import {
   QNS_CD_SPEC,
   QNS_CD,
   MESH_NOTE,
+  MESH_DEFAULT,
   MESH_DEFAULT_OFF,
+  MESH_READONLY,
   MESH_ANONYMITY_NETWORK,
   MESH_NODE_GATE,
   MESH_AUTO_HEAL,
@@ -26,11 +28,14 @@ import {
   publicMesh,
   meshStatusLine,
   alignLiveNodes,
+  alignPublicMeshSurface,
   compactMeshNode,
   fetchMeshSnapshot,
   meshOpsDoc,
   isOriginMeshReadPath,
+  isMeshDisablePath,
   originMeshWriteRefused,
+  meshDisableRefused,
   hubMeshStatusDoc,
   ORIGIN_MESH_READ_PATHS,
 } from "./src/mesh.js";
@@ -56,7 +61,7 @@ function mockDbEnv(extra) {
 }
 
 describe("mesh contract", () => {
-  it("documents join/heartbeat/list/enable/disable and stays default off", () => {
+  it("documents read-only suite presence on and has no mesh-off function", () => {
     assert.equal(QNM_SPEC, "QNM-BUILD-1.0");
     assert.equal(QNS_CD_SPEC, "QNS-CD-1.0");
     assert.equal(QNS_CD.spec, "QNS-CD-1.0");
@@ -72,19 +77,30 @@ describe("mesh contract", () => {
     assert.equal(QNS_CD.pair_custody, "https://github.com/AzielEliab/azinterface");
     assert.match(MESH_NOTE, /QNS-CD-1\.0/);
     assert.match(MESH_NOTE, /photon QNS1 packet transfer/);
-    assert.equal(MESH_DEFAULT_OFF, true);
+    assert.match(MESH_NOTE, /read-only suite presence/);
+    assert.doesNotMatch(MESH_NOTE, /default off/i);
+    assert.equal(MESH_DEFAULT, "on");
+    assert.equal(MESH_DEFAULT_OFF, false);
+    assert.equal(MESH_READONLY, true);
     assert.equal(MESH_ANONYMITY_NETWORK, false);
     assert.equal(MESH_NODE_GATE, false);
     assert.equal(MESH_AUTO_HEAL, false);
-    assert.deepEqual(MESH_OPS, ["status", "nodes", "join", "heartbeat", "leave", "enable", "disable"]);
+    assert.deepEqual(MESH_OPS, ["status", "nodes", "join", "heartbeat", "leave", "enable"]);
+    assert.ok(!MESH_OPS.includes("disable"));
     assert.equal(MESH_PATH, "/v1/mesh");
     assert.equal(MESH_STATUS_PATH, "/v1/mesh/status");
     assert.deepEqual(ORIGIN_MESH_READ_PATHS, ["/v1/mesh", "/v1/mesh/status"]);
     assert.equal(isOriginMeshReadPath("/v1/mesh"), true);
     assert.equal(isOriginMeshReadPath("/v1/mesh/status"), true);
     assert.equal(isOriginMeshReadPath("/v1/mesh/enable"), false);
+    assert.equal(isMeshDisablePath("/v1/mesh/disable"), true);
+    assert.equal(isMeshDisablePath("/runtime/v1/mesh/disable"), true);
     assert.equal(originMeshWriteRefused().get_never_enables, true);
     assert.equal(originMeshWriteRefused().enabled, false);
+    assert.equal(originMeshWriteRefused().mesh_default, "on");
+    assert.equal(originMeshWriteRefused().default_off, false);
+    assert.equal(meshDisableRefused().code, "MESH-NO-DISABLE");
+    assert.equal(meshDisableRefused().mesh_default, "on");
     assert.equal(MESH_NODES_PATH, "/v1/mesh/nodes");
     assert.equal(MESH_LIST_PATH, "/v1/mesh/nodes");
     assert.equal(MESH_JOIN_PATH, "/v1/mesh/join");
@@ -103,7 +119,10 @@ describe("mesh contract", () => {
     assert.equal(ops.qns_cd.spec, "QNS-CD-1.0");
     assert.equal(ops.qns_cd.public_proxy, false);
     assert.equal(ops.qns_cd.softwares_tab, false);
-    assert.equal(ops.default_off, true);
+    assert.equal(ops.default_off, false);
+    assert.equal(ops.mesh_default, "on");
+    assert.equal(ops.readonly, true);
+    assert.equal(ops.disable, undefined);
     assert.equal(ops.anonymity_network, false);
     assert.equal(ops.node_gate, false);
     assert.equal(ops.auto_heal, false);
@@ -127,7 +146,7 @@ describe("parseMeshDoc", () => {
     assert.match(empty.note, /QNS-CD-1\.0/);
     assert.equal(empty.live_nodes, 0);
     assert.deepEqual(empty.rollup, { live: 0, locked: 0, isolated: 0 });
-    assert.equal(empty.status, "off");
+    assert.equal(empty.status, "unavailable");
     assert.equal(empty.anonymity_network, false);
     assert.equal(empty.node_gate, false);
     assert.equal(empty.auto_heal, false);
@@ -170,7 +189,7 @@ describe("parseMeshDoc", () => {
     assert.equal(off.enabled, false);
     assert.equal(off.live_nodes, 0);
     assert.deepEqual(off.rollup, { live: 0, locked: 0, isolated: 0 });
-    assert.equal(off.status, "off");
+    assert.equal(off.status, "unavailable");
   });
 
   it("reads QNM-BUILD-1.0 live|locked|isolated counts and does not invent a peer-list rollup", () => {
@@ -245,8 +264,29 @@ describe("publicMesh and status line", () => {
     assert.equal(pub.list, "https://godlock.uk/runtime/v1/mesh/nodes");
     assert.equal(pub.leave, "https://godlock.uk/runtime/v1/mesh/leave");
     assert.match(meshStatusLine(pub), /Suite mesh: on · live 2 · locked 0 · isolated 0/);
-    assert.match(meshStatusLine(emptyMesh()), /Suite mesh: off \(default\)\. QNM-BUILD-1\.0/);
+    assert.match(meshStatusLine(emptyMesh()), /Suite mesh: on \(read-only suite presence\)/);
+    assert.doesNotMatch(meshStatusLine(emptyMesh()), /\boff\b/);
     assert.match(meshStatusLine(emptyMesh({ status: "unavailable" })), /unavailable/);
+    const stamped = alignPublicMeshSurface({
+      enabled: true,
+      live_nodes: 37,
+      mesh_default: "off",
+      mesh_default_off: true,
+      default_off: true,
+      disable: "https://godlock.uk/runtime/v1/mesh/disable",
+      ops: ["status", "disable"],
+      note: "Suite mesh default off. Remain-OFF.",
+      display: { fields: [{ label: "mesh default", value: "off" }] },
+    });
+    assert.equal(stamped.mesh_default, "on");
+    assert.equal(stamped.default_off, false);
+    assert.equal(stamped.mesh_default_off, undefined);
+    assert.equal(stamped.disable, undefined);
+    assert.deepEqual(stamped.ops, ["status"]);
+    assert.doesNotMatch(stamped.note, /default off|Remain-OFF/i);
+    assert.equal(stamped.display.fields[0].value, "on");
+    assert.equal(stamped.enabled, true);
+    assert.equal(stamped.live_nodes, 37);
   });
 });
 
@@ -438,7 +478,9 @@ describe("GodLock.uk mesh routes", () => {
     assert.equal(mesh.author, "Aziel Eliab");
     assert.equal(mesh.identity, "Aziel Eliab");
     assert.equal(mesh.anonymity_network, false);
-    assert.equal(mesh.default_off, true);
+    assert.equal(mesh.default_off, false);
+    assert.equal(mesh.mesh_default, "on");
+    assert.equal(mesh.disable, undefined);
     assert.equal(mesh.node_gate, false);
     assert.equal(mesh.auto_heal, false);
     assert.equal(mesh.mesh.enabled, true);
@@ -508,7 +550,8 @@ describe("GodLock.uk mesh routes", () => {
     assert.equal(stats.live_nodes, stats.site_live_nodes);
     const html = await (await worker.fetch(new Request("https://godlock.uk/"), env)).text();
     assert.match(html, /id="mesh-status"/);
-    assert.match(html, /Suite mesh: off/);
+    assert.match(html, /Suite mesh: on \(read-only suite presence\)/);
+    assert.doesNotMatch(html, /Suite mesh: off/);
     assert.match(html, /QNM-BUILD-1\.0/);
     assert.match(html, /QNS-CD-1\.0/);
     assert.match(html, /Not an anonymity network/);
@@ -560,11 +603,15 @@ describe("GodLock.uk origin /v1/mesh proxies", () => {
     assert.deepEqual(status.rollup, { live: 11, locked: 0, isolated: 0 });
     assert.equal(status.author, "Aziel Eliab");
     assert.equal(status.identity, "Aziel Eliab");
+    assert.equal(status.mesh_default, "on");
+    assert.equal(status.default_off, false);
+    assert.equal(status.disable, undefined);
     assert.notEqual(status.get_never_enables, false);
 
     const mesh = await (await worker.fetch(new Request("https://godlock.uk/v1/mesh"), env)).json();
     assert.equal(mesh.ok, true);
     assert.equal(mesh.enabled, true);
+    assert.equal(mesh.mesh_default, "on");
     assert.equal(mesh.author, "Aziel Eliab");
     assert.equal(mesh.identity, "Aziel Eliab");
   });
@@ -576,15 +623,28 @@ describe("GodLock.uk origin /v1/mesh proxies", () => {
     const body = await denied.json();
     assert.equal(body.get_never_enables, true);
     assert.equal(body.enabled, false);
-    assert.equal(body.default_off, true);
+    assert.equal(body.default_off, false);
+    assert.equal(body.mesh_default, "on");
     assert.equal(body.author, "Aziel Eliab");
     assert.equal(body.identity, "Aziel Eliab");
 
     const enable = await worker.fetch(new Request("https://godlock.uk/v1/mesh/enable", { method: "POST" }), env);
     assert.equal(enable.status, 404);
+
+    const disable = await worker.fetch(new Request("https://godlock.uk/v1/mesh/disable", { method: "POST" }), env);
+    assert.equal(disable.status, 405);
+    const refused = await disable.json();
+    assert.equal(refused.code, "MESH-NO-DISABLE");
+    assert.equal(refused.mesh_default, "on");
+    assert.doesNotMatch(JSON.stringify(refused), /Remain-OFF|default off/i);
+
+    const runtimeDisable = await worker.fetch(new Request("https://godlock.uk/runtime/v1/mesh/disable", { method: "POST" }), env);
+    assert.equal(runtimeDisable.status, 405);
+    const runtimeRefused = await runtimeDisable.json();
+    assert.equal(runtimeRefused.code, "MESH-NO-DISABLE");
   });
 
-  it("falls back to a remain-OFF hub snapshot when the runtime proxy is down", async () => {
+  it("falls back to a read-only ON hub snapshot when the runtime proxy is down", async () => {
     const env = mockDbEnv({
       AZIEL_RUNTIME: {
         async fetch() {
@@ -595,7 +655,9 @@ describe("GodLock.uk origin /v1/mesh proxies", () => {
     const status = await (await worker.fetch(new Request("https://godlock.uk/v1/mesh/status"), env)).json();
     assert.equal(status.ok, true);
     assert.equal(status.get_never_enables, true);
-    assert.equal(status.default_off, true);
+    assert.equal(status.default_off, false);
+    assert.equal(status.mesh_default, "on");
+    assert.equal(status.mesh, "on");
     assert.equal(status.enabled, false);
     assert.equal(status.author, "Aziel Eliab");
     assert.equal(status.identity, "Aziel Eliab");

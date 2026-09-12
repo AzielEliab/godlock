@@ -10,6 +10,7 @@ GodLock Runtime tool: https://www.azieleliab.com/runtime#godlock
 Official site: https://www.azieleliab.com/
 Part of the Aziel Eliab ecosystem
 Aziel Corpus Library: https://www.azielcorpuslibrary.net/
+He Didn't Jump: https://www.hedidntjump.com/
 GodLock.uk: https://godlock.uk/
 aziel-runtime GitHub: https://github.com/AzielEliab/aziel-runtime
 Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/

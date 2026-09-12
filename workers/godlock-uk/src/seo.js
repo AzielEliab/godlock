@@ -12,6 +12,9 @@ export const LIBRARY = "https://www.azielcorpuslibrary.net";
 export const LIBRARY_AZIEL = LIBRARY + "/AzielEliab";
 export const LIBRARY_RUNTIME = LIBRARY + "/runtime";
 export const LIBRARY_HOME = LIBRARY + "/";
+/** Sister archive door (An Aziel Eliab Project). Not a Softwares card. */
+export const HEDIDNTJUMP = "https://www.hedidntjump.com/";
+export const HEDIDNTJUMP_LABEL = "He Didn't Jump";
 export const SIGIL = LIBRARY + "/sigil.png";
 export const SITE = "GodLock";
 export const AUTHOR = "Aziel Eliab";
@@ -111,6 +114,7 @@ export function ecosystemLinks() {
   return [
     { id: "official", label: "Official site", href: AZIEL_OFFICIAL },
     { id: "library", label: "Aziel Corpus Library", href: LIBRARY_HOME },
+    { id: "hedidntjump", label: HEDIDNTJUMP_LABEL, href: HEDIDNTJUMP },
     { id: "runtime-github", label: "Aziel Runtime on GitHub", href: GITHUB_RUNTIME },
     { id: "runtime", label: "Aziel Runtime", href: CATALOG + "/", secondary: true },
     { id: "glama", label: "Try on Glama", href: GLAMA_RUNTIME },
@@ -160,7 +164,7 @@ export function personNode() {
     hasOccupation: { "@type": "Occupation", name: "Author" },
     description: "Author of GodLock. Identity is Aziel Eliab only. Aziel Elroi Eliab is SEO alternateName only.",
     knowsAbout: [SITE, "FragGate", "Aziel Runtime"],
-    sameAs: [CANON_HOST + AZIEL_ELIAB_PATH, LIBRARY_AZIEL, LIBRARY_HOME, AUTHOR_GITHUB, GITHUB],
+    sameAs: [CANON_HOST + AZIEL_ELIAB_PATH, LIBRARY_AZIEL, LIBRARY_HOME, HEDIDNTJUMP, AUTHOR_GITHUB, GITHUB],
     mainEntityOfPage: CANON_HOST + AZIEL_ELIAB_PATH,
   };
 }
@@ -489,7 +493,7 @@ function jsonLd(title, path, description, kind, products) {
       mainEntity: { "@id": list["@id"] },
       breadcrumb: { "@id": crumbs["@id"] },
       hasPart: { "@id": software["@id"] },
-      relatedLink: [PUBLIC_RUNTIME, CANON_HOST + "/v1/software", CANON_HOST + AZIEL_ELIAB_PATH, LIBRARY],
+      relatedLink: [PUBLIC_RUNTIME, CANON_HOST + "/v1/software", CANON_HOST + AZIEL_ELIAB_PATH, LIBRARY, HEDIDNTJUMP],
       significantLink: [PUBLIC_RUNTIME, CANON_HOST + "/v1/software"],
     });
   }
@@ -525,9 +529,9 @@ function jsonLd(title, path, description, kind, products) {
       publisher: who,
       copyrightHolder: who,
       creator: who,
-      sameAs: [LIBRARY_AZIEL, AUTHOR_GITHUB],
-      relatedLink: [LIBRARY_AZIEL, CANON_HOST + REASON_PATH, CANON_HOST + SOFTWARE_PATH, AUTHOR_GITHUB],
-      significantLink: [LIBRARY_AZIEL, CANON_HOST + REASON_PATH, CANON_HOST + SOFTWARE_PATH],
+      sameAs: [LIBRARY_AZIEL, HEDIDNTJUMP, AUTHOR_GITHUB],
+      relatedLink: [LIBRARY_AZIEL, HEDIDNTJUMP, CANON_HOST + REASON_PATH, CANON_HOST + SOFTWARE_PATH, AUTHOR_GITHUB],
+      significantLink: [LIBRARY_AZIEL, HEDIDNTJUMP, CANON_HOST + REASON_PATH, CANON_HOST + SOFTWARE_PATH],
       subjectOf: { "@type": "CreativeWork", name: "Specified Fit, Not Pretty Spirals", url: CANON_HOST + REASON_PATH },
       mentions: [
         { "@type": "CreativeWork", name: "Specified Fit, Not Pretty Spirals", url: CANON_HOST + REASON_PATH },
@@ -833,6 +837,7 @@ export async function sitemapXml(env, extras = {}) {
   add(LIBRARY + "/", "0.6", "weekly");
   add(LIBRARY_AZIEL, "0.7", "weekly");
   add(LIBRARY_RUNTIME, "0.6", "weekly");
+  add(HEDIDNTJUMP, "0.6", "weekly");
   add(CATALOG + "/", "0.6", "daily");
   add(CATALOG + "/v1/software", "0.7", "daily");
   add(CATALOG + "/v1/fraggate/list", "0.6", "daily");
@@ -865,6 +870,8 @@ export function citeDoc() {
     identity_note: "Aziel Eliab only. Aziel Elroi Eliab is SEO alternateName only. Shared Person @id is https://www.azieleliab.com/#aziel.",
     person_id: AZIEL_PERSON_ID,
     official_site: AZIEL_OFFICIAL,
+    he_didnt_jump: HEDIDNTJUMP,
+    he_didnt_jump_note: "Sister archive door. An Aziel Eliab Project. Not a Softwares card. Identity Aziel Eliab only.",
     ecosystem: ecosystemLinks(),
     alternateName: AUTHOR_AKA,
     title: SITE,
@@ -973,6 +980,7 @@ export function citeDoc() {
     aziel_corpus_library: LIBRARY_AZIEL,
     library: LIBRARY + "/",
     library_aziel_eliab: LIBRARY_AZIEL,
+    hedidntjump: HEDIDNTJUMP,
     health: CANON_HOST + "/health",
     license: "Apache-2.0",
     catalog: CATALOG + "/",
@@ -994,6 +1002,7 @@ export function llmsDoc() {
     + "Part of the Aziel Eliab ecosystem\n"
     + "Official site: " + AZIEL_OFFICIAL + "\n"
     + "Aziel Corpus Library: " + LIBRARY_HOME + "\n"
+    + "He Didn't Jump: " + HEDIDNTJUMP + "\n"
     + "Aziel Runtime on GitHub: " + GITHUB_RUNTIME + "\n"
     + "Aziel Runtime: " + CATALOG + "/\n"
     + "Try on Glama: " + GLAMA_RUNTIME + "\n"
@@ -1020,6 +1029,7 @@ export function llmsDoc() {
     + "\n"
     + "Aziel Corpus Library: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
+    + "He Didn't Jump: " + HEDIDNTJUMP + "\n"
     + "GodLock Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
     + "Donate: " + CANON_HOST + DONATE_PATH + " (AZL-DONATE-1.0). Same door: " + DONATE_CANONICAL + "\n"
     + "GodLock Softwares lists suite doors available from GodLock, pulled from the live aziel-runtime catalog. Aziel Runtime (aziel-runtime) and FragGate are separate cards. New catalog slugs are included automatically. AZBrowser, AZNet, AZHub, AZInterface, and AZCoherence are separate Plain cards (azbrowser-download-tracker, aznet-download-tracker, azhub-download-tracker, azinterface-download-tracker, azcoherence-download-tracker). Never nest AZHub with AZInterface. AZCoherence is peer to AZ-CLCE (azclce), not AKM-TRIAD. FragGate is its own Gate card (fraggate-download-tracker Download/Worker, A–Z with DecisionGATE). Each product is tethered to its Worker, GitHub, and /runtime. Sorted Plain A–Z → Gate A–Z → Lock A–Z on the catalog JSON (Clock is not Lock). The Softwares HTML page features GodLock first. GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"

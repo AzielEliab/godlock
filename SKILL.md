@@ -14,6 +14,7 @@ GodLock is a product name (Specified Fit stress-test and resilience engine). Not
 **Official site:** https://www.azieleliab.com/  
 **GodLock.uk:** https://godlock.uk/  
 **Aziel Corpus Library:** https://www.azielcorpuslibrary.net/  
+**He Didn't Jump:** https://www.hedidntjump.com/  
 **aziel-runtime GitHub:** https://github.com/AzielEliab/aziel-runtime  
 **FragGate kernel:** https://github.com/AzielEliab/fraggate (FG-0.1)
 

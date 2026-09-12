@@ -147,7 +147,7 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(text.endsWith("— Aziel Eliab\n"));
   });
 
-  it("orders nav Engine | Reason | Softwares | Runtime | Verify | Donate | Aziel Eliab | Aziel Corpus Library", () => {
+  it("orders nav Engine | Reason | Softwares | Runtime | Verify | Donate | Aziel Eliab | Aziel Corpus Library | He Didn't Jump", () => {
     const nav = topNav("/verify");
     assert.match(
       nav,
@@ -155,7 +155,7 @@ describe("Aziel Eliab page chrome", () => {
     );
     assert.match(
       nav,
-      /href="\/verify"[^>]*>Verify<\/a><span class="sep">\|<\/span><a href="\/donate">Donate<\/a><span class="sep">\|<\/span><a href="\/AzielEliab" class="aziel">Aziel Eliab<\/a><span class="sep">\|<\/span><a href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab" class="aziel">Aziel Corpus Library<\/a>/,
+      /href="\/verify"[^>]*>Verify<\/a><span class="sep">\|<\/span><a href="\/donate">Donate<\/a><span class="sep">\|<\/span><a href="\/AzielEliab" class="aziel">Aziel Eliab<\/a><span class="sep">\|<\/span><a href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab" class="aziel">Aziel Corpus Library<\/a><span class="sep">\|<\/span><a href="https:\/\/www\.hedidntjump\.com\/" class="aziel">He Didn't Jump<\/a>/,
     );
     assert.match(CSS, /--royal:#6b3fa0/);
     assert.match(CSS, /--royal-deep:#4a2870/);
@@ -170,6 +170,7 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(html.includes(AZIEL_MANIFESTO[0]));
     assert.ok(html.includes("— Aziel Eliab"));
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab">Aziel Eliab — Digital Library<\/a>/);
+    assert.match(html, /href="https:\/\/www\.hedidntjump\.com\/">He Didn't Jump<\/a>/);
     const manifesto = html.match(/<section class="about-aziel"[\s\S]*?<\/section>/)[0];
     assert.doesNotMatch(manifesto, /MCP|OpenAPI|runtime_session|Workers AI/i);
     assert.doesNotMatch(azielEliabBody(), /MCP|OpenAPI|runtime_session|Workers AI/i);
@@ -183,6 +184,7 @@ describe("Aziel Eliab page chrome", () => {
     assert.equal(person.url, AZIEL_OFFICIAL);
     assert.ok(person.sameAs.includes("https://godlock.uk/AzielEliab"));
     assert.ok(person.sameAs.includes(LIBRARY_AZIEL));
+    assert.ok(person.sameAs.includes("https://www.hedidntjump.com/"));
     assert.ok(person.sameAs.includes(AUTHOR_GITHUB));
     assert.ok(person.sameAs.includes(GITHUB));
     const about = ld["@graph"].find((n) => {
@@ -194,6 +196,7 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok([].concat(about["@type"]).includes("ProfilePage"));
     assert.equal(about.name, "About Aziel Eliab");
     assert.ok((about.relatedLink || []).includes(LIBRARY_AZIEL));
+    assert.ok((about.relatedLink || []).includes("https://www.hedidntjump.com/"));
     assert.ok((about.relatedLink || []).includes(CANON_HOST + "/reason"));
     assert.ok((about.mentions || []).some((m) => m && m.name === "Specified Fit, Not Pretty Spirals"));
     assert.equal(person.identifier, "Aziel Eliab");
@@ -202,6 +205,7 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok((person.knowsAbout || []).includes("GodLock"));
     assert.equal(about.identifier, "about-aziel-eliab");
     assert.ok((about.significantLink || []).includes(LIBRARY_AZIEL));
+    assert.ok((about.significantLink || []).includes("https://www.hedidntjump.com/"));
     assert.ok((about.mentions || []).some((m) => m && m["@id"] === "https://godlock.uk/software#page"));
     assert.ok(ld["@graph"].some((n) => n["@type"] === "BreadcrumbList"));
   });
@@ -220,6 +224,7 @@ describe("Aziel Eliab SEO surfaces", () => {
       CANON_HOST + "/AzielEliab",
       LIBRARY_AZIEL,
       "https://www.azielcorpuslibrary.net/",
+      "https://www.hedidntjump.com/",
       AUTHOR_GITHUB,
       GITHUB,
     ]);
@@ -362,6 +367,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes("https://www.azielcorpuslibrary.net/runtime"));
     assert.ok(!xml.includes(CANON_HOST + "/AzielCorpusLibrary"));
     assert.ok(xml.includes(LIBRARY_AZIEL));
+    assert.ok(xml.includes("https://www.hedidntjump.com/"));
     const cite = citeDoc();
     assert.equal(cite.specified_fit, CANON_HOST + "/reason");
     assert.equal(cite.reason, CANON_HOST + "/reason");
@@ -375,6 +381,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.author_id, AZIEL_PERSON_ID);
     assert.equal(cite.person_id, "https://www.azieleliab.com/#aziel");
     assert.equal(cite.official_site, AZIEL_OFFICIAL);
+    assert.equal(cite.he_didnt_jump, "https://www.hedidntjump.com/");
+    assert.equal(cite.hedidntjump, "https://www.hedidntjump.com/");
     assert.equal(cite.identity, "Aziel Eliab");
     assert.match(cite.identity_note, /alternateName only/);
     assert.equal(cite.reasoning_spine, "Specified Fit, Not Pretty Spirals");
@@ -481,6 +489,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /FragGate list fallback: https:\/\/godlock\.uk\/runtime\/v1\/fraggate\/list/);
     assert.match(llms, /Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
     assert.match(llms, /Aziel Corpus Library: https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab/);
+    assert.match(llms, /He Didn't Jump: https:\/\/www\.hedidntjump\.com\//);
     assert.doesNotMatch(llms, /Aziel Corpus Library: https:\/\/godlock\.uk\/AzielCorpusLibrary/);
     assert.match(llms, /GodLock Softwares lists suite doors available from GodLock/);
     assert.doesNotMatch(llms, /Digital Library identity/);
@@ -592,6 +601,7 @@ describe("priority page SEO", () => {
     assert.equal(collection.identifier, "godlock-softwares");
     assert.ok((collection.significantLink || []).includes("https://godlock.uk/runtime"));
     assert.ok((collection.relatedLink || []).includes("https://godlock.uk/AzielEliab"));
+    assert.ok((collection.relatedLink || []).includes("https://www.hedidntjump.com/"));
     assert.ok(ld["@graph"].some((n) => n["@type"] === "BreadcrumbList"));
     const list = ld["@graph"].find((n) => n["@type"] === "ItemList");
     assert.ok(list);
@@ -718,6 +728,7 @@ describe("Aziel Corpus Library off-site", () => {
   it("points the nav tab at the live library identity URL", () => {
     const nav = topNav("/");
     assert.match(nav, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab" class="aziel">Aziel Corpus Library<\/a>/);
+    assert.match(nav, /href="https:\/\/www\.hedidntjump\.com\/" class="aziel">He Didn't Jump<\/a>/);
     assert.doesNotMatch(nav, /href="\/AzielCorpusLibrary"/);
     assert.match(nav, /href="\/AzielEliab" class="aziel">Aziel Eliab<\/a>/);
   });
@@ -727,6 +738,7 @@ describe("Aziel Corpus Library off-site", () => {
     assert.equal(res.status, 200);
     const html = await res.text();
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab" class="aziel">Aziel Corpus Library<\/a>/);
+    assert.match(html, /href="https:\/\/www\.hedidntjump\.com\/" class="aziel">He Didn't Jump<\/a>/);
     assert.match(html, /href="\/AzielEliab" class="aziel">Aziel Eliab<\/a>/);
     assert.doesNotMatch(html, /<h1>About Aziel<\/h1>/);
     assert.doesNotMatch(html, /Who\? Does not matter\./);
@@ -1717,6 +1729,7 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.equal(person["@id"], "https://www.azieleliab.com/#aziel");
     assert.equal(person.url, "https://www.azieleliab.com/");
     assert.ok(person.sameAs.includes("https://godlock.uk/AzielEliab"));
+    assert.ok(person.sameAs.includes("https://www.hedidntjump.com/"));
     const stub = personLocalStub();
     assert.equal(stub["@id"], LOCAL_PERSON_STUB_ID);
     assert.equal(stub["@type"], undefined);
@@ -1768,6 +1781,7 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.deepEqual(links.map((l) => [l.label, l.href, !!l.secondary]), [
       ["Official site", "https://www.azieleliab.com/", false],
       ["Aziel Corpus Library", "https://www.azielcorpuslibrary.net/", false],
+      ["He Didn't Jump", "https://www.hedidntjump.com/", false],
       ["Aziel Runtime on GitHub", "https://github.com/AzielEliab/aziel-runtime", false],
       ["Aziel Runtime", "https://aziel-runtime.vibelock.workers.dev/", true],
       ["Try on Glama", "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime", false],
@@ -1776,6 +1790,7 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.match(eco, /Part of the Aziel Eliab ecosystem/);
     assert.match(eco, /href="https:\/\/www\.azieleliab\.com\/">Official site<\/a>/);
     assert.match(eco, /href="https:\/\/www\.azielcorpuslibrary\.net\/">Aziel Corpus Library<\/a>/);
+    assert.match(eco, /href="https:\/\/www\.hedidntjump\.com\/">He Didn't Jump<\/a>/);
     assert.match(eco, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Aziel Runtime on GitHub<\/a>/);
     assert.match(eco, /href="https:\/\/aziel-runtime\.vibelock\.workers\.dev\/" class="secondary">Aziel Runtime<\/a>/);
     assert.match(eco, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
@@ -1844,6 +1859,8 @@ describe("GodLock Softwares identity", () => {
     assert.doesNotMatch(html, /Downloadable software/);
     assert.doesNotMatch(html, /same completeness as the Digital Library/);
     assert.doesNotMatch(html, /matching Digital Library Software completeness/);
+    assert.match(html, /href="https:\/\/www\.hedidntjump\.com\/">He Didn't Jump<\/a>/);
+    assert.doesNotMatch(html, /<article class="soft-card[^"]*" id="hedidntjump"/);
     assert.doesNotMatch(html, /MASTER·WRITABLE/);
     assert.doesNotMatch(html, /Ask Jeeves/i);
     assert.doesNotMatch(html, /library search/i);

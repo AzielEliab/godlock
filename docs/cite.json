@@ -18,6 +18,8 @@
   "official_site": "https://www.azieleliab.com/",
   "library": "https://www.azielcorpuslibrary.net/",
   "library_aziel_eliab": "https://www.azielcorpuslibrary.net/AzielEliab",
+  "he_didnt_jump": "https://www.hedidntjump.com/",
+  "he_didnt_jump_note": "Sister archive door. An Aziel Eliab Project. Not a Softwares card. Identity Aziel Eliab only.",
   "site": "https://godlock.uk/",
   "github": "https://github.com/AzielEliab/godlock",
   "software": "https://godlock.uk/software",
@@ -35,6 +37,7 @@
   "ecosystem": [
     { "id": "official", "label": "Official site", "href": "https://www.azieleliab.com/" },
     { "id": "library", "label": "Aziel Corpus Library", "href": "https://www.azielcorpuslibrary.net/" },
+    { "id": "hedidntjump", "label": "He Didn't Jump", "href": "https://www.hedidntjump.com/" },
     { "id": "godlock", "label": "GodLock.uk", "href": "https://godlock.uk/" },
     { "id": "runtime-github", "label": "Aziel Runtime on GitHub", "href": "https://github.com/AzielEliab/aziel-runtime" },
     { "id": "runtime", "label": "Aziel Runtime", "href": "https://aziel-runtime.vibelock.workers.dev/", "secondary": true },

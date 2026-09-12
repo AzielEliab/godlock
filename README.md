@@ -13,10 +13,11 @@ It is **not** a VPN, ghost net, or anonymity tool.
 
 **Primary public site:** [https://godlock.uk](https://godlock.uk)
 
-Part of the **Aziel Eliab** ecosystem (official hub, sister library, this engine, runtime, kernel):
+Part of the **Aziel Eliab** ecosystem (official hub, sister library, sister archive, this engine, runtime, kernel):
 
 - **Official site:** https://www.azieleliab.com/
 - **Aziel Corpus Library:** https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
+- **He Didn't Jump:** https://www.hedidntjump.com/ — An Aziel Eliab Project (sister archive door, not a Softwares card)
 - **GodLock.uk (this engine):** https://godlock.uk
 - **Aziel Eliab on GodLock:** https://godlock.uk/AzielEliab
 - **Specified Fit (public reasoning):** https://godlock.uk/reason
@@ -145,6 +146,7 @@ No DOI is claimed. Do not invent one.
 - Suite mesh (QNM-BUILD-1.0, default off, live|locked|isolated counts only, not an anonymity network). QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in https://github.com/AzielEliab/qnm-node; runtime cites in https://github.com/AzielEliab/aziel-runtime; no public qnsd proxy): https://godlock.uk/runtime/v1/mesh
 - anon-broadcast is not a publish path on godlock.uk (local communique, not hosted here): https://github.com/AzielEliab/anon-broadcast
 - Aziel Corpus Library: https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
+- He Didn't Jump: https://www.hedidntjump.com/ — An Aziel Eliab Project (sister archive door)
 - Counted download / install: https://godlock-download-tracker.vibelock.workers.dev/
 - GitHub: https://github.com/AzielEliab/godlock
 - Live cite JSON: https://godlock.uk/cite.json

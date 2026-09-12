@@ -38,8 +38,9 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 - `/runtime` and `/runtime/*` same-origin Aziel Runtime door (service-bind or HTTPS proxy to aziel-runtime)
 - `/AzielEliab` public identity page (Aziel Eliab only); `/aziel-eliab`, `/about`, `/aboutme` 308 here
 - Public Person `@id` is the shared hub id `https://www.azieleliab.com/#aziel`. Author / creator / publisher references use that object. The local fragment `https://godlock.uk/AzielEliab#aziel-eliab` is a stub pointing at the hub, not a competing primary. WebSite stays `https://godlock.uk/#website`. GodLock SoftwareApplication stays `https://godlock.uk/#godlock` (author → Person `@id`; `isPartOf` the hub Runtime tool `https://www.azieleliab.com/runtime#godlock`). Runtime references use the hub parent `https://www.azieleliab.com/runtime#runtime` (sameAs GitHub + Glama only). No MCP op entities.
-- Footer/nav **Part of the Aziel Eliab ecosystem** (not between Softwares heading and list): Official site, Aziel Corpus Library, Aziel Runtime on GitHub, Aziel Runtime (secondary workers.dev), Try on Glama. Self-canonicals only — godlock.uk pages point at themselves.
+- Footer/nav **Part of the Aziel Eliab ecosystem** (not between Softwares heading and list): Official site, Aziel Corpus Library, He Didn't Jump (`https://www.hedidntjump.com/`), Aziel Runtime on GitHub, Aziel Runtime (secondary workers.dev), Try on Glama. Self-canonicals only — godlock.uk pages point at themselves.
 - Nav **Aziel Corpus Library** is an off-site link to `https://www.azielcorpuslibrary.net/AzielEliab`. `/AzielCorpusLibrary` (and kebab/case aliases) 308 there; godlock.uk does not host a library About mirror
+- Nav **He Didn't Jump** is an off-site sister door to `https://www.hedidntjump.com/`. Not a Softwares card. Identity Aziel Eliab only.
 - `/receipt/{id}` public if not isolated
 - `/health` JSON
 - `/robots.txt` `/sitemap.xml` `/cite.json` `/llms.txt` `/ai.txt` `/openapi.json` (each lists the `/runtime` door)

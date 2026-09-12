@@ -4,6 +4,7 @@
  */
 import {
   headMeta, documentTitle, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
+  HEDIDNTJUMP, HEDIDNTJUMP_LABEL,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
   DONATE_PATH, AI_CLIENTS_SENTENCE, runtimeDistribution, ecosystemLinks,
 } from "./seo.js";
@@ -158,6 +159,7 @@ export function navItems() {
     { href: DONATE_PATH, label: "Donate" },
     { href: AZIEL_ELIAB_PATH, label: "Aziel Eliab", aziel: true },
     { href: LIBRARY_AZIEL, label: "Aziel Corpus Library", aziel: true },
+    { href: HEDIDNTJUMP, label: HEDIDNTJUMP_LABEL, aziel: true },
   ];
 }
 
@@ -212,7 +214,7 @@ ${topNav(p)}
 ${ecosystemNav()}
 <div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
 ${body}
-<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
+<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
 ${ecosystemNav()}
 </footer>
 </div>
@@ -416,7 +418,7 @@ export function specifiedFitPublicHtml() {
 export function reasonBody() {
   return `<section class="about-aziel" id="specified-fit-brief"><div class="card about-prose">
 ${specifiedFitPublicHtml()}
-<p><a href="${esc(AZIEL_ELIAB_PATH)}">Aziel Eliab</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a></p>
+<p><a href="${esc(AZIEL_ELIAB_PATH)}">Aziel Eliab</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a></p>
 </div></section>`;
 }
 
@@ -432,7 +434,7 @@ export function azielEliabBody() {
 ${paras}
 <p class="about-sign">${esc(AZIEL_SIGNATURE)}</p>
 ${specifiedFitPublicHtml()}
-<p><a href="${esc(REASON_PATH)}">Specified Fit, Not Pretty Spirals</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a></p>
+<p><a href="${esc(REASON_PATH)}">Specified Fit, Not Pretty Spirals</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a></p>
 </div></section>`;
 }
 

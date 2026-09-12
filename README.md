@@ -6,22 +6,31 @@ It is **not** a VPN, ghost net, or anonymity tool.
 
 > GodLock does not argue. It records, analyzes, hardens, and grows.
 
+**Person `@id`:** [https://www.azieleliab.com/#aziel](https://www.azieleliab.com/#aziel)  
+**Runtime `@id`:** [https://www.azieleliab.com/runtime#runtime](https://www.azieleliab.com/runtime#runtime)
+
 ## Websites
 
 **Primary public site:** [https://godlock.uk](https://godlock.uk)
 
-- **GodLock.uk (public engine):** https://godlock.uk
+Part of the **Aziel Eliab** ecosystem (official hub, sister library, this engine, runtime, kernel):
+
+- **Official site:** https://www.azieleliab.com/
+- **Aziel Corpus Library:** https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
+- **GodLock.uk (this engine):** https://godlock.uk
 - **Aziel Eliab on GodLock:** https://godlock.uk/AzielEliab
 - **Specified Fit (public reasoning):** https://godlock.uk/reason
 - **Verify:** https://godlock.uk/verify
 - **Donate:** https://godlock.uk/donate — AZL-DONATE-1.0 (same door https://www.azieleliab.com/donate). Payment-URI QRs are solid black-on-white PNGs (`/donate/qr/{rail}.png`).
-- **Software catalog on GodLock:** https://godlock.uk/software — full live aziel-runtime suite plus aziel-runtime / FragGate (Worker, GitHub, `/runtime` FragGate/MCP; uses/download counters)
-- **Runtime (FragGate door):** https://godlock.uk/runtime — same-origin proxy of live Aziel Runtime **2.0.0-rc1**
-- **Aziel Corpus Library (sister site):** https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
-- **aziel-runtime:** https://aziel-runtime.vibelock.workers.dev/ — repo https://github.com/AzielEliab/aziel-runtime
+- **Softwares on GodLock:** https://godlock.uk/software — **GodLock-first** (Softwares heading → list). Suite doors available from GodLock, pulled from live aziel-runtime. Not a Digital Library Softwares page and **not** a claim that Softwares matches Digital Library completeness.
+- **Runtime (FragGate door):** https://godlock.uk/runtime — same-origin proxy of Aziel Runtime **2.0.0-rc1**. Prefer **Try on Glama** [https://glama.ai/mcp/servers/AzielEliab/aziel-runtime](https://glama.ai/mcp/servers/AzielEliab/aziel-runtime). Official Runtime Worker is secondary: https://aziel-runtime.vibelock.workers.dev/
+- **aziel-runtime (GitHub):** https://github.com/AzielEliab/aziel-runtime
+- **FragGate kernel (FG-0.1):** https://github.com/AzielEliab/fraggate
 
 Counted download / install (gzip HTTP 200, no 302) — **not** the primary website:
 https://godlock-download-tracker.vibelock.workers.dev/
+
+GitHub crawl aids (this repo, not a live Worker deploy): [docs/llms.txt](docs/llms.txt) · [docs/ai.txt](docs/ai.txt) · [docs/cite.json](docs/cite.json) · [CITATION.cff](CITATION.cff)
 
 **License:** [Apache-2.0](LICENSE)
 **GitHub:** [AzielEliab/godlock](https://github.com/AzielEliab/godlock)
@@ -94,9 +103,13 @@ Public engine and catalog live on godlock.uk and aziel-runtime — not on the do
 Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
 
 - Public engine: https://godlock.uk
-- Runtime door: https://godlock.uk/runtime
+- Softwares (GodLock-first heading → list): https://godlock.uk/software
+- Runtime door (2.0.0-rc1): https://godlock.uk/runtime
+- **Try on Glama:** https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
+- Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/
 - Catalog OpenAPI: https://godlock.uk/runtime/openapi.json
 - Catalog MCP: `POST https://godlock.uk/runtime/mcp`
+- FragGate kernel: https://github.com/AzielEliab/fraggate
 - Suite mesh (QNM-BUILD-1.0, default off; live|locked|isolated counts only; no Node Gate; no auto-heal). QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only (local qnsd in [qnm-node](https://github.com/AzielEliab/qnm-node); runtime cites in [aziel-runtime](https://github.com/AzielEliab/aziel-runtime); not a Softwares-tab product; no public qnsd proxy): `GET https://godlock.uk/v1/mesh/status` · `GET https://godlock.uk/v1/mesh` · `GET https://godlock.uk/runtime/v1/mesh/status` · `GET https://godlock.uk/runtime/v1/mesh/nodes` · snapshot `GET https://godlock.uk/mesh` · GET never enables · MCP/FragGate `POST https://godlock.uk/runtime/v1/mesh/{join|heartbeat|leave|enable|disable}`
 - anon-broadcast is not a publish path on godlock.uk. Local communique style tool (not hosted on the Worker; no ffmpeg farm): https://github.com/AzielEliab/anon-broadcast
 
@@ -112,23 +125,30 @@ POST `/v1/score` `{text}` and POST `/v1/submit` `{text}` (ephemeral, no durable 
 
 Aziel Eliab. GodLock. https://godlock.uk. https://github.com/AzielEliab/godlock.
 
+Person `@id` https://www.azieleliab.com/#aziel. Runtime `@id` https://www.azieleliab.com/runtime#runtime. Identity **Aziel Eliab** only.
+
 No DOI is claimed. Do not invent one.
 
+- Official site: https://www.azieleliab.com/
 - Public engine: https://godlock.uk (fallback https://godlock-uk.vibelock.workers.dev)
 - Aziel Eliab on GodLock: https://godlock.uk/AzielEliab
 - Specified Fit: https://godlock.uk/reason
 - Verify: https://godlock.uk/verify
 - Donate: https://godlock.uk/donate (AZL-DONATE-1.0; same door https://www.azieleliab.com/donate)
-- Software catalog on GodLock: https://godlock.uk/software
-- Runtime door: https://godlock.uk/runtime (library https://www.azielcorpuslibrary.net/runtime · origin https://aziel-runtime.vibelock.workers.dev/)
+- Softwares on GodLock: https://godlock.uk/software — GodLock-first (heading → list). Suite doors from GodLock. Not Digital Library completeness.
+- Runtime door: https://godlock.uk/runtime — Aziel Runtime **2.0.0-rc1**
+- Try on Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
+- Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/
+- aziel-runtime GitHub: https://github.com/AzielEliab/aziel-runtime
+- FragGate kernel: https://github.com/AzielEliab/fraggate
 - Runtime API uses (this door, not GodLock product Uses): https://godlock.uk/runtime/v1/uses
 - Suite mesh (QNM-BUILD-1.0, default off, live|locked|isolated counts only, not an anonymity network). QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in https://github.com/AzielEliab/qnm-node; runtime cites in https://github.com/AzielEliab/aziel-runtime; no public qnsd proxy): https://godlock.uk/runtime/v1/mesh
 - anon-broadcast is not a publish path on godlock.uk (local communique, not hosted here): https://github.com/AzielEliab/anon-broadcast
 - Aziel Corpus Library: https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
-- aziel-runtime: https://aziel-runtime.vibelock.workers.dev/ — https://github.com/AzielEliab/aziel-runtime
 - Counted download / install: https://godlock-download-tracker.vibelock.workers.dev/
 - GitHub: https://github.com/AzielEliab/godlock
-- Citation JSON: https://godlock.uk/cite.json
+- Live cite JSON: https://godlock.uk/cite.json
+- Repo crawl aids: [docs/cite.json](docs/cite.json) · [docs/llms.txt](docs/llms.txt) · [CITATION.cff](CITATION.cff)
 
 ## License
 

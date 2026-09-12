@@ -116,6 +116,8 @@ This Worker also hosts the product runtime API (CORS `*`). `/v1` routes do **not
 
 Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
 
+Identity **Aziel Eliab** only. Person `@id` https://www.azieleliab.com/#aziel. Runtime `@id` https://www.azieleliab.com/runtime#runtime. Prefer [Try on Glama](https://glama.ai/mcp/servers/AzielEliab/aziel-runtime). Official Runtime Worker is secondary. FragGate kernel: https://github.com/AzielEliab/fraggate. Repo crawl aids: [`docs/llms.txt`](../../docs/llms.txt), [`docs/cite.json`](../../docs/cite.json).
+
 | Method | Path | Notes |
 |--------|------|-------|
 | GET | `/v1/health` | Liveness |

@@ -10,6 +10,8 @@ Every submission is hash-chained into an append-only ledger. Isolated gibberish 
 
 **This is a public HTTPS bootstrap surface.** Suite mesh is **QNM-BUILD-1.0**: opt-in on the runtime door (`/runtime/v1/mesh/*`) and **default off** until operator/runtime enable. Public rollup is **live|locked|isolated counts only**. No Node Gate. No auto-heal. Not an anonymity network. **QNS-CD-1.0** (photon QNS1 packet transfer) is a hub cite / Worker mesh cross-map only — local qnsd in [qnm-node](https://github.com/AzielEliab/qnm-node), runtime cites in [aziel-runtime](https://github.com/AzielEliab/aziel-runtime), pair custody on [AZInterface](https://github.com/AzielEliab/azinterface). Not a Softwares-tab product. No public qnsd proxy. No Cloudflare Tunnel. Author: **Aziel Eliab**.
 
+GitHub-side crawl aids (this repo; not a live Worker deploy): [`docs/llms.txt`](../../docs/llms.txt), [`docs/ai.txt`](../../docs/ai.txt), [`docs/cite.json`](../../docs/cite.json), [`CITATION.cff`](../../CITATION.cff). Person `@id` https://www.azieleliab.com/#aziel. Runtime `@id` https://www.azieleliab.com/runtime#runtime. Softwares is GodLock-first (heading → list), not Digital Library completeness. Runtime **2.0.0-rc1**. Prefer [Try on Glama](https://glama.ai/mcp/servers/AzielEliab/aziel-runtime). Official Runtime Worker is secondary. FragGate kernel: https://github.com/AzielEliab/fraggate.
+
 GodLock is a product name, not an identity.
 
 Counted download: https://godlock-download-tracker.vibelock.workers.dev/download

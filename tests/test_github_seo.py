@@ -27,6 +27,7 @@ REQUIRED_IDS = (
 REQUIRED_LINKS = (
     "https://www.azieleliab.com/",
     "https://www.azielcorpuslibrary.net/",
+    "https://www.hedidntjump.com/",
     "https://godlock.uk",
     "https://github.com/AzielEliab/aziel-runtime",
     "https://aziel-runtime.vibelock.workers.dev/",
@@ -109,9 +110,11 @@ def test_cite_json_graph():
     assert CITE["doi"] is None
     assert "GodLock-first" in CITE["software_note"]
     assert "Digital Library completeness" in CITE["software_note"]
+    assert CITE["he_didnt_jump"] == "https://www.hedidntjump.com/"
     hrefs = {row["href"] for row in CITE["ecosystem"]}
     assert "https://www.azieleliab.com/" in hrefs
     assert "https://www.azielcorpuslibrary.net/" in hrefs
+    assert "https://www.hedidntjump.com/" in hrefs
     assert "https://godlock.uk/" in hrefs
     assert "https://github.com/AzielEliab/aziel-runtime" in hrefs
     assert "https://aziel-runtime.vibelock.workers.dev/" in hrefs
@@ -123,6 +126,7 @@ def test_pyproject_discovery_urls():
     assert 'Homepage = "https://godlock.uk"' in PYPROJECT
     assert "https://www.azieleliab.com/" in PYPROJECT
     assert "https://www.azielcorpuslibrary.net/" in PYPROJECT
+    assert "https://www.hedidntjump.com/" in PYPROJECT
     assert "https://github.com/AzielEliab/aziel-runtime" in PYPROJECT
     assert "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime" in PYPROJECT
     assert "https://github.com/AzielEliab/fraggate" in PYPROJECT

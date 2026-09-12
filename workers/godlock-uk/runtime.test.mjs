@@ -103,6 +103,7 @@ describe("runtime path mapping", () => {
     assert.match(html, />Try on Glama</);
     assert.match(html, /Part of the Aziel Eliab ecosystem/);
     assert.match(html, /href="https:\/\/www\.azieleliab\.com\/"[^>]*>Official site</);
+    assert.match(html, /href="https:\/\/www\.hedidntjump\.com\/"[^>]*>He Didn't Jump</);
     assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime"[^>]*>Try on Glama</);
     assert.match(html, />Documentation\/Architecture</);
     assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime"[^>]*>Try on Glama</);

@@ -7,6 +7,7 @@ Person @id: https://www.azieleliab.com/#aziel
 Runtime @id: https://www.azieleliab.com/runtime#runtime
 Official site: https://www.azieleliab.com/
 Aziel Corpus Library: https://www.azielcorpuslibrary.net/
+He Didn't Jump: https://www.hedidntjump.com/
 GodLock.uk: https://godlock.uk/
 aziel-runtime GitHub: https://github.com/AzielEliab/aziel-runtime
 Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/

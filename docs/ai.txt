@@ -1,0 +1,22 @@
+# GodLock — AI / assistant crawl aid
+
+Alias of docs/llms.txt (same facts). Live alias: https://godlock.uk/ai.txt
+
+Author: Aziel Eliab only
+Person @id: https://www.azieleliab.com/#aziel
+Runtime @id: https://www.azieleliab.com/runtime#runtime
+Official site: https://www.azieleliab.com/
+Aziel Corpus Library: https://www.azielcorpuslibrary.net/
+GodLock.uk: https://godlock.uk/
+aziel-runtime GitHub: https://github.com/AzielEliab/aziel-runtime
+Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/
+Try on Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
+FragGate kernel: https://github.com/AzielEliab/fraggate
+GitHub: https://github.com/AzielEliab/godlock
+
+GodLock Softwares is GodLock-first (heading → list). Not Digital Library completeness.
+Runtime cite: 2.0.0-rc1. Prefer Try on Glama. Worker is secondary.
+
+Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
+
+See docs/llms.txt for the full brief.

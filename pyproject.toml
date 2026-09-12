@@ -13,6 +13,8 @@ authors = [
 ]
 requires-python = ">=3.10"
 keywords = [
+    "godlock",
+    "aziel-eliab",
     "specified-fit",
     "resilience",
     "receipts",
@@ -20,6 +22,10 @@ keywords = [
     "lumen",
     "miragegrid",
     "stress-test",
+    "mcp",
+    "fraggate",
+    "aziel-runtime",
+    "openapi",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -50,8 +56,14 @@ dev = [
 godlock = "godlock.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/AzielEliab/godlock"
-Download = "https://github.com/AzielEliab/godlock/releases"
+Homepage = "https://godlock.uk"
+Repository = "https://github.com/AzielEliab/godlock"
+Official = "https://www.azieleliab.com/"
+Library = "https://www.azielcorpuslibrary.net/"
+Runtime = "https://github.com/AzielEliab/aziel-runtime"
+Glama = "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime"
+FragGate = "https://github.com/AzielEliab/fraggate"
+Download = "https://godlock-download-tracker.vibelock.workers.dev/"
 Issues = "https://github.com/AzielEliab/godlock/issues"
 
 [tool.setuptools.packages.find]

@@ -1,0 +1,27 @@
+{
+  "name": "godlock",
+  "homepage": "https://godlock.uk",
+  "description": "GodLock.uk Specified Fit stress-test engine + localhost receipts. Softwares is GodLock-first. Aziel Runtime 2.0.0-rc1 (Try on Glama). Author: Aziel Eliab.",
+  "topics": [
+    "godlock",
+    "aziel-eliab",
+    "specified-fit",
+    "apache-2-0",
+    "cloudflare-workers",
+    "mcp",
+    "model-context-protocol",
+    "openapi",
+    "python",
+    "website",
+    "fraggate",
+    "aziel-runtime",
+    "chatgpt",
+    "glama",
+    "claude",
+    "grok",
+    "stress-test",
+    "resilience",
+    "receipts",
+    "ai-agents"
+  ]
+}

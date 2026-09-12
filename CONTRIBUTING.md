@@ -6,6 +6,13 @@ if you want a change upstream. Keep a fork forever if you do not.
 
 **Forks are welcome and always allowed.**
 
+Public identity is **Aziel Eliab** only. Person `@id`
+https://www.azieleliab.com/#aziel. Runtime `@id`
+https://www.azieleliab.com/runtime#runtime. Softwares on godlock.uk is
+GodLock-first (heading → list), not a Digital Library completeness
+claim. Runtime cite is **2.0.0-rc1**; prefer Try on Glama
+https://glama.ai/mcp/servers/AzielEliab/aziel-runtime.
+
 ## How to run tests
 
 ```bash

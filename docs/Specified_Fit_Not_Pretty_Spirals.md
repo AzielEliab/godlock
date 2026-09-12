@@ -129,7 +129,7 @@ Engagement tokens (φ, √2, Flower of Life, corkscrew, Aziel Sequence, leftover
 
 Pretty ratios and spirals are not a design proof. Treat spiral-to-God or phi-as-physics claims as weak / category error. Treat code+reader challenges as the steel class.
 
-Public identity: **Aziel Eliab** only.
+Public identity: **Aziel Eliab** only. Person `@id` https://www.azieleliab.com/#aziel.
 
 ---
 
@@ -139,3 +139,7 @@ Eliab, Aziel. (2026). *Specified Fit, Not Pretty Spirals*. GodLock. https://godl
 
 In-repo: `docs/Specified_Fit_Not_Pretty_Spirals.md`  
 Site: https://godlock.uk · https://godlock.uk/reason · https://godlock.uk/AzielEliab
+
+Ecosystem: https://www.azieleliab.com/ · https://www.azielcorpuslibrary.net/ · https://github.com/AzielEliab/aziel-runtime · https://github.com/AzielEliab/fraggate  
+Runtime `@id` https://www.azieleliab.com/runtime#runtime · Try on Glama https://glama.ai/mcp/servers/AzielEliab/aziel-runtime  
+Repo crawl aids: `docs/llms.txt` · `docs/cite.json` · `CITATION.cff`

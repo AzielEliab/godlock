@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "Cite GodLock as below. Identity is Aziel Eliab only. Do not invent a DOI."
+title: GodLock
+abstract: >-
+  GodLock.uk public HTTPS Specified Fit stress-test engine and localhost
+  receipts tool. Softwares is GodLock-first (heading then list), not a Digital
+  Library clone. Runtime cite 2.0.0-rc1 via FragGate. Prefer Try on Glama.
+  Official Runtime Worker is secondary.
+type: software
+authors:
+  - family-names: Eliab
+    given-names: Aziel
+    website: https://www.azieleliab.com/
+license: Apache-2.0
+repository-code: https://github.com/AzielEliab/godlock
+url: https://godlock.uk
+keywords:
+  - GodLock
+  - Aziel Eliab
+  - Specified Fit
+  - FragGate
+  - aziel-runtime
+  - MCP
+  - OpenAPI
+preferred-citation:
+  type: software
+  authors:
+    - family-names: Eliab
+      given-names: Aziel
+  title: GodLock
+  year: 2026
+  url: https://godlock.uk
+  notes: >-
+    Person @id https://www.azieleliab.com/#aziel.
+    Runtime @id https://www.azieleliab.com/runtime#runtime.
+    Try on Glama https://glama.ai/mcp/servers/AzielEliab/aziel-runtime.
+    FragGate kernel https://github.com/AzielEliab/fraggate.

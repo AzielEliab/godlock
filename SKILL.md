@@ -9,6 +9,14 @@ GodLock is a product name (Specified Fit stress-test and resilience engine). Not
 
 **Identity:** Aziel Eliab only. GodLock is a **product name**, not an identity label.
 
+**Person `@id`:** https://www.azieleliab.com/#aziel  
+**Runtime `@id`:** https://www.azieleliab.com/runtime#runtime  
+**Official site:** https://www.azieleliab.com/  
+**GodLock.uk:** https://godlock.uk/  
+**Aziel Corpus Library:** https://www.azielcorpuslibrary.net/  
+**aziel-runtime GitHub:** https://github.com/AzielEliab/aziel-runtime  
+**FragGate kernel:** https://github.com/AzielEliab/fraggate (FG-0.1)
+
 Always send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent.
 
 ## How to use (3 steps)
@@ -22,8 +30,10 @@ Always send `User-Agent: Mozilla/5.0`. Cloudflare Workers may 403 an empty agent
 ## Call these URLs
 
 - Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json
-- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
-- MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`
+- Catalog OpenAPI: https://godlock.uk/runtime/openapi.json
+- MCP: `POST https://godlock.uk/runtime/mcp`
+- **Try on Glama:** https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
+- Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/ — OpenAPI `/openapi.json`, MCP `POST /mcp`
 - Live skill (this markdown): `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`
 
 Ops (do **not** increment downloads or views):
@@ -55,9 +65,13 @@ GitHub: https://github.com/AzielEliab/godlock
 
 Author: **Aziel Eliab**. Honest scope: Offline Specified Fit / GodLock score. Not a VPN and not an anonymity network. GodLock is a product name. Public reasoning: Specified Fit, Not Pretty Spirals.
 
+- GodLock Softwares (GodLock-first heading → list; not Digital Library completeness): https://godlock.uk/software
+- Runtime **2.0.0-rc1** door: https://godlock.uk/runtime
+- Try on Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
 - Catalog product: https://aziel-runtime.vibelock.workers.dev/p/godlock/
-- Catalog OpenAPI: https://aziel-runtime.vibelock.workers.dev/openapi.json
-- Catalog MCP: `POST https://aziel-runtime.vibelock.workers.dev/mcp`
+- Catalog OpenAPI: https://godlock.uk/runtime/openapi.json
+- Catalog MCP: `POST https://godlock.uk/runtime/mcp`
+- Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/
 - This Worker skill: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/skill`
 - This Worker OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json
 - Sample payload: `GET https://godlock-download-tracker.vibelock.workers.dev/v1/example`

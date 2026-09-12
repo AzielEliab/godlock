@@ -12,6 +12,7 @@ import {
   azielEliabBody,
   azielEliabText,
   page,
+  brandRow,
   topNav,
   ecosystemNav,
   CSS,
@@ -54,6 +55,9 @@ import {
   GLAMA_RUNTIME,
   RUNTIME_DOCS_2_0,
   GITHUB_RUNTIME,
+  BRAND_MARK,
+  BRAND_MARK_PATH,
+  BRAND_MARK_ALT,
 } from "./src/seo.js";
 import worker, { publicPayload } from "./src/index.js";
 import {
@@ -159,6 +163,34 @@ describe("Aziel Eliab page chrome", () => {
     );
     assert.match(CSS, /--royal:#6b3fa0/);
     assert.match(CSS, /--royal-deep:#4a2870/);
+    assert.match(CSS, /\.brandmark\{width:40px;height:40px/);
+  });
+
+  it("puts the rose-star brand mark top-left and scrubs everblooming-sigil wording", () => {
+    assert.equal(BRAND_MARK_PATH, "/sigil.png");
+    assert.equal(BRAND_MARK, "https://godlock.uk/sigil.png");
+    assert.equal(BRAND_MARK_ALT, "Aziel Eliab rose-star brand mark. Author Aziel Eliab.");
+    assert.match(
+      brandRow(),
+      /<img class="brandmark" src="\/sigil\.png" width="40" height="40" alt="" decoding="async" fetchpriority="high"><div class="brand">GodLock<\/div>/,
+    );
+    const html = page("GodLock", "<p>body</p>", { path: "/", kind: "home" });
+    const markAt = html.indexOf('class="brandmark"');
+    const brandAt = html.indexOf('class="brand"');
+    const navAt = html.indexOf('class="nav2"');
+    assert.ok(markAt > 0 && markAt < brandAt && brandAt < navAt);
+    assert.match(html, /rel="preload" href="\/sigil\.png" as="image" fetchpriority="high"/);
+    assert.match(html, /rel="icon" href="\/sigil\.png" type="image\/png"/);
+    assert.match(html, /property="og:image" content="https:\/\/godlock\.uk\/sigil\.png"/);
+    assert.match(html, /property="og:image:alt" content="Aziel Eliab rose-star brand mark\. Author Aziel Eliab\."/);
+    assert.match(html, /name="twitter:image:alt" content="Aziel Eliab rose-star brand mark\. Author Aziel Eliab\."/);
+    assert.doesNotMatch(html, /everblooming/i);
+    assert.doesNotMatch(html, /Aziel Eliab sigil/);
+    assert.match(html, /Author Aziel Eliab/);
+    const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    const person = ld["@graph"].find((n) => n["@type"] === "Person");
+    assert.equal(person.name, "Aziel Eliab");
+    assert.equal(person.image, BRAND_MARK);
   });
 
   it("renders crawlable manifesto HTML with a Digital Library cross-link", () => {
@@ -617,7 +649,7 @@ describe("priority page SEO", () => {
     assert.ok((list.itemListElement || []).some((it) => it.url === "https://godlock.uk/software#fraggate"));
     assert.ok((list.itemListElement || []).some((it) => it.item && it.item["@type"] === "SoftwareApplication" && it.item.identifier === "godlock"));
     assert.match(html, /<h2 class="soft-heading">Softwares<\/h2>/);
-    assert.match(html, /<div class="brand">GodLock<\/div><span class="pill">HTTPS engine<\/span>/);
+    assert.match(html, /<img class="brandmark" src="\/sigil\.png" width="40" height="40" alt="" decoding="async" fetchpriority="high"><div class="brand">GodLock<\/div><span class="pill">HTTPS engine<\/span>/);
     assert.doesNotMatch(html, /Downloadable software/);
     assert.doesNotMatch(html, /MASTER·WRITABLE|Ask Jeeves|library search/i);
     assert.doesNotMatch(html, /same completeness as the Digital Library/);
@@ -1862,7 +1894,7 @@ describe("GodLock Softwares identity", () => {
     assert.deepEqual(pageCards.slice(0, 3).map((p) => p.slug), ["godlock", "aziel-runtime", "fraggate"]);
     const html = page("Softwares", softwareBody({ products: CATALOG_FALLBACK_PRODUCTS }), { path: "/software", kind: "software" });
     assert.match(html, /<title>GodLock Softwares<\/title>/);
-    assert.match(html, /<div class="brand">GodLock<\/div><span class="pill">HTTPS engine<\/span>/);
+    assert.match(html, /<img class="brandmark" src="\/sigil\.png" width="40" height="40" alt="" decoding="async" fetchpriority="high"><div class="brand">GodLock<\/div><span class="pill">HTTPS engine<\/span>/);
     assert.match(html, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.equal(softCardIds(html)[0], "godlock");
     assert.match(html, /<article class="soft-card featured" id="godlock"/);
@@ -1871,6 +1903,7 @@ describe("GodLock Softwares identity", () => {
     assert.doesNotMatch(html, /Downloadable software/);
     assert.doesNotMatch(html, /same completeness as the Digital Library/);
     assert.doesNotMatch(html, /matching Digital Library Software completeness/);
+    assert.doesNotMatch(html, /everblooming/i);
     assert.match(html, /href="https:\/\/www\.hedidntjump\.com\/">He Didn't Jump<\/a>/);
     assert.doesNotMatch(html, /<article class="soft-card[^"]*" id="hedidntjump"/);
     assert.doesNotMatch(html, /MASTER·WRITABLE/);

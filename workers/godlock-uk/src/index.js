@@ -1,7 +1,7 @@
 /**
  * GodLock.uk public HTTPS stress-test engine (Cloudflare Worker).
  * One input. Locked protocol. Append-only hash-chained receipts.
- * Not a forum, not a tunnel. Suite mesh is QNM-BUILD-1.0 (default OFF):
+ * Not a forum, not a tunnel. Suite mesh is QNM-BUILD-1.0 (read-only, on):
  * live|locked|isolated counts only. No Node Gate. No auto-heal.
  * Not an anonymity network. Author: Aziel Eliab.
  */
@@ -39,8 +39,11 @@ import {
   publicMesh,
   meshOpsDoc,
   isOriginMeshReadPath,
+  isMeshDisablePath,
   originMeshWriteRefused,
+  meshDisableRefused,
   hubMeshStatusDoc,
+  alignPublicMeshSurface,
 } from "./mesh.js";
 
 const TEXT_MAX = 8000;
@@ -535,6 +538,10 @@ export default {
         }, 200, extraHeadersFor(nodeId));
       }
 
+      if (isMeshDisablePath(path)) {
+        return json(meshDisableRefused(), 405, extraHeadersFor(nodeId));
+      }
+
       if (isOriginMeshReadPath(path)) {
         if (request.method !== "GET" && request.method !== "HEAD") {
           return json(originMeshWriteRefused(), 405, extraHeadersFor(nodeId));
@@ -551,14 +558,14 @@ export default {
           if (proxied && proxied.status >= 200 && proxied.status < 400) {
             return proxied;
           }
-        } catch { /* remain-OFF local snapshot; GET never enables */ }
+        } catch { /* read-only local snapshot; GET never enables */ }
         const stats = await gatherStats(env, { wrote });
         return json(hubMeshStatusDoc(stats, path), 200, extraHeadersFor(nodeId));
       }
 
       if (path === "/mesh") {
         const stats = await gatherStats(env, { wrote });
-        return json({
+        return json(alignPublicMeshSurface({
           ok: true,
           product: "GodLock",
           site: "godlock.uk",
@@ -567,14 +574,17 @@ export default {
           ...meshOpsDoc(),
           spec: "QNM-BUILD-1.0",
           anonymity_network: false,
-          default_off: true,
+          default_off: false,
+          mesh_default: "on",
+          readonly: true,
+          mesh_readonly: true,
           node_gate: false,
           auto_heal: false,
           live_nodes: stats.live_nodes,
           rollup: stats.mesh && stats.mesh.rollup ? stats.mesh.rollup : { live: 0, locked: 0, isolated: 0 },
           site_live_nodes: stats.site_live_nodes,
           mesh: stats.mesh,
-        }, 200, extraHeadersFor(nodeId));
+        }), 200, extraHeadersFor(nodeId));
       }
 
       if (path === "/heartbeat" && request.method === "POST") {

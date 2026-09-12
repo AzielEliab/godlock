@@ -1,7 +1,8 @@
 /**
  * Suite mesh client aligned to QNM-BUILD-1.0.
  * Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal.
- * Default OFF until operator/runtime enable. Not an anonymity network.
+ * Read-only suite presence ON. This Worker has no mesh-off function.
+ * Not an anonymity network.
  * QNS-CD-1.0 is a hub cite / Worker mesh cross-map only (photon QNS1
  * packet transfer). Local qnsd lives in qnm-node. This Worker does not
  * implement qnsd and does not expose a public qnsd proxy.
@@ -15,7 +16,9 @@ export const QNS_CD_SPEC = "QNS-CD-1.0";
 export const QNS_CD_NAME = "photon QNS1 packet transfer";
 export const QNM_NODE = "https://github.com/AzielEliab/qnm-node";
 export const AZINTERFACE = "https://github.com/AzielEliab/azinterface";
-export const MESH_DEFAULT_OFF = true;
+export const MESH_DEFAULT = "on";
+export const MESH_DEFAULT_OFF = false;
+export const MESH_READONLY = true;
 export const MESH_ANONYMITY_NETWORK = false;
 export const MESH_NODE_GATE = false;
 export const MESH_AUTO_HEAL = false;
@@ -50,9 +53,8 @@ export const QNS_CD = Object.freeze({
 });
 
 export const MESH_NOTE =
-  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in qnm-node; no public proxy). Suite mesh default off. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network.";
-export const MESH_NOTE_ON =
-  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in qnm-node; no public proxy). Suite mesh is on. Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network.";
+  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in qnm-node; no public proxy). Suite mesh is on (read-only suite presence). Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network.";
+export const MESH_NOTE_ON = MESH_NOTE;
 
 export const MESH_PATH = "/v1/mesh";
 export const MESH_STATUS_PATH = "/v1/mesh/status";
@@ -68,11 +70,44 @@ export const MESH_LIST_PATH = MESH_NODES_PATH;
 export const MESH_READ_PATHS = [MESH_STATUS_PATH, MESH_NODES_PATH, MESH_PATH];
 /** Same-origin apex proxies for Live Nodes clients (parity with azieleliab.com / corpus). GET only. */
 export const ORIGIN_MESH_READ_PATHS = [MESH_PATH, MESH_STATUS_PATH];
-export const MESH_OPS = ["status", "nodes", "join", "heartbeat", "leave", "enable", "disable"];
+/** Public write ops on the runtime door. disable is not a function on this Worker. */
+export const MESH_OPS = ["status", "nodes", "join", "heartbeat", "leave", "enable"];
 
 export function isOriginMeshReadPath(pathname) {
   const p = String(pathname || "").replace(/\/+$/, "") || "/";
   return ORIGIN_MESH_READ_PATHS.includes(p);
+}
+
+/** Apex or same-origin runtime mesh JSON that must present as read-only ON. */
+export function isPublicMeshJsonPath(pathname) {
+  const raw = String(pathname || "").replace(/\/+$/, "") || "/";
+  const p = raw.startsWith(RUNTIME_PATH + "/") ? raw.slice(RUNTIME_PATH.length) : raw;
+  return MESH_READ_PATHS.includes(p);
+}
+
+export function isMeshDisablePath(pathname) {
+  const p = String(pathname || "").replace(/\/+$/, "") || "/";
+  return p === MESH_DISABLE_PATH || p === RUNTIME_PATH + MESH_DISABLE_PATH;
+}
+
+export function meshDisableRefused() {
+  return {
+    ok: false,
+    error: "mesh-off is not a function on this Worker",
+    code: "MESH-NO-DISABLE",
+    mesh_default: MESH_DEFAULT,
+    default: MESH_DEFAULT,
+    default_off: false,
+    readonly: true,
+    mesh_readonly: true,
+    enabled: true,
+    get_never_enables: true,
+    author: AUTHOR,
+    identity: AUTHOR,
+    spec: QNM_SPEC,
+    note: "GodLock.uk presents read-only QNM suite presence. This Worker has no path that turns suite presence off.",
+    door: PUBLIC_MESH,
+  };
 }
 
 export function originMeshWriteRefused() {
@@ -80,16 +115,69 @@ export function originMeshWriteRefused() {
     ok: false,
     error: "method not allowed",
     get_never_enables: true,
-    default_off: true,
-    default: "off",
+    default_off: false,
+    default: MESH_DEFAULT,
+    mesh_default: MESH_DEFAULT,
+    readonly: true,
+    mesh_readonly: true,
     enabled: false,
     author: AUTHOR,
     identity: AUTHOR,
     spec: QNM_SPEC,
-    note: "GET never enables. Remain-OFF. Enable/join/leave stay on /runtime/v1/mesh/{enable|join|leave}.",
+    note: "GET never enables. Read-only suite presence. This Worker has no mesh-off function.",
     door: PUBLIC_MESH,
-    enable: PUBLIC_MESH_ENABLE,
   };
+}
+
+export function scrubMeshOffCopy(text) {
+  return String(text == null ? "" : text)
+    .replace(/Suite mesh default off/gi, "Suite mesh is on (read-only suite presence)")
+    .replace(/suite mesh \(default off\)/gi, "suite mesh (read-only, on)")
+    .replace(/\bdefault off\b/gi, "read-only, on")
+    .replace(/Remain-OFF\.?\s*/gi, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .trim();
+}
+
+export function alignPublicMeshSurface(doc) {
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) return doc;
+  const out = { ...doc };
+  delete out.mesh_default_off;
+  delete out.disable;
+  out.mesh_default = MESH_DEFAULT;
+  out.default = MESH_DEFAULT;
+  out.default_off = false;
+  out.readonly = true;
+  out.mesh_readonly = true;
+  if (out.mesh === "off") out.mesh = "on";
+  if (typeof out.note === "string") out.note = scrubMeshOffCopy(out.note);
+  if (typeof out.limitation === "string") out.limitation = scrubMeshOffCopy(out.limitation);
+  if (Array.isArray(out.ops)) {
+    out.ops = out.ops.filter((op) => String(op) !== "disable");
+  }
+  if (out.display && typeof out.display === "object" && !Array.isArray(out.display)) {
+    const display = { ...out.display };
+    if (typeof display.summary === "string") display.summary = scrubMeshOffCopy(display.summary);
+    if (Array.isArray(display.fields)) {
+      display.fields = display.fields.map((field) => {
+        if (!field || typeof field !== "object") return field;
+        const next = { ...field };
+        const label = String(next.label || "").toLowerCase();
+        if (label === "mesh default" || label === "default" || label === "mesh_default") {
+          next.value = MESH_DEFAULT;
+        } else if (typeof next.value === "string") {
+          next.value = scrubMeshOffCopy(next.value);
+        }
+        return next;
+      });
+    }
+    out.display = display;
+  }
+  if (out.mesh && typeof out.mesh === "object" && !Array.isArray(out.mesh)) {
+    out.mesh = alignPublicMeshSurface(out.mesh);
+  }
+  return out;
 }
 
 export const PUBLIC_MESH = PUBLIC_RUNTIME + MESH_PATH;
@@ -203,9 +291,12 @@ export function emptyMesh(extra = {}) {
     ok: true,
     spec: QNM_SPEC,
     enabled: false,
-    default_off: true,
+    default_off: false,
+    mesh_default: MESH_DEFAULT,
+    readonly: true,
+    mesh_readonly: true,
     live_nodes: 0,
-    status: extra.status || "off",
+    status: extra.status || "unavailable",
     source: extra.source || "fallback",
     node_gate: false,
     auto_heal: false,
@@ -260,20 +351,23 @@ export function parseMeshDoc(body) {
   const unavailable = inner.ok === false
     && !enabled
     && (inner.error || inner.status === "unavailable" || inner.status === "not_found");
-  const status = enabled ? "on" : (unavailable ? "unavailable" : "off");
+  const status = enabled ? "on" : "unavailable";
   const live = enabled ? rollup.live : 0;
   const locked = enabled ? rollup.locked : 0;
   const isolated = enabled ? rollup.isolated : 0;
   return emptyMesh({
     ok: inner.ok !== false,
     enabled,
-    default_off: inner.default_off !== false,
+    default_off: false,
+    mesh_default: MESH_DEFAULT,
+    readonly: true,
+    mesh_readonly: true,
     live_nodes: live,
     rollup: { live, locked, isolated },
     status,
     source: inner.source || "parsed",
     door: inner.door || PUBLIC_MESH,
-    note: enabled ? MESH_NOTE_ON : MESH_NOTE,
+    note: MESH_NOTE,
   });
 }
 
@@ -284,10 +378,13 @@ export function publicMesh(mesh) {
   return {
     spec: QNM_SPEC,
     enabled,
-    default_off: m.default_off !== false,
+    default_off: false,
+    mesh_default: MESH_DEFAULT,
+    readonly: true,
+    mesh_readonly: true,
     live_nodes: enabled ? rollup.live : 0,
     rollup,
-    status: enabled ? "on" : (m.status === "unavailable" ? "unavailable" : "off"),
+    status: enabled ? "on" : "unavailable",
     source: m.source || "fallback",
     node_gate: false,
     auto_heal: false,
@@ -301,12 +398,11 @@ export function publicMesh(mesh) {
     heartbeat: PUBLIC_MESH_HEARTBEAT,
     leave: PUBLIC_MESH_LEAVE,
     enable: PUBLIC_MESH_ENABLE,
-    disable: PUBLIC_MESH_DISABLE,
     mcp: RUNTIME_PATH + "/mcp",
     fraggate: RUNTIME_PATH + "/v1/fraggate/call",
     ops: MESH_OPS.slice(),
     qns_cd: QNS_CD,
-    note: m.note || MESH_NOTE,
+    note: scrubMeshOffCopy(m.note || MESH_NOTE),
   };
 }
 
@@ -317,9 +413,9 @@ export function meshStatusLine(mesh) {
     return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated + ". QNS-CD-1.0. Not an anonymity network.";
   }
   if (m.status === "unavailable") {
-    return "Suite mesh: off (unavailable). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
+    return "Suite mesh: on (read-only suite presence). Rollup unavailable. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
   }
-  return "Suite mesh: off (default). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
+  return "Suite mesh: on (read-only suite presence). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
 }
 
 /**
@@ -461,8 +557,8 @@ export async function fetchMeshSnapshot(env, deps = {}) {
 }
 
 /**
- * Hub-local remain-OFF snapshot when the runtime proxy is down.
- * GET /v1/mesh and /v1/mesh/status never enable.
+ * Hub-local read-only snapshot when the runtime proxy is down.
+ * GET /v1/mesh and /v1/mesh/status never enable. No mesh-off function.
  */
 export function hubMeshStatusDoc(stats, path) {
   const mesh = publicMesh(stats && stats.mesh);
@@ -476,12 +572,14 @@ export function hubMeshStatusDoc(stats, path) {
     identity: AUTHOR,
     via: path || MESH_STATUS_PATH,
     get_never_enables: true,
-    default_off: true,
-    default: "off",
-    mesh_default: "off",
+    default_off: false,
+    default: MESH_DEFAULT,
+    mesh_default: MESH_DEFAULT,
+    readonly: true,
+    mesh_readonly: true,
     enabled,
-    mesh: enabled ? "on" : "off",
-    status: mesh.status,
+    mesh: "on",
+    status: enabled ? "on" : "unavailable",
     live_nodes: enabled ? rollup.live : 0,
     locked_nodes: enabled ? rollup.locked : 0,
     isolated_nodes: enabled ? rollup.isolated : 0,
@@ -493,7 +591,7 @@ export function hubMeshStatusDoc(stats, path) {
     node_gate: false,
     auto_heal: false,
     anonymity_network: false,
-    note: enabled ? MESH_NOTE_ON : MESH_NOTE,
+    note: MESH_NOTE,
     mesh_status: PUBLIC_MESH_STATUS,
     mesh_status_local: "https://godlock.uk" + MESH_STATUS_PATH,
     mesh_status_runtime: PUBLIC_MESH_STATUS,
@@ -502,7 +600,10 @@ export function hubMeshStatusDoc(stats, path) {
     door: PUBLIC_MESH,
     ...meshOpsDoc(),
     enabled,
-    default_off: true,
+    default_off: false,
+    mesh_default: MESH_DEFAULT,
+    readonly: true,
+    mesh_readonly: true,
     get_never_enables: true,
     author: AUTHOR,
     identity: AUTHOR,
@@ -520,12 +621,14 @@ export function meshOpsDoc() {
     heartbeat: PUBLIC_MESH_HEARTBEAT,
     leave: PUBLIC_MESH_LEAVE,
     enable: PUBLIC_MESH_ENABLE,
-    disable: PUBLIC_MESH_DISABLE,
     mcp: PUBLIC_RUNTIME + "/mcp",
     fraggate: PUBLIC_RUNTIME + "/v1/fraggate/call",
     ops: MESH_OPS.slice(),
     rollup_shape: "live|locked|isolated counts only",
-    default_off: true,
+    default_off: false,
+    mesh_default: MESH_DEFAULT,
+    readonly: true,
+    mesh_readonly: true,
     node_gate: false,
     auto_heal: false,
     anonymity_network: false,

@@ -22,6 +22,8 @@ const DEFAULT_REPO = "godlock";
 const DEFAULT_BRANCH = "main";
 const HOST = "https://godlock-download-tracker.vibelock.workers.dev";
 const GITHUB_REPO = "https://github.com/AzielEliab/godlock";
+/** Same-origin rose-star brand mark (Aziel Eliab). Empty alt — no words on the mark. */
+const BRAND_MARK_PATH = "/sigil.png";
 
 const GITHUB_RELEASES = "https://github.com/AzielEliab/godlock/releases";
 const GITHUB_LATEST = "https://github.com/AzielEliab/godlock/releases/latest";
@@ -246,6 +248,27 @@ echo "Author: Aziel Eliab."
 `;
 }
 
+async function serveBrandMark(request, env) {
+  if (!env.ASSETS) {
+    return json({ error: "assets binding missing" }, 500);
+  }
+  const assetUrl = new URL(BRAND_MARK_PATH, request.url);
+  const assetRes = await env.ASSETS.fetch(new Request(assetUrl, { method: "GET" }));
+  if (!assetRes.ok) {
+    return json({ error: "asset not hosted", asset: "sigil.png", status: assetRes.status }, 404);
+  }
+  const headers = new Headers();
+  headers.set("Content-Type", "image/png");
+  headers.set("Cache-Control", "public, max-age=86400, immutable");
+  const len = assetRes.headers.get("Content-Length");
+  if (len) headers.set("Content-Length", len);
+  for (const [k, v] of Object.entries(corsHeaders())) headers.set(k, v);
+  if (request.method === "HEAD") {
+    return new Response(null, { status: 200, headers });
+  }
+  return new Response(assetRes.body, { status: 200, headers });
+}
+
 async function serveAsset(request, env, asset, { head = false } = {}) {
   if (!env.ASSETS) {
     return json({ error: "assets binding missing" }, 500);
@@ -326,6 +349,8 @@ async function indexHtml(env) {
   .btns { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: 0 0 .85rem; }
   @media (max-width: 520px) { .btns { grid-template-columns: 1fr; } }
   a.btn, button.btn { display: block; width: 100%; box-sizing: border-box; text-align: center; font: inherit; font-size: 1.2rem; font-weight: 750; padding: 1rem 1.1rem; border-radius: 10px; border: 0; cursor: pointer; text-decoration: none; }
+  .brandrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 .85rem;min-height:48px}
+  .brandmark{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:0 0 40px;box-shadow:0 0 0 1px #0003,0 0 0 1px #c9a227}
   a.btn.primary { background: #e8eaef; color: #0e1014; }
   button.btn.install { background: #c9a227; color: #14110a; }
   button.btn.install.copied { background: #7dcf9a; color: #0e1014; }
@@ -342,6 +367,7 @@ async function indexHtml(env) {
   .cite a { color: #c9d4ff; }
 </style>
 <body>
+  <div class="brandrow"><img class="brandmark" src="/sigil.png" width="40" height="40" alt="" decoding="async"></div>
   <h1>GodLock</h1>
   <p class="motto">GodLock does not argue. It records, analyzes, hardens, and grows. Author Aziel Eliab.</p>
   <p class="banner">GodLock is a product name (Specified Fit stress-test and resilience engine), not an identity label. Author: Aziel Eliab. Not a VPN. Not a ghost net. Not anonymity. Logical GodLock receipts only. Public reasoning: Specified Fit, Not Pretty Spirals.</p>
@@ -413,6 +439,10 @@ export default {
 
     const runtime = await handleRuntime(request, url, env);
     if (runtime) return runtime;
+
+    if ((url.pathname === BRAND_MARK_PATH || url.pathname === BRAND_MARK_PATH + "/") && (request.method === "GET" || request.method === "HEAD")) {
+      return serveBrandMark(request, env);
+    }
 
     if ((url.pathname === "/install.sh" || url.pathname === "/install.sh/") && request.method === "GET") {
       return new Response(installScript(), {

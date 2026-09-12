@@ -78,6 +78,18 @@ describe("hideInternalDetermination", () => {
     assert.match(hideInternalDetermination("Submit a challenge about specified complexity."), /specified complexity/);
   });
 
+  it("scrubs everblooming-sigil wording to rose-star brand mark", () => {
+    assert.equal(
+      hideInternalDetermination("Public chrome uses the everblooming sigil."),
+      "Public chrome uses the rose-star brand mark.",
+    );
+    assert.equal(
+      hideInternalDetermination("Aziel Eliab sigil. Author Aziel Eliab."),
+      "Aziel Eliab rose-star brand mark. Author Aziel Eliab.",
+    );
+    assert.doesNotMatch(hideInternalDetermination("everblooming sigil"), /everblooming|sigil/i);
+  });
+
   it("rewrites observational phrasing instead of leaving broken English", () => {
     assert.equal(
       hideInternalDetermination("the relationship between the limits of observation and the data"),

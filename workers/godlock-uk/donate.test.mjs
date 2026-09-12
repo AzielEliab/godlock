@@ -25,6 +25,7 @@ import { defaultDescription, citeDoc } from "./src/seo.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const QR_DIR = join(HERE, "public", "donate", "qr");
+const PUBLIC_DIR = join(HERE, "public");
 const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 const THEATER = /tip.?jar|buy me a coffee|patron|unlocks? a feature|thank you for (your )?generosit|progress bar|name on a wall of fame/i;
@@ -50,8 +51,8 @@ function mockEnv() {
     ASSETS: {
       async fetch(request) {
         const url = new URL(request.url);
-        const name = url.pathname.split("/").pop() || "";
-        const file = join(QR_DIR, name);
+        const rel = url.pathname.replace(/^\/+/, "");
+        const file = join(PUBLIC_DIR, rel);
         if (!existsSync(file)) return new Response("missing", { status: 404 });
         const body = readFileSync(file);
         return new Response(body, { status: 200, headers: { "Content-Type": "image/png" } });
@@ -158,7 +159,9 @@ describe("Donate door and homepage block", () => {
     assert.doesNotMatch(html, THEATER);
     assert.doesNotMatch(html, /<svg[\s>]/);
     assert.doesNotMatch(html, /<rect[\s>]/);
-    assert.equal(html.split("<img ").length - 1, DONATE_RAILS.length);
+    assert.equal(html.split("<img ").length - 1, DONATE_RAILS.length + 1);
+    assert.ok(html.includes('class="brandmark"'));
+    assert.ok(html.includes('src="/sigil.png"'));
     assert.ok(html.includes('src="/donate/qr/btc.png"'));
     assert.ok(html.includes('src="/donate/qr/sol.png"'));
     assert.ok(html.includes('src="/donate/qr/trx.png"'));
@@ -216,5 +219,18 @@ describe("Donate door and homepage block", () => {
     }
     const missing = await worker.fetch(new Request("https://godlock.uk/donate/qr/nope.png"), env);
     assert.equal(missing.status, 404);
+  });
+
+  it("serves the same-origin rose-star brand mark PNG", async () => {
+    const file = join(PUBLIC_DIR, "sigil.png");
+    assert.equal(existsSync(file), true);
+    const onDisk = readFileSync(file);
+    assert.deepEqual(onDisk.subarray(0, 8), PNG_MAGIC);
+    assert.ok(onDisk.length > 1024);
+    const res = await worker.fetch(new Request("https://godlock.uk/sigil.png"), mockEnv());
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get("Content-Type") || "", /image\/png/);
+    const buf = Buffer.from(await res.arrayBuffer());
+    assert.deepEqual(buf, onDisk);
   });
 });

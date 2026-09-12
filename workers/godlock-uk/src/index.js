@@ -17,6 +17,7 @@ import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./led
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
   PUBLIC_RUNTIME, RUNTIME_PATH, permanentIdentityRedirect, citeRuntimeVersion,
+  BRAND_MARK_PATH,
 } from "./seo.js";
 import {
   fetchCatalogProducts, softwareSuite, publicProduct, softwareApiDoc,
@@ -414,10 +415,14 @@ function extraHeadersFor(nodeId, more) {
   return h;
 }
 
-async function serveDonateQrPng(request, env, path) {
+function isPublicPngPath(path) {
+  if (path === BRAND_MARK_PATH) return true;
   const id = donateQrIdFromPath(path);
-  const known = DONATE_RAILS.some((r) => r.id === id);
-  if (!id || !known) {
+  return !!id && DONATE_RAILS.some((r) => r.id === id);
+}
+
+async function servePublicPng(request, env, path) {
+  if (!isPublicPngPath(path)) {
     return new Response("not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
   }
   if (!env || !env.ASSETS) {
@@ -449,8 +454,8 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders() });
     }
 
-    if ((request.method === "GET" || request.method === "HEAD") && donateQrIdFromPath(path)) {
-      return serveDonateQrPng(request, env, path);
+    if ((request.method === "GET" || request.method === "HEAD") && isPublicPngPath(path)) {
+      return servePublicPng(request, env, path);
     }
 
     try {

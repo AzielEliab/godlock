@@ -4,7 +4,7 @@
  */
 import {
   headMeta, documentTitle, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
-  HEDIDNTJUMP, HEDIDNTJUMP_LABEL,
+  HEDIDNTJUMP, HEDIDNTJUMP_LABEL, BRAND_MARK_PATH,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
   DONATE_PATH, AI_CLIENTS_SENTENCE, runtimeDistribution, ecosystemLinks,
 } from "./seo.js";
@@ -20,8 +20,9 @@ export const CSS = `
 html,body{background:var(--bg);color:var(--ink)}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;line-height:1.5}
 .wrap{max-width:720px;margin:auto;padding:24px 18px 80px}
-.brandrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px}
-.brand{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.brandrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px;min-height:48px}
+.brandmark{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:0 0 40px;box-shadow:0 0 0 1px #0003,0 0 0 1px var(--gold)}
+.brand{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
 .nav2{margin:0 0 14px;font-size:14px}
 .nav2 .sep{color:var(--muted);margin:0 8px}
 .nav2 a.aziel,.nav2 a.aziel:visited{color:var(--royal);font-weight:700}
@@ -94,7 +95,8 @@ footer{margin-top:36px;color:var(--muted);font-size:14px}
 @media (max-width:720px){
   .wrap{padding:16px 14px 72px}
   .stats{grid-template-columns:1fr 1fr}
-  .brand{width:100%}
+  .brandrow{gap:8px}
+  .brand{width:auto;font-size:22px;flex:1 1 auto;min-width:0}
   button,.button{width:100%}
   .actions{flex-direction:column}
 }
@@ -184,6 +186,10 @@ export const AZIEL_MANIFESTO = [
 
 export const AZIEL_SIGNATURE = "— Aziel Eliab";
 
+export function brandRow() {
+  return `<div class="brandrow"><img class="brandmark" src="${esc(BRAND_MARK_PATH)}" width="40" height="40" alt="" decoding="async" fetchpriority="high"><div class="brand">GodLock</div><span class="pill">HTTPS engine</span></div>`;
+}
+
 export function topNav(path) {
   const here = String(path || "/");
   const items = navItems();
@@ -208,7 +214,7 @@ export function page(title, body, { path, kind, extraHeaders, indexable, product
   const p = path || "/";
   const docTitle = documentTitle(title, kind);
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(docTitle)}</title>${headMeta({ title, path: p, kind, indexable, products })}<style>${CSS}</style></head><body><div class="wrap">
-<div class="brandrow"><div class="brand">GodLock</div><span class="pill">HTTPS engine</span></div>
+${brandRow()}
 <p class="author">Author Aziel Eliab</p>
 ${topNav(p)}
 ${ecosystemNav()}

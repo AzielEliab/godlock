@@ -15,7 +15,11 @@ export const LIBRARY_HOME = LIBRARY + "/";
 /** Sister archive door (An Aziel Eliab Project). Not a Softwares card. */
 export const HEDIDNTJUMP = "https://www.hedidntjump.com/";
 export const HEDIDNTJUMP_LABEL = "He Didn't Jump";
-export const SIGIL = LIBRARY + "/sigil.png";
+/** Same-origin rose-star brand mark (not the Digital Library pentagram-only file). */
+export const BRAND_MARK_PATH = "/sigil.png";
+export const BRAND_MARK = CANON_HOST + BRAND_MARK_PATH;
+export const BRAND_MARK_ALT = "Aziel Eliab rose-star brand mark. Author Aziel Eliab.";
+export const SIGIL = BRAND_MARK;
 export const SITE = "GodLock";
 export const AUTHOR = "Aziel Eliab";
 export const AUTHOR_AKA = "Aziel Elroi Eliab";
@@ -159,7 +163,7 @@ export function personNode() {
     alternateName: [AUTHOR_AKA],
     identifier: AUTHOR,
     url: AZIEL_OFFICIAL,
-    image: SIGIL,
+    image: BRAND_MARK,
     jobTitle: "Author",
     hasOccupation: { "@type": "Occupation", name: "Author" },
     description: "Author of GodLock. Identity is Aziel Eliab only. Aziel Elroi Eliab is SEO alternateName only.",
@@ -483,7 +487,7 @@ function jsonLd(title, path, description, kind, products) {
       inLanguage: "en",
       identifier: "godlock-softwares",
       keywords: defaultKeywords("software"),
-      image: SIGIL,
+      image: BRAND_MARK,
       author: who,
       publisher: who,
       copyrightHolder: who,
@@ -520,7 +524,7 @@ function jsonLd(title, path, description, kind, products) {
       inLanguage: "en",
       identifier: "about-aziel-eliab",
       keywords: defaultKeywords("aziel"),
-      image: SIGIL,
+      image: BRAND_MARK,
       about: who,
       mainEntity: who,
       breadcrumb: { "@id": crumbs["@id"] },
@@ -592,13 +596,16 @@ export function headMeta(opts) {
     prop("og:url", url),
     prop("og:site_name", SITE),
     prop("og:locale", "en_GB"),
-    prop("og:image", SIGIL),
-    prop("og:image:alt", "Aziel Eliab sigil. Author Aziel Eliab."),
+    prop("og:image", BRAND_MARK),
+    prop("og:image:alt", BRAND_MARK_ALT),
     meta("twitter:card", "summary"),
     meta("twitter:title", docTitle),
     meta("twitter:description", description),
-    meta("twitter:image", SIGIL),
-    meta("twitter:image:alt", "Aziel Eliab sigil. Author Aziel Eliab."),
+    meta("twitter:image", BRAND_MARK),
+    meta("twitter:image:alt", BRAND_MARK_ALT),
+    linkRel("icon", BRAND_MARK_PATH, " type=" + Q + "image/png" + Q),
+    linkRel("apple-touch-icon", BRAND_MARK_PATH),
+    linkRel("preload", BRAND_MARK_PATH, " as=" + Q + "image" + Q + " fetchpriority=" + Q + "high" + Q),
     linkRel("alternate", "/cite.json", " type=" + Q + "application/json" + Q),
     linkRel("alternate", "/llms.txt", " type=" + Q + "text/plain" + Q),
     linkRel("alternate", "/ai.txt", " type=" + Q + "text/plain" + Q),

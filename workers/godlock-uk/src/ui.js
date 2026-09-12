@@ -74,6 +74,8 @@ button.ghost,.button.ghost{background:transparent;color:var(--ink);border:1px so
 .prior{list-style:none;padding:0;margin:0}
 .prior li{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0}
 .prior a{color:var(--gold);text-decoration:none}
+.prior .challenge-preview{margin:6px 0;white-space:pre-wrap;word-break:break-word}
+.answer .challenge-text{white-space:pre-wrap;word-break:break-word}
 pre.verify{white-space:pre-wrap;word-break:break-word;background:#16130f;border:1px solid var(--line);border-radius:12px;padding:14px;overflow:auto;color:var(--ink)}
 .ok{color:var(--yes);font-weight:700}
 .bad{color:var(--no);font-weight:700}
@@ -110,6 +112,30 @@ function publicText(s, fallback) {
   const t = hideInternalDetermination(String(s == null ? "" : s).trim());
   if (!t || t === "[object Object]") return fallback || "Receipt recorded under the locked protocol.";
   return t;
+}
+
+export const CHALLENGE_NOT_RETAINED = "challenge text not retained";
+export const CHALLENGE_PREVIEW_MAX = 140;
+
+/** Legacy rows have a null/missing column. Empty string is a stored (empty) challenge. */
+export function retainedChallengeText(row) {
+  if (!row || row.challenge_text == null) return null;
+  return String(row.challenge_text);
+}
+
+export function challengeBlockText(row) {
+  const t = retainedChallengeText(row);
+  return t == null ? CHALLENGE_NOT_RETAINED : t;
+}
+
+export function challengePreview(row, max = CHALLENGE_PREVIEW_MAX) {
+  const t = retainedChallengeText(row);
+  if (t == null) return CHALLENGE_NOT_RETAINED;
+  const one = t.replace(/\s+/g, " ").trim();
+  const n = Number(max);
+  const limit = Number.isFinite(n) && n > 0 ? n : CHALLENGE_PREVIEW_MAX;
+  if (one.length <= limit) return one;
+  return one.slice(0, limit) + "…";
 }
 
 function pillClass(label) {
@@ -283,9 +309,11 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
   const latestHtml = latest && !latest.isolated ? answerCard(latest, true) : "";
   const list = (prior || []).map((r) => {
     return `<li><span class="pill ${pillClass(r.label)}">${esc(r.label)}</span>
+      <div class="challenge-preview">${esc(challengePreview(r))}</div>
       <a href="/receipt/${esc(r.id)}">${esc(publicText(r.summary, r.label))}</a>
       <div class="muted">${esc(when(r.created_utc))}</div>
-      <div class="hash">${esc(r.content_sha256 || "")}</div></li>`;
+      <div class="hash">${esc(r.content_sha256 || "")}</div>
+      <a href="/receipt/${esc(r.id)}">Full receipt</a></li>`;
   }).join("") || `<p class="muted">No public receipts yet. Submit a challenge.</p>`;
   return `
 <div class="stats">
@@ -335,6 +363,7 @@ export function answerCard(row, latest) {
   return `<article class="answer">
     <span class="pill ${pillClass(row.label)}">${esc(row.label)}</span>
     <h2>${esc(title)}</h2>
+    <div class="block"><div class="k">Challenge</div><p class="challenge-text">${esc(challengeBlockText(row))}</p></div>
     <div class="block"><div class="k">1. Summary</div><p>${esc(publicText(row.summary))}</p></div>
     <div class="block"><div class="k">2. Explanation</div><p>${esc(publicText(row.explanation))}</p></div>
     <div class="block"><div class="k">3. Score change</div><p>${esc(row.score_before)}% → ${esc(row.score_after)}% (${sign}${esc(delta)})</p></div>

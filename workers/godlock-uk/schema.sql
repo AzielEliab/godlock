@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS receipts (
   id TEXT PRIMARY KEY,
   created_utc TEXT NOT NULL,
   text_sha256 TEXT NOT NULL,
+  -- Exact submitted challenge body. NULL on legacy rows (pre-retention).
+  -- text_sha256 is sha256 of this stored text when present.
+  challenge_text TEXT,
   label TEXT NOT NULL,
   summary TEXT NOT NULL,
   explanation TEXT NOT NULL,

@@ -315,7 +315,7 @@ describe("runtime API use tracker", () => {
 describe("software CTA and nav", () => {
   it("offers Official Runtime distribution on the runtime card and Invoke via Runtime on catalog cards", () => {
     const html = softwareBody({ products: [] });
-    assert.match(html, /<h2 class="soft-heading">Downloadable software<\/h2>\s*<div class="soft-grid">/);
+    assert.match(html, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.match(html, /class="button" href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
     assert.match(html, /class="button ghost" href="\/runtime">Official Runtime<\/a>/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Source on GitHub<\/a>/);

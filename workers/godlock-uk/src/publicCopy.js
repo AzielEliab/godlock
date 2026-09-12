@@ -26,6 +26,8 @@ const NEUTRAL_REWRITE = [
   [/empirical[- ]limits?(?:\s+of\s+observation)/gi, "observational limits"],
   [/the limits of observation/gi, "observational limits"],
   [/limits of observation/gi, "observational limits"],
+  [/everblooming\s+sigils?/gi, "rose-star brand mark"],
+  [/aziel eliab sigil/gi, "Aziel Eliab rose-star brand mark"],
 ];
 
 export function hideInternalDetermination(text) {

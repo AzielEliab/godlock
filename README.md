@@ -11,7 +11,7 @@ It is **not** a VPN, ghost net, or anonymity tool.
 
 ## Websites
 
-**Primary public site:** [https://godlock.uk](https://godlock.uk)
+**Primary public site:** [https://godlock.uk](https://godlock.uk) — Worker UI shows the Aziel Eliab rose-star brand mark top-left. Softwares stays GodLock-first (not a Digital Library clone). Identity is Aziel Eliab only.
 
 Part of the **Aziel Eliab** ecosystem (official hub, sister library, sister archive, this engine, runtime, kernel):
 

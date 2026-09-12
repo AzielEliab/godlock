@@ -22,7 +22,8 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 
 ## Routes
 
-- `/` engine (one screen; Specified Fit steel claim on the spine)
+- `/` engine (one screen; Specified Fit steel claim on the spine). Rose-star brand mark top-left (same-origin `/sigil.png`). Not "everblooming sigil" wording.
+- `/sigil.png` same-origin rose-star brand mark (Aziel Eliab). Worker UI chrome only — Softwares stays GodLock-first, not a Digital Library clone.
 - `/reason` Specified Fit, Not Pretty Spirals (public brief); `/specified-fit` 308 here
 - `POST /submit` challenge (`text`); JSON unless `Accept: text/html` (then 303)
 - `POST /heartbeat` live-node ping; JSON includes `live_nodes`, `mesh`, and `uses` so the homepage can update

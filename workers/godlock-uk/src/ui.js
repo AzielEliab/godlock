@@ -152,7 +152,7 @@ export function navItems() {
   return [
     { href: "/", label: "Engine" },
     { href: REASON_PATH, label: "Reason" },
-    { href: SOFTWARE_PATH, label: "Software" },
+    { href: SOFTWARE_PATH, label: "Softwares" },
     { href: RUNTIME_PATH, label: "Runtime" },
     { href: "/verify", label: "Verify" },
     { href: DONATE_PATH, label: "Donate" },
@@ -212,7 +212,7 @@ ${topNav(p)}
 ${ecosystemNav()}
 <div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
 ${body}
-<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Software</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
+<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
 ${ecosystemNav()}
 </footer>
 </div>
@@ -282,17 +282,25 @@ ${ecosystemNav()}
 </body></html>`;
 }
 
-export function homeSoftwareLine({ products, extras } = {}) {
-  const list = softwareSuite(products, extras);
-  const links = list.map((p) => {
-    const slug = String(p.slug || "");
-    const name = stripRuntimeFragGateMash(p.name || slug);
-    return `<a class="soft-name" href="${esc(SOFTWARE_PATH + "#" + slug)}">${esc(name)}</a>`;
-  }).join(". ");
+/** Featured Softwares slugs. GodLock is first on the HTML page; catalog JSON stays Plain→Gate→Lock. */
+export const FEATURED_SOFTWARES = ["godlock", "aziel-runtime", "fraggate"];
+
+export function featureGodLockFirst(products) {
+  const list = Array.isArray(products) ? products.slice() : [];
+  const featured = [];
+  const featuredSet = new Set(FEATURED_SOFTWARES);
+  for (const slug of FEATURED_SOFTWARES) {
+    const card = list.find((p) => p && p.slug === slug);
+    if (card) featured.push(card);
+  }
+  return featured.concat(list.filter((p) => p && !featuredSet.has(p.slug)));
+}
+
+export function homeSoftwareLine() {
   return `<section class="home-software" id="software">
-  <h2>Software</h2>
-  <p class="soft-line">${links}${links ? "." : ""}</p>
-  <p class="muted"><a href="${esc(SOFTWARE_PATH)}">Full cards</a> · <a href="/v1/software">Software API</a> · <a href="${esc(RUNTIME_PATH + "/v1/software")}">Runtime catalog</a></p>
+  <h2>Softwares</h2>
+  <p class="soft-line"><a class="soft-name" href="${esc(SOFTWARE_PATH + "#godlock")}">GodLock</a>. Suite doors available from GodLock. <a class="soft-name" href="${esc(SOFTWARE_PATH + "#aziel-runtime")}">Aziel Runtime</a>. <a class="soft-name" href="${esc(SOFTWARE_PATH + "#fraggate")}">FragGate</a>.</p>
+  <p class="muted"><a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="/v1/software">Software API</a> · <a href="${esc(RUNTIME_PATH + "/v1/software")}">Runtime catalog</a></p>
 </section>`;
 }
 
@@ -341,13 +349,13 @@ ${err}
   <div class="actions">
     <button type="submit">Submit</button>
     <a class="button ghost" href="/verify">Verify</a>
-    <a class="button ghost" href="${esc(SOFTWARE_PATH)}">Software</a>
+    <a class="button ghost" href="${esc(SOFTWARE_PATH)}">Softwares</a>
     <a class="button" href="${esc(RUNTIME_PATH)}">Runtime</a>
     <a class="button ghost" href="${esc(DOWNLOAD)}">Download</a>
     <a class="button ghost" href="${esc(DONATE_PATH)}">Donate</a>
   </div>
 </form>
-${homeSoftwareLine({ products, extras })}
+${homeSoftwareLine()}
 ${latestHtml}
 ${donateHomeBlock()}
 <h2>Prior receipts</h2>
@@ -433,8 +441,8 @@ export function azielEliabText() {
 }
 
 export function softwareBody({ products, extras } = {}) {
-  const list = softwareSuite(products, extras);
-  const featured = new Set(["godlock", "aziel-runtime", "fraggate", "azieltether"]);
+  const list = featureGodLockFirst(softwareSuite(products, extras));
+  const featured = new Set(FEATURED_SOFTWARES);
   const cards = list.map((p) => {
     const slug = String(p.slug || "");
     const feat = featured.has(slug);
@@ -468,7 +476,7 @@ export function softwareBody({ products, extras } = {}) {
         ].filter(Boolean).join(" ");
     return `<article class="soft-card${feat ? " featured" : ""}" id="${esc(slug)}" data-family="${esc(family)}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(stripRuntimeFragGateMash(p.name || slug))}</h3><div class="soft-meta">${ver}${dl}${views}${uses}</div><p>${esc(stripRuntimeFragGateMash(hideInternalDetermination(p.one_line || "")))}</p><p class="soft-links">${links}</p></article>`;
   }).join("");
-  return `<h2 class="soft-heading">Downloadable software</h2>
+  return `<h2 class="soft-heading">Softwares</h2>
 <div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
 }
 

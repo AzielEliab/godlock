@@ -692,7 +692,7 @@ export default {
         scheduleCatalogRefresh(ctx, env);
         const extras = { version: fetched.version };
         const products = softwareSuite(fetched.products, extras);
-        return html(page("Software", softwareBody({ products: fetched.products, extras }), { path: SOFTWARE_PATH, kind: "software", products }), {
+        return html(page("Softwares", softwareBody({ products: fetched.products, extras }), { path: SOFTWARE_PATH, kind: "software", products }), {
           extraHeaders: extraHeadersFor(nodeId, { "Cache-Control": SOFTWARE_HTML_CACHE_CONTROL }),
         });
       }

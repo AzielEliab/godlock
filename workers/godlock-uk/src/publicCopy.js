@@ -2,7 +2,9 @@
  * Strip hidden determination-method labels from public HTML, receipts,
  * and scrapeable metadata. Backend may still use those methods internally.
  * Engagement tokens that appear in a user's own challenge quote are not
- * rewritten here (this runs on engine summary/explanation). Author: Aziel Eliab.
+ * rewritten here (this runs on engine summary/explanation). Stored
+ * challenge_text is the submitter's exact text and is not rewritten.
+ * Author: Aziel Eliab.
  *
  * Branded framework titles are removed. Everyday scientific English is kept
  * readable: "limits of observation" is rewritten, not deleted mid-sentence.

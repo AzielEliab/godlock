@@ -18,6 +18,9 @@ import {
   softwareBody,
   homeBody,
   homeSoftwareLine,
+  answerCard,
+  receiptBody,
+  CHALLENGE_NOT_RETAINED,
 } from "./src/ui.js";
 import {
   robotsTxt,
@@ -1801,6 +1804,8 @@ describe("receipts UI and public payload", () => {
     ];
     const home = homeBody({ stats: { current_score: 49.5, residual: 50.5, uses: 3 }, latest: null, prior });
     assert.match(home, /<h2>Prior receipts<\/h2>/);
+    assert.match(home, /challenge text not retained/);
+    assert.match(home, /Full receipt/);
     const newerAt = home.indexOf("/receipt/new");
     const olderAt = home.indexOf("/receipt/old");
     assert.ok(newerAt > 0 && olderAt > newerAt);
@@ -1837,6 +1842,71 @@ describe("receipts UI and public payload", () => {
     assert.equal(payload.score_after, 49.5);
     assert.equal(payload.delta, -1);
     assert.equal(payload.isolated, 0);
+    assert.equal(payload.challenge_text, null);
     assert.equal("weighing" in payload, false);
+  });
+
+  it("shows stored challenge text on the latest card, receipt page, and prior preview", () => {
+    const row = {
+      id: "r-text",
+      created_utc: "2026-09-12T00:00:00.000Z",
+      label: "Yes",
+      summary: "The challenge holds.",
+      explanation: "Score moved down.",
+      score_before: 50,
+      score_after: 49,
+      residual: 51,
+      challenge_text: "Code plus a reader is specified information; a spiral is not a proof.",
+      content_sha256: "c",
+      isolated: 0,
+    };
+    const latest = answerCard(row, true);
+    assert.match(latest, /<div class="k">Challenge<\/div>/);
+    assert.match(latest, /Code plus a reader is specified information/);
+    const challengeAt = latest.indexOf("Challenge");
+    const summaryAt = latest.indexOf("1. Summary");
+    assert.ok(challengeAt > 0 && summaryAt > challengeAt);
+    const receipt = receiptBody({ id: row.id, row, entries: [] });
+    assert.match(receipt, /Code plus a reader is specified information/);
+    const home = homeBody({ stats: {}, latest: null, prior: [row] });
+    assert.match(home, /Code plus a reader is specified information/);
+    assert.match(home, /href="\/receipt\/r-text">Full receipt</);
+  });
+
+  it("shows challenge text not retained for legacy null columns", () => {
+    const legacy = {
+      id: "old",
+      label: "Interesting",
+      summary: "Older row",
+      explanation: "No body stored.",
+      created_utc: "2026-09-10T12:00:00.000Z",
+      score_before: 50,
+      score_after: 50,
+      residual: 50,
+      content_sha256: "bb",
+      isolated: 0,
+    };
+    const card = answerCard(legacy, false);
+    assert.match(card, new RegExp(CHALLENGE_NOT_RETAINED));
+    const receipt = receiptBody({ id: legacy.id, row: legacy, entries: [] });
+    assert.match(receipt, new RegExp(CHALLENGE_NOT_RETAINED));
+    const home = homeBody({ stats: {}, latest: null, prior: [legacy] });
+    assert.match(home, new RegExp(CHALLENGE_NOT_RETAINED));
+  });
+
+  it("escapes challenge text in HTML", () => {
+    const html = answerCard({
+      id: "xss",
+      label: "Yes",
+      summary: "ok",
+      explanation: "ok",
+      challenge_text: '<script>alert(1)</script>',
+      score_before: 50,
+      score_after: 50,
+      residual: 50,
+      isolated: 0,
+    }, false);
+    assert.doesNotMatch(html, /<script>alert/);
+    assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
   });
 });

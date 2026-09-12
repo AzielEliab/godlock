@@ -45,6 +45,13 @@ import {
 
 const TEXT_MAX = 8000;
 const NODE_COOKIE = "godlock_node";
+const LEDGER_CHALLENGE_PREVIEW = 160;
+const RECEIPT_INSERT = "INSERT INTO receipts(id, created_utc, text_sha256, challenge_text, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+
+function ledgerChallengePreview(text) {
+  const s = String(text == null ? "" : text);
+  return s.length <= LEDGER_CHALLENGE_PREVIEW ? s : s.slice(0, LEDGER_CHALLENGE_PREVIEW);
+}
 
 /** Production probes LIVE origin /v1/mesh/status. Tests set MESH_PROBE_ORIGIN=false. */
 function meshSnapshotDeps(env) {
@@ -59,6 +66,7 @@ async function ensureSchema(env) {
   await env.DB.batch([
     env.DB.prepare(`CREATE TABLE IF NOT EXISTS receipts (
       id TEXT PRIMARY KEY, created_utc TEXT NOT NULL, text_sha256 TEXT NOT NULL,
+      challenge_text TEXT,
       label TEXT NOT NULL, summary TEXT NOT NULL, explanation TEXT NOT NULL,
       score_before REAL NOT NULL, score_after REAL NOT NULL, residual REAL NOT NULL,
       isolated INTEGER NOT NULL DEFAULT 0, content_sha256 TEXT NOT NULL)`),
@@ -74,6 +82,9 @@ async function ensureSchema(env) {
     env.DB.prepare("INSERT OR IGNORE INTO metadata(key, value) VALUES ('views', '0')"),
     env.DB.prepare("INSERT OR IGNORE INTO metadata(key, value) VALUES ('uses', '0')"),
   ]);
+  try {
+    await env.DB.prepare("ALTER TABLE receipts ADD COLUMN challenge_text TEXT").run();
+  } catch { /* column already present */ }
   try {
     await env.DB.prepare("ALTER TABLE heartbeats ADD COLUMN last_ms INTEGER").run();
   } catch { /* column already present */ }
@@ -210,7 +221,7 @@ async function fetchDownloads(env) {
 async function publicReceipts(env, limit) {
   const n = Math.min(Math.max(Number(limit) || 24, 1), 100);
   const res = await env.DB.prepare(
-    "SELECT id, created_utc, text_sha256, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256 FROM receipts WHERE isolated=0 ORDER BY created_utc DESC LIMIT ?"
+    "SELECT id, created_utc, text_sha256, challenge_text, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256 FROM receipts WHERE isolated=0 ORDER BY created_utc DESC LIMIT ?"
   ).bind(n).all();
   return res.results || [];
 }
@@ -264,7 +275,8 @@ export function publicPayload(row) {
   const score_before = safe.score_before;
   const score_after = safe.score_after;
   const delta = receiptScoreDelta(score_before, score_after);
-  return {
+  const isolated = Number(safe.isolated) ? 1 : 0;
+  const payload = {
     id: safe.id,
     created_utc: safe.created_utc,
     label: safe.label,
@@ -276,15 +288,20 @@ export function publicPayload(row) {
     residual: safe.residual,
     text_sha256: safe.text_sha256,
     content_sha256: safe.content_sha256,
-    isolated: Number(safe.isolated) ? 1 : 0,
+    isolated,
   };
+  if (!isolated) {
+    payload.challenge_text = safe.challenge_text != null ? String(safe.challenge_text) : null;
+  }
+  return payload;
 }
 
-async function processSubmit(env, text) {
+export async function processSubmit(env, text) {
   const created_utc = new Date().toISOString();
   const id = newId();
-  const text_sha256 = sha256hex(text);
-  const isolated = shouldIsolate(text) ? 1 : 0;
+  const challenge_text = String(text ?? "");
+  const text_sha256 = sha256hex(challenge_text);
+  const isolated = shouldIsolate(challenge_text) ? 1 : 0;
   const score_before = await currentScore(env);
 
   if (isolated) {
@@ -292,6 +309,7 @@ async function processSubmit(env, text) {
       id,
       created_utc,
       text_sha256,
+      challenge_text,
       label: "Isolated",
       summary: "Isolated locally. Not scored. Not shown on the public feed.",
       explanation: "",
@@ -303,23 +321,28 @@ async function processSubmit(env, text) {
     row.summary = hideInternalDetermination(row.summary);
     row.explanation = hideInternalDetermination(row.explanation);
     row.content_sha256 = hashReceipt(row);
-    await env.DB.prepare(
-      "INSERT INTO receipts(id, created_utc, text_sha256, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
-    ).bind(id, created_utc, text_sha256, row.label, row.summary, row.explanation, row.score_before, row.score_after, row.residual, 1, row.content_sha256).run();
-    await appendLedger(env, "ISOLATE", { receipt_id: id, text_sha256, content_sha256: row.content_sha256 });
+    await env.DB.prepare(RECEIPT_INSERT)
+      .bind(id, created_utc, text_sha256, challenge_text, row.label, row.summary, row.explanation, row.score_before, row.score_after, row.residual, 1, row.content_sha256).run();
+    await appendLedger(env, "ISOLATE", {
+      receipt_id: id,
+      text_sha256,
+      content_sha256: row.content_sha256,
+      challenge_preview: ledgerChallengePreview(challenge_text),
+    });
     const uses = await usesCount(env);
     try { if (uses > 0) await metaSet(env, "uses", String(uses)); } catch { /* keep prior floor */ }
     return { ...row, isolated: true };
   }
 
   const prior = await publicReceipts(env, 8);
-  const answered = await answerChallenge(env, text, score_before, prior);
+  const answered = await answerChallenge(env, challenge_text, score_before, prior);
   const score_after = clampScore(score_before + Number(answered.score_delta || 0));
   const residual = residualOf(score_after);
   const row = {
     id,
     created_utc,
     text_sha256,
+    challenge_text,
     label: answered.label,
     summary: hideInternalDetermination(answered.summary),
     explanation: hideInternalDetermination(answered.explanation),
@@ -329,14 +352,14 @@ async function processSubmit(env, text) {
     isolated: 0,
   };
   row.content_sha256 = hashReceipt(row);
-  await env.DB.prepare(
-    "INSERT INTO receipts(id, created_utc, text_sha256, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256) VALUES(?,?,?,?,?,?,?,?,?,?,?)"
-  ).bind(id, created_utc, text_sha256, row.label, row.summary, row.explanation, score_before, score_after, residual, 0, row.content_sha256).run();
+  await env.DB.prepare(RECEIPT_INSERT)
+    .bind(id, created_utc, text_sha256, challenge_text, row.label, row.summary, row.explanation, score_before, score_after, residual, 0, row.content_sha256).run();
   await appendLedger(env, "SUBMIT", {
     receipt_id: id,
     label: row.label,
     text_sha256,
     content_sha256: row.content_sha256,
+    challenge_preview: ledgerChallengePreview(challenge_text),
     score_before,
     score_after,
     residual,

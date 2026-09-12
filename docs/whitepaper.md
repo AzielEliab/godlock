@@ -303,6 +303,20 @@ physical proof of φ or √2. Resilience score is the mean Specified Fit
 
 Apache-2.0. Copyright 2026 Aziel Eliab.
 
+Public identity is **Aziel Eliab** only. Person `@id`
+https://www.azieleliab.com/#aziel. Runtime `@id`
+https://www.azieleliab.com/runtime#runtime.
+
+Ecosystem cites (not a Digital Library Softwares clone):
+https://www.azieleliab.com/ · https://www.azielcorpuslibrary.net/ ·
+https://godlock.uk/ · https://github.com/AzielEliab/aziel-runtime ·
+https://github.com/AzielEliab/fraggate. Runtime **2.0.0-rc1**. Prefer
+Try on Glama https://glama.ai/mcp/servers/AzielEliab/aziel-runtime.
+Worker https://aziel-runtime.vibelock.workers.dev/ is secondary.
+
+GitHub crawl aids: `docs/llms.txt`, `docs/ai.txt`, `docs/cite.json`,
+`CITATION.cff`.
+
 Forks are welcome and always allowed. Download counts may be
 reported per `owner/repo` through the optional Cloudflare worker
 in `workers/download-tracker/` (shipped undeployed until an

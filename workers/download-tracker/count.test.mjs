@@ -1,8 +1,16 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import worker from "./src/index.js";
 import { checkGodlockUpdate, compareVersions, parseUpdateDoc } from "./src/update.js";
 import { citeDoc, llmsDoc, robotsTxt, sitemapXml } from "./src/discover.js";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const PUBLIC_DIR = join(HERE, "public");
+const BRAND_MARK_FILE = join(PUBLIC_DIR, "sigil.png");
+const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 function mockEnv(initial = {}) {
   const store = { ...initial };
@@ -23,8 +31,20 @@ function mockEnv(initial = {}) {
       },
     },
     ASSETS: {
-      async fetch() {
-        return new Response("missing", { status: 404 });
+      async fetch(request) {
+        const url = new URL(request.url);
+        const rel = decodeURIComponent(url.pathname.replace(/^\/+/, ""));
+        if (!rel || rel.includes("..") || rel.includes("/") || rel.includes("\\")) {
+          return new Response("missing", { status: 404 });
+        }
+        const file = join(PUBLIC_DIR, rel);
+        if (!existsSync(file)) return new Response("missing", { status: 404 });
+        const body = readFileSync(file);
+        const type = rel.endsWith(".png") ? "image/png" : "application/octet-stream";
+        return new Response(body, {
+          status: 200,
+          headers: { "Content-Type": type, "Content-Length": String(body.length) },
+        });
       },
     },
   };
@@ -122,7 +142,51 @@ describe("user-facing ABAD leftovers", () => {
       ["sitemap", sitemap],
     ]) {
       assert.equal(/\bABAD\b/.test(text), false, name + " still has user-facing ABAD");
+      assert.equal(/everblooming/i.test(text), false, name + " still has everblooming wording");
     }
+  });
+});
+
+describe("rose-star brand mark", () => {
+  it("puts the mark top-left with empty alt and no words on the mark", async () => {
+    const env = mockEnv({
+      "godlock|__views__": "1",
+      "godlock|AzielEliab|godlock|main|0": "1",
+    });
+    const html = await (await fetchPath(env, "/")).text();
+    assert.match(
+      html,
+      /<div class="brandrow"><img class="brandmark" src="\/sigil\.png" width="40" height="40" alt="" decoding="async"><\/div>/,
+    );
+    const markAt = html.indexOf('class="brandmark"');
+    const h1At = html.indexOf("<h1>GodLock</h1>");
+    assert.ok(markAt > 0 && markAt < h1At);
+    assert.doesNotMatch(html, /everblooming/i);
+    assert.doesNotMatch(html, /Aziel Eliab sigil/);
+    assert.doesNotMatch(html, /alt="[^"]+"/);
+    assert.match(html, /Author Aziel Eliab/);
+    assert.match(html, /<h1>GodLock<\/h1>/);
+  });
+
+  it("hosts the official ~75KB rose-star PNG without incrementing views", async () => {
+    const env = mockEnv({
+      "godlock|__views__": "4",
+      "godlock|AzielEliab|godlock|main|0": "1",
+    });
+    assert.equal(existsSync(BRAND_MARK_FILE), true);
+    const onDisk = readFileSync(BRAND_MARK_FILE);
+    assert.deepEqual(onDisk.subarray(0, 8), PNG_MAGIC);
+    assert.ok(onDisk.length > 70_000 && onDisk.length < 80_000);
+    const before = { ...env.store };
+    const res = await fetchPath(env, "/sigil.png");
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get("Content-Type") || "", /image\/png/);
+    const buf = Buffer.from(await res.arrayBuffer());
+    assert.deepEqual(buf, onDisk);
+    const head = await fetchPath(env, "/sigil.png", "HEAD");
+    assert.equal(head.status, 200);
+    assert.match(head.headers.get("Content-Type") || "", /image\/png/);
+    assert.deepEqual(env.store, before);
   });
 });
 

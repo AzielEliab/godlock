@@ -172,6 +172,8 @@ describe("Aziel Eliab page chrome", () => {
     assert.match(CSS, /--royal:#6b3fa0/);
     assert.match(CSS, /--royal-deep:#4a2870/);
     assert.match(CSS, /\.brandmark\{width:40px;height:40px/);
+    assert.match(CSS, /\.nav2\{display:flex;flex-wrap:wrap/);
+    assert.match(CSS, /overflow-wrap:anywhere/);
   });
 
   it("puts the rose-star brand mark top-left and scrubs everblooming-sigil wording", () => {
@@ -731,7 +733,10 @@ describe("homepage stays a natural argument surface", () => {
     assert.match(html, /href="\/reason">Read the brief</);
     assert.match(html, /Answers open with Yes, No, Let's review, or Interesting/);
     assert.match(html, /GodLock records a receipt\. It does not sermonize/);
-    assert.match(html, /Works with ChatGPT \(GPT Actions \/ OpenAI\), Grok \(xAI\), Venice, Claude \(Anthropic\)/);
+    const visibleHome = html.split(/<body[^>]*>/i)[1] || "";
+    assert.doesNotMatch(visibleHome, /Works with ChatGPT \(GPT Actions \/ OpenAI\)/);
+    assert.doesNotMatch(visibleHome, /<p class="muted">Works with /);
+    assert.match(html, /name="description" content="[^"]*Works with ChatGPT \(GPT Actions \/ OpenAI\), Grok \(xAI\), Venice, Claude \(Anthropic\)/);
     assert.match(html, /Cursor \(MCP\), Glama \(MCP\), Perplexity/);
     assert.match(html, /other MCP\/OpenAPI-capable assistants/);
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
@@ -806,7 +811,8 @@ describe("major AI client list", () => {
     assert.doesNotMatch(software, /Works with ChatGPT \(GPT Actions \/ OpenAI\)/);
     assert.doesNotMatch(software, /Use with Grok, ChatGPT, Venice/);
     const home = homeBody({ stats: {}, latest: null, prior: [] });
-    assert.match(home, /Works with ChatGPT \(GPT Actions \/ OpenAI\)/);
+    assert.doesNotMatch(home, /Works with ChatGPT \(GPT Actions \/ OpenAI\)/);
+    assert.doesNotMatch(home, /other MCP\/OpenAPI-capable assistants/);
     assert.match(home, /href="\/software#aziel-runtime">Aziel Runtime<\/a>/);
     const homeLine = homeSoftwareLine();
     assert.doesNotMatch(homeLine, /href="\/software#godlock">GodLock<\/a>/);

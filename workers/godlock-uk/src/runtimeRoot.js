@@ -166,7 +166,7 @@ export function runtimeChromeNav() {
     const color = it.secondary ? "#9aa3b2" : "#c9a227";
     return `<a href="${it.href}" style="color:${color};text-decoration:none">${it.label}</a>`;
   }).join(`<span style="color:#9aa3b2"> · </span>`);
-  return `<nav aria-label="GodLock" style="font:14px/1.45 system-ui,sans-serif;margin:0 0 .75rem;padding:0 0 .85rem;border-bottom:1px solid #2a3140"><a href="/" style="color:#efe6d6;font-weight:800;text-decoration:none;margin-right:.75rem">GodLock</a>${links}</nav><nav aria-label="Aziel Eliab ecosystem" style="font:13px/1.45 system-ui,sans-serif;margin:0 0 .85rem;color:#9aa3b2"><p style="margin:0 0 4px">Part of the Aziel Eliab ecosystem</p>${eco}</nav><div id="godlock-runtime-dist" aria-label="Aziel Runtime distribution" style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 1.2rem">${dist}</div>`;
+  return `<nav aria-label="GodLock" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;font:14px/1.45 system-ui,sans-serif;margin:0 0 .75rem;padding:0 0 .85rem;border-bottom:1px solid #2a3140;overflow-wrap:anywhere"><a href="/" style="color:#efe6d6;font-weight:800;text-decoration:none;margin-right:.75rem">GodLock</a>${links}</nav><nav aria-label="Aziel Eliab ecosystem" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font:13px/1.45 system-ui,sans-serif;margin:0 0 .85rem;color:#9aa3b2;overflow-wrap:anywhere"><p style="margin:0 0 4px;flex:1 1 100%">Part of the Aziel Eliab ecosystem</p>${eco}</nav><div id="godlock-runtime-dist" aria-label="Aziel Runtime distribution" style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 1.2rem">${dist}</div>`;
 }
 
 function injectRuntimeChrome(html) {

@@ -17,6 +17,7 @@ import {
   ecosystemNav,
   CSS,
   softwareBody,
+  softwaresCard,
   homeBody,
   homeSoftwareLine,
   FEATURED_SOFTWARES,
@@ -47,6 +48,7 @@ import {
   GITHUB,
   AZIEL_PERSON_ID,
   AZIEL_OFFICIAL,
+  OFFICIAL_SOFTWARES,
   ABOUT_PUBLIC_WORK_LEAD,
   identityMachineUrls,
   LOCAL_PERSON_STUB_ID,
@@ -88,6 +90,7 @@ import {
   resetCatalogCache,
   SOFTWARE_HTML_CACHE_CONTROL,
   softwareSuite,
+  publicSoftwaresList,
   productsFromCatalogDoc,
   suiteFamily,
   sortSoftwareSuite,
@@ -379,16 +382,17 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes("<changefreq>daily</changefreq>"));
     assert.ok(xml.includes("<priority>1.0</priority>"));
     assert.ok((xml.match(/<loc>/g) || []).length >= 80);
-    assert.ok(xml.includes(CANON_HOST + "/software#fraggate"));
-    assert.ok(xml.includes(CANON_HOST + "/software#peacelock"));
-    assert.ok(xml.includes(CANON_HOST + "/software#4dmap"));
-    assert.ok(xml.includes(CANON_HOST + "/software#embryolock"));
-    assert.ok(xml.includes(CANON_HOST + "/software#azbrowser"));
-    assert.ok(xml.includes(CANON_HOST + "/software#aznet"));
-    assert.ok(xml.includes(CANON_HOST + "/software#azhub"));
-    assert.ok(xml.includes(CANON_HOST + "/software#azinterface"));
-    assert.ok(xml.includes(CANON_HOST + "/software#azcoherence"));
-    assert.ok(xml.includes(CANON_HOST + "/software#azclce"));
+    assert.ok(xml.includes(CANON_HOST + "/software#aziel-runtime"));
+    assert.ok(xml.includes(OFFICIAL_SOFTWARES));
+    assert.ok(!xml.includes(CANON_HOST + "/software#fraggate"));
+    assert.ok(!xml.includes(CANON_HOST + "/software#godlock"));
+    assert.ok(!xml.includes(CANON_HOST + "/software#peacelock"));
+    assert.ok(!xml.includes(CANON_HOST + "/software#4dmap"));
+    assert.ok(!xml.includes(CANON_HOST + "/software#embryolock"));
+    assert.ok(!xml.includes(CANON_HOST + "/software#azbrowser"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/describe?slug=peacelock"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/describe?slug=azbrowser"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/describe?slug=azcoherence"));
     assert.ok(xml.includes(CANON_HOST + "/v1/software"));
     assert.ok(xml.includes(CANON_HOST + "/runtime"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/runtime.json"));
@@ -509,7 +513,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.door, "fraggate");
     assert.equal(cite.software_catalog, CANON_HOST + "/runtime/v1/software");
     assert.equal(cite.software_api, CANON_HOST + "/v1/software");
-    assert.equal(cite.azcoherence, CANON_HOST + "/software#azcoherence");
+    assert.equal(cite.azcoherence, OFFICIAL_SOFTWARES + "#azcoherence");
     assert.equal(cite.azcoherence_name, "AZCoherence");
     assert.equal(cite.azcoherence_slug, "azcoherence");
     assert.equal(cite.azcoherence_worker, AZCOHERENCE_WORKER);
@@ -544,7 +548,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Aziel Corpus Library: https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab/);
     assert.match(llms, /He Didn't Jump: https:\/\/www\.hedidntjump\.com\//);
     assert.doesNotMatch(llms, /Aziel Corpus Library: https:\/\/godlock\.uk\/AzielCorpusLibrary/);
-    assert.match(llms, /GodLock Softwares lists suite doors available from GodLock/);
+    assert.match(llms, /GodLock\.uk Softwares lists Aziel Runtime only/);
+    assert.match(llms, /Software listing: https:\/\/www\.azieleliab\.com\/software/);
+    assert.doesNotMatch(llms, /Suite doors available from GodLock/);
     assert.doesNotMatch(llms, /Digital Library identity/);
     assert.doesNotMatch(llms, /matching Digital Library Software completeness/);
     assert.doesNotMatch(llms, /same completeness as the Digital Library/);
@@ -667,17 +673,21 @@ describe("priority page SEO", () => {
     assert.ok(ld["@graph"].some((n) => n["@type"] === "BreadcrumbList"));
     const list = ld["@graph"].find((n) => n["@type"] === "ItemList");
     assert.ok(list);
-    assert.ok(list.numberOfItems >= 30);
-    assert.ok((list.itemListElement || []).some((it) => it.url === "https://godlock.uk/software#godlock"));
-    assert.ok((list.itemListElement || []).some((it) => it.url === "https://godlock.uk/software#fraggate"));
-    assert.ok((list.itemListElement || []).some((it) => it.item && it.item["@type"] === "SoftwareApplication" && it.item.identifier === "godlock"));
+    assert.equal(list.numberOfItems, 1);
+    assert.ok((list.itemListElement || []).some((it) => it.url === "https://godlock.uk/software#aziel-runtime"));
+    assert.ok(!(list.itemListElement || []).some((it) => it.url === "https://godlock.uk/software#godlock"));
+    assert.ok(!(list.itemListElement || []).some((it) => it.url === "https://godlock.uk/software#fraggate"));
+    assert.ok((list.itemListElement || []).some((it) => it.item && it.item["@type"] === "SoftwareApplication" && it.item.identifier === "aziel-runtime"));
     assert.match(html, /<h2 class="soft-heading">Softwares<\/h2>/);
     assert.match(html, /<img class="brandmark" src="\/sigil\.png" width="40" height="40" alt="" decoding="async" fetchpriority="high"><div class="brand">GodLock<\/div><span class="pill">HTTPS engine<\/span>/);
     assert.doesNotMatch(html, /Downloadable software/);
     assert.doesNotMatch(html, /MASTER·WRITABLE|Ask Jeeves|library search/i);
     assert.doesNotMatch(html, /same completeness as the Digital Library/);
-    assert.equal(softCardIds(html)[0], "godlock");
-    assert.match(html, /<article class="soft-card featured" id="godlock"/);
+    assert.equal(softCardIds(html)[0], "aziel-runtime");
+    assert.match(html, /<article class="soft-card featured" id="aziel-runtime"/);
+    assert.doesNotMatch(html, /<article class="soft-card[^"]*" id="godlock"/);
+    assert.doesNotMatch(html, /<article class="soft-card[^"]*" id="fraggate"/);
+    assert.match(html, /https:\/\/www\.azieleliab\.com\/software/);
     assert.match(html, /name="keywords" content="GodLock Softwares, GodLock.uk/);
     const aboutMeta = headMeta({ title: "Aziel Eliab", path: "/AzielEliab", kind: "aziel" });
     assert.doesNotMatch(aboutMeta, /GodLock Softwares, GodLock.uk/);
@@ -702,13 +712,14 @@ describe("homepage stays a natural argument surface", () => {
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
     assert.match(html, /<h2>Softwares<\/h2>/);
     assert.match(html, /id="software"/);
-    assert.match(html, /href="\/software#godlock">GodLock<\/a>/);
-    assert.match(html, /Suite doors available from GodLock/);
+    assert.doesNotMatch(html, /href="\/software#godlock">GodLock<\/a>/);
+    assert.doesNotMatch(html, /Suite doors available from GodLock/);
     assert.match(html, /href="\/software#aziel-runtime">Aziel Runtime<\/a>/);
-    assert.match(html, /href="\/software#fraggate">FragGate<\/a>/);
+    assert.doesNotMatch(html, /href="\/software#fraggate">FragGate<\/a>/);
+    assert.match(html, /https:\/\/www\.azieleliab\.com\/software/);
     assert.doesNotMatch(html, /href="\/software#aziel-corpus">Aziel Digital Library<\/a>/);
     assert.doesNotMatch(html, /<h2>Software<\/h2>/);
-    assert.match(html, /href="\/v1\/software">Software API<\/a>/);
+    assert.match(html, /href="https:\/\/www\.azieleliab\.com\/software">Official Softwares<\/a>/);
     assert.match(html, /<h2>Prior receipts<\/h2>/);
     assert.match(html, /href="\/receipts">Full receipts chain</);
     assert.match(html, /id="stat-receipts"/);
@@ -771,11 +782,13 @@ describe("major AI client list", () => {
     assert.doesNotMatch(software, /Use with Grok, ChatGPT, Venice/);
     const home = homeBody({ stats: {}, latest: null, prior: [] });
     assert.match(home, /Works with ChatGPT \(GPT Actions \/ OpenAI\)/);
-    assert.match(home, /href="\/software#godlock">GodLock<\/a>/);
+    assert.match(home, /href="\/software#aziel-runtime">Aziel Runtime<\/a>/);
     const homeLine = homeSoftwareLine();
-    assert.match(homeLine, /href="\/software#godlock">GodLock<\/a>/);
+    assert.doesNotMatch(homeLine, /href="\/software#godlock">GodLock<\/a>/);
     assert.match(homeLine, /href="\/software#aziel-runtime">Aziel Runtime<\/a>/);
-    assert.match(homeLine, /href="\/software#fraggate">FragGate<\/a>/);
+    assert.doesNotMatch(homeLine, /href="\/software#fraggate">FragGate<\/a>/);
+    assert.match(homeLine, /https:\/\/www\.azieleliab\.com\/software/);
+    assert.doesNotMatch(homeLine, /Suite doors available from GodLock/);
     assert.doesNotMatch(homeLine, /Aziel Digital Library/);
     assert.doesNotMatch(homeLine, /href="\/software#aznet">AZNet<\/a>/);
     const softwareMeta = defaultDescription("software");
@@ -896,6 +909,10 @@ function softCardH3s(html) {
   return [...String(html).matchAll(/<article class="soft-card[\s\S]*?<h3>([^<]+)<\/h3>/g)].map((m) => m[1]);
 }
 
+function suiteCardsHtml(products, extras) {
+  return softwareSuite(products, extras).map((p) => softwaresCard(p)).join("");
+}
+
 describe("Software page hosts the full aziel-runtime catalog", () => {
   it("keeps a snapshot fallback that is not a 27-only cap, plus the aziel-runtime / FragGate card", () => {
     assert.ok(CATALOG_PRODUCT_COUNT >= 28, "snapshot floor " + CATALOG_PRODUCT_COUNT);
@@ -998,7 +1015,10 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(fetched.products.some((p) => p.slug === "azbrowser"));
     assert.ok(fetched.products.some((p) => p.slug === "nextlock"));
     assert.ok(fetched.products.length > CATALOG_PRODUCT_COUNT);
-    const html = softwareBody({ products: fetched.products });
+    const publicHtml = softwareBody({ products: fetched.products });
+    assert.deepEqual(softCardIds(publicHtml), ["aziel-runtime"]);
+    assert.match(publicHtml, /https:\/\/www\.azieleliab\.com\/software/);
+    const html = suiteCardsHtml(fetched.products);
     const ids = softCardIds(html);
     assert.ok(ids.includes("azmail"));
     assert.ok(ids.includes("azbrowser"));
@@ -1011,12 +1031,16 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
   });
 
   it("renders catalog cards with Worker, GitHub, Runtime, MCP, and counters when present", () => {
-    const html = softwareBody({
-      products: CATALOG_FALLBACK_PRODUCTS.map((p) => (
-        p.slug === "godlock" ? { ...p, downloads: 40, uses: 7 } : p
-      )),
-      extras: { runtimeUses: 42 },
-    });
+    const runtimeExtras = { runtimeUses: 42 };
+    const products = CATALOG_FALLBACK_PRODUCTS.map((p) => (
+      p.slug === "godlock" ? { ...p, downloads: 40, uses: 7 } : p
+    ));
+    const pageHtml = softwareBody({ products, extras: runtimeExtras });
+    assert.deepEqual(softCardIds(pageHtml), ["aziel-runtime"]);
+    assert.doesNotMatch(pageHtml, /id="godlock"/);
+    assert.doesNotMatch(pageHtml, /id="fraggate"/);
+    assert.match(pageHtml, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
+    const html = suiteCardsHtml(products, runtimeExtras);
     const ids = softCardIds(html);
     const names = softCardH3s(html);
     assert.ok(ids.length >= CATALOG_PRODUCT_COUNT, "cards " + ids.length);
@@ -1064,7 +1088,6 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /40 downloads/);
     assert.match(html, /7 uses/);
     assert.match(html, /42 uses/);
-    assert.match(html, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.doesNotMatch(html, /<h2>Runtime<\/h2>/);
     assert.doesNotMatch(html, /Full Aziel Eliab suite/);
     assert.doesNotMatch(html, /catalog engines plus/);
@@ -1216,50 +1239,37 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(fetched.products.length, CATALOG_PRODUCT_COUNT);
   });
 
-  it("serves the full suite from GET /software even when origin fetch is empty", async () => {
+  it("serves Aziel Runtime only from GET /software even when origin fetch is empty", async () => {
     const res = await worker.fetch(new Request("https://godlock.uk/software"), mockEnv());
     assert.equal(res.status, 200);
     const html = await res.text();
     const ids = softCardIds(html);
     const names = softCardH3s(html);
-    assert.ok(ids.length >= CATALOG_PRODUCT_COUNT, "live-or-fallback cards " + ids.length);
-    assert.ok(names.length >= CATALOG_PRODUCT_COUNT, "soft-card h3 names " + names.length);
-    assert.equal(ids[0], "godlock");
-    assert.equal(ids[1], "aziel-runtime");
-    assert.equal(ids[2], "fraggate");
-    assert.ok(names.includes("GodLock"));
-    for (const slug of CATALOG_SLUGS) assert.ok(ids.includes(slug), slug);
-    assert.ok(ids.includes("aziel-runtime"));
-    assert.ok(ids.includes("fraggate"));
-    assert.ok(ids.includes("azbrowser"));
-    assert.ok(ids.includes("aznet"));
-    assert.ok(ids.includes("azhub"));
-    assert.ok(ids.includes("azinterface"));
-    assert.ok(ids.includes("azcoherence"));
-    assert.ok(ids.includes("azclce"));
-    assert.ok(ids.includes("peacelock"));
+    assert.deepEqual(ids, ["aziel-runtime"]);
+    assert.deepEqual(names, ["Aziel Runtime"]);
+    assert.doesNotMatch(html, /id="godlock"/);
+    assert.doesNotMatch(html, /id="fraggate"/);
+    assert.doesNotMatch(html, /id="azbrowser"/);
     assert.match(html, /<title>GodLock Softwares<\/title>/);
     assert.match(html, /href="\/runtime">Runtime<\/a>/);
-    assert.match(html, /Invoke via Runtime/);
     assert.match(html, /class="button" href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
     assert.match(html, /class="button ghost" href="\/runtime">Official Runtime<\/a>/);
     assert.match(html, /Try on Glama/);
     assert.match(html, /Documentation\/Architecture/);
     assert.match(html, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.match(res.headers.get("Cache-Control") || "", /s-maxage=300/);
-    assert.match(html, /aziel-runtime \(Aziel Runtime\)/);
+    assert.match(html, /https:\/\/www\.azieleliab\.com\/software/);
     assert.match(html, /href="\/runtime\/mcp">MCP<\/a>/);
     assert.match(html, /QNM-BUILD-1\.0/);
     assert.doesNotMatch(html, /<h2>Runtime<\/h2>/);
     assert.doesNotMatch(html, /every live aziel-runtime catalog engine plus aziel-runtime \/ FragGate/);
     assert.doesNotMatch(html, /catalog engines plus/);
     assert.doesNotMatch(html, /Suite: <a href="#aziel-runtime">/);
+    assert.doesNotMatch(html, /Suite doors available from GodLock/);
     assert.doesNotMatch(html, /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
     assert.doesNotMatch(html, /Aziel Eliab Runtime \d+\.\d+(?:\.\d+)? FragGate/);
     assert.doesNotMatch(html, /href="https:\/\/github\.com\/AzielEliab\/anon-broadcast"/);
-    assert.match(html, /Worker<\/a>/);
     assert.doesNotMatch(html, /Catalog unavailable/);
-    assert.match(html, /Specified Fit \/ GodLock score/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA/i);
     assert.doesNotMatch(html, /\bABAD\b/);
     const jsonRes = await worker.fetch(new Request("https://godlock.uk/software?format=json"), mockEnv());
@@ -1270,50 +1280,25 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(body.catalog, "https://godlock.uk/runtime/v1/software");
     assert.equal(body.catalog_origin, "https://aziel-runtime.vibelock.workers.dev/v1/software");
     assert.equal(body.catalog_fraggate, "https://godlock.uk/runtime/v1/fraggate/list");
-    assert.ok(body.product_count >= CATALOG_PRODUCT_COUNT);
-    assert.ok(body.suite_count >= CATALOG_PRODUCT_COUNT);
-    assert.ok(body.products.some((p) => p.slug === "godlock" && p.invoke === "/runtime/v1/pull/godlock" && p.worker && p.mcp === "/runtime/mcp"));
+    assert.equal(body.official_softwares, OFFICIAL_SOFTWARES);
+    assert.equal(body.cloned_suite, false);
+    assert.equal(body.product_count, 1);
+    assert.equal(body.suite_count, 1);
+    assert.ok(body.products.every((p) => p.slug === "aziel-runtime"));
     assert.ok(body.products.some((p) => p.slug === "aziel-runtime" && p.invoke === "/runtime"));
-    assert.ok(body.products.some((p) => p.slug === "fraggate" && p.download === FRAGGATE_DOWNLOAD && p.worker === FRAGGATE_WORKER && p.family === "gate"));
-    assert.ok(body.products.some((p) => p.slug === "azbrowser" && p.download === AZBROWSER_DOWNLOAD && p.worker === AZBROWSER_WORKER && p.family === "plain"));
-    assert.ok(body.products.some((p) => p.slug === "aznet" && p.download === AZNET_DOWNLOAD && p.worker === AZNET_WORKER && p.family === "plain"));
-    assert.ok(body.products.some((p) => p.slug === "azhub" && p.download === AZHUB_DOWNLOAD && p.worker === AZHUB_WORKER && p.family === "plain"));
-    assert.ok(body.products.some((p) => p.slug === "azinterface" && p.download === AZINTERFACE_DOWNLOAD && p.worker === AZINTERFACE_WORKER && p.family === "plain"));
-    assert.ok(body.products.some((p) => p.slug === "azcoherence" && p.download === AZCOHERENCE_DOWNLOAD && p.worker === AZCOHERENCE_WORKER && p.family === "plain" && p.github === AZCOHERENCE_GITHUB));
-    const listed = body.products.map((p) => p.slug);
-    assert.ok(listed.indexOf("azclce") < listed.indexOf("azbrowser"));
-    assert.ok(listed.indexOf("azbrowser") < listed.indexOf("azcoherence"));
-    assert.ok(listed.indexOf("azcoherence") < listed.indexOf("azhub"));
-    assert.ok(listed.indexOf("azhub") < listed.indexOf("azinterface"));
-    assert.ok(listed.indexOf("azinterface") < listed.indexOf("aznet"));
-    assert.ok(listed.indexOf("aznet") < listed.indexOf("decisiongate"));
-    assert.ok(listed.indexOf("decisiongate") < listed.indexOf("fraggate"));
-    assert.ok(listed.indexOf("fraggate") < body.products.findIndex((p) => p.family === "lock"));
-    assert.ok(body.products.some((p) => p.slug === "peacelock"));
-    const families = body.products.map((p) => p.family);
-    const firstLock = families.indexOf("lock");
-    const lastPlain = families.lastIndexOf("plain");
-    const gate = families.indexOf("gate");
-    assert.ok(lastPlain < gate || gate < 0);
-    assert.ok(gate < firstLock || gate < 0);
-    assert.equal(body.products.find((p) => p.slug === "staticclock").family, "plain");
+    assert.ok(!body.products.some((p) => p.slug === "godlock"));
+    assert.ok(!body.products.some((p) => p.slug === "fraggate"));
     const cite = await (await worker.fetch(new Request("https://godlock.uk/cite.json"), mockEnv())).json();
-    assert.ok(cite.software_slugs.includes("godlock"));
-    assert.ok(cite.software_slugs.includes("aziel-runtime"));
-    assert.ok(cite.software_slugs.includes("fraggate"));
-    assert.ok(cite.software_slugs.includes("azbrowser"));
-    assert.ok(cite.software_slugs.includes("aznet"));
-    assert.ok(cite.software_slugs.includes("azhub"));
-    assert.ok(cite.software_slugs.includes("azinterface"));
-    assert.ok(cite.software_slugs.includes("azcoherence"));
-    assert.ok(cite.software_slugs.includes("azclce"));
-    assert.ok(cite.software_slugs.includes("peacelock"));
-    assert.ok(cite.software_slugs.length >= CATALOG_PRODUCT_COUNT);
-    assert.ok(cite.software_product_count >= CATALOG_PRODUCT_COUNT);
+    assert.deepEqual(cite.software_slugs, ["aziel-runtime"]);
+    assert.equal(cite.software_product_count, 1);
+    assert.equal(cite.official_softwares, OFFICIAL_SOFTWARES);
     const llms = llmsDoc();
-    assert.match(llms, /GodLock Softwares lists suite doors available from GodLock/);
+    assert.match(llms, /GodLock\.uk Softwares lists Aziel Runtime only/);
+    assert.match(llms, /Software listing: https:\/\/www\.azieleliab\.com\/software/);
+    assert.doesNotMatch(llms, /Suite doors available from GodLock/);
     assert.doesNotMatch(llms, /same completeness|matching Digital Library Software completeness/);
-    assert.match(defaultDescription("software"), /aziel-runtime \(Aziel Runtime\)/);
+    assert.match(defaultDescription("software"), /Aziel Runtime only on this page/);
+    assert.match(defaultDescription("software"), /https:\/\/www\.azieleliab\.com\/software/);
     assert.doesNotMatch(defaultDescription("software"), /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
     assert.doesNotMatch(defaultDescription("runtime"), /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
   });
@@ -1347,14 +1332,16 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.match(html, /<title>GodLock Softwares<\/title>/);
     assert.match(html, /name="description" content="Aziel Runtime is not merely an API orchestrator/);
-    assert.match(html, /Suite doors available from GodLock/);
+    assert.match(html, /https:\/\/www\.azieleliab\.com\/software/);
+    assert.doesNotMatch(html, /Suite doors available from GodLock/);
     assert.doesNotMatch(html, /Aziel Eliab Softwares catalog/);
     assert.doesNotMatch(html, /same completeness as the Digital Library/);
     assert.doesNotMatch(html, /<h2>Runtime<\/h2>/);
     assert.doesNotMatch(html, /Full Aziel Eliab suite/);
     const ids = softCardIds(html);
-    assert.ok(ids.includes("godlock"));
-    assert.ok(ids.includes("azcoherence"));
+    assert.deepEqual(ids, ["aziel-runtime"]);
+    assert.doesNotMatch(html, /id="godlock"/);
+    assert.doesNotMatch(html, /id="azcoherence"/);
     const cached = await loadCatalogForHtml(env);
     assert.ok(cached.products.length >= CATALOG_PRODUCT_COUNT);
     assert.equal(hung, 0);
@@ -1381,10 +1368,14 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(body.runtime_distribution[0].href, "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime");
     assert.equal(body.runtime_distribution[0].primary, true);
     assert.equal(body.sort, "plain-gate-lock");
-    assert.ok(body.products.some((p) => p.slug === "azcoherence" && p.family === "plain" && p.worker === AZCOHERENCE_WORKER && p.github === AZCOHERENCE_GITHUB && p.download === AZCOHERENCE_DOWNLOAD && p.invoke === "/runtime/v1/pull/azcoherence"));
-    assert.ok(body.software.some((p) => p.slug === "azcoherence" && p.name === "AZCoherence" && p.family === "plain"));
-    assert.ok(body.software.some((p) => p.slug === "azclce"));
-    const names = body.software.filter((p) => p.family === "plain").map((p) => p.name);
+    assert.equal(body.official_softwares, OFFICIAL_SOFTWARES);
+    assert.equal(body.cloned_suite, false);
+    assert.ok(body.products.every((p) => p.slug === "aziel-runtime"));
+    assert.ok(!body.products.some((p) => p.slug === "azcoherence"));
+    assert.ok(!body.software.some((p) => p.slug === "azcoherence"));
+    const suite = softwareSuite(CATALOG_FALLBACK_PRODUCTS);
+    assert.ok(suite.some((p) => p.slug === "azcoherence" && p.family === "plain" && p.worker === AZCOHERENCE_WORKER && p.github === AZCOHERENCE_GITHUB && p.download === AZCOHERENCE_DOWNLOAD));
+    const names = suite.filter((p) => p.family === "plain").map((p) => p.name);
     assert.ok(names.indexOf("AZ-CLCE") < names.indexOf("AZCoherence"));
     assert.ok(names.indexOf("AZCoherence") < names.indexOf("AZHub"));
     const mapped = compactProduct({
@@ -1400,7 +1391,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(mapped.worker, "");
     assert.equal(mapped.worker_home, AZCOHERENCE_WORKER);
     const api = softwareApiDoc([], { source: "fallback" });
-    assert.ok(api.products.some((p) => p.slug === AZCOHERENCE_SLUG));
+    assert.ok(api.products.every((p) => p.slug === "aziel-runtime"));
+    assert.ok(!api.products.some((p) => p.slug === AZCOHERENCE_SLUG));
     assert.equal(omitUntilWorker("azcoherence"), false);
   });
 
@@ -1481,7 +1473,10 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(azn.download, AZNET_DOWNLOAD);
     assert.equal(azn.downloads, 1);
     assert.equal(azn.views, 3);
-    const html = softwareBody({ products: counted.products });
+    const page = softwareBody({ products: counted.products });
+    assert.deepEqual(softCardIds(page), ["aziel-runtime"]);
+    assert.doesNotMatch(page, /id="fraggate"/);
+    const html = suiteCardsHtml(counted.products);
     assert.match(html, /id="fraggate"[^>]*data-family="gate"/);
     assert.match(html, /<h3>FragGate<\/h3>/);
     assert.match(html, /href="https:\/\/fraggate-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
@@ -1574,7 +1569,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       one_line: LIVE_AZBROWSER_ONE_LINE,
     });
     assert.equal(card.one_line, LIVE_AZBROWSER_ONE_LINE);
-    const html = softwareBody({ products: [card] });
+    const html = softwaresCard(card);
     assert.doesNotMatch(html, /FragGate only\.\s+is a separate/);
     assert.match(html, /AZNet is a separate software \(order\/token pairing only\)\./);
   });
@@ -1625,7 +1620,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(iface.download, AZINTERFACE_DOWNLOAD);
     assert.equal(iface.downloads, 3);
     assert.equal(iface.views, 5);
-    const html = softwareBody({ products: counted.products });
+    const html = suiteCardsHtml(counted.products);
     assert.match(html, /id="azhub"[^>]*data-family="plain"/);
     assert.match(html, /<h3>AZHub<\/h3>/);
     assert.match(html, /href="https:\/\/azhub-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
@@ -1715,7 +1710,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
 
     const card = compactProduct({ slug: "aznet", name: "AZNet", one_line: LIVE_AZNET_ONE_LINE });
     assert.equal(card.one_line, HEALED_AZNET_ONE_LINE);
-    const html = softwareBody({ products: [card] });
+    const html = softwaresCard(card);
     assert.match(html, /id="aznet"[^>]*data-family="plain"/);
     assert.match(html, /<h3>AZNet<\/h3>/);
     assert.match(html, /Separate software; functional-order pair with AZBrowser\./);
@@ -1760,7 +1755,9 @@ describe("Phase F Aziel Runtime 2.0.0-rc1 hub cite", () => {
     const runtime = defaultDescription("runtime");
     assert.ok(software.startsWith(RUNTIME_ABSTRACT.slice(0, 80)));
     assert.ok(runtime.startsWith(RUNTIME_ABSTRACT.slice(0, 80)));
-    assert.ok(software.indexOf(RUNTIME_ABSTRACT.slice(0, 40)) < software.indexOf("Suite doors available from GodLock"));
+    assert.ok(software.indexOf(RUNTIME_ABSTRACT.slice(0, 40)) < software.indexOf("Aziel Runtime only on this page"));
+    assert.match(software, /https:\/\/www\.azieleliab\.com\/software/);
+    assert.doesNotMatch(software, /Suite doors available from GodLock/);
     assert.doesNotMatch(software, /same completeness as the Digital Library/);
     assert.doesNotMatch(software, /Aziel Eliab Softwares catalog/);
     assert.ok(runtime.indexOf(RUNTIME_ABSTRACT.slice(0, 40)) < runtime.indexOf("2.0.0-rc1"));
@@ -1880,11 +1877,14 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.match(liveHtml, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     const liveLd = graphLd(liveHtml);
     const list = liveLd["@graph"].find((n) => n["@type"] === "ItemList");
-    const godItem = (list.itemListElement || []).find((it) => it.item && it.item.identifier === "godlock");
-    assert.ok(godItem);
-    const toolParts = [].concat(godItem.item.isPartOf || []);
+    const runtimeItem = (list.itemListElement || []).find((it) => it.item && it.item.identifier === "aziel-runtime");
+    assert.ok(runtimeItem);
+    assert.ok(isSharedPersonRef(runtimeItem.item.author));
+    const siteGod = liveLd["@graph"].find((n) => n["@type"] === "SoftwareApplication" && n["@id"] === "https://godlock.uk/#godlock");
+    assert.ok(siteGod);
+    const toolParts = [].concat(siteGod.isPartOf || []);
     assert.ok(toolParts.some((p) => p && p["@id"] === "https://www.azieleliab.com/runtime#godlock"));
-    assert.ok(isSharedPersonRef(godItem.item.author));
+    assert.ok(isSharedPersonRef(siteGod.author));
   });
 
   it("self-canonicals godlock.uk pages to themselves and presents read-only mesh ON", async () => {
@@ -1915,19 +1915,20 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
 
 describe("GodLock Softwares identity", () => {
   it("keeps GodLock HTTPS-engine chrome and features GodLock first without library-hub copy", () => {
-    assert.deepEqual(FEATURED_SOFTWARES, ["godlock", "aziel-runtime", "fraggate"]);
+    assert.deepEqual(FEATURED_SOFTWARES, ["aziel-runtime"]);
     const suite = softwareSuite(CATALOG_FALLBACK_PRODUCTS);
     assert.equal(suite[0].slug, "aziel-runtime", "catalog JSON stays Plain→Gate→Lock extras-first");
-    const pageCards = featureGodLockFirst(suite);
-    assert.deepEqual(pageCards.slice(0, 3).map((p) => p.slug), ["godlock", "aziel-runtime", "fraggate"]);
+    const pageCards = featureGodLockFirst(publicSoftwaresList(suite));
+    assert.deepEqual(pageCards.map((p) => p.slug), ["aziel-runtime"]);
     const html = page("Softwares", softwareBody({ products: CATALOG_FALLBACK_PRODUCTS }), { path: "/software", kind: "software" });
     assert.match(html, /<title>GodLock Softwares<\/title>/);
     assert.match(html, /<img class="brandmark" src="\/sigil\.png" width="40" height="40" alt="" decoding="async" fetchpriority="high"><div class="brand">GodLock<\/div><span class="pill">HTTPS engine<\/span>/);
     assert.match(html, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
-    assert.equal(softCardIds(html)[0], "godlock");
-    assert.match(html, /<article class="soft-card featured" id="godlock"/);
+    assert.equal(softCardIds(html)[0], "aziel-runtime");
     assert.match(html, /<article class="soft-card featured" id="aziel-runtime"/);
-    assert.match(html, /<article class="soft-card featured" id="fraggate"/);
+    assert.doesNotMatch(html, /<article class="soft-card[^"]*" id="godlock"/);
+    assert.doesNotMatch(html, /<article class="soft-card[^"]*" id="fraggate"/);
+    assert.match(html, /https:\/\/www\.azieleliab\.com\/software/);
     assert.doesNotMatch(html, /Downloadable software/);
     assert.doesNotMatch(html, /same completeness as the Digital Library/);
     assert.doesNotMatch(html, /matching Digital Library Software completeness/);
@@ -1944,7 +1945,9 @@ describe("GodLock Softwares identity", () => {
     assert.equal(collection.identifier, "godlock-softwares");
     assert.ok(!(collection.sameAs || []).includes("https://www.azielcorpuslibrary.net/runtime"));
     const cite = citeDoc();
-    assert.match(cite.software_suite, /Suite doors available from GodLock/);
+    assert.match(cite.software_suite, /Aziel Runtime only/);
+    assert.match(cite.software_suite, /https:\/\/www\.azieleliab\.com\/software/);
+    assert.doesNotMatch(cite.software_suite, /Suite doors available from GodLock/);
     assert.doesNotMatch(cite.software_suite, /same completeness/);
   });
 });

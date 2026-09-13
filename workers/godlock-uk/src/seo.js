@@ -1162,6 +1162,8 @@ export function headMeta(opts) {
     linkRel("alternate", "/who-is-aziel-eliab.txt", " type=" + Q + "text/plain" + Q),
     linkRel("alternate", "/.well-known/aziel.json", " type=" + Q + "application/json" + Q),
     linkRel("alternate", "/.well-known/person.jsonld", " type=" + Q + "application/ld+json" + Q),
+    linkRel("alternate", "/.well-known/mcp.json", " type=" + Q + "application/json" + Q + " title=" + Q + "MCP discovery" + Q),
+    linkRel("alternate", "/mcp.json", " type=" + Q + "application/json" + Q + " title=" + Q + "MCP discovery" + Q),
     hashPathRedirectScript(),
   );
   if (kind !== "aziel") {
@@ -1319,6 +1321,8 @@ export const PUBLIC_ALLOW = [
   "/who",
   "/.well-known/aziel.json",
   "/.well-known/person.jsonld",
+  "/.well-known/mcp.json",
+  "/mcp.json",
   "/openapi.json",
   "/count",
   "/stats",
@@ -1334,6 +1338,7 @@ export function robotsTxt() {
     "# Author: Aziel Eliab. Also known as Aziel Elroi Eliab (alternateName only).",
     "# Content-Signal opens search + AI input + AI train.",
     "# Identity machine: /person.jsonld /identity.jsonld /graph.jsonld /who /who-is-aziel-eliab.txt /who-is /.well-known/aziel.json /.well-known/person.jsonld",
+    "# MCP discovery (not a second door): /.well-known/mcp.json /mcp.json → POST /runtime/mcp.",
     "# GodLock product surface. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.",
     "# Homepage hashes (#software #runtime #receipts #donate #reason #verify #AzielEliab) map to real paths.",
     "# Softwares HTML: /software. Catalog JSON: /v1/software (not a second FragGate door). Door: /runtime.",
@@ -1396,6 +1401,8 @@ export async function sitemapXml(env, extras = {}) {
   add(CANON_HOST + WHO_IS_ALIAS_PATH, "0.8", "weekly");
   add(CANON_HOST + "/.well-known/aziel.json", "0.8", "weekly");
   add(CANON_HOST + "/.well-known/person.jsonld", "0.85", "weekly");
+  add(CANON_HOST + "/.well-known/mcp.json", "0.7", "weekly");
+  add(CANON_HOST + "/mcp.json", "0.65", "weekly");
   add(CANON_HOST + "/stats", "0.45", "daily");
   add(CANON_HOST + COUNT_PATH, "0.4", "daily");
   add(SISTER_STATS.azieleliab, "0.4", "daily");
@@ -1500,6 +1507,8 @@ export function citeDoc() {
       who_is: CANON_HOST + WHO_IS_ALIAS_PATH,
       well_known_aziel: CANON_HOST + "/.well-known/aziel.json",
       well_known_person: CANON_HOST + "/.well-known/person.jsonld",
+      mcp_discovery: CANON_HOST + "/.well-known/mcp.json",
+      mcp_discovery_alias: CANON_HOST + "/mcp.json",
       reason: CANON_HOST + REASON_PATH,
       count: CANON_HOST + COUNT_PATH,
       runtime: PUBLIC_RUNTIME,
@@ -1559,6 +1568,9 @@ export function citeDoc() {
     azcoherence_peer: AZCOHERENCE_PEER,
     azcoherence_note: "Second-pass triad coherence review. Peer AZ-CLCE (azclce). Not AKM-TRIAD. FragGate single door. Author Aziel Eliab.",
     openapi: CANON_HOST + "/openapi.json",
+    mcp_discovery: CANON_HOST + "/.well-known/mcp.json",
+    mcp_discovery_alias: CANON_HOST + "/mcp.json",
+    mcp_discovery_note: "Discovery JSON only. Points at POST " + PUBLIC_RUNTIME + "/mcp. Not a second FragGate door.",
     update_check: CATALOG + "/v1/update/check?slug=godlock&version=0.1.0",
     update_download: DOWNLOAD,
     runtime: PUBLIC_RUNTIME,
@@ -1691,6 +1703,8 @@ export function llmsDoc() {
     + "Cite: " + CANON_HOST + "/cite.json\n"
     + "LLMs: " + CANON_HOST + "/llms.txt\n"
     + "AI: " + CANON_HOST + "/ai.txt\n"
+    + "MCP discovery: " + CANON_HOST + "/.well-known/mcp.json\n"
+    + "MCP discovery alias: " + CANON_HOST + "/mcp.json\n"
     + "Person JSON-LD: " + CANON_HOST + "/person.jsonld\n"
     + "Who is Aziel Eliab: " + CANON_HOST + WHO_PATH + "\n"
     + "Who is Aziel Eliab (txt): " + CANON_HOST + WHO_IS_PATH + "\n"
@@ -1720,6 +1734,7 @@ export function llmsDoc() {
     + "Catalog JSON: " + PUBLIC_RUNTIME + "/v1/catalog.json\n"
     + "Origin catalog: " + CATALOG + "/v1/catalog.json\n"
     + "OpenAPI: " + CANON_HOST + "/openapi.json\n"
+    + "MCP discovery (not a second door): " + CANON_HOST + "/.well-known/mcp.json and " + CANON_HOST + "/mcp.json → POST " + PUBLIC_RUNTIME + "/mcp\n"
     + "Update check: " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, use counted " + DOWNLOAD + " (no silent overwrite).\n\n"
     + "## Runtime (FragGate door)\n\n"
     + RUNTIME_ABSTRACT + "\n\n"
@@ -1736,6 +1751,7 @@ export function llmsDoc() {
     + "FragGate list: " + PUBLIC_RUNTIME + "/v1/fraggate/list\n"
     + "OpenAPI: " + PUBLIC_RUNTIME + "/openapi.json\n"
     + "MCP: POST " + PUBLIC_RUNTIME + "/mcp\n"
+    + "MCP discovery: " + CANON_HOST + "/.well-known/mcp.json\n"
     + "Suite mesh (read-only, on): " + PUBLIC_RUNTIME + "/v1/mesh\n"
     + "QNM-BUILD-1.0 rollup: live|locked|isolated counts only. No Node Gate. No auto-heal.\n"
     + "GET /v1/mesh never enables. Display rollup only. This Worker has no mesh-off function.\n"
@@ -1767,6 +1783,37 @@ export function aiDoc() {
   return llmsDoc();
 }
 
+/** Host-root MCP discovery. Points at POST /runtime/mcp. Not a second FragGate door. */
+export function mcpDiscoveryDoc() {
+  return {
+    name: RUNTIME_NAME,
+    description: "Aziel Runtime FragGate MCP door on GodLock.uk. Discovery only. Not a second FragGate door. GodLock is a product name, not an identity.",
+    icon: BRAND_MARK,
+    endpoint: PUBLIC_RUNTIME + "/mcp",
+    transport: "JSON-RPC MCP-over-HTTP",
+    method: "POST",
+    methods: ["initialize", "tools/list", "tools/call", "ping"],
+    auth: "none (public)",
+    door: "fraggate",
+    note: "Discovery JSON pointing at the same-origin Runtime MCP door. POST " + PUBLIC_RUNTIME + "/mcp. Pipeline: fraggate_list → fraggate_describe → fraggate_call. Not a second FragGate door.",
+    skill: PUBLIC_RUNTIME + "/v1/skill",
+    runtime: PUBLIC_RUNTIME + "/v1/runtime.json",
+    fraggate: PUBLIC_RUNTIME + "/v1/fraggate",
+    software: PUBLIC_RUNTIME + "/v1/software",
+    openapi: PUBLIC_RUNTIME + "/openapi.json",
+    glama: GLAMA_RUNTIME,
+    official_runtime: PUBLIC_RUNTIME,
+    product: SITE,
+    host: CANON_HOST + "/",
+    host_kind: "product_surface",
+    author: AUTHOR,
+    identity: AUTHOR,
+    person_id: AZIEL_PERSON_ID,
+    runtime_id: HUB_RUNTIME_ID,
+    sameAs: runtimeSameAs(),
+  };
+}
+
 export function siteOpenApi() {
   return {
     openapi: "3.1.0",
@@ -1795,6 +1842,8 @@ export function siteOpenApi() {
       "/who-is": { get: { operationId: "godlockUkWhoIsAlias", summary: "308 to /who-is-aziel-eliab.txt", responses: { "308": { description: "Permanent redirect" } } } },
       "/count": { get: { operationId: "godlockUkCount", summary: "Public Live Nodes / Uses / Receipts counters", responses: { "200": { description: "OK" } } } },
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
+      "/.well-known/mcp.json": { get: { operationId: "godlockUkWellKnownMcp", summary: "MCP discovery JSON pointing at POST /runtime/mcp (not a second FragGate door)", responses: { "200": { description: "OK" } } } },
+      "/mcp.json": { get: { operationId: "godlockUkMcpDiscovery", summary: "Same body as /.well-known/mcp.json — discovery only", responses: { "200": { description: "OK" } } } },
       "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record", responses: { "200": { description: "OK" } } } },
       "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief", responses: { "200": { description: "OK" } } } },
       "/person.jsonld": { get: { operationId: "godlockUkPersonJsonLd", summary: "Shared AZindex Person (https://www.azieleliab.com/#aziel)", responses: { "200": { description: "OK" } } } },

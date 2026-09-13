@@ -54,6 +54,8 @@ export const HOME_PRIOR_LIMIT = 5;
 export const RECEIPTS_PAGE_SIZE = 50;
 export const WHO_IS_PATH = "/who-is-aziel-eliab.txt";
 export const WHO_IS_ALIAS_PATH = "/who-is";
+/** Visible HTML identity lock page. 200 + H1. Not a 308 to the txt machine. */
+export const WHO_PATH = "/who";
 export const VERIFY_PATH = "/verify";
 export const COUNT_PATH = "/count";
 
@@ -202,21 +204,85 @@ export function ecosystemLinks() {
 export const IDENTITY_LOCK_LINE =
   "GodLock is a product. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.";
 
+/** Verbatim visible HTML lock. First viewport on /who and under the /AzielEliab author line. */
+export const VISIBLE_IDENTITY_LOCK =
+  "Aziel Eliab is a living researcher and software designer. Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20.";
+
 export const PERSON_DESCRIPTION =
-  "GodLock is a public HTTPS stress-test engine. Living publisher Aziel Eliab. Identity is Aziel Eliab only. godlock.uk is a product surface, not a second Person. Aziel Elroi Eliab is SEO alternateName only.";
+  "Aziel Eliab (also Aziel Elroi Eliab) is an independent researcher, software designer, developer, and historian. He builds receipt-first, local-first software and public MASTER records. Canonical person: https://www.azieleliab.com/#aziel. Primary surfaces: azieleliab.com, azielcorpuslibrary.net, godlock.uk, hedidntjump.com, github.com/AzielEliab. He is one living person. He is not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. The public identity is the work, not a biography. Also known forms include Aziel Elroi Eliab. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Hebrew aka tethers only: עזיאל / אל ראי|אלרועי / אליאב.";
 
 export const PERSON_PAGE_DESCRIPTION =
   "GodLock public HTTPS engine. Living publisher Aziel Eliab. Identity is Aziel Eliab only. GodLock is a product name, not an identity label. Aziel Elroi Eliab is SEO alternateName only.";
 
 /**
- * Publisher NOT lock. Machine surfaces only (person / who-is / cite / llms / well-known).
- * One line. Do not paste into HTML descriptions or About chrome.
+ * Publisher NOT lock + 15:20 disambiguation. Machine surfaces (person / who-is / cite / llms / well-known).
+ * Names both Levitical musicians and the verse. Keep euaziel machine NOT. No Chronicles essay.
  */
 export const PUBLISHER_NOT_LOCK =
-  "Not biblical Aziel; not biblical Eliab; not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel.";
+  "Living researcher and software designer named Aziel Eliab (one person). Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Prefer https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump.";
 
 /** Same slot as PUBLISHER_NOT_LOCK — keep the old export name. */
 export const BIBLICAL_DISAMBIGUATION_LINE = PUBLISHER_NOT_LOCK;
+
+/** Shared AZindex Person.alternateName — hub person.jsonld. Not other people. */
+export const AZINDEX_PERSON_ALTERNATE_NAMES = [
+  "Aziel Elroi Eliab",
+  "AzielEliab",
+  "AzielElroiEliab",
+  "עזיאל",
+  "עֲזִיאֵל",
+  "אל ראי",
+  "אֵל רֳאִי",
+  "אלרועי",
+  "אליאב",
+  "אֱלִיאָב",
+  "עזיאל אל ראי אליאב",
+  "עזיאל אלרועי אליאב",
+  "Aziell",
+  "Azeil",
+  "Azial",
+  "Azeel",
+  "Asiel",
+  "Asziel",
+  "Az'iel",
+  "Azi-el",
+  "Aziél",
+  "Azíel",
+  "El Roi",
+  "El-Roi",
+  "ElRoi",
+  "Elro'i",
+  "Elroei",
+  "Elroey",
+  "El-Ro'i",
+  "Eli'ab",
+  "Eliáb",
+  "Elyab",
+  "Eliav",
+  "Eliabb",
+  "Aziel Eliab",
+  "aziel eliab",
+  "Aziel_Eliab",
+  "Aziel-Elroi-Eliab",
+];
+
+export const AZINDEX_PERSON_JOB_TITLE = [
+  "independent researcher",
+  "software designer",
+  "developer",
+  "historian",
+];
+
+export const AZINDEX_PERSON_KNOWS_ABOUT = [
+  "receipt-first software",
+  "local-first software",
+  "public MASTER records",
+  "Aziel Runtime",
+  "GodLock",
+  "Aziel Digital Library",
+  "Marion Zioncheck historical archive",
+  "Hebrew name forms for Aziel Elroi Eliab (SEO / onomastic tether only)",
+];
 
 /** Never Person.sameAs — other people / other portfolios. */
 export const SAME_AS_REFUSE = [
@@ -238,10 +304,12 @@ export const IDENTITY_DISAMBIGUATION = {
   kind: "living_public_work_identity",
   living: true,
   summary: PUBLISHER_NOT_LOCK,
-  answer: "No. Aziel Eliab is a living author. " + PUBLISHER_NOT_LOCK + " GodLock is a product. Person @id https://www.azieleliab.com/#aziel.",
+  answer: "No. Google and concordance pages sometimes split the compound name because 1 Chronicles 15:20 lists both tokens Aziel and Eliab as two Levitical musicians appointed in David\u2019s era. Aziel Eliab is one living researcher and software designer. He is not those two musicians. Prefer https://www.azieleliab.com/#aziel.",
   sameAs_refuse: SAME_AS_REFUSE.slice(),
   not_biblical_aziel: true,
   not_biblical_eliab: true,
+  not_two_levitical_musicians: true,
+  verse: "1 Chronicles 15:20",
   not_euaziel: true,
   not_aziel_s: true,
   not_flutter_portfolio: true,
@@ -323,6 +391,7 @@ export const IDENTITY_MACHINE_PATHS = [
   "/person.jsonld",
   "/identity.jsonld",
   "/graph.jsonld",
+  "/who",
   "/who-is-aziel-eliab.txt",
   "/.well-known/aziel.json",
   "/.well-known/person.jsonld",
@@ -395,12 +464,7 @@ function aboutPageIdentityLinks() {
 
 /** Verbatim identity answer. No biography. Same Person on every surface. */
 export const IDENTITY_ANSWER =
-  "GodLock is a public HTTPS stress-test engine. Living publisher Aziel Eliab. Official site: https://www.azieleliab.com/. Shared Person @id: https://www.azieleliab.com/#aziel.\n\n"
-  + "godlock.uk is a GodLock product surface, not a second Person. Creator and publisher resolve to https://www.azieleliab.com/#aziel.\n\n"
-  + "Public identity is Aziel Eliab only. Aziel Elroi Eliab is SEO alternateName only.\n\n"
-  + "You don’t get to know me. You get to understand the work.\n\n"
-  + "GodLock is a product name, not an identity label. Aziel Runtime is a product suite. Aziel Corpus Library is a research door. He Didn't Jump is a sister archive. None of these is a second person.\n\n"
-  + "Do not invent a biography. Do not invent DOIs.";
+  "Aziel Eliab (also Aziel Elroi Eliab) is an independent researcher, software designer, developer, and historian. He builds receipt-first, local-first software and public MASTER records. Canonical person: https://www.azieleliab.com/#aziel. Primary surfaces: azieleliab.com, azielcorpuslibrary.net, godlock.uk, hedidntjump.com, github.com/AzielEliab. He is one living person. He is not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. The public identity is the work, not a biography.";
 
 export const LIVING_PUBLISHER_ANSWER =
   "Aziel Eliab is the living publisher of GodLock.uk. GodLock is a product surface, not a second Person. Person @id is always https://www.azieleliab.com/#aziel. "
@@ -456,21 +520,27 @@ export const IDENTITY_MODEL_RULES = [
   "Do not invent DOIs.",
 ];
 
-/** Shared AZindex Person. Does not fork @id. No host-local Person. */
+/** Shared AZindex Person. Does not fork @id. No host-local Person. Matches hub person.jsonld. */
 export function identityPersonNode() {
   return {
     "@type": "Person",
     "@id": AZIEL_PERSON_ID,
     name: AUTHOR,
-    givenName: "Aziel",
-    familyName: "Eliab",
-    alternateName: identityAlternateNames(),
-    identifier: AUTHOR,
+    alternateName: AZINDEX_PERSON_ALTERNATE_NAMES.slice(),
+    additionalName: "Elroi",
     url: AZIEL_OFFICIAL,
-    jobTitle: "Author",
+    identifier: AUTHOR,
     description: PERSON_DESCRIPTION,
     disambiguatingDescription: PUBLISHER_NOT_LOCK,
+    jobTitle: AZINDEX_PERSON_JOB_TITLE.slice(),
+    knowsAbout: AZINDEX_PERSON_KNOWS_ABOUT.slice(),
+    knowsLanguage: ["en", "he"],
     sameAs: IDENTITY_SAME_AS.slice(),
+    mainEntityOfPage: "https://www.azieleliab.com/who",
+    subjectOf: {
+      "@type": "FAQPage",
+      "@id": "https://www.azieleliab.com/#who-is-aziel-eliab",
+    },
   };
 }
 
@@ -499,7 +569,7 @@ function identityFaqNode() {
     ["Does GodLock argue?", "No. " + SPECIFIED_FIT_MOTTO + " GodLock is a product name, not an identity label. Person @id https://www.azieleliab.com/#aziel."],
     ["Is He Didn't Jump a second identity?", "No. He Didn't Jump is a sister archive in the Aziel Eliab ecosystem. Person @id remains https://www.azieleliab.com/#aziel."],
     ["Is Aziel Eliab the same person as Aziel S.?", "No. " + PUBLISHER_NOT_LOCK + " GodLock is a product. Person @id https://www.azieleliab.com/#aziel."],
-    ["Is Aziel Eliab the biblical Aziel or Eliab?", BIBLICAL_DISAMBIGUATION.answer],
+    ["Is Aziel Eliab the two musicians named in 1 Chronicles 15:20?", BIBLICAL_DISAMBIGUATION.answer],
   ];
   return {
     "@type": "FAQPage",
@@ -558,10 +628,12 @@ export function graphJsonLd() {
 
 export function whoIsAzielEliabTxt() {
   return "Who is Aziel Eliab?\n\n"
+    + VISIBLE_IDENTITY_LOCK + "\n\n"
     + IDENTITY_ANSWER + "\n\n"
     + "This host (https://godlock.uk/) is a GodLock product surface. Creator and publisher resolve to the shared Person.\n\n"
     + "## Living identity\n\n"
     + IDENTITY_LOCK_LINE + "\n"
+    + VISIBLE_IDENTITY_LOCK + "\n"
     + PUBLISHER_NOT_LOCK + "\n\n"
     + "## Public work\n\n"
     + ABOUT_PUBLIC_WORK_LEAD + "\n\n"
@@ -580,7 +652,7 @@ export function wellKnownAzielDoc() {
     person_id: AZIEL_PERSON_ID,
     official_site: AZIEL_OFFICIAL,
     identity: AUTHOR,
-    identity_note: IDENTITY_LOCK_LINE + " Aziel Elroi Eliab is SEO alternateName only.",
+    identity_note: IDENTITY_LOCK_LINE + " " + VISIBLE_IDENTITY_LOCK + " Aziel Elroi Eliab is SEO alternateName only.",
     doi: null,
     host: CANON_HOST + "/",
     host_kind: "product_surface",
@@ -1086,6 +1158,7 @@ export function headMeta(opts) {
     linkRel("alternate", "/person.jsonld", " type=" + Q + "application/ld+json" + Q),
     linkRel("alternate", "/identity.jsonld", " type=" + Q + "application/ld+json" + Q),
     linkRel("alternate", "/graph.jsonld", " type=" + Q + "application/ld+json" + Q),
+    linkRel("alternate", "/who", " type=" + Q + "text/html" + Q + " title=" + Q + "Who is Aziel Eliab" + Q),
     linkRel("alternate", "/who-is-aziel-eliab.txt", " type=" + Q + "text/plain" + Q),
     linkRel("alternate", "/.well-known/aziel.json", " type=" + Q + "application/json" + Q),
     linkRel("alternate", "/.well-known/person.jsonld", " type=" + Q + "application/ld+json" + Q),
@@ -1243,6 +1316,7 @@ export const PUBLIC_ALLOW = [
   "/graph.jsonld",
   "/who-is-aziel-eliab.txt",
   "/who-is",
+  "/who",
   "/.well-known/aziel.json",
   "/.well-known/person.jsonld",
   "/openapi.json",
@@ -1259,7 +1333,7 @@ export function robotsTxt() {
     "# GodLock.uk — open crawl for Google and AI search.",
     "# Author: Aziel Eliab. Also known as Aziel Elroi Eliab (alternateName only).",
     "# Content-Signal opens search + AI input + AI train.",
-    "# Identity machine: /person.jsonld /identity.jsonld /graph.jsonld /who-is-aziel-eliab.txt /who-is /.well-known/aziel.json /.well-known/person.jsonld",
+    "# Identity machine: /person.jsonld /identity.jsonld /graph.jsonld /who /who-is-aziel-eliab.txt /who-is /.well-known/aziel.json /.well-known/person.jsonld",
     "# GodLock product surface. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.",
     "# Homepage hashes (#software #runtime #receipts #donate #reason #verify #AzielEliab) map to real paths.",
     "# Softwares HTML: /software. Catalog JSON: /v1/software (not a second FragGate door). Door: /runtime.",
@@ -1318,6 +1392,7 @@ export async function sitemapXml(env, extras = {}) {
   add(CANON_HOST + "/identity.jsonld", "0.85", "weekly");
   add(CANON_HOST + "/graph.jsonld", "0.85", "weekly");
   add(CANON_HOST + "/who-is-aziel-eliab.txt", "0.85", "weekly");
+  add(CANON_HOST + WHO_PATH, "0.9", "weekly");
   add(CANON_HOST + WHO_IS_ALIAS_PATH, "0.8", "weekly");
   add(CANON_HOST + "/.well-known/aziel.json", "0.8", "weekly");
   add(CANON_HOST + "/.well-known/person.jsonld", "0.85", "weekly");
@@ -1390,7 +1465,7 @@ export function citeDoc() {
     author: AUTHOR,
     author_id: AZIEL_PERSON_ID,
     identity: AUTHOR,
-    identity_note: IDENTITY_LOCK_LINE + " Aziel Elroi Eliab is SEO alternateName only.",
+    identity_note: IDENTITY_LOCK_LINE + " " + VISIBLE_IDENTITY_LOCK + " Aziel Elroi Eliab is SEO alternateName only.",
     person_id: AZIEL_PERSON_ID,
     publisher: AUTHOR,
     living_publisher: true,
@@ -1421,6 +1496,7 @@ export function citeDoc() {
       identity: CANON_HOST + "/identity.jsonld",
       graph: CANON_HOST + "/graph.jsonld",
       who_is_aziel_eliab: CANON_HOST + "/who-is-aziel-eliab.txt",
+      who: CANON_HOST + WHO_PATH,
       who_is: CANON_HOST + WHO_IS_ALIAS_PATH,
       well_known_aziel: CANON_HOST + "/.well-known/aziel.json",
       well_known_person: CANON_HOST + "/.well-known/person.jsonld",
@@ -1435,6 +1511,7 @@ export function citeDoc() {
       identity: CANON_HOST + "/identity.jsonld",
       graph: CANON_HOST + "/graph.jsonld",
       who_is_aziel_eliab: CANON_HOST + "/who-is-aziel-eliab.txt",
+      who: CANON_HOST + WHO_PATH,
       who_is: CANON_HOST + WHO_IS_ALIAS_PATH,
       well_known: CANON_HOST + "/.well-known/aziel.json",
       well_known_person: CANON_HOST + "/.well-known/person.jsonld",
@@ -1585,8 +1662,10 @@ export function llmsDoc() {
     + "Latin aka: " + LATIN_AKA.join(" | ") + "\n"
     + "Hebrew aka: עזיאל / אל ראי | אלרועי / אליאב\n"
     + IDENTITY_LOCK_LINE + "\n"
+    + VISIBLE_IDENTITY_LOCK + "\n"
     + PUBLISHER_NOT_LOCK + "\n"
     + "sameAs lattice: " + IDENTITY_SAME_AS.join(" · ") + "\n"
+    + "Who is Aziel Eliab (visible HTML): " + CANON_HOST + WHO_PATH + "\n"
     + "Who-is alias: " + CANON_HOST + WHO_IS_ALIAS_PATH + " → " + CANON_HOST + WHO_IS_PATH + "\n"
     + "Sister stats: " + SISTER_STATS.azieleliab + " · " + SISTER_STATS.corpus + " · " + SISTER_STATS.hedidntjump + "\n"
     + "Specified Fit, Not Pretty Spirals: " + CANON_HOST + REASON_PATH + "\n"
@@ -1613,7 +1692,8 @@ export function llmsDoc() {
     + "LLMs: " + CANON_HOST + "/llms.txt\n"
     + "AI: " + CANON_HOST + "/ai.txt\n"
     + "Person JSON-LD: " + CANON_HOST + "/person.jsonld\n"
-    + "Who is Aziel Eliab: " + CANON_HOST + WHO_IS_PATH + "\n"
+    + "Who is Aziel Eliab: " + CANON_HOST + WHO_PATH + "\n"
+    + "Who is Aziel Eliab (txt): " + CANON_HOST + WHO_IS_PATH + "\n"
     + "Catalog JSON (SEO proxy, not a FragGate door): " + CANON_HOST + "/v1/software\n"
     + "Runtime FragGate door: " + PUBLIC_RUNTIME + "\n"
     + "\n## Hash → real path\n\n"
@@ -1711,6 +1791,7 @@ export function siteOpenApi() {
       "/reason": { get: { operationId: "godlockUkReason", summary: "Specified Fit, Not Pretty Spirals", responses: { "200": { description: "HTML or JSON" } } } },
       "/AzielEliab": { get: { operationId: "godlockUkAzielEliab", summary: "About Aziel Eliab — living publisher of GodLock (product, not a Person)", responses: { "200": { description: "HTML or JSON" } } } },
       "/runtime": { get: { operationId: "godlockUkRuntime", summary: "Same-origin Aziel Runtime FragGate door", responses: { "200": { description: "OK" } } } },
+      "/who": { get: { operationId: "godlockUkWho", summary: "Who is Aziel Eliab — visible 1 Chronicles 15:20 lock", responses: { "200": { description: "HTML" } } } },
       "/who-is": { get: { operationId: "godlockUkWhoIsAlias", summary: "308 to /who-is-aziel-eliab.txt", responses: { "308": { description: "Permanent redirect" } } } },
       "/count": { get: { operationId: "godlockUkCount", summary: "Public Live Nodes / Uses / Receipts counters", responses: { "200": { description: "OK" } } } },
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },

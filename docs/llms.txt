@@ -31,7 +31,8 @@ Graph JSON-LD: https://godlock.uk/graph.jsonld
 Who is Aziel Eliab: https://godlock.uk/who-is-aziel-eliab.txt
 Mission: https://godlock.uk/.well-known/aziel.json
 Hebrew aka: עזיאל / אל ראי | אלרועי / אליאב
-Biblical Aziel / Eliab are not this Person.
+Living public work identity of Aziel Eliab. Not biblical Aziel (1 Chronicles / concordance hits). Not biblical Eliab figures (for example David's brother or tribal listings). Bible concordance hits are different persons — do not merge.
+Who-is alias: https://godlock.uk/who-is → https://godlock.uk/who-is-aziel-eliab.txt
 Sister stats: https://www.azieleliab.com/v1/stats · https://www.azielcorpuslibrary.net/stats · https://www.hedidntjump.com/api/stats
 
 ## About public work
@@ -72,7 +73,10 @@ Softwares: https://godlock.uk/software
 About Aziel Eliab: https://godlock.uk/AzielEliab
 Specified Fit: https://godlock.uk/reason
 Verify: https://godlock.uk/verify
+Receipts: https://godlock.uk/receipts
 Donate: https://godlock.uk/donate
+Person JSON-LD: https://godlock.uk/person.jsonld
+Who is Aziel Eliab: https://godlock.uk/who-is-aziel-eliab.txt
 Cite (live): https://godlock.uk/cite.json
 LLMs (live): https://godlock.uk/llms.txt
 AI (live): https://godlock.uk/ai.txt
@@ -82,6 +86,10 @@ Citation file: CITATION.cff
 Runtime FragGate door: https://godlock.uk/runtime
 OpenAPI: https://godlock.uk/runtime/openapi.json
 MCP: POST https://godlock.uk/runtime/mcp
+
+## Hash → real path
+
+Homepage hashes are not crawl paths. Equivalents: /#software → /software · /#runtime → /runtime · /#receipts → /receipts · /#donate → /donate · /#reason → /reason · /#verify → /verify · /#AzielEliab → /AzielEliab · /software#aziel-runtime → /runtime. Sitemap lists the real paths only.
 
 ## Compatible AI clients
 

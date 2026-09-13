@@ -32,7 +32,7 @@ Who is Aziel Eliab: https://godlock.uk/who-is-aziel-eliab.txt
 Mission: https://godlock.uk/.well-known/aziel.json
 Hebrew aka: עזיאל / אל ראי | אלרועי / אליאב
 Living publisher of GodLock.uk. Product surface, not a second Person. Person @id is always https://www.azieleliab.com/#aziel.
-Living public work identity of Aziel Eliab. Not biblical Aziel (1 Chronicles / concordance hits). Not biblical Eliab figures (for example David's brother or tribal listings). Bible concordance hits are different persons — do not merge.
+Aziel Eliab only — living public work identity. Not Aziel S., not a Flutter/React portfolio engineer, and not biblical Aziel or Eliab. GodLock is a product name, not a second Person. Person @id https://www.azieleliab.com/#aziel.
 sameAs lattice: https://github.com/AzielEliab · https://github.com/azieltherevealerofthesealed-arch · https://glama.ai/mcp/servers/AzielEliab/aziel-runtime · https://www.azieleliab.com/ · https://www.azielcorpuslibrary.net/ · https://godlock.uk/ · https://www.hedidntjump.com/ · https://x.com/AzielElroiEliab · https://x.com/azieleliab
 Who-is alias: https://godlock.uk/who-is → https://godlock.uk/who-is-aziel-eliab.txt
 Sister stats: https://www.azieleliab.com/v1/stats · https://www.azielcorpuslibrary.net/stats · https://www.hedidntjump.com/api/stats

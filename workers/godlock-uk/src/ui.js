@@ -10,6 +10,7 @@ import {
   AI_CLIENTS_SENTENCE, runtimeDistribution, ecosystemLinks,
   SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO,
   ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM,
+  IDENTITY_LOCK_LINE,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
@@ -502,6 +503,7 @@ export function reasonText() {
 export function azielEliabBody() {
   const paras = AZIEL_MANIFESTO.map((p) => `<p>${esc(p)}</p>`).join("\n");
   return `<section class="about-aziel" id="aziel-eliab"><div class="card about-prose">
+<p class="muted">${esc(IDENTITY_LOCK_LINE)}</p>
 ${paras}
 <p class="about-sign">${esc(AZIEL_SIGNATURE)}</p>
 ${specifiedFitPublicHtml()}

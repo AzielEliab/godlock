@@ -53,6 +53,8 @@ import {
   identityMachineUrls,
   IDENTITY_LOCK_LINE,
   PUBLISHER_NOT_LOCK,
+  VISIBLE_IDENTITY_LOCK,
+  WHO_PATH,
   LOCAL_PERSON_STUB_ID,
   AI_CRAWLER_AGENTS,
   AI_CLIENTS,
@@ -213,7 +215,11 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(html.includes("— Aziel Eliab"));
     assert.match(html, /GodLock is a product/);
     assert.match(html, /Living publisher Aziel Eliab/);
-    assert.doesNotMatch(html, /1 Chronicles/);
+    assert.ok(html.includes(VISIBLE_IDENTITY_LOCK));
+    const authorAt = html.indexOf('<p class="author">Author Aziel Eliab</p>');
+    const lockAt = html.indexOf(VISIBLE_IDENTITY_LOCK);
+    const navAt = html.indexOf('class="nav2"');
+    assert.ok(authorAt >= 0 && lockAt > authorAt && lockAt < navAt);
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab">Aziel Eliab — Digital Library<\/a>/);
     assert.match(html, /href="https:\/\/www\.hedidntjump\.com\/">He Didn't Jump<\/a>/);
     const manifesto = html.match(/<section class="about-aziel"[\s\S]*?<\/section>/)[0];
@@ -291,6 +297,7 @@ describe("Aziel Eliab SEO surfaces", () => {
   it("lists identity and library pages in robots, sitemap, cite, llms, and ai", async () => {
     const robots = robotsTxt();
     assert.match(robots, /Allow: \/AzielEliab/);
+    assert.match(robots, /Allow: \/who\n/);
     assert.match(robots, /Allow: \/reason/);
     assert.match(robots, /Allow: \/donate/);
     assert.match(robots, /Allow: \/receipts/);
@@ -387,6 +394,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/reason"));
     assert.ok(xml.includes(CANON_HOST + "/donate"));
     assert.ok(xml.includes(CANON_HOST + "/receipts"));
+    assert.ok(xml.includes("<loc>" + CANON_HOST + "/who</loc>"));
     assert.ok(xml.includes("<loc>" + CANON_HOST + "/who-is</loc>"));
     assert.ok(xml.includes(CANON_HOST + "/count"));
     assert.ok(xml.includes("https://www.azieleliab.com/donate"));
@@ -611,6 +619,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(spec.paths["/verify"]);
     assert.ok(spec.paths["/reason"]);
     assert.ok(spec.paths["/AzielEliab"]);
+    assert.ok(spec.paths["/who"]);
     assert.ok(spec.paths["/who-is"]);
     assert.ok(spec.paths["/person.jsonld"]);
     assert.ok(spec.paths["/.well-known/person.jsonld"]);
@@ -648,6 +657,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(permanentIdentityRedirect("/who-is"), "/who-is-aziel-eliab.txt");
     assert.equal(permanentIdentityRedirect("/whois"), "/who-is-aziel-eliab.txt");
     assert.equal(permanentIdentityRedirect("/who-is-aziel-eliab.txt"), "");
+    assert.equal(permanentIdentityRedirect("/who"), "");
+    assert.equal(WHO_PATH, "/who");
   });
 });
 
@@ -858,6 +869,17 @@ describe("Aziel Corpus Library off-site", () => {
 });
 
 describe("Aziel Eliab routes", () => {
+  it("serves /who 200 with the visible 15:20 lock and H1", async () => {
+    const res = await worker.fetch(new Request("https://godlock.uk/who"), mockEnv());
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, /<h1>Who is Aziel Eliab<\/h1>/);
+    assert.ok(html.includes(VISIBLE_IDENTITY_LOCK));
+    const body = html.replace(/^[\s\S]*<body>/i, "").replace(/<\/body>[\s\S]*$/i, "");
+    assert.ok(body.includes(VISIBLE_IDENTITY_LOCK));
+    assert.doesNotMatch(html, /Works with ChatGPT/);
+  });
+
   it("serves the manifesto at /AzielEliab", async () => {
     const res = await worker.fetch(new Request("https://godlock.uk/AzielEliab"), mockEnv());
     assert.equal(res.status, 200);
@@ -885,9 +907,9 @@ describe("Aziel Eliab routes", () => {
     assert.equal(body.host_kind, "product_surface");
     assert.equal(body.product_not_identity, true);
     assert.equal(body.disambiguation, PUBLISHER_NOT_LOCK);
-    assert.doesNotMatch(body.disambiguation, /1 Chronicles/);
-    assert.doesNotMatch(body.disambiguation, /concordance hits/);
-    assert.doesNotMatch(body.text, /Aziel S|Flutter|1 Chronicles/i);
+    assert.match(body.disambiguation, /1 Chronicles 15:20/);
+    assert.match(body.disambiguation, /two Levitical musicians Aziel and Eliab/);
+    assert.doesNotMatch(body.text, /Aziel S|Flutter/i);
     assert.ok(body.text.includes("The receipt is the argument that survives the speaker."));
   });
 

@@ -9,7 +9,7 @@ import { randomBytes } from "node:crypto";
 import { json, html, corsHeaders, wantsJson, readCookie } from "./http.js";
 import {
   page, homeBody, verifyBody, receiptBody, receiptsBody, azielEliabBody, azielEliabText,
-  reasonBody, reasonText, softwareBody, donateBody, AZIEL_ELIAB_PATH, REASON_PATH, SOFTWARE_PATH, DONATE_PATH,
+  whoPageHtml, reasonBody, reasonText, softwareBody, donateBody, AZIEL_ELIAB_PATH, REASON_PATH, SOFTWARE_PATH, DONATE_PATH,
   RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE,
 } from "./ui.js";
 import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
@@ -20,7 +20,7 @@ import {
   PUBLIC_RUNTIME, RUNTIME_PATH, RUNTIME_VERSION, OFFICIAL_SOFTWARES, permanentIdentityRedirect, citeRuntimeVersion,
   BRAND_MARK_PATH,
   personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, wellKnownAzielDoc,
-  AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE,
+  AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE, WHO_PATH,
 } from "./seo.js";
 import {
   fetchCatalogProducts, softwareSuite, softwareApiDoc, publicSoftwaresList,
@@ -607,6 +607,9 @@ export default {
       }
       if (path === "/who-is-aziel-eliab.txt") {
         return new Response(whoIsAzielEliabTxt(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+      }
+      if (path === WHO_PATH) {
+        return html(whoPageHtml(), { extraHeaders: extraHeadersFor(nodeId) });
       }
       if (path === "/.well-known/aziel.json") {
         return json(wellKnownAzielDoc());

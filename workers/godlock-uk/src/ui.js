@@ -10,6 +10,7 @@ import {
   runtimeDistribution, ecosystemLinks,
   SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO,
   ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM,
+  VISIBLE_IDENTITY_LOCK, IDENTITY_ANSWER,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
@@ -58,6 +59,7 @@ footer .ecosystem{margin:16px 0 0}
 .pill.interesting{background:#2a2410;color:var(--gold);border-color:var(--gold)}
 .pill.ok{background:#14261c;color:var(--yes);border-color:#2e6b45}
 .author{color:var(--muted);margin:0 0 14px;font-size:14px}
+.identity-lock{margin:0 0 14px;font-size:15px;color:var(--ink);max-width:40rem}
 .banner{background:#1a140c;border:1px solid #8a5a2b;border-radius:12px;padding:12px 14px;margin:0 0 16px;color:#f0d0a8;font-size:15px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px;margin:0 0 16px}
 .stat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
@@ -220,6 +222,7 @@ export function page(title, body, { path, kind, extraHeaders, indexable, product
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(docTitle)}</title>${headMeta({ title, path: p, kind, indexable, products })}<style>${CSS}</style></head><body><div class="wrap">
 ${brandRow()}
 <p class="author">Author Aziel Eliab</p>
+${kind === "aziel" ? `<p class="identity-lock">${esc(VISIBLE_IDENTITY_LOCK)}</p>` : ""}
 ${topNav(p)}
 ${ecosystemNav()}
 <div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
@@ -511,6 +514,57 @@ ${specifiedFitPublicHtml()}
 
 export function azielEliabText() {
   return AZIEL_MANIFESTO.join("\n\n") + "\n\n" + AZIEL_SIGNATURE + "\n";
+}
+
+/** Visible /who lock page. Standalone HTML so view-source body contains the lock line. */
+export function whoPageHtml() {
+  const faq = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "@id": "https://www.azieleliab.com/who#faq",
+    url: "https://www.azieleliab.com/who",
+    name: "Who is Aziel Eliab?",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "Who is Aziel Eliab?",
+        acceptedAnswer: { "@type": "Answer", text: IDENTITY_ANSWER },
+      },
+      {
+        "@type": "Question",
+        name: "Is Aziel Eliab the two musicians named in 1 Chronicles 15:20?",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: "No. Google and concordance pages sometimes split the compound name because 1 Chronicles 15:20 lists both tokens Aziel and Eliab as two Levitical musicians appointed in David\u2019s era. Aziel Eliab is one living researcher and software designer. He is not those two musicians. Prefer https://www.azieleliab.com/#aziel.",
+        },
+      },
+    ],
+    about: { "@id": "https://www.azieleliab.com/#aziel" },
+    author: { "@id": "https://www.azieleliab.com/#aziel" },
+  };
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Who is Aziel Eliab</title>
+<meta name="description" content="${esc(VISIBLE_IDENTITY_LOCK)}">
+<link rel="canonical" href="https://www.azieleliab.com/who">
+<link rel="alternate" type="application/ld+json" href="/person.jsonld" title="person.jsonld">
+<link rel="alternate" type="text/plain" href="/who-is-aziel-eliab.txt" title="who-is">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt">
+<script type="application/ld+json">
+${JSON.stringify(faq)}
+</script>
+</head>
+<body>
+<main>
+<h1>Who is Aziel Eliab</h1>
+<p>${esc(VISIBLE_IDENTITY_LOCK)}</p>
+<p>${esc(IDENTITY_ANSWER)}</p>
+</main>
+</body>
+</html>
+`;
 }
 
 export function softwaresCard(p, { featured = false } = {}) {

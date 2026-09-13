@@ -15,6 +15,38 @@
   "zenodo_status": "Do not invent DOIs.",
   "surface": "github-docs-crawl-aid",
   "live_cite": "https://godlock.uk/cite.json",
+  "identity_machine": {
+    "person": "https://godlock.uk/person.jsonld",
+    "identity": "https://godlock.uk/identity.jsonld",
+    "graph": "https://godlock.uk/graph.jsonld",
+    "who_is_aziel_eliab": "https://godlock.uk/who-is-aziel-eliab.txt",
+    "well_known": "https://godlock.uk/.well-known/aziel.json",
+    "person_id": "https://www.azieleliab.com/#aziel",
+    "note": "Shared Person @id. GodLock is a product surface, not a second identity."
+  },
+  "hebrew_aka": ["עזיאל", "אל ראי", "אלרועי", "אליאב"],
+  "misspelling_alternateNames": [
+    "Azial Eliab",
+    "Azeil Eliab",
+    "Asiel Eliab",
+    "Aziel Elijah",
+    "Aziel Eliah",
+    "Aziel Elia",
+    "AzielEliab",
+    "Azieleliab",
+    "Aziel-Eliab",
+    "Elroi Eliab",
+    "Aziel Elroieliab"
+  ],
+  "biblical_disambiguation": {
+    "summary": "Public author Aziel Eliab. Not the biblical Aziel or biblical Eliab. Hebrew forms are aka of this Person only. GodLock is a product name, not an identity label. Person @id https://www.azieleliab.com/#aziel."
+  },
+  "sister_stats": {
+    "azieleliab": "https://www.azieleliab.com/v1/stats",
+    "corpus": "https://www.azielcorpuslibrary.net/v1/stats",
+    "hedidntjump": "https://www.hedidntjump.com/api/stats"
+  },
+  "host_stats": "https://godlock.uk/stats",
   "official_site": "https://www.azieleliab.com/",
   "library": "https://www.azielcorpuslibrary.net/",
   "library_aziel_eliab": "https://www.azielcorpuslibrary.net/AzielEliab",

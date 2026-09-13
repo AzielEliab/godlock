@@ -111,6 +111,16 @@ def test_cite_json_graph():
     assert "GodLock-first" in CITE["software_note"]
     assert "Digital Library completeness" in CITE["software_note"]
     assert CITE["he_didnt_jump"] == "https://www.hedidntjump.com/"
+    assert CITE["identity_machine"]["person_id"] == "https://www.azieleliab.com/#aziel"
+    assert CITE["sister_stats"]["azieleliab"] == "https://www.azieleliab.com/v1/stats"
+    assert CITE["sister_stats"]["corpus"] == "https://www.azielcorpuslibrary.net/v1/stats"
+    assert CITE["sister_stats"]["hedidntjump"] == "https://www.hedidntjump.com/api/stats"
+    assert "עזיאל" in CITE["hebrew_aka"]
+    assert "אליאב" in CITE["hebrew_aka"]
+    assert "אל ראי" in CITE["hebrew_aka"]
+    assert "אלרועי" in CITE["hebrew_aka"]
+    assert "biblical Aziel" in CITE["biblical_disambiguation"]["summary"]
+    assert "GodLock is a product name" in CITE["biblical_disambiguation"]["summary"]
     hrefs = {row["href"] for row in CITE["ecosystem"]}
     assert "https://www.azieleliab.com/" in hrefs
     assert "https://www.azielcorpuslibrary.net/" in hrefs

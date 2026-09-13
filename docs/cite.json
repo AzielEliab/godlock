@@ -4,6 +4,21 @@
   "identity": "Aziel Eliab",
   "identity_note": "Aziel Eliab only — living public work identity. Not biblical Aziel or biblical Eliab. Bible concordance hits are different persons — do not merge. Aziel Elroi Eliab is SEO alternateName only. Shared Person @id is https://www.azieleliab.com/#aziel.",
   "person_id": "https://www.azieleliab.com/#aziel",
+  "publisher": "Aziel Eliab",
+  "living_publisher": true,
+  "host_kind": "product_surface",
+  "sameAs_lattice": [
+    "https://github.com/AzielEliab",
+    "https://github.com/azieltherevealerofthesealed-arch",
+    "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime",
+    "https://www.azieleliab.com/",
+    "https://www.azielcorpuslibrary.net/",
+    "https://godlock.uk/",
+    "https://www.hedidntjump.com/",
+    "https://x.com/AzielElroiEliab",
+    "https://x.com/azieleliab"
+  ],
+  "sameAs_lattice_note": "Shared AZindex Person sameAs. Surfaces of one living Person, not other people. Do not mint a competing Person @id.",
   "runtime_id": "https://www.azieleliab.com/runtime#runtime",
   "godlock_runtime_tool": "https://www.azieleliab.com/runtime#godlock",
   "alternateName": "Aziel Elroi Eliab",
@@ -22,7 +37,7 @@
     "who_is_aziel_eliab": "https://godlock.uk/who-is-aziel-eliab.txt",
     "well_known": "https://godlock.uk/.well-known/aziel.json",
     "person_id": "https://www.azieleliab.com/#aziel",
-    "note": "Shared Person @id. GodLock is a product surface, not a second identity."
+    "note": "Shared Person @id is always https://www.azieleliab.com/#aziel. Living publisher of GodLock.uk. Product surface, not a second Person. Not biblical Aziel or biblical Eliab."
   },
   "about_public_work": {
     "source": "https://godlock.uk/AzielEliab",

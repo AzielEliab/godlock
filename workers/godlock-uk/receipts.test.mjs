@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import worker, { publicPayload, processSubmit } from "./src/index.js";
+import worker, { publicPayload, processSubmit, parseDownloadTotal } from "./src/index.js";
 import { sha256hex } from "./src/ledger.js";
 import { CHALLENGE_NOT_RETAINED } from "./src/ui.js";
 
@@ -59,9 +59,14 @@ function recordingEnv() {
       },
       async all() {
         if (/FROM receipts WHERE isolated=0/.test(q)) {
-          const limit = Number(bound[0]) || 24;
+          const limit = Number(bound[0]) || 5;
+          const offset = Number(bound[1]) || 0;
+          const rows = receipts
+            .filter((r) => !Number(r.isolated))
+            .slice()
+            .sort((a, b) => String(b.created_utc || "").localeCompare(String(a.created_utc || "")));
           return {
-            results: receipts.filter((r) => !Number(r.isolated)).slice(0, limit),
+            results: rows.slice(offset, offset + limit),
           };
         }
         if (/FROM ledger/.test(q)) {
@@ -197,8 +202,11 @@ describe("receipt HTML/JSON and prior list", () => {
     );
     const html = await htmlRes.text();
     assert.match(html, /<h2>Prior receipts<\/h2>/);
+    assert.match(html, /href="\/receipts">Full receipts chain</);
+    assert.match(html, /id="stat-receipts">/);
     assert.match(html, /Functionally specified digital information/);
     assert.match(html, new RegExp("href=\"/receipt/" + row.id + "\">Full receipt<"));
+    assert.doesNotMatch(html, /class="donate-home"/);
     const jsonRes = await worker.fetch(
       new Request("https://godlock.uk/?format=json", {
         headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
@@ -262,6 +270,104 @@ describe("receipt HTML/JSON and prior list", () => {
     });
     assert.equal(payload.challenge_text, null);
     assert.equal(CHALLENGE_NOT_RETAINED, "challenge text not retained");
+  });
+});
+
+describe("Receipts tab and homepage last five", () => {
+  it("serves /receipts with the full public chain and stored challenge text", async () => {
+    const rec = recordingEnv();
+    const row = await processSubmit(rec.env, PUBLIC_CHALLENGE);
+    const htmlRes = await worker.fetch(
+      new Request("https://godlock.uk/receipts", {
+        headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
+      }),
+      rec.env,
+    );
+    assert.equal(htmlRes.status, 200);
+    const html = await htmlRes.text();
+    assert.match(html, /<title>Receipts — GodLock<\/title>/);
+    assert.match(html, /href="\/receipts"[^>]*aria-current="page"/);
+    assert.match(html, /Functionally specified digital information/);
+    assert.match(html, new RegExp("/receipt/" + row.id));
+    assert.match(html, /id="stat-receipts">1</);
+    assert.match(html, /stress-test engine/);
+    const jsonRes = await worker.fetch(
+      new Request("https://godlock.uk/receipts?format=json", {
+        headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
+      }),
+      rec.env,
+    );
+    const body = await jsonRes.json();
+    assert.equal(body.ok, true);
+    assert.equal(body.path, "/receipts");
+    assert.equal(body.total, 1);
+    assert.equal(body.receipts.length, 1);
+    assert.equal(body.receipts[0].challenge_text, PUBLIC_CHALLENGE);
+    assert.equal(body.stats.receipts, 1);
+  });
+
+  it("308s /prior to /receipts", async () => {
+    const rec = recordingEnv();
+    const res = await worker.fetch(
+      new Request("https://godlock.uk/prior", { headers: { "User-Agent": "Mozilla/5.0" } }),
+      rec.env,
+    );
+    assert.equal(res.status, 308);
+    assert.equal(res.headers.get("Location"), "/receipts");
+  });
+
+  it("lists at most five receipts on the homepage when more exist", async () => {
+    const rec = recordingEnv();
+    for (let i = 0; i < 7; i++) {
+      rec.receipts.push({
+        id: "id" + i,
+        created_utc: "2026-09-0" + (i + 1) + "T00:00:00.000Z",
+        challenge_text: "challenge body " + i,
+        label: "Yes",
+        summary: "s" + i,
+        explanation: "e",
+        isolated: 0,
+        content_sha256: "c" + i,
+      });
+    }
+    const htmlRes = await worker.fetch(
+      new Request("https://godlock.uk/", {
+        headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
+      }),
+      rec.env,
+    );
+    const html = await htmlRes.text();
+    assert.match(html, /id="stat-receipts">7</);
+    assert.match(html, /challenge body 6/);
+    assert.doesNotMatch(html, /challenge body 0/);
+    assert.doesNotMatch(html, /challenge body 1/);
+    const jsonRes = await worker.fetch(
+      new Request("https://godlock.uk/?format=json", {
+        headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
+      }),
+      rec.env,
+    );
+    const body = await jsonRes.json();
+    assert.equal(body.receipts.length, 5);
+    assert.equal(body.stats.receipts, 7);
+    const tab = await (await worker.fetch(
+      new Request("https://godlock.uk/receipts?format=json", {
+        headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
+      }),
+      rec.env,
+    )).json();
+    assert.equal(tab.total, 7);
+    assert.equal(tab.receipts.length, 7);
+  });
+});
+
+describe("download tally is never views plus uses", () => {
+  it("reads tracker total/downloads and rejects invented sums", () => {
+    assert.equal(parseDownloadTotal({ total: 81, downloads: 81, views: 143 }), 81);
+    assert.equal(parseDownloadTotal({ downloads: 26 }), 26);
+    assert.equal(parseDownloadTotal({ count: 9 }), 9);
+    assert.equal(parseDownloadTotal(null), null);
+    assert.equal(parseDownloadTotal({ views: 1213, uses: 35 }), null);
   });
 });
 

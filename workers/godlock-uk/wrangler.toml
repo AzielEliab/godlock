@@ -15,6 +15,12 @@ binding = "AI"
 binding = "AZIEL_RUNTIME"
 service = "aziel-runtime"
 
+# Same-account counted download Worker. Homepage Downloads reads /count here
+# first so the figure is not a stale HTTPS cache of views+uses.
+[[services]]
+binding = "DOWNLOAD_TRACKER"
+service = "godlock-download-tracker"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "godlock-uk"

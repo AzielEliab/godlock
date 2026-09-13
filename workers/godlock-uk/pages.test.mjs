@@ -23,6 +23,7 @@ import {
   featureGodLockFirst,
   answerCard,
   receiptBody,
+  receiptsBody,
   CHALLENGE_NOT_RETAINED,
 } from "./src/ui.js";
 import {
@@ -153,11 +154,11 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(text.endsWith("— Aziel Eliab\n"));
   });
 
-  it("orders nav Engine | Reason | Softwares | Runtime | Verify | Donate | Aziel Eliab | Aziel Corpus Library | He Didn't Jump", () => {
+  it("orders nav Engine | Reason | Softwares | Runtime | Receipts | Verify | Donate | Aziel Eliab | Aziel Corpus Library | He Didn't Jump", () => {
     const nav = topNav("/verify");
     assert.match(
       nav,
-      /href="\/">Engine<\/a><span class="sep">\|<\/span><a href="\/reason">Reason<\/a><span class="sep">\|<\/span><a href="\/software">Softwares<\/a><span class="sep">\|<\/span><a href="\/runtime">Runtime<\/a><span class="sep">\|<\/span><a href="\/verify"/,
+      /href="\/">Engine<\/a><span class="sep">\|<\/span><a href="\/reason">Reason<\/a><span class="sep">\|<\/span><a href="\/software">Softwares<\/a><span class="sep">\|<\/span><a href="\/runtime">Runtime<\/a><span class="sep">\|<\/span><a href="\/receipts">Receipts<\/a><span class="sep">\|<\/span><a href="\/verify"/,
     );
     assert.match(
       nav,
@@ -279,6 +280,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/AzielEliab/);
     assert.match(robots, /Allow: \/reason/);
     assert.match(robots, /Allow: \/donate/);
+    assert.match(robots, /Allow: \/receipts/);
     assert.doesNotMatch(robots, /Allow: \/AzielCorpusLibrary/);
     assert.match(robots, /Allow: \/software/);
     assert.match(robots, /Allow: \/v1\/software/);
@@ -371,6 +373,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     const xml = await sitemapXml({});
     assert.ok(xml.includes(CANON_HOST + "/reason"));
     assert.ok(xml.includes(CANON_HOST + "/donate"));
+    assert.ok(xml.includes(CANON_HOST + "/receipts"));
     assert.ok(xml.includes("https://www.azieleliab.com/donate"));
     assert.ok(xml.includes(CANON_HOST + "/AzielEliab"));
     assert.ok(xml.includes("<changefreq>daily</changefreq>"));
@@ -416,6 +419,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.specified_fit, CANON_HOST + "/reason");
     assert.equal(cite.reason, CANON_HOST + "/reason");
     assert.equal(cite.donate, CANON_HOST + "/donate");
+    assert.equal(cite.receipts, CANON_HOST + "/receipts");
     assert.equal(cite.donate_canonical, "https://www.azieleliab.com/donate");
     assert.equal(cite.donate_spec, "AZL-DONATE-1.0");
     assert.equal(cite.aziel_eliab, CANON_HOST + "/AzielEliab");
@@ -436,6 +440,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.priority_pages.software, CANON_HOST + "/software");
     assert.equal(cite.priority_pages.aziel_eliab, CANON_HOST + "/AzielEliab");
     assert.equal(cite.priority_pages.verify, CANON_HOST + "/verify");
+    assert.equal(cite.priority_pages.receipts, CANON_HOST + "/receipts");
     assert.equal(cite.priority_pages.donate, CANON_HOST + "/donate");
     assert.equal(cite.priority_pages.runtime, CANON_HOST + "/runtime");
     assert.ok(cite.ai_clients.includes("ChatGPT (GPT Actions / OpenAI)"));
@@ -524,6 +529,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Runtime FragGate door: https:\/\/godlock\.uk\/runtime/);
     assert.match(llms, /Catalog JSON \(SEO proxy, not a FragGate door\): https:\/\/godlock\.uk\/v1\/software/);
     assert.match(llms, /Specified Fit, Not Pretty Spirals: https:\/\/godlock\.uk\/reason/);
+    assert.match(llms, /Receipts: https:\/\/godlock\.uk\/receipts/);
     assert.match(llms, /Donate: https:\/\/godlock\.uk\/donate \(AZL-DONATE-1\.0\)\. Same door: https:\/\/www\.azieleliab\.com\/donate/);
     assert.match(llms, /AZCoherence \(azcoherence\)/);
     assert.match(llms, /AZCoherence Worker: https:\/\/azcoherence-download-tracker\.vibelock\.workers\.dev\//);
@@ -583,6 +589,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(spec.paths["/software"]);
     assert.ok(spec.paths["/v1/software"]);
     assert.ok(spec.paths["/donate"]);
+    assert.ok(spec.paths["/receipts"]);
     assert.ok(spec.paths["/runtime/v1/software"]);
     assert.ok(spec.paths["/v1/mesh"]);
     assert.ok(spec.paths["/v1/mesh/status"]);
@@ -609,6 +616,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(permanentIdentityRedirect("/aziel-corpus-library"), LIBRARY_AZIEL);
     assert.equal(permanentIdentityRedirect("/AzielCorpusLibrary"), LIBRARY_AZIEL);
     assert.equal(permanentIdentityRedirect("/AzielCorpusLibrary/"), LIBRARY_AZIEL);
+    assert.equal(permanentIdentityRedirect("/prior"), "/receipts");
+    assert.equal(permanentIdentityRedirect("/Prior"), "/receipts");
+    assert.equal(permanentIdentityRedirect("/receipts"), "");
   });
 });
 
@@ -618,6 +628,7 @@ describe("priority page SEO", () => {
     assert.equal(documentTitle("Softwares", "software"), "GodLock Softwares");
     assert.equal(documentTitle("Aziel Eliab", "aziel"), "About Aziel Eliab — GodLock");
     assert.equal(documentTitle("Verify", "verify"), "Verify — GodLock");
+    assert.equal(documentTitle("Receipts", "receipts"), "Receipts — GodLock");
     assert.match(headMeta({ title: "GodLock", path: "/", kind: "home" }), /og:title" content="GodLock by Aziel Eliab — Specified Fit, Not Pretty Spirals"/);
     assert.match(headMeta({ title: "Softwares", path: "/software", kind: "software" }), /og:title" content="GodLock Softwares"/);
     assert.doesNotMatch(headMeta({ title: "GodLock", path: "/", kind: "home" }), /GodLock — GodLock/);
@@ -699,6 +710,11 @@ describe("homepage stays a natural argument surface", () => {
     assert.doesNotMatch(html, /<h2>Software<\/h2>/);
     assert.match(html, /href="\/v1\/software">Software API<\/a>/);
     assert.match(html, /<h2>Prior receipts<\/h2>/);
+    assert.match(html, /href="\/receipts">Full receipts chain</);
+    assert.match(html, /id="stat-receipts"/);
+    assert.doesNotMatch(html, /class="donate-home"/);
+    assert.doesNotMatch(html, /id="donate"/);
+    assert.match(html, /href="\/donate">Donate</);
     assert.match(html, /class="scorebox"/);
     assert.match(html, /id="mesh-status"/);
     assert.match(html, /Suite mesh: on \(read-only suite presence\)/);
@@ -1872,7 +1888,7 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
   });
 
   it("self-canonicals godlock.uk pages to themselves and presents read-only mesh ON", async () => {
-    const paths = ["/", "/software", "/AzielEliab", "/reason", "/verify", "/donate"];
+    const paths = ["/", "/software", "/AzielEliab", "/reason", "/verify", "/donate", "/receipts"];
     for (const path of paths) {
       const res = await worker.fetch(new Request("https://godlock.uk" + path), mockEnv());
       assert.equal(res.status, 200, path);
@@ -1939,7 +1955,7 @@ describe("receipts UI and public payload", () => {
       { id: "new", label: "Yes", summary: "Newer hold", created_utc: "2026-09-11T12:00:00.000Z", content_sha256: "aa" },
       { id: "old", label: "Interesting", summary: "Older row", created_utc: "2026-09-10T12:00:00.000Z", content_sha256: "bb" },
     ];
-    const home = homeBody({ stats: { current_score: 49.5, residual: 50.5, uses: 3 }, latest: null, prior });
+    const home = homeBody({ stats: { current_score: 49.5, residual: 50.5, uses: 3, receipts: 2 }, latest: null, prior });
     assert.match(home, /<h2>Prior receipts<\/h2>/);
     assert.match(home, /challenge text not retained/);
     assert.match(home, /Full receipt/);
@@ -1949,6 +1965,29 @@ describe("receipts UI and public payload", () => {
     assert.match(home, /id="stat-current-score">49\.5%/);
     assert.match(home, /id="stat-residual">50\.5%/);
     assert.match(home, /id="stat-uses">3</);
+    assert.match(home, /id="stat-receipts">2</);
+    assert.match(home, /href="\/receipts">Full receipts chain</);
+  });
+
+  it("caps homepage Prior at the last 5 and leaves the full chain for /receipts", () => {
+    const prior = [1, 2, 3, 4, 5, 6, 7].map((n) => ({
+      id: "r" + n,
+      label: "Yes",
+      summary: "Row " + n,
+      created_utc: "2026-09-0" + n + "T12:00:00.000Z",
+      content_sha256: "h" + n,
+    }));
+    const home = homeBody({ stats: { receipts: 7 }, latest: null, prior });
+    assert.match(home, /href="\/receipt\/r1"/);
+    assert.match(home, /href="\/receipt\/r5"/);
+    assert.doesNotMatch(home, /href="\/receipt\/r6"/);
+    assert.doesNotMatch(home, /href="\/receipt\/r7"/);
+    assert.match(home, /href="\/receipts">Full receipts chain</);
+    const tab = receiptsBody({ rows: prior, total: 7, page: 1, pageSize: 50, stats: { receipts: 7 } });
+    assert.match(tab, /href="\/receipt\/r6"/);
+    assert.match(tab, /href="\/receipt\/r7"/);
+    assert.match(tab, /id="stat-receipts">7</);
+    assert.match(tab, /stress-test engine/);
   });
 
   it("refreshes scorebox from gatherStats fields in the homepage script", () => {
@@ -1959,6 +1998,8 @@ describe("receipts UI and public payload", () => {
     assert.match(html, /scoreEl&&j\.current_score!=null/);
     assert.match(html, /residualEl&&j\.residual!=null/);
     assert.match(html, /usesEl&&j\.uses!=null/);
+    assert.match(html, /recEl&&j\.receipts!=null/);
+    assert.match(html, /id="stat-receipts"/);
   });
 
   it("exposes score_before, score_after, and delta on public JSON receipts", () => {

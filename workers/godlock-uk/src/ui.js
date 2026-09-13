@@ -6,7 +6,8 @@ import {
   headMeta, documentTitle, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
   HEDIDNTJUMP, HEDIDNTJUMP_LABEL, BRAND_MARK_PATH,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
-  DONATE_PATH, AI_CLIENTS_SENTENCE, runtimeDistribution, ecosystemLinks,
+  DONATE_PATH, RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE,
+  AI_CLIENTS_SENTENCE, runtimeDistribution, ecosystemLinks,
   SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO,
   ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM,
 } from "./seo.js";
@@ -14,7 +15,7 @@ import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import { receiptScoreDelta } from "./engine.js";
 import { softwareSuite, invokeHref, workerHref, stripRuntimeFragGateMash } from "./catalog.js";
-import { donateBody as donatePageBody, donateHomeBlock } from "./donate.js";
+import { donateBody as donatePageBody } from "./donate.js";
 
 export const CSS = `
 :root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
@@ -57,7 +58,7 @@ footer .ecosystem{margin:16px 0 0}
 .pill.ok{background:#14261c;color:var(--yes);border-color:#2e6b45}
 .author{color:var(--muted);margin:0 0 14px;font-size:14px}
 .banner{background:#1a140c;border:1px solid #8a5a2b;border-radius:12px;padding:12px 14px;margin:0 0 16px;color:#f0d0a8;font-size:15px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px;margin:0 0 16px}
 .stat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
 .stat b{display:block;font-size:22px;font-weight:800}
 .stat span{color:var(--muted);font-size:12px}
@@ -93,7 +94,7 @@ footer{margin-top:36px;color:var(--muted);font-size:14px}
 .donate-actions{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
 .donate-qr{margin:12px 0 0;width:128px;height:128px;padding:0;background:#fff;border-radius:4px;overflow:hidden}
 .donate-qr img{display:block;width:128px;height:128px;background:#fff}
-.donate-home{margin:18px 0 0}
+.prior-more{margin:10px 0 0}
 @media (max-width:720px){
   .wrap{padding:16px 14px 72px}
   .stats{grid-template-columns:1fr 1fr}
@@ -151,7 +152,7 @@ function pillClass(label) {
   return "review";
 }
 
-export { AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH, DONATE_PATH };
+export { AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH, DONATE_PATH, RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE };
 
 export function navItems() {
   return [
@@ -159,6 +160,7 @@ export function navItems() {
     { href: REASON_PATH, label: "Reason" },
     { href: SOFTWARE_PATH, label: "Softwares" },
     { href: RUNTIME_PATH, label: "Runtime" },
+    { href: RECEIPTS_PATH, label: "Receipts" },
     { href: "/verify", label: "Verify" },
     { href: DONATE_PATH, label: "Donate" },
     { href: AZIEL_ELIAB_PATH, label: "Aziel Eliab", aziel: true },
@@ -221,7 +223,7 @@ ${topNav(p)}
 ${ecosystemNav()}
 <div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
 ${body}
-<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
+<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(RECEIPTS_PATH)}">Receipts</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
 ${ecosystemNav()}
 </footer>
 </div>
@@ -253,11 +255,13 @@ ${ecosystemNav()}
     var usesEl=document.getElementById("stat-uses");
     var views=document.getElementById("stat-views");
     var dl=document.getElementById("stat-downloads");
+    var recEl=document.getElementById("stat-receipts");
     var meshEl=document.getElementById("mesh-status");
     if(live&&j.live_nodes!=null)live.textContent=String(j.live_nodes);
     if(usesEl&&j.uses!=null)usesEl.textContent=String(j.uses);
     if(views&&j.views!=null)views.textContent=String(j.views);
     if(dl&&j.downloads!=null)dl.textContent=String(j.downloads);
+    if(recEl&&j.receipts!=null)recEl.textContent=String(j.receipts);
     var scoreEl=document.getElementById("stat-current-score");
     var residualEl=document.getElementById("stat-residual");
     if(scoreEl&&j.current_score!=null)scoreEl.textContent=String(j.current_score)+"%";
@@ -313,31 +317,39 @@ export function homeSoftwareLine() {
 </section>`;
 }
 
+export function priorReceiptItems(rows, { fullChallenge = false } = {}) {
+  return (rows || []).map((r) => {
+    const challenge = fullChallenge ? challengeBlockText(r) : challengePreview(r);
+    return `<li><span class="pill ${pillClass(r.label)}">${esc(r.label)}</span>
+      <div class="challenge-preview">${esc(challenge)}</div>
+      <a href="/receipt/${esc(r.id)}">${esc(publicText(r.summary, r.label))}</a>
+      <div class="muted">${esc(when(r.created_utc))}</div>
+      <div class="hash">${esc(r.content_sha256 || "")}</div>
+      <a href="/receipt/${esc(r.id)}">Full receipt</a></li>`;
+  }).join("");
+}
+
 export function homeBody({ stats, latest, prior, error, products, extras }) {
   const s = stats || {};
   const live = s.live_nodes != null ? s.live_nodes : 0;
   const views = s.views != null ? s.views : 0;
   const uses = s.uses != null ? s.uses : 0;
   const downloads = s.downloads != null ? s.downloads : 0;
+  const receipts = s.receipts != null ? s.receipts : 0;
   const score = s.current_score != null ? s.current_score : 50;
   const residual = s.residual != null ? s.residual : 50;
   const meshLine = meshStatusLine(s.mesh);
   const err = error ? `<p class="bad">${esc(error)}</p>` : "";
   const latestHtml = latest && !latest.isolated ? answerCard(latest, true) : "";
-  const list = (prior || []).map((r) => {
-    return `<li><span class="pill ${pillClass(r.label)}">${esc(r.label)}</span>
-      <div class="challenge-preview">${esc(challengePreview(r))}</div>
-      <a href="/receipt/${esc(r.id)}">${esc(publicText(r.summary, r.label))}</a>
-      <div class="muted">${esc(when(r.created_utc))}</div>
-      <div class="hash">${esc(r.content_sha256 || "")}</div>
-      <a href="/receipt/${esc(r.id)}">Full receipt</a></li>`;
-  }).join("") || `<p class="muted">No public receipts yet. Submit a challenge.</p>`;
+  const shown = (prior || []).slice(0, HOME_PRIOR_LIMIT);
+  const list = priorReceiptItems(shown) || `<p class="muted">No public receipts yet. Submit a challenge.</p>`;
   return `
 <div class="stats">
   <div class="stat"><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
   <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
   <div class="stat"><b id="stat-uses">${esc(uses)}</b><span>Uses</span></div>
   <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>
+  <div class="stat"><b id="stat-receipts">${esc(receipts)}</b><span>Receipts</span></div>
 </div>
 <p class="muted" id="mesh-status">${esc(meshLine)}</p>
 <div class="scorebox">
@@ -366,8 +378,54 @@ ${err}
 </form>
 ${homeSoftwareLine()}
 ${latestHtml}
-${donateHomeBlock()}
 <h2>Prior receipts</h2>
+<p class="muted prior-more">Newest ${esc(HOME_PRIOR_LIMIT)}. <a href="${esc(RECEIPTS_PATH)}">Full receipts chain</a>.</p>
+<ul class="prior">${list}</ul>
+`;
+}
+
+export function receiptsPager({ page, pages, total }) {
+  const p = Math.max(1, Number(page) || 1);
+  const n = Math.max(1, Number(pages) || 1);
+  const count = Number(total);
+  const totalN = Number.isFinite(count) && count >= 0 ? count : 0;
+  if (n <= 1) {
+    return `<p class="muted">${esc(totalN)} public receipt${totalN === 1 ? "" : "s"}.</p>`;
+  }
+  const prev = p > 1
+    ? `<a class="button ghost" href="${esc(RECEIPTS_PATH + "?page=" + (p - 1))}">Newer</a>`
+    : "";
+  const next = p < n
+    ? `<a class="button ghost" href="${esc(RECEIPTS_PATH + "?page=" + (p + 1))}">Older</a>`
+    : "";
+  return `<p class="muted">Page ${esc(p)} of ${esc(n)} · ${esc(totalN)} public receipts.</p>
+<p class="actions">${prev}${next}</p>`;
+}
+
+export function receiptsBody({ rows, total, page, pageSize, stats }) {
+  const s = stats || {};
+  const live = s.live_nodes != null ? s.live_nodes : 0;
+  const views = s.views != null ? s.views : 0;
+  const uses = s.uses != null ? s.uses : 0;
+  const downloads = s.downloads != null ? s.downloads : 0;
+  const receipts = s.receipts != null ? s.receipts : (total != null ? total : 0);
+  const list = priorReceiptItems(rows, { fullChallenge: true })
+    || `<p class="muted">No public receipts yet. <a href="/">Submit a challenge</a>.</p>`;
+  const size = Number(pageSize) || RECEIPTS_PAGE_SIZE;
+  const pages = Math.max(1, Math.ceil((Number(total) || 0) / size));
+  return `
+<div class="stats">
+  <div class="stat"><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
+  <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
+  <div class="stat"><b id="stat-uses">${esc(uses)}</b><span>Uses</span></div>
+  <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>
+  <div class="stat"><b id="stat-receipts">${esc(receipts)}</b><span>Receipts</span></div>
+</div>
+<h1 class="soft-heading">Receipts</h1>
+<p>Public questions and the hash-chained receipt list. Newest first. GodLock is a stress-test engine — Yes / No / Let's review / Interesting — not a forum.</p>
+<p class="muted">${esc(SPECIFIED_FIT_TITLE)}. ${esc(SPECIFIED_FIT_MOTTO)} <a href="${esc(REASON_PATH)}">Read the brief</a>.</p>
+<p class="muted"><a href="/">Submit a challenge</a> on the Engine.</p>
+${receiptsPager({ page, pages, total: total != null ? total : receipts })}
 <ul class="prior">${list}</ul>
 `;
 }

@@ -5,6 +5,7 @@ export const CANON_HOST = "https://godlock.uk";
 export const FALLBACK_HOST = "https://godlock-uk.vibelock.workers.dev";
 export const DOWNLOAD = "https://godlock-download-tracker.vibelock.workers.dev/download";
 export const DOWNLOAD_STATS = "https://godlock-download-tracker.vibelock.workers.dev/stats";
+export const DOWNLOAD_COUNT = "https://godlock-download-tracker.vibelock.workers.dev/count";
 export const GITHUB = "https://github.com/AzielEliab/godlock";
 export const AUTHOR_GITHUB = "https://github.com/AzielEliab";
 /** Secondary source account. Same person — not a second identity. */
@@ -44,6 +45,9 @@ export const SOFTWARE_PATH = "/software";
 export const RUNTIME_PATH = "/runtime";
 export const DONATE_PATH = "/donate";
 export const DONATE_CANONICAL = "https://www.azieleliab.com/donate";
+export const RECEIPTS_PATH = "/receipts";
+export const HOME_PRIOR_LIMIT = 5;
+export const RECEIPTS_PAGE_SIZE = 50;
 export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
 export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
 export const RUNTIME_NAME = "Aziel Runtime";
@@ -499,6 +503,7 @@ export function documentTitle(title, kind) {
   if (kind === "reason") return "Specified Fit, Not Pretty Spirals — " + SITE;
   if (kind === "verify") return "Verify — " + SITE;
   if (kind === "donate") return "Donate — " + SITE;
+  if (kind === "receipts") return "Receipts — " + SITE;
   if (kind === "runtime") return "Aziel Runtime FragGate door — " + SITE;
   if (kind === "notfound") return "Not found — " + SITE;
   const raw = String(title || SITE).trim();
@@ -605,6 +610,11 @@ export function defaultDescription(kind) {
       "Donate. Nothing is free. This work has no corporate backer. No grant. No product that unlocks when you pay. Payment is not a key. Author Aziel Eliab. Same door " + DONATE_CANONICAL + ".",
     );
   }
+  if (kind === "receipts") {
+    return hideInternalDetermination(
+      "Public GodLock.uk receipt chain. Full questions and hash-chained receipts. Stress-test engine, not a forum. Specified Fit, Not Pretty Spirals. Author Aziel Eliab.",
+    );
+  }
   return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Aziel Runtime door: " + PUBLIC_RUNTIME + " (aziel-runtime). Suite mesh is on (read-only suite presence; QNM-BUILD-1.0 live|locked|isolated counts only; no Node Gate; no auto-heal): " + PUBLIC_RUNTIME + "/v1/mesh. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. " + AI_CLIENTS_SENTENCE);
 }
 
@@ -612,6 +622,7 @@ function defaultKeywords(kind) {
   if (kind === "aziel") return "Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test, About Aziel Eliab";
   if (kind === "reason") return "Specified Fit, Not Pretty Spirals, Aziel Eliab, GodLock, code+reader";
   if (kind === "donate") return "Donate, Aziel Eliab, GodLock, Bitcoin, Ethereum, Litecoin, XRP, Dogecoin";
+  if (kind === "receipts") return "GodLock receipts, hash-chained ledger, Specified Fit, Aziel Eliab, challenge, Yes No Let's review Interesting";
   if (kind === "software") {
     return "GodLock Softwares, GodLock.uk, FragGate, Aziel Runtime, catalog, Plain A-Z, Gate, Lock, HTTPS engine";
   }
@@ -763,7 +774,7 @@ function jsonLd(title, path, description, kind, products) {
   const software = godlockSoftwareNode();
   const who = personRef();
   const graph = [website, software, person, personLocalStub()];
-  if (kind !== "aziel" && kind !== "reason" && kind !== "verify" && kind !== "receipt" && kind !== "donate" && kind !== "notfound") {
+  if (kind !== "aziel" && kind !== "reason" && kind !== "verify" && kind !== "receipt" && kind !== "receipts" && kind !== "donate" && kind !== "notfound") {
     graph.push(runtimeSoftwareNode(person, products), runtimeWebApiNode(person));
   }
   if (kind === "home") {
@@ -883,6 +894,17 @@ function jsonLd(title, path, description, kind, products) {
       sameAs: [DONATE_CANONICAL],
     });
   }
+  if (kind === "receipts") {
+    graph.push({
+      "@type": "WebPage",
+      "@id": CANON_HOST + RECEIPTS_PATH + "#page",
+      name: documentTitle("Receipts", "receipts"),
+      url: CANON_HOST + RECEIPTS_PATH,
+      description: defaultDescription("receipts"),
+      isPartOf: { "@id": website["@id"] },
+      author: who,
+    });
+  }
   return { "@context": "https://schema.org", "@graph": graph };
 }
 
@@ -959,6 +981,9 @@ export function permanentIdentityRedirect(path) {
   }
   if (compact === "azielcorpuslibrary") {
     return LIBRARY_AZIEL;
+  }
+  if (compact === "prior") {
+    return RECEIPTS_PATH;
   }
   return "";
 }
@@ -1068,6 +1093,7 @@ export const PUBLIC_ALLOW = [
   "/runtime",
   "/runtime/",
   "/donate",
+  "/receipts",
   "/AzielEliab",
   "/cite.json",
   "/llms.txt",
@@ -1138,6 +1164,7 @@ export async function sitemapXml(env, extras = {}) {
   add(CANON_HOST + SOFTWARE_PATH, "0.95", "daily");
   add(CANON_HOST + AZIEL_ELIAB_PATH, "0.95", "weekly");
   add(CANON_HOST + "/verify", "0.85", "daily");
+  add(CANON_HOST + RECEIPTS_PATH, "0.85", "daily");
   add(CANON_HOST + DONATE_PATH, "0.7", "monthly");
   add(CANON_HOST + "/cite.json", "0.8", "weekly");
   add(CANON_HOST + "/llms.txt", "0.8", "weekly");
@@ -1227,6 +1254,7 @@ export function citeDoc() {
       software: CANON_HOST + SOFTWARE_PATH,
       aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,
       verify: CANON_HOST + "/verify",
+      receipts: CANON_HOST + RECEIPTS_PATH,
       donate: CANON_HOST + DONATE_PATH,
       cite: CANON_HOST + "/cite.json",
       llms: CANON_HOST + "/llms.txt",
@@ -1259,6 +1287,7 @@ export function citeDoc() {
     github: GITHUB,
     download: DOWNLOAD,
     verify: CANON_HOST + "/verify",
+    receipts: CANON_HOST + RECEIPTS_PATH,
     donate: CANON_HOST + DONATE_PATH,
     donate_canonical: DONATE_CANONICAL,
     donate_spec: "AZL-DONATE-1.0",
@@ -1403,6 +1432,7 @@ export function llmsDoc() {
     + "Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
     + "About Aziel Eliab: " + CANON_HOST + AZIEL_ELIAB_PATH + "\n"
     + "Verify: " + CANON_HOST + "/verify\n"
+    + "Receipts: " + CANON_HOST + RECEIPTS_PATH + "\n"
     + "Donate: " + CANON_HOST + DONATE_PATH + "\n"
     + "Cite: " + CANON_HOST + "/cite.json\n"
     + "LLMs: " + CANON_HOST + "/llms.txt\n"
@@ -1495,6 +1525,7 @@ export function siteOpenApi() {
       "/software": { get: { operationId: "godlockUkSoftware", summary: "GodLock Softwares — suite doors from GodLock (Plain → Gate → Lock)", responses: { "200": { description: "HTML or JSON" } } } },
       "/v1/software": { get: { operationId: "godlockUkSoftwareApi", summary: "Same-origin Softwares catalog (Plain A–Z includes AZCoherence; live catalog or local fallback)", responses: { "200": { description: "OK" } } } },
       "/donate": { get: { operationId: "godlockUkDonate", summary: "AZL-DONATE-1.0 door (static rails; no KV; payment is not a key)", responses: { "200": { description: "HTML or JSON" } } } },
+      "/receipts": { get: { operationId: "godlockUkReceipts", summary: "Public questions + hash-chained receipt list (newest first; isolated omitted)", responses: { "200": { description: "HTML or JSON" } } } },
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
       "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record", responses: { "200": { description: "OK" } } } },
       "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief", responses: { "200": { description: "OK" } } } },

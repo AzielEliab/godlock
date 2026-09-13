@@ -39,7 +39,7 @@ npx wrangler d1 execute godlock-uk --remote --command "DELETE FROM ledger"
 
 Local / preview D1: drop `--remote` or point at the preview database. Confirm the database name before execute.
 
-After wipe, `/verify` walks an empty ledger (valid empty chain). Home prior-receipts is empty. **Views, Uses floor, current_score, downloads cache, Live Nodes, and download KV are unchanged** if you followed the “do not touch” list below.
+After wipe, `/verify` walks an empty ledger (valid empty chain). Home prior-receipts and `/receipts` are empty. The public **Receipts** counter is the live `isolated=0` count (same source as Prior), so it goes to 0 after a wipe. **Views, Uses floor, current_score, downloads cache, Live Nodes, and download KV are unchanged** if you followed the “do not touch” list below.
 
 ## What you must not wipe
 

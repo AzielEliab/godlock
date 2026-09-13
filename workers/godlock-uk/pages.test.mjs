@@ -33,6 +33,7 @@ import {
   citeDoc,
   llmsDoc,
   aiDoc,
+  mcpDiscoveryDoc,
   defaultDescription,
   headMeta,
   personNode,
@@ -308,7 +309,10 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/v1\/mesh\nAllow: \/v1\/mesh\/status/);
     assert.match(robots, /Allow: \/runtime\nAllow: \/runtime\//);
     assert.match(robots, /Allow: \/ai\.txt/);
+    assert.match(robots, /Allow: \/\.well-known\/mcp\.json/);
+    assert.match(robots, /Allow: \/mcp\.json/);
     assert.match(robots, /Allow: \/openapi\.json/);
+    assert.match(robots, /MCP discovery \(not a second door\)/);
     assert.match(robots, /Content-Signal: search=yes, ai-input=yes, ai-train=yes/);
     assert.match(robots, /User-agent: Googlebot\nAllow: \//);
     assert.match(robots, /User-agent: Googlebot-Image\nAllow: \//);
@@ -421,6 +425,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/runtime/llms.txt"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/cite.json"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/mcp"));
+    assert.ok(xml.includes(CANON_HOST + "/.well-known/mcp.json"));
+    assert.ok(xml.includes(CANON_HOST + "/mcp.json"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/software"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/mesh"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/mesh/status"));
@@ -506,6 +512,11 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.notEqual(cite.runtime_distribution[1].primary, true);
     assert.equal(cite.runtime_openapi, CANON_HOST + "/runtime/openapi.json");
     assert.equal(cite.runtime_mcp, CANON_HOST + "/runtime/mcp");
+    assert.equal(cite.mcp_discovery, CANON_HOST + "/.well-known/mcp.json");
+    assert.equal(cite.mcp_discovery_alias, CANON_HOST + "/mcp.json");
+    assert.equal(cite.priority_pages.mcp_discovery, CANON_HOST + "/.well-known/mcp.json");
+    assert.equal(cite.priority_pages.mcp_discovery_alias, CANON_HOST + "/mcp.json");
+    assert.match(cite.mcp_discovery_note, /Not a second FragGate door/);
     assert.equal(cite.runtime_mesh, CANON_HOST + "/runtime/v1/mesh");
     assert.equal(cite.runtime_mesh_status, CANON_HOST + "/runtime/v1/mesh/status");
     assert.equal(cite.runtime_mesh_nodes, CANON_HOST + "/runtime/v1/mesh/nodes");
@@ -587,6 +598,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Door: https:\/\/godlock\.uk\/runtime/);
     assert.match(llms, /OpenAPI: https:\/\/godlock\.uk\/runtime\/openapi\.json/);
     assert.match(llms, /MCP: POST https:\/\/godlock\.uk\/runtime\/mcp/);
+    assert.match(llms, /MCP discovery: https:\/\/godlock\.uk\/\.well-known\/mcp\.json/);
+    assert.match(llms, /MCP discovery alias: https:\/\/godlock\.uk\/mcp\.json/);
+    assert.match(llms, /MCP discovery \(not a second door\): https:\/\/godlock\.uk\/\.well-known\/mcp\.json and https:\/\/godlock\.uk\/mcp\.json → POST https:\/\/godlock\.uk\/runtime\/mcp/);
     assert.match(llms, /Suite mesh \(read-only, on\): https:\/\/godlock\.uk\/runtime\/v1\/mesh/);
     assert.doesNotMatch(llms, /default off/i);
     assert.doesNotMatch(llms, /Remain-OFF/);
@@ -623,6 +637,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(spec.paths["/who-is"]);
     assert.ok(spec.paths["/person.jsonld"]);
     assert.ok(spec.paths["/.well-known/person.jsonld"]);
+    assert.ok(spec.paths["/.well-known/mcp.json"]);
+    assert.ok(spec.paths["/mcp.json"]);
     assert.ok(spec.paths["/count"]);
     assert.ok(spec.paths["/runtime"]);
     assert.ok(spec.paths["/runtime/v1/software"]);
@@ -637,6 +653,26 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(spec.paths["/mesh"]);
     assert.ok(spec.paths["/runtime/v1/update/check"]);
     assert.doesNotMatch(JSON.stringify(spec), /\bABAD\b/);
+    const wellMcp = await worker.fetch(new Request("https://godlock.uk/.well-known/mcp.json"), mockEnv());
+    const aliasMcp = await worker.fetch(new Request("https://godlock.uk/mcp.json"), mockEnv());
+    assert.equal(wellMcp.status, 200);
+    assert.equal(aliasMcp.status, 200);
+    assert.match(wellMcp.headers.get("Content-Type") || "", /application\/json/);
+    const wellMcpDoc = await wellMcp.json();
+    const aliasMcpDoc = await aliasMcp.json();
+    const expectedMcp = mcpDiscoveryDoc();
+    assert.deepEqual(wellMcpDoc, expectedMcp);
+    assert.deepEqual(aliasMcpDoc, expectedMcp);
+    assert.equal(expectedMcp.endpoint, CANON_HOST + "/runtime/mcp");
+    assert.equal(expectedMcp.method, "POST");
+    assert.equal(expectedMcp.door, "fraggate");
+    assert.equal(expectedMcp.product, "GodLock");
+    assert.equal(expectedMcp.person_id, AZIEL_PERSON_ID);
+    assert.equal(expectedMcp.runtime_id, "https://www.azieleliab.com/runtime#runtime");
+    assert.match(expectedMcp.note, /Not a second FragGate door/);
+    assert.doesNotMatch(expectedMcp.endpoint, /^https:\/\/godlock\.uk\/mcp$/);
+    const hostMcp = await worker.fetch(new Request("https://godlock.uk/mcp", { method: "POST", body: "{}", headers: { "Content-Type": "application/json" } }), mockEnv());
+    assert.notEqual(hostMcp.status, 200);
   });
 
   it("308s about/kebab/case variants to the canonical identity paths", () => {

@@ -18,7 +18,7 @@
     "https://x.com/AzielElroiEliab",
     "https://x.com/azieleliab"
   ],
-  "sameAs_refuse": ["euaziel", "Aziel S.", "Aziel S", "Flutter-React", "Flutter/React", "Flutter portfolio"],
+  "sameAs_refuse": ["euaziel", "euaziel.site", "Aziel S.", "Aziel S", "Flutter-React", "Flutter/React", "Flutter portfolio"],
   "sameAs_lattice_note": "Shared AZindex Person sameAs. Surfaces of one living Person, not other people. Never sameAs euaziel, Aziel S., or Flutter-React portfolio URLs. Do not mint a competing Person @id.",
   "runtime_id": "https://www.azieleliab.com/runtime#runtime",
   "godlock_runtime_tool": "https://www.azieleliab.com/runtime#godlock",
@@ -37,6 +37,7 @@
     "graph": "https://godlock.uk/graph.jsonld",
     "who_is_aziel_eliab": "https://godlock.uk/who-is-aziel-eliab.txt",
     "well_known": "https://godlock.uk/.well-known/aziel.json",
+    "well_known_person": "https://godlock.uk/.well-known/person.jsonld",
     "person_id": "https://www.azieleliab.com/#aziel",
     "note": "Shared Person @id is always https://www.azieleliab.com/#aziel. GodLock product surface. Living publisher Aziel Eliab."
   },
@@ -63,7 +64,8 @@
       "https://godlock.uk/identity.jsonld",
       "https://godlock.uk/graph.jsonld",
       "https://godlock.uk/who-is-aziel-eliab.txt",
-      "https://godlock.uk/.well-known/aziel.json"
+      "https://godlock.uk/.well-known/aziel.json",
+      "https://godlock.uk/.well-known/person.jsonld"
     ]
   },
   "hebrew_aka": ["עזיאל", "אל ראי", "אלרועי", "אליאב"],
@@ -83,8 +85,8 @@
   "identity_disambiguation": {
     "kind": "living_public_work_identity",
     "living": true,
-    "summary": "Not biblical Aziel or Eliab concordance hits. Different persons — do not merge.",
-    "sameAs_refuse": ["euaziel", "Aziel S.", "Aziel S", "Flutter-React", "Flutter/React", "Flutter portfolio"],
+    "summary": "Not Aziel S., not euaziel.site. Not biblical Aziel or Eliab concordance hits. Different persons — do not merge.",
+    "sameAs_refuse": ["euaziel", "euaziel.site", "Aziel S.", "Aziel S", "Flutter-React", "Flutter/React", "Flutter portfolio"],
     "not_aziel_s": true,
     "not_flutter_portfolio": true,
     "not_euaziel": true
@@ -92,7 +94,7 @@
   "biblical_disambiguation": {
     "kind": "living_public_work_identity",
     "living": true,
-    "summary": "Not biblical Aziel or Eliab concordance hits. Different persons — do not merge."
+    "summary": "Not Aziel S., not euaziel.site. Not biblical Aziel or Eliab concordance hits. Different persons — do not merge."
   },
   "hash_path_equivalents": {
     "https://godlock.uk/#software": "https://godlock.uk/software",

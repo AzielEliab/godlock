@@ -28,6 +28,7 @@ export const SIGIL = BRAND_MARK;
 export const SITE = "GodLock";
 export const AUTHOR = "Aziel Eliab";
 export const AUTHOR_AKA = "Aziel Elroi Eliab";
+export const AUTHOR_TITLE = "The Revealer of The Sealed";
 /** Shared public Person @id. Satellite sites reference this; they do not mint a competing primary. */
 export const AZIEL_OFFICIAL = "https://www.azieleliab.com/";
 /** Official Softwares / software listing. GodLock.uk does not clone the suite catalog. */
@@ -206,13 +207,14 @@ export const PERSON_DESCRIPTION =
 export const PERSON_PAGE_DESCRIPTION =
   "GodLock public HTTPS engine. Living publisher Aziel Eliab. Identity is Aziel Eliab only. GodLock is a product name, not an identity label. Aziel Elroi Eliab is SEO alternateName only.";
 
-/** ONE short biblical/concordance slot. Do not paste this into descriptions. */
+/** ONE short merge-block. Do not paste this into descriptions. */
 export const BIBLICAL_DISAMBIGUATION_LINE =
-  "Not biblical Aziel or Eliab concordance hits. Different persons — do not merge.";
+  "Not Aziel S., not euaziel.site. Not biblical Aziel or Eliab concordance hits. Different persons — do not merge.";
 
 /** Never Person.sameAs — other people / other portfolios. */
 export const SAME_AS_REFUSE = [
   "euaziel",
+  "euaziel.site",
   "Aziel S.",
   "Aziel S",
   "Flutter-React",
@@ -271,7 +273,7 @@ export function personNode() {
     name: AUTHOR,
     givenName: "Aziel",
     familyName: "Eliab",
-    alternateName: [AUTHOR_AKA],
+    alternateName: uniquePreserve([AUTHOR_AKA, AUTHOR_TITLE]),
     identifier: AUTHOR,
     url: AZIEL_OFFICIAL,
     image: BRAND_MARK,
@@ -313,6 +315,7 @@ export const IDENTITY_MACHINE_PATHS = [
   "/graph.jsonld",
   "/who-is-aziel-eliab.txt",
   "/.well-known/aziel.json",
+  "/.well-known/person.jsonld",
 ];
 
 export function identityMachineUrls() {
@@ -395,8 +398,8 @@ export const LIVING_PUBLISHER_ANSWER =
 /** Hebrew aka of the same Person. Not a second identity. */
 export const HEBREW_AKA = ["עזיאל", "אל ראי", "אלרועי", "אליאב"];
 
-/** Latin aka / spacing forms of Aziel Elroi Eliab. */
-export const LATIN_AKA = [AUTHOR_AKA, "Aziel El-Roi Eliab", "Aziel El Roi Eliab"];
+/** Latin aka / title / spacing forms of Aziel Eliab. */
+export const LATIN_AKA = [AUTHOR_AKA, AUTHOR_TITLE, "Aziel El-Roi Eliab", "Aziel El Roi Eliab"];
 
 /** Crawl misspellings. Same Person — not preferred names and not other people. */
 export const IDENTITY_MISSPELLINGS = [
@@ -1069,6 +1072,7 @@ export function headMeta(opts) {
     linkRel("alternate", "/graph.jsonld", " type=" + Q + "application/ld+json" + Q),
     linkRel("alternate", "/who-is-aziel-eliab.txt", " type=" + Q + "text/plain" + Q),
     linkRel("alternate", "/.well-known/aziel.json", " type=" + Q + "application/json" + Q),
+    linkRel("alternate", "/.well-known/person.jsonld", " type=" + Q + "application/ld+json" + Q),
     hashPathRedirectScript(),
   );
   if (kind !== "aziel") {
@@ -1224,6 +1228,7 @@ export const PUBLIC_ALLOW = [
   "/who-is-aziel-eliab.txt",
   "/who-is",
   "/.well-known/aziel.json",
+  "/.well-known/person.jsonld",
   "/openapi.json",
   "/count",
   "/stats",
@@ -1238,7 +1243,7 @@ export function robotsTxt() {
     "# GodLock.uk — open crawl for Google and AI search.",
     "# Author: Aziel Eliab. Also known as Aziel Elroi Eliab (alternateName only).",
     "# Content-Signal opens search + AI input + AI train.",
-    "# Identity machine: /person.jsonld /identity.jsonld /graph.jsonld /who-is-aziel-eliab.txt /who-is /.well-known/aziel.json",
+    "# Identity machine: /person.jsonld /identity.jsonld /graph.jsonld /who-is-aziel-eliab.txt /who-is /.well-known/aziel.json /.well-known/person.jsonld",
     "# GodLock product surface. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.",
     "# Homepage hashes (#software #runtime #receipts #donate #reason #verify #AzielEliab) map to real paths.",
     "# Softwares HTML: /software. Catalog JSON: /v1/software (not a second FragGate door). Door: /runtime.",
@@ -1299,6 +1304,7 @@ export async function sitemapXml(env, extras = {}) {
   add(CANON_HOST + "/who-is-aziel-eliab.txt", "0.85", "weekly");
   add(CANON_HOST + WHO_IS_ALIAS_PATH, "0.8", "weekly");
   add(CANON_HOST + "/.well-known/aziel.json", "0.8", "weekly");
+  add(CANON_HOST + "/.well-known/person.jsonld", "0.85", "weekly");
   add(CANON_HOST + "/stats", "0.45", "daily");
   add(CANON_HOST + COUNT_PATH, "0.4", "daily");
   add(SISTER_STATS.azieleliab, "0.4", "daily");
@@ -1401,6 +1407,7 @@ export function citeDoc() {
       who_is_aziel_eliab: CANON_HOST + "/who-is-aziel-eliab.txt",
       who_is: CANON_HOST + WHO_IS_ALIAS_PATH,
       well_known_aziel: CANON_HOST + "/.well-known/aziel.json",
+      well_known_person: CANON_HOST + "/.well-known/person.jsonld",
       reason: CANON_HOST + REASON_PATH,
       count: CANON_HOST + COUNT_PATH,
       runtime: PUBLIC_RUNTIME,
@@ -1414,6 +1421,7 @@ export function citeDoc() {
       who_is_aziel_eliab: CANON_HOST + "/who-is-aziel-eliab.txt",
       who_is: CANON_HOST + WHO_IS_ALIAS_PATH,
       well_known: CANON_HOST + "/.well-known/aziel.json",
+      well_known_person: CANON_HOST + "/.well-known/person.jsonld",
       person_id: AZIEL_PERSON_ID,
       note: "Shared Person @id is always https://www.azieleliab.com/#aziel. GodLock product surface. Living publisher Aziel Eliab.",
     },
@@ -1556,6 +1564,7 @@ export function llmsDoc() {
     + "Identity JSON-LD: " + CANON_HOST + "/identity.jsonld\n"
     + "Graph JSON-LD: " + CANON_HOST + "/graph.jsonld\n"
     + "Mission: " + CANON_HOST + "/.well-known/aziel.json\n"
+    + "Well-known Person JSON-LD: " + CANON_HOST + "/.well-known/person.jsonld\n"
     + "Hebrew aka: עזיאל / אל ראי | אלרועי / אליאב\n"
     + IDENTITY_LOCK_LINE + "\n"
     + "sameAs lattice: " + IDENTITY_SAME_AS.join(" · ") + "\n"
@@ -1689,6 +1698,7 @@ export function siteOpenApi() {
       "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record", responses: { "200": { description: "OK" } } } },
       "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief", responses: { "200": { description: "OK" } } } },
       "/person.jsonld": { get: { operationId: "godlockUkPersonJsonLd", summary: "Shared AZindex Person (https://www.azieleliab.com/#aziel)", responses: { "200": { description: "OK" } } } },
+      "/.well-known/person.jsonld": { get: { operationId: "godlockUkWellKnownPersonJsonLd", summary: "Alias of /person.jsonld — same Person @id https://www.azieleliab.com/#aziel", responses: { "200": { description: "OK" } } } },
       "/identity.jsonld": { get: { operationId: "godlockUkIdentityJsonLd", summary: "Alias of /person.jsonld — same Person @id", responses: { "200": { description: "OK" } } } },
       "/graph.jsonld": { get: { operationId: "godlockUkGraphJsonLd", summary: "Person + FAQ + WebSite + GodLock SoftwareApplication", responses: { "200": { description: "OK" } } } },
       "/who-is-aziel-eliab.txt": { get: { operationId: "godlockUkWhoIsAziel", summary: "Verbatim identity answer + model rules", responses: { "200": { description: "OK" } } } },

@@ -221,7 +221,7 @@ describe("Aziel Eliab page chrome", () => {
     const person = ld["@graph"].find((n) => n["@type"] === "Person");
     assert.equal(person["@id"], AZIEL_PERSON_ID);
     assert.equal(person.name, "Aziel Eliab");
-    assert.deepEqual(person.alternateName, ["Aziel Elroi Eliab"]);
+    assert.deepEqual(person.alternateName, ["Aziel Elroi Eliab", "The Revealer of The Sealed"]);
     assert.equal(person.url, AZIEL_OFFICIAL);
     assert.ok(person.sameAs.includes("https://godlock.uk/AzielEliab"));
     assert.ok(person.sameAs.includes(LIBRARY_AZIEL));

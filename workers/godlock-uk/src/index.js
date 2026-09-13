@@ -590,7 +590,7 @@ export default {
       if (path === "/ai.txt") {
         return new Response(aiDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
-      if (path === "/person.jsonld") {
+      if (path === "/person.jsonld" || path === "/.well-known/person.jsonld") {
         return new Response(JSON.stringify(personJsonLd(), null, 2), {
           headers: { "Content-Type": "application/ld+json; charset=utf-8", ...corsHeaders() },
         });

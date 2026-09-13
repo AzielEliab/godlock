@@ -42,6 +42,13 @@ import {
   sitemapXml,
   wellKnownAzielDoc,
   whoIsAzielEliabTxt,
+  HASH_PATH_EQUIVALENTS,
+  SOFTWARE_HASH_REAL_PATHS,
+  hashPathEquivalent,
+  hashPathEquivalentUrls,
+  WHO_IS_PATH,
+  WHO_IS_ALIAS_PATH,
+  COUNT_PATH,
 } from "./src/seo.js";
 import { AZIEL_MANIFESTO, SPECIFIED_FIT_MOTTO as UI_SPECIFIED_FIT_MOTTO } from "./src/ui.js";
 
@@ -93,6 +100,8 @@ describe("AZindex identity machine", () => {
     assert.notEqual(person["@id"], "https://godlock.uk/#aziel");
     assert.notEqual(person["@id"], "https://godlock.uk/AzielEliab#aziel-eliab");
     assert.match(person.description, /product name, not an identity label/);
+    assert.match(person.description, /Living public work identity/);
+    assert.match(person.description, /Not biblical Aziel or biblical Eliab/);
     assert.doesNotMatch(JSON.stringify(person), /\bDOI\b/i);
     assert.deepEqual(person.sameAs, [
       AUTHOR_GITHUB,
@@ -141,13 +150,21 @@ describe("AZindex identity machine", () => {
     assert.ok(names.includes("Does GodLock argue?"));
     assert.ok(names.includes("Is He Didn't Jump a second identity?"));
     assert.ok(names.includes("Is Aziel Eliab the biblical Aziel or Eliab?"));
+    assert.ok(names.includes("Is Aziel Eliab a living person or a biblical Aziel+Eliab pair?"));
     const biblical = faq.mainEntity.find((q) => q.name === "Is Aziel Eliab the biblical Aziel or Eliab?");
     assert.equal(biblical.acceptedAnswer.text, BIBLICAL_DISAMBIGUATION.answer);
     assert.match(biblical.acceptedAnswer.text, /1 Chronicles 15:20/);
     assert.match(biblical.acceptedAnswer.text, /עזיאל/);
     assert.match(biblical.acceptedAnswer.text, /אליאב/);
+    assert.match(biblical.acceptedAnswer.text, /living public work identity/i);
+    assert.match(biblical.acceptedAnswer.text, /concordance hits are different persons/);
+    assert.equal(BIBLICAL_DISAMBIGUATION.living, true);
+    assert.equal(BIBLICAL_DISAMBIGUATION.kind, "living_public_work_identity");
+    assert.match(BIBLICAL_DISAMBIGUATION.summary, /Living public work identity of Aziel Eliab/);
     const who = faq.mainEntity.find((q) => q.name === "Who is Aziel Eliab?");
     assert.equal(who.acceptedAnswer.text, IDENTITY_ANSWER);
+    assert.match(IDENTITY_ANSWER, /living public work identity/);
+    assert.match(person.description, /Living public work identity/);
     const why = faq.mainEntity.find((q) => q.name === "Why does GodLock exist?");
     assert.equal(why.acceptedAnswer.text, ABOUT_PUBLIC_WORK_LEAD);
     const sermon = faq.mainEntity.find((q) => q.name === "What is a claim that cannot be scored?");
@@ -184,8 +201,11 @@ describe("AZindex identity machine", () => {
     assert.match(text, /This host \(https:\/\/godlock\.uk\/\) is a GodLock product surface/);
     assert.match(text, /He Didn't Jump remains in the ecosystem/);
     assert.match(text, /Specified Fit, Not Pretty Spirals is a public design motto/);
+    assert.match(text, /## Living identity/);
     assert.match(text, /## Biblical disambiguation/);
     assert.match(text, /## Public work/);
+    assert.match(text, /living public work identity/i);
+    assert.match(text, /concordance hits are different persons/);
     assert.ok(text.includes(ABOUT_PUBLIC_WORK_LEAD));
     assert.ok(text.includes(SPECIFIED_FIT_MOTTO));
     assert.match(text, /## Hebrew aka/);
@@ -237,6 +257,7 @@ describe("AZindex identity machine", () => {
       "/identity.jsonld",
       "/graph.jsonld",
       "/who-is-aziel-eliab.txt",
+      "/who-is",
       "/.well-known/aziel.json",
     ]) {
       assert.match(robots, new RegExp("Allow: " + path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
@@ -246,7 +267,23 @@ describe("AZindex identity machine", () => {
     assert.ok(xml.includes(CANON_HOST + "/identity.jsonld"));
     assert.ok(xml.includes(CANON_HOST + "/graph.jsonld"));
     assert.ok(xml.includes(CANON_HOST + "/who-is-aziel-eliab.txt"));
+    assert.ok(xml.includes("<loc>" + CANON_HOST + "/who-is</loc>"));
     assert.ok(xml.includes(CANON_HOST + "/.well-known/aziel.json"));
+    for (const path of [
+      "/",
+      "/software",
+      "/runtime",
+      "/receipts",
+      "/donate",
+      "/reason",
+      "/verify",
+      "/AzielEliab",
+      "/count",
+    ]) {
+      assert.ok(xml.includes(CANON_HOST + path), path);
+    }
+    assert.ok(!xml.includes(CANON_HOST + "/#software"));
+    assert.ok(!xml.includes(CANON_HOST + "/#receipts"));
     assert.ok(xml.includes(CANON_HOST + "/llms.txt"));
     const cite = citeDoc();
     assert.equal(cite.identity_machine.person_id, AZIEL_PERSON_ID);
@@ -325,5 +362,33 @@ describe("AZindex identity machine", () => {
     assert.equal(work.themes.person_id, AZIEL_PERSON_ID);
     assert.deepEqual(work.identity_machine, identityMachineUrls());
     assert.equal(SISTER_STATS.corpus, "https://www.azielcorpuslibrary.net/stats");
+  });
+
+  it("maps homepage hashes to real paths and 308s /who-is", async () => {
+    assert.equal(hashPathEquivalent("#software"), "/software");
+    assert.equal(hashPathEquivalent("#runtime"), "/runtime");
+    assert.equal(hashPathEquivalent("#receipts"), "/receipts");
+    assert.equal(hashPathEquivalent("#donate"), "/donate");
+    assert.equal(hashPathEquivalent("#reason"), "/reason");
+    assert.equal(hashPathEquivalent("#verify"), "/verify");
+    assert.equal(hashPathEquivalent("#AzielEliab"), "/AzielEliab");
+    assert.equal(hashPathEquivalent("#prior"), "/receipts");
+    assert.equal(SOFTWARE_HASH_REAL_PATHS["aziel-runtime"], "/runtime");
+    const urls = hashPathEquivalentUrls();
+    assert.equal(urls[CANON_HOST + "/#software"], CANON_HOST + "/software");
+    assert.equal(urls[CANON_HOST + "/software#aziel-runtime"], CANON_HOST + "/runtime");
+    assert.ok(HASH_PATH_EQUIVALENTS.length >= 10);
+    const cite = citeDoc();
+    assert.deepEqual(cite.hash_path_equivalents, urls);
+    assert.match(cite.identity_note, /living public work identity/);
+    assert.equal(cite.priority_pages.who_is, CANON_HOST + WHO_IS_ALIAS_PATH);
+    assert.equal(cite.priority_pages.reason, CANON_HOST + "/reason");
+    assert.equal(cite.priority_pages.count, CANON_HOST + COUNT_PATH);
+    const llms = llmsDoc();
+    assert.match(llms, /Hash → real path/);
+    assert.match(llms, /living public work identity/i);
+    const whoAlias = await fetchPath("/who-is");
+    assert.equal(whoAlias.status, 308);
+    assert.equal(whoAlias.headers.get("Location"), WHO_IS_PATH);
   });
 });

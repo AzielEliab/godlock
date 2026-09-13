@@ -10,7 +10,7 @@ import {
   runtimeDistribution, ecosystemLinks,
   SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO,
   ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM,
-  VISIBLE_IDENTITY_LOCK, IDENTITY_ANSWER, identityPersonNode,
+  VISIBLE_IDENTITY_LOCK, IDENTITY_ANSWER,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
@@ -514,10 +514,10 @@ export function azielEliabText() {
   return AZIEL_MANIFESTO.join("\n\n") + "\n\n" + AZIEL_SIGNATURE + "\n";
 }
 
-/** /who HTML. Machine Person + FAQ JSON-LD in head. No standalone visible 15:20 lock paragraph. */
+/** Visible /who lock page. Standalone HTML so view-source body contains the lock line. */
 export function whoPageHtml() {
-  const person = identityPersonNode();
   const faq = {
+    "@context": "https://schema.org",
     "@type": "FAQPage",
     "@id": "https://www.azieleliab.com/who#faq",
     url: "https://www.azieleliab.com/who",
@@ -540,7 +540,6 @@ export function whoPageHtml() {
     about: { "@id": "https://www.azieleliab.com/#aziel" },
     author: { "@id": "https://www.azieleliab.com/#aziel" },
   };
-  const ld = { "@context": "https://schema.org", "@graph": [person, faq] };
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -549,13 +548,10 @@ export function whoPageHtml() {
 <meta name="description" content="${esc(VISIBLE_IDENTITY_LOCK)}">
 <link rel="canonical" href="https://www.azieleliab.com/who">
 <link rel="alternate" type="application/ld+json" href="/person.jsonld" title="person.jsonld">
-<link rel="alternate" type="application/ld+json" href="/identity.jsonld" title="identity.jsonld">
-<link rel="alternate" type="application/ld+json" href="/graph.jsonld" title="graph.jsonld">
-<link rel="alternate" type="application/ld+json" href="/.well-known/person.jsonld" title="well-known person">
 <link rel="alternate" type="text/plain" href="/who-is-aziel-eliab.txt" title="who-is">
 <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt">
 <script type="application/ld+json">
-${JSON.stringify(ld)}
+${JSON.stringify(faq)}
 </script>
 </head>
 <body>

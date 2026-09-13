@@ -59,7 +59,6 @@ footer .ecosystem{margin:16px 0 0}
 .pill.interesting{background:#2a2410;color:var(--gold);border-color:var(--gold)}
 .pill.ok{background:#14261c;color:var(--yes);border-color:#2e6b45}
 .author{color:var(--muted);margin:0 0 14px;font-size:14px}
-.identity-lock{margin:0 0 14px;font-size:15px;color:var(--ink);max-width:40rem}
 .banner{background:#1a140c;border:1px solid #8a5a2b;border-radius:12px;padding:12px 14px;margin:0 0 16px;color:#f0d0a8;font-size:15px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px;margin:0 0 16px}
 .stat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
@@ -222,7 +221,6 @@ export function page(title, body, { path, kind, extraHeaders, indexable, product
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(docTitle)}</title>${headMeta({ title, path: p, kind, indexable, products })}<style>${CSS}</style></head><body><div class="wrap">
 ${brandRow()}
 <p class="author">Author Aziel Eliab</p>
-${kind === "aziel" ? `<p class="identity-lock">${esc(VISIBLE_IDENTITY_LOCK)}</p>` : ""}
 ${topNav(p)}
 ${ecosystemNav()}
 <div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
@@ -559,7 +557,6 @@ ${JSON.stringify(faq)}
 <body>
 <main>
 <h1>Who is Aziel Eliab</h1>
-<p>${esc(VISIBLE_IDENTITY_LOCK)}</p>
 <p>${esc(IDENTITY_ANSWER)}</p>
 </main>
 </body>

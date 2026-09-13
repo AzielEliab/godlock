@@ -124,6 +124,14 @@ def test_cite_json_graph():
     assert about["product_not_identity"] is True
     assert "https://godlock.uk/person.jsonld" in about["identity_machine"]
     assert "https://godlock.uk/graph.jsonld" in about["identity_machine"]
+    assert "https://godlock.uk/.well-known/person.jsonld" in about["identity_machine"]
+    assert CITE["identity_machine"]["well_known_person"] == "https://godlock.uk/.well-known/person.jsonld"
+    assert "The Revealer of The Sealed" in CITE["latin_aka"]
+    assert "Revealer of The Sealed" in CITE["latin_aka"]
+    assert "The Revealer of The Sealed" in LLMS
+    assert "Revealer of The Sealed" in LLMS
+    assert "https://godlock.uk/.well-known/person.jsonld" in LLMS
+    assert "https://godlock.uk/.well-known/person.jsonld" in AI
     assert "debate with no record becomes a pulpit" in LLMS
     assert "Document over declare." in LLMS
     assert "A claim that cannot be scored is a sermon." in LLMS

@@ -26,12 +26,14 @@ Aziel Elroi Eliab is SEO alternateName only.
 
 Live identity machine (do not fork @id):
 Person JSON-LD: https://godlock.uk/person.jsonld
+Person JSON-LD (well-known): https://godlock.uk/.well-known/person.jsonld
 Identity JSON-LD: https://godlock.uk/identity.jsonld
 Graph JSON-LD: https://godlock.uk/graph.jsonld
 Who is Aziel Eliab: https://godlock.uk/who-is-aziel-eliab.txt
 Mission: https://godlock.uk/.well-known/aziel.json
 Well-known Person JSON-LD: https://godlock.uk/.well-known/person.jsonld
-Also known as: Aziel Elroi Eliab · The Revealer of The Sealed
+Also known as: Aziel Elroi Eliab · The Revealer of The Sealed · Revealer of The Sealed
+Latin aka: Aziel Elroi Eliab | Aziel El-Roi Eliab | Aziel El Roi Eliab | The Revealer of The Sealed | Revealer of The Sealed
 Hebrew aka: עזיאל / אל ראי | אלרועי / אליאב
 GodLock is a product. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.
 sameAs lattice: https://github.com/AzielEliab · https://github.com/azieltherevealerofthesealed-arch · https://glama.ai/mcp/servers/AzielEliab/aziel-runtime · https://www.azieleliab.com/ · https://www.azielcorpuslibrary.net/ · https://godlock.uk/ · https://www.hedidntjump.com/ · https://x.com/AzielElroiEliab · https://x.com/azieleliab

@@ -18,6 +18,7 @@ import {
   IDENTITY_SAME_AS,
   IDENTITY_MISSPELLINGS,
   HEBREW_AKA,
+  LATIN_AKA,
   BIBLICAL_DISAMBIGUATION,
   BIBLICAL_DISAMBIGUATION_LINE,
   IDENTITY_DISAMBIGUATION,
@@ -98,6 +99,11 @@ describe("AZindex identity machine", () => {
     assert.equal(person.name, AUTHOR);
     assert.deepEqual(person.alternateName, identityAlternateNames());
     assert.ok(person.alternateName.includes(AUTHOR_AKA));
+    assert.ok(LATIN_AKA.includes("The Revealer of The Sealed"));
+    assert.ok(LATIN_AKA.includes("Revealer of The Sealed"));
+    assert.ok(person.alternateName.includes("The Revealer of The Sealed"));
+    assert.ok(person.alternateName.includes("Revealer of The Sealed"));
+    for (const latin of LATIN_AKA) assert.ok(person.alternateName.includes(latin), latin);
     for (const hebrew of HEBREW_AKA) assert.ok(person.alternateName.includes(hebrew), hebrew);
     for (const miss of IDENTITY_MISSPELLINGS) assert.ok(person.alternateName.includes(miss), miss);
     assert.equal(person.disambiguatingDescription, BIBLICAL_DISAMBIGUATION_LINE);
@@ -136,6 +142,7 @@ describe("AZindex identity machine", () => {
     assert.deepEqual(IDENTITY_SAME_AS, person.sameAs);
     assert.equal(personJsonLd()["@id"], AZIEL_PERSON_ID);
     assert.deepEqual(identityJsonLd(), personJsonLd());
+    assert.equal(personJsonLd()["@id"], "https://www.azieleliab.com/#aziel");
   });
 
   it("keeps graph WebSite creator/publisher on the shared Person and GodLock isPartOf Runtime", () => {
@@ -277,6 +284,9 @@ describe("AZindex identity machine", () => {
     assert.equal(doc.about_public_work.sister_stats, undefined);
     assert.deepEqual(doc.sameAs, IDENTITY_SAME_AS);
     assert.deepEqual(doc.hebrew_aka, HEBREW_AKA);
+    assert.deepEqual(doc.latin_aka, LATIN_AKA);
+    assert.ok(doc.alternateNames.includes("The Revealer of The Sealed"));
+    assert.ok(doc.alternateNames.includes("Revealer of The Sealed"));
     assert.deepEqual(doc.misspelling_alternateNames, IDENTITY_MISSPELLINGS);
     assert.deepEqual(doc.sister_stats, {
       azieleliab: "https://www.azieleliab.com/v1/stats",
@@ -343,6 +353,9 @@ describe("AZindex identity machine", () => {
     assert.ok(cite.about_public_work.identity_machine.includes(CANON_HOST + "/graph.jsonld"));
     assert.deepEqual(cite.sister_stats, SISTER_STATS);
     assert.deepEqual(cite.hebrew_aka, HEBREW_AKA);
+    assert.deepEqual(cite.latin_aka, LATIN_AKA);
+    assert.equal(cite.identity_machine.well_known_person, CANON_HOST + "/.well-known/person.jsonld");
+    assert.ok(cite.about_public_work.identity_machine.includes(CANON_HOST + "/.well-known/person.jsonld"));
     assert.ok(xml.includes(SISTER_STATS.azieleliab));
     assert.ok(xml.includes(SISTER_STATS.corpus));
     assert.ok(xml.includes(SISTER_STATS.hedidntjump));
@@ -380,14 +393,21 @@ describe("AZindex identity machine", () => {
     assert.doesNotMatch(person.description, /concordance|1 Chronicles|Aziel S|Flutter|euaziel/i);
     assert.doesNotMatch(JSON.stringify(person), /1 Chronicles/);
 
-    const wellKnownPerson = await fetchPath("/.well-known/person.jsonld");
-    assert.equal(wellKnownPerson.status, 200);
-    assert.match(wellKnownPerson.headers.get("Content-Type") || "", /application\/ld\+json/);
-    assert.deepEqual(await wellKnownPerson.json(), person);
-
     const identityRes = await fetchPath("/identity.jsonld");
     const identity = await identityRes.json();
     assert.deepEqual(identity, person);
+
+    const wellPersonRes = await fetchPath("/.well-known/person.jsonld");
+    assert.equal(wellPersonRes.status, 200);
+    assert.match(wellPersonRes.headers.get("Content-Type") || "", /application\/ld\+json/);
+    const wellPersonBody = await wellPersonRes.text();
+    const personRes2 = await fetchPath("/person.jsonld");
+    assert.equal(wellPersonBody, await personRes2.text());
+    const wellPerson = JSON.parse(wellPersonBody);
+    assert.deepEqual(wellPerson, person);
+    assert.deepEqual(wellPerson, identity);
+    assert.ok(wellPerson.alternateName.includes("The Revealer of The Sealed"));
+    assert.ok(wellPerson.alternateName.includes("Revealer of The Sealed"));
 
     const graphRes = await fetchPath("/graph.jsonld");
     assert.match(graphRes.headers.get("Content-Type") || "", /application\/ld\+json/);
@@ -455,6 +475,9 @@ describe("AZindex identity machine", () => {
     assert.ok(!cite.misspelling_alternateNames.includes("Aziel S."));
     assert.ok(cite.misspelling_alternateNames.length >= 8);
     assert.deepEqual(cite.hebrew_aka, HEBREW_AKA);
+    assert.deepEqual(cite.latin_aka, LATIN_AKA);
+    assert.ok(cite.alternateNames.includes("The Revealer of The Sealed"));
+    assert.ok(cite.alternateNames.includes("Revealer of The Sealed"));
     assert.equal(cite.living_publisher, true);
     assert.equal(cite.host_kind, "product_surface");
     assert.equal(cite.publisher, AUTHOR);

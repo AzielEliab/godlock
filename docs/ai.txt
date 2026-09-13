@@ -24,4 +24,6 @@ Identity machine (do not fork @id): https://godlock.uk/person.jsonld · https://
 Hebrew aka: עזיאל / אל ראי | אלרועי / אליאב. Biblical Aziel / Eliab are not this Person. GodLock is a product name.
 Sister stats: https://www.azieleliab.com/v1/stats · https://www.azielcorpuslibrary.net/stats · https://www.hedidntjump.com/api/stats
 
+About public work (https://godlock.uk/AzielEliab): debate with no record → pulpit; pulpit with no score → private religion. A claim must stand open and leave a receipt. Document over declare. A claim that cannot be scored is a sermon. Specified Fit, Not Pretty Spirals. GodLock does not argue. It records, analyzes, hardens, and grows. GodLock is a product name, not an identity. Person @id https://www.azieleliab.com/#aziel.
+
 See docs/llms.txt for the full brief.

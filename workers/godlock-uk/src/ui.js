@@ -7,6 +7,8 @@ import {
   HEDIDNTJUMP, HEDIDNTJUMP_LABEL, BRAND_MARK_PATH,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
   DONATE_PATH, AI_CLIENTS_SENTENCE, runtimeDistribution, ecosystemLinks,
+  SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO,
+  ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
@@ -165,11 +167,10 @@ export function navItems() {
   ];
 }
 
-export const SPECIFIED_FIT_TITLE = "Specified Fit, Not Pretty Spirals";
+export { SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO };
 export const SPECIFIED_FIT_STEEL =
   "Functionally specified digital information joined to a translation / reader system has only one observed adequate cause: intelligence. Pretty spirals and φ are not a proof. Darwinian selection is conceded after a replicator exists. Residual uncertainty stays. Score ceiling 99.7 · floor 33.3.";
 export const SPECIFIED_FIT_ANSWERS = "Answers: Yes / No / Let's review / Interesting.";
-export const SPECIFIED_FIT_MOTTO = "GodLock does not argue. It records, analyzes, hardens, and grows.";
 export const SPECIFIED_FIT_LAYERS = [
   { letter: "A", title: "Detection", body: "Specified complexity / functional information: complex and independently specifiable. Same move as cryptanalysis / SETI. A spiral is not a specification." },
   { letter: "B", title: "Biological object", body: "Digital sequence + mapping table + machines that implement the mapping + error repair + machines encoded in the sequences (compiler+source / code+reader). Not “life is complicated.”" },
@@ -178,9 +179,9 @@ export const SPECIFIED_FIT_LAYERS = [
 ];
 
 export const AZIEL_MANIFESTO = [
-  "I made this because a debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion. Intelligent design was never the point by itself. The point was whether a claim could stand in the open, be answered, and leave something behind that was not just my voice.",
-  "Questions over answers, or the mouth outruns the mind. Document over declare, or speech becomes a throne. Formality before familiarity, or warmth is mistaken for proof. Trust is an output. It is grown from a chain you can audit, not granted at the door. I am not always right. That is not a confession. It is the method.",
-  "A claim that cannot be scored is a sermon wearing work clothes. Intelligent design and design-flaw sit at the same table. No creed inherits a private lane. Later readings bury earlier ones as the evidence hardens. The receipt is the argument that survives the speaker.",
+  ABOUT_PUBLIC_WORK_LEAD,
+  ABOUT_DOCUMENT_OVER_DECLARE,
+  ABOUT_UNSCORED_CLAIM,
   "All paths lead home. Morality over legality: a statute can bless a harm and still be called law. Law keeps order. Morality keeps the soul from calling order holy. Let us pray there is a God. If there is, the record is how we stay correctable before Him. If there is not, the record is how we stay correctable before each other.",
 ];
 

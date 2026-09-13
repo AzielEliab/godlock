@@ -46,6 +46,8 @@ import {
   GITHUB,
   AZIEL_PERSON_ID,
   AZIEL_OFFICIAL,
+  ABOUT_PUBLIC_WORK_LEAD,
+  identityMachineUrls,
   LOCAL_PERSON_STUB_ID,
   AI_CRAWLER_AGENTS,
   AI_CLIENTS,
@@ -230,6 +232,16 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok((about.relatedLink || []).includes(LIBRARY_AZIEL));
     assert.ok((about.relatedLink || []).includes("https://www.hedidntjump.com/"));
     assert.ok((about.relatedLink || []).includes(CANON_HOST + "/reason"));
+    for (const url of identityMachineUrls()) {
+      assert.ok((about.relatedLink || []).includes(url), url);
+      assert.ok((about.significantLink || []).includes(url), url);
+    }
+    const aboutWork = ld["@graph"].find((n) => n["@id"] === CANON_HOST + "/AzielEliab#public-work");
+    assert.ok(aboutWork);
+    assert.equal(aboutWork.description, ABOUT_PUBLIC_WORK_LEAD);
+    const faq = ld["@graph"].find((n) => n["@type"] === "FAQPage");
+    assert.ok(faq);
+    assert.ok((faq.mainEntity || []).some((q) => q.name === "Why does GodLock exist?"));
     assert.ok((about.mentions || []).some((m) => m && m.name === "Specified Fit, Not Pretty Spirals"));
     assert.equal(person.identifier, "Aziel Eliab");
     assert.equal(person.givenName, "Aziel");

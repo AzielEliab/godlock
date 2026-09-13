@@ -24,6 +24,13 @@ import {
   X_URL,
   X_URL_AKA,
   identityAlternateNames,
+  aboutPublicWorkDoc,
+  ABOUT_PUBLIC_WORK_LEAD,
+  ABOUT_DOCUMENT_OVER_DECLARE,
+  ABOUT_UNSCORED_CLAIM,
+  SPECIFIED_FIT_TITLE,
+  SPECIFIED_FIT_MOTTO,
+  identityMachineUrls,
   citeDoc,
   graphJsonLd,
   identityJsonLd,
@@ -36,6 +43,7 @@ import {
   wellKnownAzielDoc,
   whoIsAzielEliabTxt,
 } from "./src/seo.js";
+import { AZIEL_MANIFESTO, SPECIFIED_FIT_MOTTO as UI_SPECIFIED_FIT_MOTTO } from "./src/ui.js";
 
 function mockEnv() {
   const stmt = {
@@ -126,6 +134,11 @@ describe("AZindex identity machine", () => {
     const names = (faq.mainEntity || []).map((q) => q.name);
     assert.ok(names.includes("Who is Aziel Eliab?"));
     assert.ok(names.includes("Is GodLock a person or an identity?"));
+    assert.ok(names.includes("Why does GodLock exist?"));
+    assert.ok(names.includes("Must a claim stand open and leave a receipt?"));
+    assert.ok(names.includes("What does document over declare mean?"));
+    assert.ok(names.includes("What is a claim that cannot be scored?"));
+    assert.ok(names.includes("Does GodLock argue?"));
     assert.ok(names.includes("Is He Didn't Jump a second identity?"));
     assert.ok(names.includes("Is Aziel Eliab the biblical Aziel or Eliab?"));
     const biblical = faq.mainEntity.find((q) => q.name === "Is Aziel Eliab the biblical Aziel or Eliab?");
@@ -135,6 +148,29 @@ describe("AZindex identity machine", () => {
     assert.match(biblical.acceptedAnswer.text, /אליאב/);
     const who = faq.mainEntity.find((q) => q.name === "Who is Aziel Eliab?");
     assert.equal(who.acceptedAnswer.text, IDENTITY_ANSWER);
+    const why = faq.mainEntity.find((q) => q.name === "Why does GodLock exist?");
+    assert.equal(why.acceptedAnswer.text, ABOUT_PUBLIC_WORK_LEAD);
+    const sermon = faq.mainEntity.find((q) => q.name === "What is a claim that cannot be scored?");
+    assert.equal(sermon.acceptedAnswer.text, ABOUT_UNSCORED_CLAIM);
+    const argue = faq.mainEntity.find((q) => q.name === "Does GodLock argue?");
+    assert.match(argue.acceptedAnswer.text, /records, analyzes, hardens, and grows/);
+    assert.match(argue.acceptedAnswer.text, /product name, not an identity label/);
+    const specified = faq.mainEntity.find((q) => q.name === "What is Specified Fit, Not Pretty Spirals?");
+    assert.match(specified.acceptedAnswer.text, /GodLock does not argue/);
+    const aboutWork = nodes.find((n) => n["@id"] === CANON_HOST + "/AzielEliab#public-work");
+    assert.ok(aboutWork);
+    assert.equal(aboutWork["@type"], "CreativeWork");
+    assert.equal(aboutWork.description, ABOUT_PUBLIC_WORK_LEAD);
+    assert.match(aboutWork.text, /Document over declare/);
+    const aboutPage = nodes.find((n) => {
+      const types = [].concat(n["@type"] || []);
+      return types.includes("AboutPage");
+    });
+    assert.ok(aboutPage);
+    for (const url of identityMachineUrls()) {
+      assert.ok((aboutPage.relatedLink || []).includes(url), url);
+      assert.ok((aboutPage.significantLink || []).includes(url), url);
+    }
     const persons = nodes.filter((n) => n["@type"] === "Person");
     assert.equal(persons.length, 1);
     assert.ok(!nodes.some((n) => n["@type"] === "Person" && n["@id"] !== AZIEL_PERSON_ID));
@@ -149,6 +185,9 @@ describe("AZindex identity machine", () => {
     assert.match(text, /He Didn't Jump remains in the ecosystem/);
     assert.match(text, /Specified Fit, Not Pretty Spirals is a public design motto/);
     assert.match(text, /## Biblical disambiguation/);
+    assert.match(text, /## Public work/);
+    assert.ok(text.includes(ABOUT_PUBLIC_WORK_LEAD));
+    assert.ok(text.includes(SPECIFIED_FIT_MOTTO));
     assert.match(text, /## Hebrew aka/);
     assert.match(text, /עזיאל \/ אל ראי \| אלרועי \/ אליאב/);
     assert.match(text, /Biblical Aziel and biblical Eliab are not this Person/);
@@ -169,10 +208,15 @@ describe("AZindex identity machine", () => {
     assert.equal(doc.mission.godlock_is_vpn, false);
     assert.equal(doc.mission.godlock_is_identity_label, false);
     assert.equal(doc.mission.godlock_is_anonymity_tool, false);
-    assert.equal(doc.mission.design_motto, "Specified Fit, Not Pretty Spirals");
+    assert.equal(doc.mission.design_motto, SPECIFIED_FIT_TITLE);
     assert.equal(doc.mission.design_motto_kind, "public_work");
+    assert.equal(doc.mission.godlock_method, SPECIFIED_FIT_MOTTO);
     assert.equal(doc.mission.philosophy, "public_work");
     assert.equal(doc.mission.status, "public_work");
+    assert.deepEqual(doc.about_public_work, aboutPublicWorkDoc());
+    assert.equal(doc.about_public_work.lead, ABOUT_PUBLIC_WORK_LEAD);
+    assert.equal(doc.about_public_work.source, CANON_HOST + "/AzielEliab");
+    assert.equal(doc.about_public_work.sister_stats, undefined);
     assert.deepEqual(doc.sameAs, IDENTITY_SAME_AS);
     assert.deepEqual(doc.hebrew_aka, HEBREW_AKA);
     assert.deepEqual(doc.misspelling_alternateNames, IDENTITY_MISSPELLINGS);
@@ -208,6 +252,9 @@ describe("AZindex identity machine", () => {
     assert.equal(cite.identity_machine.person_id, AZIEL_PERSON_ID);
     assert.equal(cite.priority_pages.who_is_aziel_eliab, CANON_HOST + "/who-is-aziel-eliab.txt");
     assert.equal(cite.he_didnt_jump, HEDIDNTJUMP);
+    assert.deepEqual(cite.about_public_work, aboutPublicWorkDoc());
+    assert.equal(cite.about_public_work.person_id, AZIEL_PERSON_ID);
+    assert.ok(cite.about_public_work.identity_machine.includes(CANON_HOST + "/graph.jsonld"));
     assert.deepEqual(cite.sister_stats, SISTER_STATS);
     assert.deepEqual(cite.hebrew_aka, HEBREW_AKA);
     assert.ok(xml.includes(SISTER_STATS.azieleliab));
@@ -218,6 +265,11 @@ describe("AZindex identity machine", () => {
     assert.match(llms, /Identity machine \(do not fork @id\): https:\/\/godlock\.uk\/who-is-aziel-eliab\.txt/);
     assert.match(llms, /Person @id: https:\/\/www\.azieleliab\.com\/#aziel/);
     assert.match(llms, /He Didn't Jump: https:\/\/www\.hedidntjump\.com\//);
+    assert.match(llms, /## About public work/);
+    assert.ok(llms.includes(ABOUT_PUBLIC_WORK_LEAD));
+    assert.ok(llms.includes("Document over declare."));
+    assert.ok(llms.includes("A claim that cannot be scored is a sermon."));
+    assert.ok(llms.includes(SPECIFIED_FIT_MOTTO));
     assert.doesNotMatch(llms, /Person @id: https:\/\/godlock\.uk\//);
   });
 
@@ -254,5 +306,24 @@ describe("AZindex identity machine", () => {
     assert.equal(mission.doi, null);
     assert.deepEqual(mission.sister_stats, SISTER_STATS);
     assert.ok(mission.hebrew_aka.includes("עזיאל"));
+    assert.equal(mission.about_public_work.lead, ABOUT_PUBLIC_WORK_LEAD);
+    assert.equal(mission.sister_stats.corpus, "https://www.azielcorpuslibrary.net/stats");
+  });
+
+  it("factors published About depth without forking Person @id", () => {
+    assert.equal(ABOUT_PUBLIC_WORK_LEAD, AZIEL_MANIFESTO[0]);
+    assert.equal(ABOUT_DOCUMENT_OVER_DECLARE, AZIEL_MANIFESTO[1]);
+    assert.equal(ABOUT_UNSCORED_CLAIM, AZIEL_MANIFESTO[2]);
+    assert.equal(SPECIFIED_FIT_MOTTO, UI_SPECIFIED_FIT_MOTTO);
+    assert.equal(SPECIFIED_FIT_TITLE, "Specified Fit, Not Pretty Spirals");
+    const work = aboutPublicWorkDoc();
+    assert.equal(work.person_id, AZIEL_PERSON_ID);
+    assert.equal(work.product_not_identity, true);
+    assert.equal(work.source, CANON_HOST + "/AzielEliab");
+    assert.match(work.themes.debate_without_record, /debate with no record becomes a pulpit/);
+    assert.match(work.themes.stand_open_leave_receipt, /leave a receipt/);
+    assert.equal(work.themes.person_id, AZIEL_PERSON_ID);
+    assert.deepEqual(work.identity_machine, identityMachineUrls());
+    assert.equal(SISTER_STATS.corpus, "https://www.azielcorpuslibrary.net/stats");
   });
 });

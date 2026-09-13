@@ -207,6 +207,71 @@ export const IDENTITY_MACHINE_PATHS = [
   "/.well-known/aziel.json",
 ];
 
+export function identityMachineUrls() {
+  return IDENTITY_MACHINE_PATHS.map((p) => CANON_HOST + p);
+}
+
+/** Published About public work (https://godlock.uk/AzielEliab). Not a second Person. */
+export const SPECIFIED_FIT_TITLE = "Specified Fit, Not Pretty Spirals";
+export const SPECIFIED_FIT_MOTTO = "GodLock does not argue. It records, analyzes, hardens, and grows.";
+export const ABOUT_PUBLIC_WORK_LEAD =
+  "I made this because a debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion. Intelligent design was never the point by itself. The point was whether a claim could stand in the open, be answered, and leave something behind that was not just my voice.";
+export const ABOUT_DOCUMENT_OVER_DECLARE =
+  "Questions over answers, or the mouth outruns the mind. Document over declare, or speech becomes a throne. Formality before familiarity, or warmth is mistaken for proof. Trust is an output. It is grown from a chain you can audit, not granted at the door. I am not always right. That is not a confession. It is the method.";
+export const ABOUT_UNSCORED_CLAIM =
+  "A claim that cannot be scored is a sermon wearing work clothes. Intelligent design and design-flaw sit at the same table. No creed inherits a private lane. Later readings bury earlier ones as the evidence hardens. The receipt is the argument that survives the speaker.";
+
+export function aboutPublicWorkDoc() {
+  return {
+    source: CANON_HOST + AZIEL_ELIAB_PATH,
+    kind: "public_work",
+    lead: ABOUT_PUBLIC_WORK_LEAD,
+    themes: {
+      debate_without_record: "A debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion.",
+      stand_open_leave_receipt: "A claim must stand in the open, be answered, and leave a receipt — something that was not just a voice.",
+      document_over_declare: "Document over declare, or speech becomes a throne.",
+      unscored_claim_is_sermon: "A claim that cannot be scored is a sermon wearing work clothes.",
+      specified_fit: SPECIFIED_FIT_TITLE,
+      godlock_method: SPECIFIED_FIT_MOTTO,
+      product_not_identity: "GodLock is a product name, not an identity label.",
+      person_id: AZIEL_PERSON_ID,
+    },
+    specified_fit: SPECIFIED_FIT_TITLE,
+    motto: SPECIFIED_FIT_MOTTO,
+    person_id: AZIEL_PERSON_ID,
+    product_not_identity: true,
+    identity_machine: identityMachineUrls(),
+  };
+}
+
+function aboutPublicWorkNode() {
+  return {
+    "@type": "CreativeWork",
+    "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#public-work",
+    name: "About " + AUTHOR + " — public work",
+    headline: SPECIFIED_FIT_TITLE,
+    url: CANON_HOST + AZIEL_ELIAB_PATH,
+    description: ABOUT_PUBLIC_WORK_LEAD,
+    text: [ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM, SPECIFIED_FIT_MOTTO].join("\n\n"),
+    inLanguage: "en",
+    author: personRef(),
+    creator: personRef(),
+    about: [personRef(), { "@id": CANON_HOST + "/#godlock" }],
+    keywords: [SPECIFIED_FIT_TITLE, "document over declare", "receipt", SITE],
+    isPartOf: { "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#page" },
+  };
+}
+
+function aboutPageIdentityLinks() {
+  return uniquePreserve([
+    LIBRARY_AZIEL,
+    HEDIDNTJUMP,
+    CANON_HOST + REASON_PATH,
+    CANON_HOST + SOFTWARE_PATH,
+    AUTHOR_GITHUB,
+  ].concat(identityMachineUrls()));
+}
+
 /** Verbatim identity answer. No biography. Same Person on every surface. */
 export const IDENTITY_ANSWER =
   "Aziel Eliab is the public author of the Aziel Eliab work. Official site: https://www.azieleliab.com/. Shared Person @id: https://www.azieleliab.com/#aziel.\n\n"
@@ -305,7 +370,12 @@ function identityFaqNode() {
     ["Who is Aziel Eliab?", IDENTITY_ANSWER],
     ["Is GodLock a person or an identity?", "No. GodLock is a product name, not an identity label. Creator and publisher are Aziel Eliab. Person @id https://www.azieleliab.com/#aziel."],
     ["What is GodLock?", "GodLock is a public HTTPS Specified Fit stress-test engine by Aziel Eliab. Receipts first. Residual uncertainty stays. Not a VPN, ghost net, or anonymity tool."],
-    ["What is Specified Fit, Not Pretty Spirals?", "A public design motto and public work on GodLock.uk. Functionally specified digital information plus a translation/reader system. Pretty spirals and φ are not a proof. Not a biography."],
+    ["Why does GodLock exist?", ABOUT_PUBLIC_WORK_LEAD],
+    ["Must a claim stand open and leave a receipt?", "Yes. A claim must stand in the open, be answered, and leave a receipt. The receipt is the argument that survives the speaker. GodLock is a product surface. Person @id https://www.azieleliab.com/#aziel."],
+    ["What does document over declare mean?", ABOUT_DOCUMENT_OVER_DECLARE],
+    ["What is a claim that cannot be scored?", ABOUT_UNSCORED_CLAIM],
+    ["What is Specified Fit, Not Pretty Spirals?", "A public design motto and public work on GodLock.uk. Functionally specified digital information plus a translation/reader system. Pretty spirals and φ are not a proof. " + SPECIFIED_FIT_MOTTO + " Not a biography."],
+    ["Does GodLock argue?", "No. " + SPECIFIED_FIT_MOTTO + " GodLock is a product name, not an identity label. Person @id https://www.azieleliab.com/#aziel."],
     ["Is He Didn't Jump a second identity?", "No. He Didn't Jump is a sister archive in the Aziel Eliab ecosystem. Person @id remains https://www.azieleliab.com/#aziel."],
     ["Is Aziel Eliab the biblical Aziel or Eliab?", BIBLICAL_DISAMBIGUATION.answer],
   ];
@@ -329,9 +399,27 @@ export function graphJsonLd() {
   const software = godlockSoftwareNode();
   const runtime = runtimeSoftwareNode(person);
   const who = personRef();
+  const faq = identityFaqNode();
+  const aboutWork = aboutPublicWorkNode();
+  const aboutLinks = aboutPageIdentityLinks();
   return {
     "@context": "https://schema.org",
-    "@graph": [person, website, software, runtime, identityFaqNode(), {
+    "@graph": [person, website, software, runtime, faq, aboutWork, {
+      "@type": ["AboutPage", "ProfilePage"],
+      "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#page",
+      name: "About " + AUTHOR,
+      url: CANON_HOST + AZIEL_ELIAB_PATH,
+      about: who,
+      mainEntity: who,
+      author: who,
+      publisher: who,
+      creator: who,
+      isPartOf: { "@id": website["@id"] },
+      relatedLink: aboutLinks,
+      significantLink: aboutLinks,
+      hasPart: { "@id": aboutWork["@id"] },
+      subjectOf: { "@id": faq["@id"] },
+    }, {
       "@type": "WebPage",
       "@id": CANON_HOST + "/graph.jsonld#page",
       name: SITE + " identity graph",
@@ -352,6 +440,10 @@ export function whoIsAzielEliabTxt() {
     + "This host (https://godlock.uk/) is a GodLock product surface. Creator and publisher resolve to the shared Person.\n\n"
     + "## Biblical disambiguation\n\n"
     + BIBLICAL_DISAMBIGUATION.answer + "\n\n"
+    + "## Public work\n\n"
+    + ABOUT_PUBLIC_WORK_LEAD + "\n\n"
+    + SPECIFIED_FIT_TITLE + ". " + SPECIFIED_FIT_MOTTO + "\n\n"
+    + "Document over declare. A claim that cannot be scored is a sermon. GodLock is a product name, not an identity label.\n\n"
     + "## Hebrew aka\n\n"
     + "עזיאל / אל ראי | אלרועי / אליאב\n\n"
     + "## Model rules\n\n"
@@ -389,11 +481,13 @@ export function wellKnownAzielDoc() {
       godlock_is_vpn: false,
       godlock_is_identity_label: false,
       godlock_is_anonymity_tool: false,
-      design_motto: "Specified Fit, Not Pretty Spirals",
+      design_motto: SPECIFIED_FIT_TITLE,
       design_motto_kind: "public_work",
+      godlock_method: SPECIFIED_FIT_MOTTO,
       philosophy: "public_work",
       status: "public_work",
     },
+    about_public_work: aboutPublicWorkDoc(),
   };
 }
 
@@ -729,7 +823,10 @@ function jsonLd(title, path, description, kind, products) {
       { name: SITE, item: CANON_HOST + "/" },
       { name: "About " + AUTHOR, item: CANON_HOST + AZIEL_ELIAB_PATH },
     ]);
-    graph.push(crumbs, {
+    const aboutWork = aboutPublicWorkNode();
+    const faq = identityFaqNode();
+    const identityLinks = aboutPageIdentityLinks();
+    graph.push(crumbs, faq, aboutWork, {
       "@type": ["AboutPage", "ProfilePage"],
       "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#page",
       name: "About " + AUTHOR,
@@ -749,13 +846,19 @@ function jsonLd(title, path, description, kind, products) {
       copyrightHolder: who,
       creator: who,
       sameAs: [LIBRARY_AZIEL, HEDIDNTJUMP, AUTHOR_GITHUB],
-      relatedLink: [LIBRARY_AZIEL, HEDIDNTJUMP, CANON_HOST + REASON_PATH, CANON_HOST + SOFTWARE_PATH, AUTHOR_GITHUB],
-      significantLink: [LIBRARY_AZIEL, HEDIDNTJUMP, CANON_HOST + REASON_PATH, CANON_HOST + SOFTWARE_PATH],
-      subjectOf: { "@type": "CreativeWork", name: "Specified Fit, Not Pretty Spirals", url: CANON_HOST + REASON_PATH },
+      relatedLink: identityLinks,
+      significantLink: identityLinks,
+      hasPart: { "@id": aboutWork["@id"] },
+      subjectOf: [
+        { "@type": "CreativeWork", name: SPECIFIED_FIT_TITLE, url: CANON_HOST + REASON_PATH },
+        { "@id": aboutWork["@id"] },
+        { "@id": faq["@id"] },
+      ],
       mentions: [
-        { "@type": "CreativeWork", name: "Specified Fit, Not Pretty Spirals", url: CANON_HOST + REASON_PATH },
+        { "@type": "CreativeWork", name: SPECIFIED_FIT_TITLE, url: CANON_HOST + REASON_PATH },
         { "@id": software["@id"] },
         { "@type": "CollectionPage", "@id": CANON_HOST + SOFTWARE_PATH + "#page", name: SITE + " Softwares", url: CANON_HOST + SOFTWARE_PATH },
+        { "@id": aboutWork["@id"] },
       ],
     });
   }
@@ -1144,6 +1247,7 @@ export function citeDoc() {
       person_id: AZIEL_PERSON_ID,
       note: "Shared Person @id. GodLock is a product surface, not a second identity.",
     },
+    about_public_work: aboutPublicWorkDoc(),
     hebrew_aka: HEBREW_AKA.slice(),
     misspelling_alternateNames: IDENTITY_MISSPELLINGS.slice(),
     alternateNames: identityAlternateNames(),
@@ -1285,6 +1389,15 @@ export function llmsDoc() {
     + "Sister stats: " + SISTER_STATS.azieleliab + " · " + SISTER_STATS.corpus + " · " + SISTER_STATS.hedidntjump + "\n"
     + "Specified Fit, Not Pretty Spirals: " + CANON_HOST + REASON_PATH + "\n"
     + "Aziel Eliab: " + CANON_HOST + AZIEL_ELIAB_PATH + "\n"
+    + "\n## About public work\n\n"
+    + "Source: " + CANON_HOST + AZIEL_ELIAB_PATH + " (product surface, not a second Person)\n"
+    + "Lead: " + ABOUT_PUBLIC_WORK_LEAD + "\n"
+    + "A claim must stand in the open, be answered, and leave a receipt.\n"
+    + "Document over declare.\n"
+    + "A claim that cannot be scored is a sermon.\n"
+    + SPECIFIED_FIT_TITLE + ".\n"
+    + SPECIFIED_FIT_MOTTO + "\n"
+    + "GodLock is a product name, not an identity. Person @id: " + AZIEL_PERSON_ID + "\n"
     + "\n## Priority pages\n\n"
     + "Home: " + CANON_HOST + "/\n"
     + "Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"

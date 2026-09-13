@@ -24,6 +24,32 @@
     "person_id": "https://www.azieleliab.com/#aziel",
     "note": "Shared Person @id. GodLock is a product surface, not a second identity."
   },
+  "about_public_work": {
+    "source": "https://godlock.uk/AzielEliab",
+    "kind": "public_work",
+    "lead": "I made this because a debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion. Intelligent design was never the point by itself. The point was whether a claim could stand in the open, be answered, and leave something behind that was not just my voice.",
+    "themes": {
+      "debate_without_record": "A debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion.",
+      "stand_open_leave_receipt": "A claim must stand in the open, be answered, and leave a receipt — something that was not just a voice.",
+      "document_over_declare": "Document over declare, or speech becomes a throne.",
+      "unscored_claim_is_sermon": "A claim that cannot be scored is a sermon wearing work clothes.",
+      "specified_fit": "Specified Fit, Not Pretty Spirals",
+      "godlock_method": "GodLock does not argue. It records, analyzes, hardens, and grows.",
+      "product_not_identity": "GodLock is a product name, not an identity label.",
+      "person_id": "https://www.azieleliab.com/#aziel"
+    },
+    "specified_fit": "Specified Fit, Not Pretty Spirals",
+    "motto": "GodLock does not argue. It records, analyzes, hardens, and grows.",
+    "person_id": "https://www.azieleliab.com/#aziel",
+    "product_not_identity": true,
+    "identity_machine": [
+      "https://godlock.uk/person.jsonld",
+      "https://godlock.uk/identity.jsonld",
+      "https://godlock.uk/graph.jsonld",
+      "https://godlock.uk/who-is-aziel-eliab.txt",
+      "https://godlock.uk/.well-known/aziel.json"
+    ]
+  },
   "hebrew_aka": ["עזיאל", "אל ראי", "אלרועי", "אליאב"],
   "misspelling_alternateNames": [
     "Azial Eliab",

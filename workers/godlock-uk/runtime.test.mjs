@@ -322,7 +322,8 @@ describe("software CTA and nav", () => {
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Source on GitHub<\/a>/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0">Documentation\/Architecture<\/a>/);
     assert.doesNotMatch(html, /glama\.ai\/mcp\/servers\/@[A-Za-z0-9_-]+/);
-    assert.match(html, /Invoke via Runtime/);
+    assert.doesNotMatch(html, /Invoke via Runtime/);
+    assert.match(html, /https:\/\/www\.azieleliab\.com\/software/);
     assert.match(html, /href="\/runtime"/);
     assert.match(html, /FragGate/);
     const nav = topNav("/software");

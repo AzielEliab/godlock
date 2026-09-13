@@ -30,6 +30,8 @@ export const AUTHOR = "Aziel Eliab";
 export const AUTHOR_AKA = "Aziel Elroi Eliab";
 /** Shared public Person @id. Satellite sites reference this; they do not mint a competing primary. */
 export const AZIEL_OFFICIAL = "https://www.azieleliab.com/";
+/** Official Softwares / software listing. GodLock.uk does not clone the suite catalog. */
+export const OFFICIAL_SOFTWARES = AZIEL_OFFICIAL.replace(/\/$/, "") + "/software";
 export const AZIEL_PERSON_ID = "https://www.azieleliab.com/#aziel";
 export const LOCAL_PERSON_STUB_ID = CANON_HOST + "/AzielEliab#aziel-eliab";
 /** Hub parent Runtime product. Satellites reference this; they do not mint a competing Runtime @id. */
@@ -585,7 +587,7 @@ export function documentTitle(title, kind) {
   return raw + " — " + SITE;
 }
 
-/** Softwares-tab slugs for sitemap anchors + CollectionPage ItemList. Not a second FragGate door. */
+/** Catalog slugs for robots/download-tracker sitemaps. Not the godlock.uk Softwares card list. */
 export const SOFTWARE_INDEX = [
   ["aziel-runtime", "Aziel Runtime"],
   ["fraggate", "FragGate"],
@@ -628,7 +630,13 @@ export const SOFTWARE_INDEX = [
   ["aziel-corpus", "Aziel Digital Library"],
 ].map(([slug, name]) => ({ slug, name }));
 
-export function softwareIndexItems(products) {
+/** GodLock.uk Softwares HTML / JSON-LD anchors. Aziel Runtime only — not a cloned suite. */
+export function publicSoftwareIndexItems() {
+  return [{ slug: RUNTIME_SLUG, name: RUNTIME_NAME }];
+}
+
+/** Full catalog slug/name list for Runtime describe/pull + tracker sitemaps. */
+export function catalogIndexItems(products) {
   const seen = new Set();
   const out = [];
   const push = (slug, name) => {
@@ -640,6 +648,10 @@ export function softwareIndexItems(products) {
   for (const p of SOFTWARE_INDEX) push(p.slug, p.name);
   for (const p of Array.isArray(products) ? products : []) push(p && p.slug, p && p.name);
   return out;
+}
+
+export function softwareIndexItems(_products) {
+  return publicSoftwareIndexItems();
 }
 
 export function isIndexCrawler(ua) {
@@ -663,7 +675,9 @@ export function defaultDescription(kind) {
     return hideInternalDetermination(
       RUNTIME_ABSTRACT
         + " Live " + RUNTIME_NAME + " " + RUNTIME_VERSION
-        + " on GodLock.uk Softwares. Suite doors available from GodLock. Catalog Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock): GodLock featured first, then aziel-runtime (Aziel Runtime), FragGate, and live suite cards. Worker, GitHub, and /runtime tethers. "
+        + " on GodLock.uk Softwares. Aziel Runtime only on this page (Try on Glama). Software listing: "
+        + OFFICIAL_SOFTWARES
+        + ". Not a Digital Library Softwares page and not a cloned suite catalog. FragGate is the Runtime kernel, not a Softwares card here. "
         + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
@@ -697,7 +711,7 @@ function defaultKeywords(kind) {
   if (kind === "donate") return "Donate, Aziel Eliab, GodLock, Bitcoin, Ethereum, Litecoin, XRP, Dogecoin";
   if (kind === "receipts") return "GodLock receipts, hash-chained ledger, Specified Fit, Aziel Eliab, challenge, Yes No Let's review Interesting";
   if (kind === "software") {
-    return "GodLock Softwares, GodLock.uk, FragGate, Aziel Runtime, catalog, Plain A-Z, Gate, Lock, HTTPS engine";
+    return "GodLock Softwares, GodLock.uk, Aziel Runtime, azieleliab.com, Try on Glama, HTTPS engine";
   }
   if (kind === "runtime" || kind === "home") {
     return "GodLock, Aziel Eliab, Runtime, FragGate, MCP, OpenAPI, ChatGPT, Grok, Venice, Claude, Cursor, Glama, Perplexity, Copilot, Gemini, Mistral, Meta AI, Apple Intelligence, Amazon Q, DuckAssist, You.com, Cohere";
@@ -812,7 +826,7 @@ function softwareItemList(products, person) {
     "@type": "ItemList",
     "@id": CANON_HOST + SOFTWARE_PATH + "#catalog",
     name: SITE + " Softwares",
-    description: "Suite doors available from GodLock. Plain A–Z → Gate A–Z → Lock A–Z. Clock is not Lock. FragGate is the single door.",
+    description: "Aziel Runtime on GodLock.uk Softwares. Software listing at " + OFFICIAL_SOFTWARES + ". Not a cloned suite catalog. FragGate is the Runtime kernel, not a Softwares card.",
     itemListOrder: "https://schema.org/ItemListOrderAscending",
     numberOfItems: items.length,
     author: personRef(),
@@ -890,8 +904,8 @@ function jsonLd(title, path, description, kind, products) {
       mainEntity: { "@id": list["@id"] },
       breadcrumb: { "@id": crumbs["@id"] },
       hasPart: { "@id": software["@id"] },
-      relatedLink: [PUBLIC_RUNTIME, CANON_HOST + "/v1/software", CANON_HOST + AZIEL_ELIAB_PATH, LIBRARY, HEDIDNTJUMP],
-      significantLink: [PUBLIC_RUNTIME, CANON_HOST + "/v1/software"],
+      relatedLink: [PUBLIC_RUNTIME, OFFICIAL_SOFTWARES, CANON_HOST + AZIEL_ELIAB_PATH, LIBRARY, HEDIDNTJUMP],
+      significantLink: [PUBLIC_RUNTIME, OFFICIAL_SOFTWARES],
     });
   }
   if (kind === "reason") {
@@ -1263,6 +1277,7 @@ export async function sitemapXml(env, extras = {}) {
   add(SISTER_STATS.corpus, "0.4", "daily");
   add(SISTER_STATS.hedidntjump, "0.4", "daily");
   add(CANON_HOST + REASON_PATH, "0.8", "weekly");
+  add(OFFICIAL_SOFTWARES, "0.8", "weekly");
   add(CANON_HOST + "/v1/software", "0.7", "daily");
   add(CANON_HOST + "/openapi.json", "0.6", "weekly");
   add(CANON_HOST + "/robots.txt", "0.4", "weekly");
@@ -1299,8 +1314,10 @@ export async function sitemapXml(env, extras = {}) {
   add(CATALOG + "/v1/fraggate/list", "0.6", "daily");
   add(CATALOG + "/v1/update/check", "0.4", "daily");
   add(CATALOG + "/v1/catalog.json", "0.5", "daily");
-  for (const p of softwareIndexItems(extras.products)) {
-    add(CANON_HOST + SOFTWARE_PATH + "#" + p.slug, "0.55", "weekly");
+  for (const p of publicSoftwareIndexItems()) {
+    add(CANON_HOST + SOFTWARE_PATH + "#" + p.slug, "0.7", "weekly");
+  }
+  for (const p of catalogIndexItems(extras.products)) {
     add(PUBLIC_RUNTIME + "/v1/fraggate/describe?slug=" + encodeURIComponent(p.slug), "0.45", "weekly");
     add(PUBLIC_RUNTIME + "/v1/pull/" + encodeURIComponent(p.slug), "0.4", "weekly");
     if (p.slug !== "aziel-runtime" && p.slug !== "aziel-corpus" && p.slug !== "azchat") {
@@ -1331,6 +1348,7 @@ export function citeDoc() {
     sameAs_lattice: IDENTITY_SAME_AS.slice(),
     sameAs_lattice_note: "Shared AZindex Person sameAs. Surfaces of one living Person, not other people. Do not mint a competing Person @id.",
     official_site: AZIEL_OFFICIAL,
+    official_softwares: OFFICIAL_SOFTWARES,
     he_didnt_jump: HEDIDNTJUMP,
     he_didnt_jump_note: "Sister archive door. An Aziel Eliab Project. Not a Softwares card. Identity Aziel Eliab only.",
     ecosystem: ecosystemLinks(),
@@ -1378,7 +1396,7 @@ export function citeDoc() {
     sister_stats: { ...SISTER_STATS },
     host_stats: CANON_HOST + "/stats",
     software_html: CANON_HOST + SOFTWARE_PATH,
-    software_api_note: "Thin SEO/catalog JSON on /v1/software. Not a second FragGate door. Door remains /runtime.",
+    software_api_note: "Thin Softwares JSON on /v1/software: Aziel Runtime only plus official listing at https://www.azieleliab.com/software. Not a cloned suite catalog. Not a second FragGate door. Door remains /runtime.",
     github: GITHUB,
     download: DOWNLOAD,
     verify: CANON_HOST + "/verify",
@@ -1392,10 +1410,10 @@ export function citeDoc() {
     software_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/list",
     software_fraggate_origin: CATALOG + "/v1/fraggate/list",
     software_catalog_json: PUBLIC_RUNTIME + "/v1/catalog.json",
-    software_suite: "Live aziel-runtime /v1/software (fallback /v1/fraggate/list). Suite doors available from GodLock. Aziel Runtime and FragGate are separate cards. GitHub and runtime drops refresh the tab without hand copy. AZCoherence (azcoherence) is Plain A–Z with peer AZ-CLCE. Not AKM-TRIAD. FragGate single door.",
+    software_suite: "GodLock.uk Softwares lists Aziel Runtime only (Try on Glama). Software listing: " + OFFICIAL_SOFTWARES + ". Not a cloned suite catalog. Not a Digital Library Softwares page. FragGate is the Runtime kernel (FG-0.1), not a Softwares card on this site.",
     software_api: CANON_HOST + "/v1/software",
     software_product_count: null,
-    azcoherence: CANON_HOST + SOFTWARE_PATH + "#" + AZCOHERENCE_SLUG,
+    azcoherence: OFFICIAL_SOFTWARES + "#" + AZCOHERENCE_SLUG,
     azcoherence_name: AZCOHERENCE_NAME,
     azcoherence_slug: AZCOHERENCE_SLUG,
     azcoherence_version: AZCOHERENCE_VERSION,
@@ -1528,6 +1546,7 @@ export function llmsDoc() {
     + "\n## Priority pages\n\n"
     + "Home: " + CANON_HOST + "/\n"
     + "Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
+    + "Official Softwares listing: " + OFFICIAL_SOFTWARES + "\n"
     + "About Aziel Eliab: " + CANON_HOST + AZIEL_ELIAB_PATH + "\n"
     + "Specified Fit: " + CANON_HOST + REASON_PATH + "\n"
     + "Verify: " + CANON_HOST + "/verify\n"
@@ -1550,7 +1569,7 @@ export function llmsDoc() {
     + "He Didn't Jump: " + HEDIDNTJUMP + "\n"
     + "GodLock Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
     + "Donate: " + CANON_HOST + DONATE_PATH + " (AZL-DONATE-1.0). Same door: " + DONATE_CANONICAL + "\n"
-    + "GodLock Softwares lists suite doors available from GodLock, pulled from the live aziel-runtime catalog. Aziel Runtime (aziel-runtime) and FragGate are separate cards. New catalog slugs are included automatically. AZBrowser, AZNet, AZHub, AZInterface, and AZCoherence are separate Plain cards (azbrowser-download-tracker, aznet-download-tracker, azhub-download-tracker, azinterface-download-tracker, azcoherence-download-tracker). Never nest AZHub with AZInterface. AZCoherence is peer to AZ-CLCE (azclce), not AKM-TRIAD. FragGate is its own Gate card (fraggate-download-tracker Download/Worker, A–Z with DecisionGATE). Each product is tethered to its Worker, GitHub, and /runtime. Sorted Plain A–Z → Gate A–Z → Lock A–Z on the catalog JSON (Clock is not Lock). The Softwares HTML page features GodLock first. GodLock, FragGate, and every true_engine_slug are hosted on this page.\n"
+    + "GodLock.uk Softwares lists Aziel Runtime only (Try on Glama). Software listing: " + OFFICIAL_SOFTWARES + ". Not a cloned suite catalog and not a Digital Library Softwares page. FragGate is the Runtime kernel (FG-0.1), not a Softwares card on godlock.uk. Live catalog remains " + PUBLIC_RUNTIME + "/v1/software. AZCoherence (azcoherence) is peer to AZ-CLCE (azclce), not AKM-TRIAD.\n"
     + "AZCoherence (azcoherence): second-pass triad coherence review (primary vs alternate → PASS/FLAG/NEUTRALIZE/REFUSE). Never invents evidence. Confidence ≠ truth. Not AKM-TRIAD. Peer AZ-CLCE. FragGate single door. Author Aziel Eliab.\n"
     + "AZCoherence Worker: " + AZCOHERENCE_WORKER + "\n"
     + "AZCoherence GitHub: " + AZCOHERENCE_GITHUB + "\n"
@@ -1619,7 +1638,7 @@ export function siteOpenApi() {
       version: "0.1.0",
       summary: "Public HTTPS stress-test engine by Aziel Eliab.",
       description: hideInternalDetermination(
-        "GodLock.uk public routes plus same-origin FragGate / MCP door. Software tab reads live " + CATALOG + "/v1/software (fallback /v1/fraggate/list). Suite mesh (QNM-BUILD-1.0, read-only, on): GET " + CANON_HOST + "/v1/mesh and GET " + CANON_HOST + "/v1/mesh/status (same-origin proxies; GET never enables) plus GET " + PUBLIC_RUNTIME + "/v1/mesh. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. This Worker has no mesh-off function. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
+        "GodLock.uk public routes plus same-origin FragGate / MCP door. Softwares lists Aziel Runtime only and points at " + OFFICIAL_SOFTWARES + ". Live catalog remains " + PUBLIC_RUNTIME + "/v1/software. Suite mesh (QNM-BUILD-1.0, read-only, on): GET " + CANON_HOST + "/v1/mesh and GET " + CANON_HOST + "/v1/mesh/status (same-origin proxies; GET never enables) plus GET " + PUBLIC_RUNTIME + "/v1/mesh. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. This Worker has no mesh-off function. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
       ),
       contact: { name: AUTHOR, url: CANON_HOST + AZIEL_ELIAB_PATH },
       license: { name: "Apache-2.0", url: "https://www.apache.org/licenses/LICENSE-2.0" },
@@ -1627,8 +1646,8 @@ export function siteOpenApi() {
     servers: [{ url: CANON_HOST }, { url: FALLBACK_HOST }],
     paths: {
       "/health": { get: { operationId: "godlockUkHealth", summary: "Liveness", responses: { "200": { description: "OK" } } } },
-      "/software": { get: { operationId: "godlockUkSoftware", summary: "GodLock Softwares — suite doors from GodLock (Plain → Gate → Lock)", responses: { "200": { description: "HTML or JSON" } } } },
-      "/v1/software": { get: { operationId: "godlockUkSoftwareApi", summary: "Same-origin Softwares catalog (Plain A–Z includes AZCoherence; live catalog or local fallback)", responses: { "200": { description: "OK" } } } },
+      "/software": { get: { operationId: "godlockUkSoftware", summary: "GodLock Softwares — Aziel Runtime plus official listing at azieleliab.com/software", responses: { "200": { description: "HTML or JSON" } } } },
+      "/v1/software": { get: { operationId: "godlockUkSoftwareApi", summary: "Same-origin Softwares JSON (Aziel Runtime only; official listing at azieleliab.com/software)", responses: { "200": { description: "OK" } } } },
       "/donate": { get: { operationId: "godlockUkDonate", summary: "AZL-DONATE-1.0 door (static rails; no KV; payment is not a key)", responses: { "200": { description: "HTML or JSON" } } } },
       "/receipts": { get: { operationId: "godlockUkReceipts", summary: "Public questions + hash-chained receipt list (newest first; isolated omitted)", responses: { "200": { description: "HTML or JSON" } } } },
       "/verify": { get: { operationId: "godlockUkVerify", summary: "Walk the public hash-chained ledger", responses: { "200": { description: "HTML or JSON" } } } },

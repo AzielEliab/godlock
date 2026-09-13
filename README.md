@@ -24,7 +24,7 @@ Part of the **Aziel Eliab** ecosystem (official hub, sister library, sister arch
 - **Verify:** https://godlock.uk/verify
 - **Donate:** https://godlock.uk/donate — AZL-DONATE-1.0 (same door https://www.azieleliab.com/donate). Payment-URI QRs are solid black-on-white PNGs (`/donate/qr/{rail}.png`). Donate rails live on this tab, not on the Engine homepage.
 - **Receipts:** https://godlock.uk/receipts — full public questions + hash-chained receipt list. Homepage Prior shows the last 5.
-- **Softwares on GodLock:** https://godlock.uk/software — **GodLock-first** (Softwares heading → list). Suite doors available from GodLock, pulled from live aziel-runtime. Not a Digital Library Softwares page and **not** a claim that Softwares matches Digital Library completeness.
+- **Softwares on GodLock:** https://godlock.uk/software — **GodLock-first** (Softwares heading → list). Aziel Runtime only on this page (**Try on Glama**). Software listing: https://www.azieleliab.com/software. Not a Digital Library Softwares page and **not** a cloned suite catalog.
 - **Runtime (FragGate door):** https://godlock.uk/runtime — same-origin proxy of Aziel Runtime **2.0.0-rc1**. Prefer **Try on Glama** [https://glama.ai/mcp/servers/AzielEliab/aziel-runtime](https://glama.ai/mcp/servers/AzielEliab/aziel-runtime). Official Runtime Worker is secondary: https://aziel-runtime.vibelock.workers.dev/
 - **aziel-runtime (GitHub):** https://github.com/AzielEliab/aziel-runtime
 - **FragGate kernel (FG-0.1):** https://github.com/AzielEliab/fraggate
@@ -105,7 +105,7 @@ Public engine and catalog live on godlock.uk and aziel-runtime — not on the do
 Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
 
 - Public engine: https://godlock.uk
-- Softwares (GodLock-first heading → list): https://godlock.uk/software
+- Softwares (GodLock-first heading → list; Aziel Runtime + official listing https://www.azieleliab.com/software): https://godlock.uk/software
 - Runtime door (2.0.0-rc1): https://godlock.uk/runtime
 - **Try on Glama:** https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
 - Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/
@@ -137,7 +137,7 @@ No DOI is claimed. Do not invent one.
 - Specified Fit: https://godlock.uk/reason
 - Verify: https://godlock.uk/verify
 - Donate: https://godlock.uk/donate (AZL-DONATE-1.0; same door https://www.azieleliab.com/donate)
-- Softwares on GodLock: https://godlock.uk/software — GodLock-first (heading → list). Suite doors from GodLock. Not Digital Library completeness.
+- Softwares on GodLock: https://godlock.uk/software — GodLock-first (heading → list). Aziel Runtime only (Try on Glama). Software listing: https://www.azieleliab.com/software. Not Digital Library completeness. Not a cloned suite catalog.
 - Runtime door: https://godlock.uk/runtime — Aziel Runtime **2.0.0-rc1**
 - Try on Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
 - Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/

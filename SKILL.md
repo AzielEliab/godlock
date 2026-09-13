@@ -66,7 +66,7 @@ GitHub: https://github.com/AzielEliab/godlock
 
 Author: **Aziel Eliab**. Honest scope: Offline Specified Fit / GodLock score. Not a VPN and not an anonymity network. GodLock is a product name. Public reasoning: Specified Fit, Not Pretty Spirals.
 
-- GodLock Softwares (GodLock-first heading → list; not Digital Library completeness): https://godlock.uk/software
+- GodLock Softwares (GodLock-first heading → list; Aziel Runtime only; official listing https://www.azieleliab.com/software; not Digital Library completeness): https://godlock.uk/software
 - Runtime **2.0.0-rc1** door: https://godlock.uk/runtime
 - Try on Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
 - Catalog product: https://aziel-runtime.vibelock.workers.dev/p/godlock/

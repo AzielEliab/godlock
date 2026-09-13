@@ -16,7 +16,7 @@ import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
-  robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR,
+  robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, mcpDiscoveryDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR,
   PUBLIC_RUNTIME, RUNTIME_PATH, RUNTIME_VERSION, OFFICIAL_SOFTWARES, permanentIdentityRedirect, citeRuntimeVersion,
   BRAND_MARK_PATH,
   personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, wellKnownAzielDoc,
@@ -613,6 +613,9 @@ export default {
       }
       if (path === "/.well-known/aziel.json") {
         return json(wellKnownAzielDoc());
+      }
+      if (path === "/.well-known/mcp.json" || path === "/mcp.json") {
+        return json(mcpDiscoveryDoc());
       }
       if (path === "/openapi.json") {
         return json(siteOpenApi());

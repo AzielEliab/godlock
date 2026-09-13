@@ -22,6 +22,6 @@ Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic
 
 Identity machine (do not fork @id): https://godlock.uk/person.jsonld · https://godlock.uk/who-is-aziel-eliab.txt · https://godlock.uk/.well-known/aziel.json
 Hebrew aka: עזיאל / אל ראי | אלרועי / אליאב. Biblical Aziel / Eliab are not this Person. GodLock is a product name.
-Sister stats: https://www.azieleliab.com/v1/stats · https://www.azielcorpuslibrary.net/v1/stats · https://www.hedidntjump.com/api/stats
+Sister stats: https://www.azieleliab.com/v1/stats · https://www.azielcorpuslibrary.net/stats · https://www.hedidntjump.com/api/stats
 
 See docs/llms.txt for the full brief.

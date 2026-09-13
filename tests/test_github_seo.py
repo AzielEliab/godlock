@@ -113,7 +113,7 @@ def test_cite_json_graph():
     assert CITE["he_didnt_jump"] == "https://www.hedidntjump.com/"
     assert CITE["identity_machine"]["person_id"] == "https://www.azieleliab.com/#aziel"
     assert CITE["sister_stats"]["azieleliab"] == "https://www.azieleliab.com/v1/stats"
-    assert CITE["sister_stats"]["corpus"] == "https://www.azielcorpuslibrary.net/v1/stats"
+    assert CITE["sister_stats"]["corpus"] == "https://www.azielcorpuslibrary.net/stats"
     assert CITE["sister_stats"]["hedidntjump"] == "https://www.hedidntjump.com/api/stats"
     assert "עזיאל" in CITE["hebrew_aka"]
     assert "אליאב" in CITE["hebrew_aka"]

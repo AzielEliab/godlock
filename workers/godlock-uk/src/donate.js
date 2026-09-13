@@ -1,6 +1,6 @@
 /**
- * AZL-DONATE-1.0 — static Donate door. Same copy and rails on /donate
- * and the homepage block. No KV, no D1 write, no unlock. Author: Aziel Eliab.
+ * AZL-DONATE-1.0 — static Donate door on /donate only.
+ * Homepage does not embed rails. No KV, no D1 write, no unlock. Author: Aziel Eliab.
  * Donate signature is — Aziel. Site chrome stays Aziel Eliab.
  * Payment-URI QRs are solid black-on-white PNGs under /donate/qr/{id}.png.
  */
@@ -263,21 +263,6 @@ ${donateCopyHtml()}
 ${donateRailsHtml()}
 <p class="wallet-hint">Open in wallet uses the standard payment URI your OS routes to an installed wallet (Exodus, MetaMask, Trust, Phantom, Coinbase, and peers). If Safari says the link is invalid, scan the QR inside your wallet — that path works for every wallet.</p>
 <div class="card">${donateCanonicalLine()}</div>
-${donateCopyScript()}
-</section>`;
-}
-
-/** Homepage block: same copy and rails as /donate. */
-export function donateHomeBlock() {
-  return `<section class="donate-home" id="donate">
-<div class="card about-prose donate-copy">
-  <h2>${esc(DONATE_TITLE)}</h2>
-  ${donateCopyHtml()}
-  <p class="muted"><a href="${esc(DONATE_PATH)}">Donate door</a></p>
-  ${donateCanonicalLine()}
-</div>
-${donateRailsHtml()}
-<p class="wallet-hint">Open in wallet uses the standard payment URI your OS routes to an installed wallet (Exodus, MetaMask, Trust, Phantom, Coinbase, and peers). If Safari says the link is invalid, scan the QR inside your wallet — that path works for every wallet.</p>
 ${donateCopyScript()}
 </section>`;
 }

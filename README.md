@@ -22,7 +22,8 @@ Part of the **Aziel Eliab** ecosystem (official hub, sister library, sister arch
 - **Aziel Eliab on GodLock:** https://godlock.uk/AzielEliab
 - **Specified Fit (public reasoning):** https://godlock.uk/reason
 - **Verify:** https://godlock.uk/verify
-- **Donate:** https://godlock.uk/donate — AZL-DONATE-1.0 (same door https://www.azieleliab.com/donate). Payment-URI QRs are solid black-on-white PNGs (`/donate/qr/{rail}.png`).
+- **Donate:** https://godlock.uk/donate — AZL-DONATE-1.0 (same door https://www.azieleliab.com/donate). Payment-URI QRs are solid black-on-white PNGs (`/donate/qr/{rail}.png`). Donate rails live on this tab, not on the Engine homepage.
+- **Receipts:** https://godlock.uk/receipts — full public questions + hash-chained receipt list. Homepage Prior shows the last 5.
 - **Softwares on GodLock:** https://godlock.uk/software — **GodLock-first** (Softwares heading → list). Suite doors available from GodLock, pulled from live aziel-runtime. Not a Digital Library Softwares page and **not** a claim that Softwares matches Digital Library completeness.
 - **Runtime (FragGate door):** https://godlock.uk/runtime — same-origin proxy of Aziel Runtime **2.0.0-rc1**. Prefer **Try on Glama** [https://glama.ai/mcp/servers/AzielEliab/aziel-runtime](https://glama.ai/mcp/servers/AzielEliab/aziel-runtime). Official Runtime Worker is secondary: https://aziel-runtime.vibelock.workers.dev/
 - **aziel-runtime (GitHub):** https://github.com/AzielEliab/aziel-runtime

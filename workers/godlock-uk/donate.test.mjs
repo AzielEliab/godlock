@@ -13,7 +13,6 @@ import {
   DONATE_CANONICAL,
   DONATE_NETWORK_NOTE,
   donateBody,
-  donateHomeBlock,
   donateDoc,
   donateText,
   donateTouchesStorage,
@@ -141,7 +140,7 @@ describe("AZL-DONATE-1.0 copy and rails", () => {
   });
 });
 
-describe("Donate door and homepage block", () => {
+describe("Donate door (tab only — not a homepage section)", () => {
   it("serves /donate as HTML with identity chrome Aziel Eliab", async () => {
     const res = await worker.fetch(new Request("https://godlock.uk/donate"), mockEnv());
     assert.equal(res.status, 200);
@@ -184,26 +183,28 @@ describe("Donate door and homepage block", () => {
     assert.deepEqual(body, { ...donateDoc(), author: "Aziel Eliab" });
   });
 
-  it("keeps the homepage donate block on the same copy and rails", () => {
+  it("keeps Donate rails on /donate and only a ghost button on the Engine homepage", () => {
     const home = homeBody({ stats: {}, latest: null, prior: [] });
     const door = donateBody();
     for (const para of DONATE_COPY) {
-      assert.ok(home.includes(para));
       assert.ok(door.includes(para));
+      assert.equal(home.includes(para), false, para);
     }
     for (const rail of DONATE_RAILS) {
-      assert.ok(home.includes(rail.address));
-      assert.ok(home.includes(rail.uri));
-      assert.ok(home.includes('src="/donate/qr/' + rail.id + '.png"'));
+      assert.ok(door.includes(rail.address));
+      assert.ok(door.includes(rail.uri));
       assert.ok(door.includes('src="/donate/qr/' + rail.id + '.png"'));
+      assert.equal(home.includes(rail.address), false, rail.id);
     }
-    assert.doesNotMatch(home, /<svg[\s>]/);
+    assert.doesNotMatch(home, /class="donate-home"/);
+    assert.doesNotMatch(home, /id="donate"/);
+    assert.doesNotMatch(home, /class="donate-rails"/);
     assert.doesNotMatch(door, /<svg[\s>]/);
-    assert.match(home, /href="\/donate">Donate door</);
-    assert.match(donateHomeBlock(), /id="donate"/);
+    assert.match(home, /href="\/donate">Donate</);
     assert.match(topNav("/"), /href="\/donate">Donate<\/a>/);
     const wrapped = page("GodLock", home, { path: "/", kind: "home" });
     assert.match(wrapped, /href="\/donate">Donate<\/a>/);
+    assert.doesNotMatch(wrapped, /class="donate-home"/);
     assert.match(defaultDescription("donate"), /Nothing is free/);
     assert.equal(citeDoc().donate, "https://godlock.uk/donate");
   });

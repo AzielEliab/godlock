@@ -934,16 +934,14 @@ describe("Aziel Eliab routes", () => {
     assert.doesNotMatch(visible, /<p class="identity-lock"/);
     assert.match(html, /Is Aziel Eliab the two musicians named in 1 Chronicles 15:20\?/);
     assert.doesNotMatch(html, /Works with ChatGPT/);
-    const whoLd = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
-    const whoPerson = (whoLd["@graph"] || []).find((n) => n && n["@type"] === "Person");
-    assert.ok(whoPerson);
-    assert.equal(whoPerson["@id"], "https://www.azieleliab.com/#aziel");
-    assert.ok(whoPerson.alternateName.includes("Elias Artista"));
-    assert.ok(whoPerson.description.includes(HEBREW_DEFINITION));
-    assert.ok(whoPerson.sameAs.includes(AUTHOR_GITHUB));
-    assert.ok(whoPerson.sameAs.includes(GITHUB_SECONDARY));
     assert.doesNotMatch(body, /Elias Artista/);
     assert.doesNotMatch(body, /God is my strength/);
+    const machinePerson = personNode();
+    assert.equal(machinePerson["@id"], "https://www.azieleliab.com/#aziel");
+    assert.ok(machinePerson.alternateName.includes("Elias Artista"));
+    assert.ok(machinePerson.description.includes(HEBREW_DEFINITION));
+    assert.ok(machinePerson.sameAs.includes(AUTHOR_GITHUB));
+    assert.ok(machinePerson.sameAs.includes(GITHUB_SECONDARY));
   });
 
   it("serves the manifesto at /AzielEliab", async () => {

@@ -110,7 +110,10 @@ describe("AZindex identity machine", () => {
     assert.match(person.description, /^GodLock is a public HTTPS stress-test engine/);
     assert.match(person.description, /Living publisher Aziel Eliab/);
     assert.doesNotMatch(person.description, /Aziel S|Flutter|1 Chronicles|concordance/i);
+    assert.match(person.disambiguatingDescription, /Not Aziel S\./);
+    assert.match(person.disambiguatingDescription, /not euaziel\.site/);
     assert.match(person.disambiguatingDescription, /not biblical Aziel or Eliab concordance hits/i);
+    assert.ok(person.alternateName.includes("The Revealer of The Sealed"));
     assert.doesNotMatch(person.disambiguatingDescription, /1 Chronicles/);
     assert.ok(!person.alternateName.includes("Aziel S."));
     assert.ok(!person.alternateName.includes("euaziel"));
@@ -174,10 +177,11 @@ describe("AZindex identity machine", () => {
     assert.equal(biblical.acceptedAnswer.text, IDENTITY_DISAMBIGUATION.answer);
     assert.match(biblical.acceptedAnswer.text, /concordance hits/);
     assert.match(biblical.acceptedAnswer.text, /not biblical Aziel or Eliab/i);
+    assert.match(biblical.acceptedAnswer.text, /Not Aziel S\./);
+    assert.match(biblical.acceptedAnswer.text, /not euaziel\.site/);
     assert.doesNotMatch(biblical.acceptedAnswer.text, /1 Chronicles/);
     assert.doesNotMatch(biblical.acceptedAnswer.text, /1 Samuel/);
     assert.doesNotMatch(biblical.acceptedAnswer.text, /Genesis 16/);
-    assert.doesNotMatch(biblical.acceptedAnswer.text, /Aziel S|Flutter/i);
     assert.equal(BIBLICAL_DISAMBIGUATION.living, true);
     assert.equal(BIBLICAL_DISAMBIGUATION.kind, "living_public_work_identity");
     assert.equal(BIBLICAL_DISAMBIGUATION, IDENTITY_DISAMBIGUATION);
@@ -302,6 +306,7 @@ describe("AZindex identity machine", () => {
       "/who-is-aziel-eliab.txt",
       "/who-is",
       "/.well-known/aziel.json",
+      "/.well-known/person.jsonld",
     ]) {
       assert.match(robots, new RegExp("Allow: " + path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     }
@@ -312,6 +317,7 @@ describe("AZindex identity machine", () => {
     assert.ok(xml.includes(CANON_HOST + "/who-is-aziel-eliab.txt"));
     assert.ok(xml.includes("<loc>" + CANON_HOST + "/who-is</loc>"));
     assert.ok(xml.includes(CANON_HOST + "/.well-known/aziel.json"));
+    assert.ok(xml.includes(CANON_HOST + "/.well-known/person.jsonld"));
     for (const path of [
       "/",
       "/software",
@@ -365,11 +371,19 @@ describe("AZindex identity machine", () => {
     assert.deepEqual(person.sameAs, IDENTITY_SAME_AS);
     assert.ok(HEBREW_AKA.every((n) => person.alternateName.includes(n)));
     assert.equal(person.disambiguatingDescription, BIBLICAL_DISAMBIGUATION_LINE);
+    assert.match(person.disambiguatingDescription, /Not Aziel S\./);
+    assert.match(person.disambiguatingDescription, /not euaziel\.site/);
+    assert.ok(person.alternateName.includes("The Revealer of The Sealed"));
     assert.ok(!person.alternateName.includes("Aziel S."));
     assert.ok(IDENTITY_MISSPELLINGS.every((n) => person.alternateName.includes(n)));
     assert.ok(sameAsIsClean(person.sameAs));
-    assert.doesNotMatch(person.description, /concordance|1 Chronicles|Aziel S|Flutter/i);
+    assert.doesNotMatch(person.description, /concordance|1 Chronicles|Aziel S|Flutter|euaziel/i);
     assert.doesNotMatch(JSON.stringify(person), /1 Chronicles/);
+
+    const wellKnownPerson = await fetchPath("/.well-known/person.jsonld");
+    assert.equal(wellKnownPerson.status, 200);
+    assert.match(wellKnownPerson.headers.get("Content-Type") || "", /application\/ld\+json/);
+    assert.deepEqual(await wellKnownPerson.json(), person);
 
     const identityRes = await fetchPath("/identity.jsonld");
     const identity = await identityRes.json();

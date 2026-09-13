@@ -139,7 +139,8 @@ def test_cite_json_graph():
     assert "אלרועי" in CITE["hebrew_aka"]
     assert "biblical Aziel" in CITE["biblical_disambiguation"]["summary"]
     assert "concordance" in CITE["biblical_disambiguation"]["summary"]
-    assert "Aziel S." not in CITE["biblical_disambiguation"]["summary"]
+    assert "Aziel S." in CITE["biblical_disambiguation"]["summary"]
+    assert "euaziel.site" in CITE["biblical_disambiguation"]["summary"]
     assert "Flutter" not in CITE["biblical_disambiguation"]["summary"]
     assert "1 Chronicles" not in json.dumps(CITE)
     assert "1 Chronicles" not in LLMS
@@ -147,7 +148,12 @@ def test_cite_json_graph():
     assert "Aziel S." not in CITE["misspelling_alternateNames"]
     assert "euaziel" not in CITE["sameAs_lattice"]
     assert "euaziel" in CITE["sameAs_refuse"]
+    assert "euaziel.site" in CITE["sameAs_refuse"]
     assert "Aziel S." in CITE["sameAs_refuse"]
+    assert CITE["identity_machine"]["well_known_person"] == "https://godlock.uk/.well-known/person.jsonld"
+    assert "https://godlock.uk/.well-known/person.jsonld" in CITE["about_public_work"]["identity_machine"]
+    assert "The Revealer of The Sealed" in LLMS
+    assert "The Revealer of The Sealed" in AI
     assert CITE["identity_disambiguation"]["not_aziel_s"] is True
     assert CITE["identity_disambiguation"]["not_flutter_portfolio"] is True
     assert CITE["identity_disambiguation"]["not_euaziel"] is True

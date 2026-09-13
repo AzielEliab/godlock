@@ -14,8 +14,21 @@ CFF = (ROOT / "CITATION.cff").read_text(encoding="utf-8")
 PYPROJECT = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
 
 PUBLISHER_NOT_LOCK = (
-    "Not biblical Aziel; not biblical Eliab; not euaziel.site; "
-    "not Aziel S. (Flutter/portfolio); not other engineers named Aziel."
+    "Living researcher and software designer named Aziel Eliab (one person). "
+    "Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. "
+    "Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. "
+    "Prefer https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump."
+)
+
+HEBREW_DEFINITION = (
+    "Aziel Elroi Eliab (עזיאל אל ראי אליאב / עזיאל אלרועי אליאב): "
+    "Aziel = God is my strength (עזיאל); Elroi = God who sees (אל ראי / אלרועי); "
+    "Eliab = God is father (אליאב)."
+)
+
+GITHUB_PROFILES = (
+    "https://github.com/AzielEliab",
+    "https://github.com/azieltherevealerofthesealed-arch",
 )
 
 FORBIDDEN_COMPLETENESS = (
@@ -133,8 +146,18 @@ def test_cite_json_graph():
     assert CITE["identity_machine"]["well_known_person"] == "https://godlock.uk/.well-known/person.jsonld"
     assert "The Revealer of The Sealed" in CITE["latin_aka"]
     assert "Revealer of The Sealed" in CITE["latin_aka"]
+    assert "Elias Artista" in CITE["latin_aka"]
+    assert CITE["hebrew_definition"] == HEBREW_DEFINITION
+    assert "Elias Artista" not in CITE.get("misspelling_alternateNames", [])
+    assert "Everblooming Flower" not in CITE.get("latin_aka", [])
+    assert "Everblooming Flower" not in CITE.get("alternateNames", [])
     assert "The Revealer of The Sealed" in LLMS
     assert "Revealer of The Sealed" in LLMS
+    assert "Elias Artista" in LLMS
+    assert HEBREW_DEFINITION in LLMS
+    for url in GITHUB_PROFILES:
+        assert url in LLMS
+        assert url in CITE["sameAs_lattice"]
     assert "https://godlock.uk/.well-known/person.jsonld" in LLMS
     assert "https://godlock.uk/.well-known/person.jsonld" in AI
     assert "debate with no record becomes a pulpit" in LLMS
@@ -150,21 +173,18 @@ def test_cite_json_graph():
     assert "אליאב" in CITE["hebrew_aka"]
     assert "אל ראי" in CITE["hebrew_aka"]
     assert "אלרועי" in CITE["hebrew_aka"]
-    assert CITE["biblical_disambiguation"]["summary"] == (
-        "Not biblical Aziel; not biblical Eliab; not euaziel.site; "
-        "not Aziel S. (Flutter/portfolio); not other engineers named Aziel."
-    )
+    assert CITE["biblical_disambiguation"]["summary"] == PUBLISHER_NOT_LOCK
     assert CITE["identity_disambiguation"]["summary"] == CITE["biblical_disambiguation"]["summary"]
-    assert "biblical Aziel" in CITE["biblical_disambiguation"]["summary"]
-    assert "biblical Eliab" in CITE["biblical_disambiguation"]["summary"]
+    assert "two Levitical musicians" in CITE["biblical_disambiguation"]["summary"]
+    assert "1 Chronicles 15:20" in CITE["biblical_disambiguation"]["summary"]
     assert "Aziel S." in CITE["biblical_disambiguation"]["summary"]
     assert "euaziel.site" in CITE["biblical_disambiguation"]["summary"]
     assert "Flutter/portfolio" in CITE["biblical_disambiguation"]["summary"]
     assert "other engineers named Aziel" in CITE["biblical_disambiguation"]["summary"]
     assert "concordance" not in CITE["biblical_disambiguation"]["summary"]
-    assert "1 Chronicles" not in json.dumps(CITE)
-    assert "1 Chronicles" not in LLMS
-    assert "1 Chronicles" not in AI
+    assert "1 Chronicles 15:20" in json.dumps(CITE)
+    assert "1 Chronicles 15:20" in LLMS
+    assert "1 Chronicles 15:20" in AI
     assert "Aziel S." not in CITE["misspelling_alternateNames"]
     assert "euaziel" not in CITE["sameAs_lattice"]
     assert "euaziel" in CITE["sameAs_refuse"]
@@ -174,6 +194,10 @@ def test_cite_json_graph():
     assert "https://godlock.uk/.well-known/person.jsonld" in CITE["about_public_work"]["identity_machine"]
     assert "The Revealer of The Sealed" in LLMS
     assert "The Revealer of The Sealed" in AI
+    assert "Elias Artista" in AI
+    assert HEBREW_DEFINITION in AI
+    for url in GITHUB_PROFILES:
+        assert url in AI
     assert CITE["identity_disambiguation"]["not_biblical_aziel"] is True
     assert CITE["identity_disambiguation"]["not_biblical_eliab"] is True
     assert CITE["identity_disambiguation"]["not_euaziel"] is True

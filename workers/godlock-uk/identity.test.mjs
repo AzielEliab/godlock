@@ -6,6 +6,7 @@ import {
   AZIEL_OFFICIAL,
   AUTHOR,
   AUTHOR_AKA,
+  AUTHOR_PEN,
   AUTHOR_GITHUB,
   CANON_HOST,
   GITHUB_SECONDARY,
@@ -25,8 +26,11 @@ import {
   IDENTITY_DISAMBIGUATION,
   IDENTITY_LOCK_LINE,
   PERSON_DESCRIPTION,
+  HEBREW_DEFINITION,
+  PEN_NAME_REFUSE,
   SAME_AS_REFUSE,
   sameAsIsClean,
+  nameLatticeIsClean,
   SISTER_STATS,
   LIBRARY_HOME,
   X_URL,
@@ -106,9 +110,18 @@ describe("AZindex identity machine", () => {
     assert.ok(person.alternateName.includes(AUTHOR_AKA));
     assert.ok(LATIN_AKA.includes("The Revealer of The Sealed"));
     assert.ok(LATIN_AKA.includes("Revealer of The Sealed"));
+    assert.ok(LATIN_AKA.includes("Elias Artista"));
     assert.ok(person.alternateName.includes("Aziel Elroi Eliab"));
+    assert.ok(person.alternateName.includes("Elias Artista"));
+    assert.ok(person.alternateName.includes("The Revealer of The Sealed"));
+    assert.ok(person.alternateName.includes("Revealer of The Sealed"));
     assert.ok(person.alternateName.includes("עזיאל"));
     assert.ok(person.alternateName.includes("אליאב"));
+    assert.ok(person.alternateName.includes("עזיאל אל ראי אליאב"));
+    assert.ok(person.alternateName.includes("עזיאל אלרועי אליאב"));
+    assert.ok(!person.alternateName.includes("Everblooming Flower"));
+    assert.ok(nameLatticeIsClean(person.alternateName));
+    assert.ok(PEN_NAME_REFUSE.includes("Everblooming Flower"));
     assert.equal(person.additionalName, "Elroi");
     assert.equal(person.disambiguatingDescription, PUBLISHER_NOT_LOCK);
     assert.equal(person.disambiguatingDescription, BIBLICAL_DISAMBIGUATION_LINE);
@@ -123,6 +136,14 @@ describe("AZindex identity machine", () => {
     assert.match(person.description, /two Levitical musicians Aziel and Eliab/);
     assert.match(person.description, /1 Chronicles 15:20/);
     assert.match(person.description, /Not euaziel\.site/);
+    assert.match(person.description, /Elias Artista/);
+    assert.ok(person.description.includes(HEBREW_DEFINITION));
+    assert.match(person.description, /God is my strength/);
+    assert.match(person.description, /God who sees/);
+    assert.match(person.description, /God is father/);
+    assert.ok(!person.description.includes("Everblooming Flower"));
+    assert.ok(LATIN_AKA.includes(AUTHOR_PEN));
+    assert.ok(LATIN_AKA.includes("Elias Artista"));
     assert.equal(
       person.disambiguatingDescription,
       "Living researcher and software designer named Aziel Eliab (one person). Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Prefer https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump.",
@@ -279,7 +300,10 @@ describe("AZindex identity machine", () => {
     assert.ok(text.includes(ABOUT_PUBLIC_WORK_LEAD));
     assert.ok(text.includes(SPECIFIED_FIT_MOTTO));
     assert.match(text, /## Hebrew aka/);
+    assert.ok(text.includes(HEBREW_DEFINITION));
     assert.match(text, /עזיאל \/ אל ראי \| אלרועי \/ אליאב/);
+    assert.match(text, /Elias Artista/);
+    assert.match(text, /Everblooming Flower is not a pen name/);
     assert.match(text, /Never sameAs euaziel, Aziel S/);
     assert.doesNotMatch(text, /\bborn\b|\blives in\b/);
     assert.doesNotMatch(text, /10\.\d{4,}\//);
@@ -309,9 +333,12 @@ describe("AZindex identity machine", () => {
     assert.equal(doc.about_public_work.sister_stats, undefined);
     assert.deepEqual(doc.sameAs, IDENTITY_SAME_AS);
     assert.deepEqual(doc.hebrew_aka, HEBREW_AKA);
+    assert.equal(doc.hebrew_definition, HEBREW_DEFINITION);
     assert.deepEqual(doc.latin_aka, LATIN_AKA);
     assert.ok(doc.alternateNames.includes("The Revealer of The Sealed"));
     assert.ok(doc.alternateNames.includes("Revealer of The Sealed"));
+    assert.ok(doc.alternateNames.includes("Elias Artista"));
+    assert.ok(nameLatticeIsClean(doc.alternateNames));
     assert.deepEqual(doc.misspelling_alternateNames, IDENTITY_MISSPELLINGS);
     assert.deepEqual(doc.sister_stats, {
       azieleliab: "https://www.azieleliab.com/v1/stats",
@@ -427,11 +454,18 @@ describe("AZindex identity machine", () => {
     assert.match(person.disambiguatingDescription, /not Aziel S\. \(Flutter\/portfolio\)/);
     assert.match(person.disambiguatingDescription, /not other engineers named Aziel/);
     assert.ok(person.alternateName.includes("Aziel Elroi Eliab"));
+    assert.ok(person.alternateName.includes("Elias Artista"));
+    assert.ok(person.alternateName.includes("The Revealer of The Sealed"));
     assert.ok(!person.alternateName.includes("Aziel S."));
+    assert.ok(!person.alternateName.includes("Everblooming Flower"));
     assert.ok(sameAsIsClean(person.sameAs));
+    assert.ok(person.sameAs.includes(AUTHOR_GITHUB));
+    assert.ok(person.sameAs.includes(GITHUB_SECONDARY));
     assert.match(person.description, /1 Chronicles 15:20/);
     assert.match(person.description, /Not euaziel\.site/);
+    assert.ok(person.description.includes(HEBREW_DEFINITION));
     assert.match(JSON.stringify(person), /1 Chronicles 15:20/);
+    assert.match(JSON.stringify(person), /Elias Artista/);
     assert.equal(person.additionalName, "Elroi");
     assert.deepEqual(person.jobTitle, AZINDEX_PERSON_JOB_TITLE);
 
@@ -521,9 +555,13 @@ describe("AZindex identity machine", () => {
     assert.ok(!cite.misspelling_alternateNames.includes("Aziel S."));
     assert.ok(cite.misspelling_alternateNames.length >= 8);
     assert.deepEqual(cite.hebrew_aka, HEBREW_AKA);
+    assert.equal(cite.hebrew_definition, HEBREW_DEFINITION);
     assert.deepEqual(cite.latin_aka, LATIN_AKA);
     assert.ok(cite.alternateNames.includes("The Revealer of The Sealed"));
     assert.ok(cite.alternateNames.includes("Revealer of The Sealed"));
+    assert.ok(cite.alternateNames.includes("Elias Artista"));
+    assert.equal(cite.pen_name, AUTHOR_PEN);
+    assert.ok(nameLatticeIsClean(cite.alternateNames));
     assert.equal(cite.living_publisher, true);
     assert.equal(cite.host_kind, "product_surface");
     assert.equal(cite.publisher, AUTHOR);
@@ -538,6 +576,10 @@ describe("AZindex identity machine", () => {
     assert.match(llms, /Living publisher Aziel Eliab/);
     assert.ok(llms.includes(PUBLISHER_NOT_LOCK));
     assert.match(llms, /sameAs lattice: https:\/\/github\.com\/AzielEliab/);
+    assert.match(llms, /https:\/\/github\.com\/azieltherevealerofthesealed-arch/);
+    assert.match(llms, /Elias Artista/);
+    assert.ok(llms.includes(HEBREW_DEFINITION));
+    assert.doesNotMatch(llms, /Everblooming Flower is a/);
     assert.match(llms, /Person @id https:\/\/www\.azieleliab\.com\/#aziel/);
     const whoAlias = await fetchPath("/who-is");
     assert.equal(whoAlias.status, 308);
@@ -558,6 +600,16 @@ describe("AZindex identity machine", () => {
     const whoVisible = whoHtml.replace(/^[\s\S]*<body>/i, "").replace(/<\/body>[\s\S]*$/i, "").replace(/<script[\s\S]*?<\/script>/gi, "");
     assert.ok(!whoVisible.includes(VISIBLE_IDENTITY_LOCK));
     assert.match(whoHtml, /Is Aziel Eliab the two musicians named in 1 Chronicles 15:20\?/);
+    const whoLd = JSON.parse(whoHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    const whoPerson = (whoLd["@graph"] || []).find((n) => n["@type"] === "Person") || whoLd;
+    assert.equal(whoPerson["@id"], "https://www.azieleliab.com/#aziel");
+    assert.ok(whoPerson.alternateName.includes("Elias Artista"));
+    assert.ok(whoPerson.description.includes(HEBREW_DEFINITION));
+    assert.ok(whoPerson.sameAs.includes(AUTHOR_GITHUB));
+    assert.ok(whoPerson.sameAs.includes(GITHUB_SECONDARY));
+    const whoBody = whoHtml.replace(/^[\s\S]*<body>/i, "").replace(/<\/body>[\s\S]*$/i, "");
+    assert.doesNotMatch(whoBody, /Elias Artista/);
+    assert.doesNotMatch(whoBody, /God is my strength/);
     assert.equal(personJsonLd()["@id"], "https://www.azieleliab.com/#aziel");
     assert.deepEqual(identityJsonLd(), personJsonLd());
     assert.match(personJsonLd().disambiguatingDescription, /two Levitical musicians Aziel and Eliab/);

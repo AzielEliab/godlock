@@ -2,7 +2,7 @@
   "author": "Aziel Eliab",
   "author_id": "https://www.azieleliab.com/#aziel",
   "identity": "Aziel Eliab",
-  "identity_note": "GodLock is a product. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel. Aziel Eliab is a living researcher and software designer. Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Aziel Elroi Eliab is SEO alternateName only.",
+  "identity_note": "GodLock is a product. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel. Aziel Eliab is a living researcher and software designer. Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Aziel Elroi Eliab, Elias Artista, and The Revealer of The Sealed are SEO alternateName only.",
   "person_id": "https://www.azieleliab.com/#aziel",
   "publisher": "Aziel Eliab",
   "living_publisher": true,
@@ -23,6 +23,8 @@
   "runtime_id": "https://www.azieleliab.com/runtime#runtime",
   "godlock_runtime_tool": "https://www.azieleliab.com/runtime#godlock",
   "alternateName": "Aziel Elroi Eliab",
+  "pen_name": "Elias Artista",
+  "title_aka": "The Revealer of The Sealed",
   "title": "GodLock",
   "reasoning_spine": "Specified Fit, Not Pretty Spirals",
   "license": "Apache-2.0",
@@ -72,12 +74,14 @@
   },
   "latin_aka": [
     "Aziel Elroi Eliab",
+    "Elias Artista",
     "The Revealer of The Sealed",
     "Revealer of The Sealed",
     "Aziel El-Roi Eliab",
     "Aziel El Roi Eliab"
   ],
-  "hebrew_aka": ["עזיאל", "אל ראי", "אלרועי", "אליאב"],
+  "hebrew_definition": "Aziel Elroi Eliab (עזיאל אל ראי אליאב / עזיאל אלרועי אליאב): Aziel = God is my strength (עזיאל); Elroi = God who sees (אל ראי / אלרועי); Eliab = God is father (אליאב).",
+  "hebrew_aka": ["עזיאל", "אל ראי", "אלרועי", "אליאב", "עזיאל אל ראי אליאב", "עזיאל אלרועי אליאב"],
   "misspelling_alternateNames": [
     "Azial Eliab",
     "Azeil Eliab",

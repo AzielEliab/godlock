@@ -178,7 +178,11 @@ describe("AZindex identity machine", () => {
     assert.ok(names.includes("Is He Didn't Jump a second identity?"));
     assert.ok(names.includes("Is Aziel Eliab the biblical Aziel or Eliab?"));
     assert.equal(names.filter((n) => /biblical/i.test(n)).length, 1);
-    assert.ok(!names.includes("Is Aziel Eliab the same person as Aziel S.?"));
+    assert.ok(names.includes("Is Aziel Eliab the same person as Aziel S.?"));
+    const azielS = faq.mainEntity.find((q) => q.name === "Is Aziel Eliab the same person as Aziel S.?");
+    assert.match(azielS.acceptedAnswer.text, /Not Aziel S\./);
+    assert.match(azielS.acceptedAnswer.text, /not euaziel\.site/);
+    assert.doesNotMatch(azielS.acceptedAnswer.text, /1 Chronicles/);
     const biblical = faq.mainEntity.find((q) => q.name === "Is Aziel Eliab the biblical Aziel or Eliab?");
     assert.equal(biblical.acceptedAnswer.text, BIBLICAL_DISAMBIGUATION.answer);
     assert.equal(biblical.acceptedAnswer.text, IDENTITY_DISAMBIGUATION.answer);

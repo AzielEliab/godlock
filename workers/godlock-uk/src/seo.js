@@ -486,6 +486,7 @@ function identityFaqNode() {
     ["What is Specified Fit, Not Pretty Spirals?", "A public design motto and public work on GodLock.uk. Functionally specified digital information plus a translation/reader system. Pretty spirals and φ are not a proof. " + SPECIFIED_FIT_MOTTO + " Not a biography."],
     ["Does GodLock argue?", "No. " + SPECIFIED_FIT_MOTTO + " GodLock is a product name, not an identity label. Person @id https://www.azieleliab.com/#aziel."],
     ["Is He Didn't Jump a second identity?", "No. He Didn't Jump is a sister archive in the Aziel Eliab ecosystem. Person @id remains https://www.azieleliab.com/#aziel."],
+    ["Is Aziel Eliab the same person as Aziel S.?", "No. " + BIBLICAL_DISAMBIGUATION_LINE + " GodLock is a product. Person @id https://www.azieleliab.com/#aziel."],
     ["Is Aziel Eliab the biblical Aziel or Eliab?", BIBLICAL_DISAMBIGUATION.answer],
   ];
   return {

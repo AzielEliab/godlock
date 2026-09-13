@@ -178,7 +178,7 @@ describe("AZindex identity machine", () => {
     assert.deepEqual(doc.misspelling_alternateNames, IDENTITY_MISSPELLINGS);
     assert.deepEqual(doc.sister_stats, {
       azieleliab: "https://www.azieleliab.com/v1/stats",
-      corpus: "https://www.azielcorpuslibrary.net/v1/stats",
+      corpus: "https://www.azielcorpuslibrary.net/stats",
       hedidntjump: "https://www.hedidntjump.com/api/stats",
     });
     assert.equal(doc.sister_stats.azieleliab, SISTER_STATS.azieleliab);

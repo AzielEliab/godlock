@@ -254,7 +254,7 @@ export const BIBLICAL_DISAMBIGUATION = {
 /** Sister hub stats JSON (cross-tether). Not identity labels. */
 export const SISTER_STATS = {
   azieleliab: AZIEL_OFFICIAL.replace(/\/$/, "") + "/v1/stats",
-  corpus: LIBRARY + "/v1/stats",
+  corpus: LIBRARY + "/stats",
   hedidntjump: "https://www.hedidntjump.com/api/stats",
 };
 

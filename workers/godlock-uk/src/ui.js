@@ -17,6 +17,7 @@ import { hideInternalDetermination } from "./publicCopy.js";
 import { receiptScoreDelta } from "./engine.js";
 import { publicSoftwaresList, invokeHref, workerHref, stripRuntimeFragGateMash, suiteFamily } from "./catalog.js";
 import { donateBody as donatePageBody } from "./donate.js";
+import { actReceiptsSection } from "./actReceipts.js";
 
 export const CSS = `
 :root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
@@ -97,6 +98,11 @@ footer{margin-top:36px;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
 .donate-qr{margin:12px 0 0;width:128px;height:128px;padding:0;background:#fff;border-radius:4px;overflow:hidden}
 .donate-qr img{display:block;width:128px;height:128px;background:#fff}
 .prior-more{margin:10px 0 0}
+.act-receipts{margin:28px 0 0;padding:22px 0 0;border-top:1px solid var(--line)}
+.act-receipts h2{margin:0 0 10px;font-size:18px;letter-spacing:-.02em}
+.act-receipts .k{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:10px 0 4px}
+.act-receipts .act-field{margin:0 0 6px}
+.act-receipts .act-meta{margin:0 0 6px;font-size:13px}
 @media (max-width:720px){
   .wrap{padding:16px 14px 72px}
   .stats{grid-template-columns:1fr 1fr}
@@ -434,6 +440,7 @@ export function receiptsBody({ rows, total, page, pageSize, stats }) {
 <p class="muted"><a href="/">Submit a challenge</a> on the Engine.</p>
 ${receiptsPager({ page, pages, total: total != null ? total : receipts })}
 <ul class="prior">${list}</ul>
+${actReceiptsSection(rows)}
 `;
 }
 

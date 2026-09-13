@@ -1,7 +1,7 @@
 /**
- * Aziel Eliab software catalog for godlock.uk/software.
- * Live fetch via AZIEL_RUNTIME service binding, then HTTPS origin / library,
- * then this snapshot so the page never drops to two GitHub links.
+ * Aziel Eliab software catalog helpers.
+ * GodLock.uk Softwares HTML lists Aziel Runtime only and points at azieleliab.com.
+ * Live fetch via AZIEL_RUNTIME still feeds Runtime sitemap / describe / pull URLs.
  * Snapshot is a fallback floor, not a 27-only cap — live catalog slugs
  * (peacelock, azmail, azhub, azinterface, azcoherence, …) are included automatically. Do not invent slugs.
  * Sort: Plain A–Z → Gate A–Z → Lock A–Z. Clock ≠ Lock. Author: Aziel Eliab.
@@ -9,6 +9,7 @@
 import { hideInternalDetermination } from "./publicCopy.js";
 import {
   AUTHOR, CANON_HOST, CATALOG, LIBRARY, RUNTIME_PATH, SOFTWARE_PATH, AZIEL_ELIAB_PATH, PUBLIC_RUNTIME, RUNTIME_NAME, RUNTIME_SLUG, RUNTIME_VERSION, GITHUB_RUNTIME,
+  AZIEL_OFFICIAL, OFFICIAL_SOFTWARES,
   citeRuntimeVersion, runtimeDistribution, GLAMA_RUNTIME, RUNTIME_DOCS_2_0,
   FRAGGATE_KERNEL, FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, FRAGGATE_COUNT,
   AZBROWSER_DOWNLOAD, AZBROWSER_WORKER, AZBROWSER_COUNT,
@@ -730,6 +731,20 @@ export function softwareSuite(products, extras = {}) {
   return sortSoftwareSuite(out);
 }
 
+/** GodLock.uk Softwares public list: Aziel Runtime only. Suite cards stay off this site. */
+export function publicSoftwaresList(products, extras = {}) {
+  const suite = softwareSuite(products, extras);
+  const runtime = suite.find((p) => p && p.slug === RUNTIME_SLUG);
+  if (runtime) return [runtime];
+  return [compactProduct({ ...RUNTIME_CARD })].filter(Boolean).map((p) => ({
+    ...p,
+    invoke: RUNTIME_CARD.invoke,
+    kernel: RUNTIME_CARD.kernel,
+    suite: true,
+    family: suiteFamily(p),
+  }));
+}
+
 export function softwareNameList(products) {
   return (Array.isArray(products) ? products : []).map((p) => {
     if (!p || !p.slug) return null;
@@ -743,14 +758,14 @@ export function softwareNameList(products) {
 }
 
 export function softwareApiDoc(products, extras = {}) {
-  const list = softwareSuite(products, extras);
+  const list = publicSoftwaresList(products, extras);
   const runtime = list.find((p) => p && p.slug === RUNTIME_SLUG);
   return {
     ok: true,
     product: "GodLock",
     author: AUTHOR,
     identity: AUTHOR,
-    source: extras.source || "fallback",
+    source: extras.source || "godlock-uk",
     runtime_version: citeRuntimeVersion((runtime && runtime.version) || extras.version),
     runtime_distribution: runtimeDistribution(),
     runtime_glama: GLAMA_RUNTIME,
@@ -758,6 +773,9 @@ export function softwareApiDoc(products, extras = {}) {
     via: SOFTWARE_JSON_PATH,
     html: CANON_HOST + SOFTWARE_PATH,
     aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,
+    official_site: AZIEL_OFFICIAL,
+    official_softwares: OFFICIAL_SOFTWARES,
+    cloned_suite: false,
     door: "fraggate",
     seo_proxy: true,
     not_a_second_fraggate_door: true,
@@ -768,7 +786,7 @@ export function softwareApiDoc(products, extras = {}) {
     catalog_json: PUBLIC_RUNTIME + CATALOG_JSON_PATH,
     sort: "plain-gate-lock",
     clock_is_not_lock: true,
-    product_count: list.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "fraggate").length,
+    product_count: list.length,
     suite_count: list.length,
     products: list.map(publicProduct).filter(Boolean),
     software: softwareNameList(list),

@@ -3,8 +3,8 @@
  * Not a forum. Author: Aziel Eliab.
  */
 import {
-  headMeta, documentTitle, BANNER, DOWNLOAD, GITHUB, CANON_HOST, CATALOG, LIBRARY_AZIEL,
-  HEDIDNTJUMP, HEDIDNTJUMP_LABEL, BRAND_MARK_PATH,
+  headMeta, documentTitle, BANNER, DOWNLOAD, GITHUB, CANON_HOST, LIBRARY_AZIEL,
+  HEDIDNTJUMP, HEDIDNTJUMP_LABEL, BRAND_MARK_PATH, AZIEL_OFFICIAL, OFFICIAL_SOFTWARES,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
   DONATE_PATH, RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE,
   AI_CLIENTS_SENTENCE, runtimeDistribution, ecosystemLinks,
@@ -14,7 +14,7 @@ import {
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import { receiptScoreDelta } from "./engine.js";
-import { softwareSuite, invokeHref, workerHref, stripRuntimeFragGateMash } from "./catalog.js";
+import { publicSoftwaresList, invokeHref, workerHref, stripRuntimeFragGateMash, suiteFamily } from "./catalog.js";
 import { donateBody as donatePageBody } from "./donate.js";
 
 export const CSS = `
@@ -295,8 +295,8 @@ ${ecosystemNav()}
 </body></html>`;
 }
 
-/** Featured Softwares slugs. GodLock is first on the HTML page; catalog JSON stays Plain→Gate→Lock. */
-export const FEATURED_SOFTWARES = ["godlock", "aziel-runtime", "fraggate"];
+/** Featured Softwares slugs on godlock.uk. Aziel Runtime only — not GodLock or FragGate cards. */
+export const FEATURED_SOFTWARES = ["aziel-runtime"];
 
 export function featureGodLockFirst(products) {
   const list = Array.isArray(products) ? products.slice() : [];
@@ -309,11 +309,17 @@ export function featureGodLockFirst(products) {
   return featured.concat(list.filter((p) => p && !featuredSet.has(p.slug)));
 }
 
+export function officialSoftwaresPointer() {
+  const host = AZIEL_OFFICIAL.replace(/\/$/, "");
+  return `<p class="soft-line">Software is available at <a class="soft-name" href="${esc(AZIEL_OFFICIAL)}">${esc(host)}</a> (<a href="${esc(OFFICIAL_SOFTWARES)}">Softwares / software listing</a>).</p>`;
+}
+
 export function homeSoftwareLine() {
+  const host = AZIEL_OFFICIAL.replace(/\/$/, "");
   return `<section class="home-software" id="software">
   <h2>Softwares</h2>
-  <p class="soft-line"><a class="soft-name" href="${esc(SOFTWARE_PATH + "#godlock")}">GodLock</a>. Suite doors available from GodLock. <a class="soft-name" href="${esc(SOFTWARE_PATH + "#aziel-runtime")}">Aziel Runtime</a>. <a class="soft-name" href="${esc(SOFTWARE_PATH + "#fraggate")}">FragGate</a>.</p>
-  <p class="muted"><a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="/v1/software">Software API</a> · <a href="${esc(RUNTIME_PATH + "/v1/software")}">Runtime catalog</a></p>
+  <p class="soft-line"><a class="soft-name" href="${esc(SOFTWARE_PATH + "#aziel-runtime")}">Aziel Runtime</a>. Software is available at <a class="soft-name" href="${esc(AZIEL_OFFICIAL)}">${esc(host)}</a> (<a href="${esc(OFFICIAL_SOFTWARES)}">Softwares / software listing</a>).</p>
+  <p class="muted"><a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(OFFICIAL_SOFTWARES)}">Official Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a></p>
 </section>`;
 }
 
@@ -507,44 +513,47 @@ export function azielEliabText() {
   return AZIEL_MANIFESTO.join("\n\n") + "\n\n" + AZIEL_SIGNATURE + "\n";
 }
 
+export function softwaresCard(p, { featured = false } = {}) {
+  if (!p || !p.slug) return "";
+  const slug = String(p.slug || "");
+  const feat = featured || FEATURED_SOFTWARES.includes(slug);
+  const family = p.family || suiteFamily(p);
+  const ver = p.version ? `<span class="pill">v${esc(p.version)}</span>` : "";
+  const dl = p.downloads != null ? `<span class="pill ok">${esc(p.downloads)} downloads</span>` : "";
+  const views = p.views != null ? `<span class="pill ok">${esc(p.views)} views</span>` : "";
+  const uses = p.uses != null ? `<span class="pill ok">${esc(p.uses)} uses</span>` : "";
+  const worker = workerHref(p);
+  const kernel = p.kernel
+    ? `<a class="button ghost" href="${esc(p.kernel)}">FragGate</a>`
+    : "";
+  const dist = slug === "aziel-runtime"
+    ? runtimeDistribution({ sameOrigin: true }).map((b) => (
+      `<a class="button${b.primary ? "" : " ghost"}" href="${esc(b.href)}">${esc(b.label)}</a>`
+    )).join(" ")
+    : "";
+  const links = slug === "aziel-runtime"
+    ? [
+        dist,
+        `<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>`,
+        kernel,
+      ].filter(Boolean).join(" ")
+    : [
+        p.download ? `<a class="button" href="${esc(p.download)}">Download</a>` : "",
+        worker ? `<a class="button ghost" href="${esc(worker)}">Worker</a>` : "",
+        p.github ? `<a class="button ghost" href="${esc(p.github)}">GitHub</a>` : "",
+        `<a class="button ghost" href="${esc(invokeHref(p))}">Invoke via Runtime</a>`,
+        `<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>`,
+        kernel,
+      ].filter(Boolean).join(" ");
+  return `<article class="soft-card${feat ? " featured" : ""}" id="${esc(slug)}" data-family="${esc(family)}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(stripRuntimeFragGateMash(p.name || slug))}</h3><div class="soft-meta">${ver}${dl}${views}${uses}</div><p>${esc(stripRuntimeFragGateMash(hideInternalDetermination(p.one_line || "")))}</p><p class="soft-links">${links}</p></article>`;
+}
+
 export function softwareBody({ products, extras } = {}) {
-  const list = featureGodLockFirst(softwareSuite(products, extras));
-  const featured = new Set(FEATURED_SOFTWARES);
-  const cards = list.map((p) => {
-    const slug = String(p.slug || "");
-    const feat = featured.has(slug);
-    const family = p.family || "";
-    const ver = p.version ? `<span class="pill">v${esc(p.version)}</span>` : "";
-    const dl = p.downloads != null ? `<span class="pill ok">${esc(p.downloads)} downloads</span>` : "";
-    const views = p.views != null ? `<span class="pill ok">${esc(p.views)} views</span>` : "";
-    const uses = p.uses != null ? `<span class="pill ok">${esc(p.uses)} uses</span>` : "";
-    const worker = workerHref(p);
-    const kernel = p.kernel
-      ? `<a class="button ghost" href="${esc(p.kernel)}">FragGate</a>`
-      : "";
-    const dist = slug === "aziel-runtime"
-      ? runtimeDistribution({ sameOrigin: true }).map((b) => (
-        `<a class="button${b.primary ? "" : " ghost"}" href="${esc(b.href)}">${esc(b.label)}</a>`
-      )).join(" ")
-      : "";
-    const links = slug === "aziel-runtime"
-      ? [
-          dist,
-          `<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>`,
-          kernel,
-        ].filter(Boolean).join(" ")
-      : [
-          p.download ? `<a class="button" href="${esc(p.download)}">Download</a>` : "",
-          worker ? `<a class="button ghost" href="${esc(worker)}">Worker</a>` : "",
-          p.github ? `<a class="button ghost" href="${esc(p.github)}">GitHub</a>` : "",
-          `<a class="button ghost" href="${esc(invokeHref(p))}">Invoke via Runtime</a>`,
-          `<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>`,
-          kernel,
-        ].filter(Boolean).join(" ");
-    return `<article class="soft-card${feat ? " featured" : ""}" id="${esc(slug)}" data-family="${esc(family)}">${feat ? '<span class="pill interesting">Featured</span> ' : ""}<h3>${esc(stripRuntimeFragGateMash(p.name || slug))}</h3><div class="soft-meta">${ver}${dl}${views}${uses}</div><p>${esc(stripRuntimeFragGateMash(hideInternalDetermination(p.one_line || "")))}</p><p class="soft-links">${links}</p></article>`;
-  }).join("");
+  const list = featureGodLockFirst(publicSoftwaresList(products, extras));
+  const cards = list.map((p) => softwaresCard(p, { featured: true })).join("");
   return `<h2 class="soft-heading">Softwares</h2>
-<div class="soft-grid">${cards || `<p class="muted">Catalog unavailable. <a href="${esc(CATALOG + "/")}">Open the catalog</a>.</p>`}</div>`;
+<div class="soft-grid">${cards}</div>
+${officialSoftwaresPointer()}`;
 }
 
 export function donateBody() {

@@ -92,16 +92,19 @@
   "identity_disambiguation": {
     "kind": "living_public_work_identity",
     "living": true,
-    "summary": "Not Aziel S., not euaziel.site. Not biblical Aziel or Eliab concordance hits. Different persons — do not merge.",
+    "summary": "Not biblical Aziel; not biblical Eliab; not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel.",
     "sameAs_refuse": ["euaziel", "euaziel.site", "Aziel S.", "Aziel S", "Flutter-React", "Flutter/React", "Flutter portfolio"],
+    "not_biblical_aziel": true,
+    "not_biblical_eliab": true,
+    "not_euaziel": true,
     "not_aziel_s": true,
     "not_flutter_portfolio": true,
-    "not_euaziel": true
+    "not_other_engineers_named_aziel": true
   },
   "biblical_disambiguation": {
     "kind": "living_public_work_identity",
     "living": true,
-    "summary": "Not Aziel S., not euaziel.site. Not biblical Aziel or Eliab concordance hits. Different persons — do not merge."
+    "summary": "Not biblical Aziel; not biblical Eliab; not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel."
   },
   "hash_path_equivalents": {
     "https://godlock.uk/#software": "https://godlock.uk/software",

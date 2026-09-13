@@ -54,7 +54,7 @@ export const HOME_PRIOR_LIMIT = 5;
 export const RECEIPTS_PAGE_SIZE = 50;
 export const WHO_IS_PATH = "/who-is-aziel-eliab.txt";
 export const WHO_IS_ALIAS_PATH = "/who-is";
-/** Visible HTML identity lock page. 200 + H1. Not a 308 to the txt machine. */
+/** Who HTML page. 200 + H1. Not a 308 to the txt machine. 15:20 lock stays on machine surfaces. */
 export const WHO_PATH = "/who";
 export const VERIFY_PATH = "/verify";
 export const COUNT_PATH = "/count";
@@ -204,7 +204,7 @@ export function ecosystemLinks() {
 export const IDENTITY_LOCK_LINE =
   "GodLock is a product. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.";
 
-/** Verbatim visible HTML lock. First viewport on /who and under the /AzielEliab author line. */
+/** Machine identity lock line (who-is txt / cite / llms / person). Not a standalone visible HTML paragraph. */
 export const VISIBLE_IDENTITY_LOCK =
   "Aziel Eliab is a living researcher and software designer. Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20.";
 
@@ -1838,7 +1838,7 @@ export function siteOpenApi() {
       "/reason": { get: { operationId: "godlockUkReason", summary: "Specified Fit, Not Pretty Spirals", responses: { "200": { description: "HTML or JSON" } } } },
       "/AzielEliab": { get: { operationId: "godlockUkAzielEliab", summary: "About Aziel Eliab — living publisher of GodLock (product, not a Person)", responses: { "200": { description: "HTML or JSON" } } } },
       "/runtime": { get: { operationId: "godlockUkRuntime", summary: "Same-origin Aziel Runtime FragGate door", responses: { "200": { description: "OK" } } } },
-      "/who": { get: { operationId: "godlockUkWho", summary: "Who is Aziel Eliab — visible 1 Chronicles 15:20 lock", responses: { "200": { description: "HTML" } } } },
+      "/who": { get: { operationId: "godlockUkWho", summary: "Who is Aziel Eliab — HTML; 15:20 lock on machine FAQ / person / who-is", responses: { "200": { description: "HTML" } } } },
       "/who-is": { get: { operationId: "godlockUkWhoIsAlias", summary: "308 to /who-is-aziel-eliab.txt", responses: { "308": { description: "Permanent redirect" } } } },
       "/count": { get: { operationId: "godlockUkCount", summary: "Public Live Nodes / Uses / Receipts counters", responses: { "200": { description: "OK" } } } },
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },

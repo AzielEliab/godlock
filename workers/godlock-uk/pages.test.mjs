@@ -216,11 +216,11 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(html.includes("— Aziel Eliab"));
     assert.match(html, /GodLock is a product/);
     assert.match(html, /Living publisher Aziel Eliab/);
-    assert.ok(html.includes(VISIBLE_IDENTITY_LOCK));
     const authorAt = html.indexOf('<p class="author">Author Aziel Eliab</p>');
-    const lockAt = html.indexOf(VISIBLE_IDENTITY_LOCK);
     const navAt = html.indexOf('class="nav2"');
-    assert.ok(authorAt >= 0 && lockAt > authorAt && lockAt < navAt);
+    assert.ok(authorAt >= 0 && navAt > authorAt);
+    assert.doesNotMatch(html, /class="identity-lock"/);
+    assert.ok(!html.includes(VISIBLE_IDENTITY_LOCK));
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab">Aziel Eliab — Digital Library<\/a>/);
     assert.match(html, /href="https:\/\/www\.hedidntjump\.com\/">He Didn't Jump<\/a>/);
     const manifesto = html.match(/<section class="about-aziel"[\s\S]*?<\/section>/)[0];
@@ -905,14 +905,16 @@ describe("Aziel Corpus Library off-site", () => {
 });
 
 describe("Aziel Eliab routes", () => {
-  it("serves /who 200 with the visible 15:20 lock and H1", async () => {
+  it("serves /who 200 with H1 and no standalone visible 15:20 lock paragraph", async () => {
     const res = await worker.fetch(new Request("https://godlock.uk/who"), mockEnv());
     assert.equal(res.status, 200);
     const html = await res.text();
     assert.match(html, /<h1>Who is Aziel Eliab<\/h1>/);
-    assert.ok(html.includes(VISIBLE_IDENTITY_LOCK));
     const body = html.replace(/^[\s\S]*<body>/i, "").replace(/<\/body>[\s\S]*$/i, "");
-    assert.ok(body.includes(VISIBLE_IDENTITY_LOCK));
+    const visible = body.replace(/<script[\s\S]*?<\/script>/gi, "");
+    assert.ok(!visible.includes(VISIBLE_IDENTITY_LOCK));
+    assert.doesNotMatch(visible, /<p class="identity-lock"/);
+    assert.match(html, /Is Aziel Eliab the two musicians named in 1 Chronicles 15:20\?/);
     assert.doesNotMatch(html, /Works with ChatGPT/);
   });
 
@@ -925,6 +927,8 @@ describe("Aziel Eliab routes", () => {
     assert.ok(html.includes(AZIEL_MANIFESTO[3]));
     assert.match(html, /Specified Fit, Not Pretty Spirals/);
     assert.match(html, /class="aziel current"/);
+    assert.doesNotMatch(html, /class="identity-lock"/);
+    assert.ok(!html.includes(VISIBLE_IDENTITY_LOCK));
   });
 
   it("308s the kebab path to /AzielEliab", async () => {

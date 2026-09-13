@@ -36,6 +36,7 @@ Also known as: Aziel Elroi Eliab · The Revealer of The Sealed · Revealer of Th
 Latin aka: Aziel Elroi Eliab | Aziel El-Roi Eliab | Aziel El Roi Eliab | The Revealer of The Sealed | Revealer of The Sealed
 Hebrew aka: עזיאל / אל ראי | אלרועי / אליאב
 GodLock is a product. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.
+Not biblical Aziel; not biblical Eliab; not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel.
 sameAs lattice: https://github.com/AzielEliab · https://github.com/azieltherevealerofthesealed-arch · https://glama.ai/mcp/servers/AzielEliab/aziel-runtime · https://www.azieleliab.com/ · https://www.azielcorpuslibrary.net/ · https://godlock.uk/ · https://www.hedidntjump.com/ · https://x.com/AzielElroiEliab · https://x.com/azieleliab
 Who-is alias: https://godlock.uk/who-is → https://godlock.uk/who-is-aziel-eliab.txt
 Sister stats: https://www.azieleliab.com/v1/stats · https://www.azielcorpuslibrary.net/stats · https://www.hedidntjump.com/api/stats

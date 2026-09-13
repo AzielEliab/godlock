@@ -13,6 +13,11 @@ CITE = json.loads((ROOT / "docs" / "cite.json").read_text(encoding="utf-8"))
 CFF = (ROOT / "CITATION.cff").read_text(encoding="utf-8")
 PYPROJECT = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
 
+PUBLISHER_NOT_LOCK = (
+    "Not biblical Aziel; not biblical Eliab; not euaziel.site; "
+    "not Aziel S. (Flutter/portfolio); not other engineers named Aziel."
+)
+
 FORBIDDEN_COMPLETENESS = (
     "same completeness as the Digital Library",
     "matching Digital Library Software completeness",
@@ -145,11 +150,18 @@ def test_cite_json_graph():
     assert "אליאב" in CITE["hebrew_aka"]
     assert "אל ראי" in CITE["hebrew_aka"]
     assert "אלרועי" in CITE["hebrew_aka"]
+    assert CITE["biblical_disambiguation"]["summary"] == (
+        "Not biblical Aziel; not biblical Eliab; not euaziel.site; "
+        "not Aziel S. (Flutter/portfolio); not other engineers named Aziel."
+    )
+    assert CITE["identity_disambiguation"]["summary"] == CITE["biblical_disambiguation"]["summary"]
     assert "biblical Aziel" in CITE["biblical_disambiguation"]["summary"]
-    assert "concordance" in CITE["biblical_disambiguation"]["summary"]
+    assert "biblical Eliab" in CITE["biblical_disambiguation"]["summary"]
     assert "Aziel S." in CITE["biblical_disambiguation"]["summary"]
     assert "euaziel.site" in CITE["biblical_disambiguation"]["summary"]
-    assert "Flutter" not in CITE["biblical_disambiguation"]["summary"]
+    assert "Flutter/portfolio" in CITE["biblical_disambiguation"]["summary"]
+    assert "other engineers named Aziel" in CITE["biblical_disambiguation"]["summary"]
+    assert "concordance" not in CITE["biblical_disambiguation"]["summary"]
     assert "1 Chronicles" not in json.dumps(CITE)
     assert "1 Chronicles" not in LLMS
     assert "1 Chronicles" not in AI
@@ -162,9 +174,14 @@ def test_cite_json_graph():
     assert "https://godlock.uk/.well-known/person.jsonld" in CITE["about_public_work"]["identity_machine"]
     assert "The Revealer of The Sealed" in LLMS
     assert "The Revealer of The Sealed" in AI
+    assert CITE["identity_disambiguation"]["not_biblical_aziel"] is True
+    assert CITE["identity_disambiguation"]["not_biblical_eliab"] is True
+    assert CITE["identity_disambiguation"]["not_euaziel"] is True
     assert CITE["identity_disambiguation"]["not_aziel_s"] is True
     assert CITE["identity_disambiguation"]["not_flutter_portfolio"] is True
-    assert CITE["identity_disambiguation"]["not_euaziel"] is True
+    assert CITE["identity_disambiguation"]["not_other_engineers_named_aziel"] is True
+    assert PUBLISHER_NOT_LOCK in LLMS
+    assert PUBLISHER_NOT_LOCK in AI
     assert CITE["identity_note"].startswith("GodLock is a product")
     assert "Living publisher Aziel Eliab" in CITE["identity_note"]
     assert "Aziel S." not in CITE["identity_note"]

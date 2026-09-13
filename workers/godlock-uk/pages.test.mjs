@@ -52,6 +52,7 @@ import {
   ABOUT_PUBLIC_WORK_LEAD,
   identityMachineUrls,
   IDENTITY_LOCK_LINE,
+  PUBLISHER_NOT_LOCK,
   LOCAL_PERSON_STUB_ID,
   AI_CRAWLER_AGENTS,
   AI_CLIENTS,
@@ -877,8 +878,9 @@ describe("Aziel Eliab routes", () => {
     assert.equal(body.person_id, "https://www.azieleliab.com/#aziel");
     assert.equal(body.host_kind, "product_surface");
     assert.equal(body.product_not_identity, true);
-    assert.match(body.disambiguation, /concordance hits/);
+    assert.equal(body.disambiguation, PUBLISHER_NOT_LOCK);
     assert.doesNotMatch(body.disambiguation, /1 Chronicles/);
+    assert.doesNotMatch(body.disambiguation, /concordance hits/);
     assert.doesNotMatch(body.text, /Aziel S|Flutter|1 Chronicles/i);
     assert.ok(body.text.includes("The receipt is the argument that survives the speaker."));
   });

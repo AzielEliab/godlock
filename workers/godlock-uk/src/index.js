@@ -20,6 +20,7 @@ import {
   PUBLIC_RUNTIME, RUNTIME_PATH, RUNTIME_VERSION, OFFICIAL_SOFTWARES, permanentIdentityRedirect, citeRuntimeVersion,
   BRAND_MARK_PATH,
   personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, wellKnownAzielDoc,
+  AZIEL_PERSON_ID, IDENTITY_LOCK_LINE,
 } from "./seo.js";
 import {
   fetchCatalogProducts, softwareSuite, softwareApiDoc, publicSoftwaresList,
@@ -797,6 +798,10 @@ export default {
             title: "Aziel Eliab",
             path: AZIEL_ELIAB_PATH,
             identity: AUTHOR,
+            person_id: AZIEL_PERSON_ID,
+            host_kind: "product_surface",
+            product_not_identity: true,
+            disambiguation: IDENTITY_LOCK_LINE,
             library: "https://www.azielcorpuslibrary.net/AzielEliab",
             text: azielEliabText(),
           }, 200, extraHeadersFor(nodeId));

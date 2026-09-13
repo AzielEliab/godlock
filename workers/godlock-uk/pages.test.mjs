@@ -207,6 +207,9 @@ describe("Aziel Eliab page chrome", () => {
     assert.match(html, /name="keywords" content="Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test, About Aziel Eliab"/);
     assert.ok(html.includes(AZIEL_MANIFESTO[0]));
     assert.ok(html.includes("— Aziel Eliab"));
+    assert.match(html, /Not Aziel S\./);
+    assert.match(html, /not a Flutter\/React portfolio engineer/);
+    assert.doesNotMatch(html, /1 Chronicles/);
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab">Aziel Eliab — Digital Library<\/a>/);
     assert.match(html, /href="https:\/\/www\.hedidntjump\.com\/">He Didn't Jump<\/a>/);
     const manifesto = html.match(/<section class="about-aziel"[\s\S]*?<\/section>/)[0];
@@ -865,6 +868,12 @@ describe("Aziel Eliab routes", () => {
     const body = await res.json();
     assert.equal(body.author, "Aziel Eliab");
     assert.equal(body.path, "/AzielEliab");
+    assert.equal(body.person_id, "https://www.azieleliab.com/#aziel");
+    assert.equal(body.host_kind, "product_surface");
+    assert.equal(body.product_not_identity, true);
+    assert.match(body.disambiguation, /Not Aziel S\./);
+    assert.match(body.disambiguation, /not a Flutter\/React portfolio engineer/);
+    assert.doesNotMatch(body.disambiguation, /1 Chronicles/);
     assert.ok(body.text.includes("The receipt is the argument that survives the speaker."));
   });
 

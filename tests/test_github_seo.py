@@ -139,6 +139,18 @@ def test_cite_json_graph():
     assert "אלרועי" in CITE["hebrew_aka"]
     assert "biblical Aziel" in CITE["biblical_disambiguation"]["summary"]
     assert "GodLock is a product name" in CITE["biblical_disambiguation"]["summary"]
+    assert "Aziel S." in CITE["biblical_disambiguation"]["summary"]
+    assert "Flutter" in CITE["biblical_disambiguation"]["summary"]
+    assert "1 Chronicles" not in json.dumps(CITE)
+    assert "1 Chronicles" not in LLMS
+    assert "1 Chronicles" not in AI
+    assert "Aziel S." not in CITE["misspelling_alternateNames"]
+    assert CITE["identity_disambiguation"]["not_aziel_s"] is True
+    assert CITE["identity_disambiguation"]["not_flutter_portfolio"] is True
+    assert "Not Aziel S." in CITE["identity_note"]
+    assert "Not Aziel S." in LLMS
+    assert "Flutter/React portfolio" in LLMS
+    assert "Not Aziel S." in AI
     hrefs = {row["href"] for row in CITE["ecosystem"]}
     assert "https://www.azieleliab.com/" in hrefs
     assert "https://www.azielcorpuslibrary.net/" in hrefs

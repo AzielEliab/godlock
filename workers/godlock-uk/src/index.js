@@ -20,6 +20,7 @@ import {
   PUBLIC_RUNTIME, RUNTIME_PATH, RUNTIME_VERSION, OFFICIAL_SOFTWARES, permanentIdentityRedirect, citeRuntimeVersion,
   BRAND_MARK_PATH,
   personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, wellKnownAzielDoc,
+  AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE,
 } from "./seo.js";
 import {
   fetchCatalogProducts, softwareSuite, softwareApiDoc, publicSoftwaresList,
@@ -589,7 +590,7 @@ export default {
       if (path === "/ai.txt") {
         return new Response(aiDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
-      if (path === "/person.jsonld") {
+      if (path === "/person.jsonld" || path === "/.well-known/person.jsonld") {
         return new Response(JSON.stringify(personJsonLd(), null, 2), {
           headers: { "Content-Type": "application/ld+json; charset=utf-8", ...corsHeaders() },
         });
@@ -797,6 +798,10 @@ export default {
             title: "Aziel Eliab",
             path: AZIEL_ELIAB_PATH,
             identity: AUTHOR,
+            person_id: AZIEL_PERSON_ID,
+            host_kind: "product_surface",
+            product_not_identity: true,
+            disambiguation: BIBLICAL_DISAMBIGUATION_LINE,
             library: "https://www.azielcorpuslibrary.net/AzielEliab",
             text: azielEliabText(),
           }, 200, extraHeadersFor(nodeId));

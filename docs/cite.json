@@ -2,7 +2,7 @@
   "author": "Aziel Eliab",
   "author_id": "https://www.azieleliab.com/#aziel",
   "identity": "Aziel Eliab",
-  "identity_note": "Aziel Eliab only — living public work identity. Not biblical Aziel or biblical Eliab. Bible concordance hits are different persons — do not merge. Aziel Elroi Eliab is SEO alternateName only. Shared Person @id is https://www.azieleliab.com/#aziel.",
+  "identity_note": "GodLock is a product. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel. Aziel Elroi Eliab is SEO alternateName only.",
   "person_id": "https://www.azieleliab.com/#aziel",
   "publisher": "Aziel Eliab",
   "living_publisher": true,
@@ -18,7 +18,8 @@
     "https://x.com/AzielElroiEliab",
     "https://x.com/azieleliab"
   ],
-  "sameAs_lattice_note": "Shared AZindex Person sameAs. Surfaces of one living Person, not other people. Do not mint a competing Person @id.",
+  "sameAs_refuse": ["euaziel", "euaziel.site", "Aziel S.", "Aziel S", "Flutter-React", "Flutter/React", "Flutter portfolio"],
+  "sameAs_lattice_note": "Shared AZindex Person sameAs. Surfaces of one living Person, not other people. Never sameAs euaziel, Aziel S., or Flutter-React portfolio URLs. Do not mint a competing Person @id.",
   "runtime_id": "https://www.azieleliab.com/runtime#runtime",
   "godlock_runtime_tool": "https://www.azieleliab.com/runtime#godlock",
   "alternateName": "Aziel Elroi Eliab",
@@ -36,8 +37,9 @@
     "graph": "https://godlock.uk/graph.jsonld",
     "who_is_aziel_eliab": "https://godlock.uk/who-is-aziel-eliab.txt",
     "well_known": "https://godlock.uk/.well-known/aziel.json",
+    "well_known_person": "https://godlock.uk/.well-known/person.jsonld",
     "person_id": "https://www.azieleliab.com/#aziel",
-    "note": "Shared Person @id is always https://www.azieleliab.com/#aziel. Living publisher of GodLock.uk. Product surface, not a second Person. Not biblical Aziel or biblical Eliab."
+    "note": "Shared Person @id is always https://www.azieleliab.com/#aziel. GodLock product surface. Living publisher Aziel Eliab."
   },
   "about_public_work": {
     "source": "https://godlock.uk/AzielEliab",
@@ -62,9 +64,17 @@
       "https://godlock.uk/identity.jsonld",
       "https://godlock.uk/graph.jsonld",
       "https://godlock.uk/who-is-aziel-eliab.txt",
-      "https://godlock.uk/.well-known/aziel.json"
+      "https://godlock.uk/.well-known/aziel.json",
+      "https://godlock.uk/.well-known/person.jsonld"
     ]
   },
+  "latin_aka": [
+    "Aziel Elroi Eliab",
+    "The Revealer of The Sealed",
+    "Revealer of The Sealed",
+    "Aziel El-Roi Eliab",
+    "Aziel El Roi Eliab"
+  ],
   "hebrew_aka": ["עזיאל", "אל ראי", "אלרועי", "אליאב"],
   "misspelling_alternateNames": [
     "Azial Eliab",
@@ -79,10 +89,19 @@
     "Elroi Eliab",
     "Aziel Elroieliab"
   ],
+  "identity_disambiguation": {
+    "kind": "living_public_work_identity",
+    "living": true,
+    "summary": "Not Aziel S., not euaziel.site. Not biblical Aziel or Eliab concordance hits. Different persons — do not merge.",
+    "sameAs_refuse": ["euaziel", "euaziel.site", "Aziel S.", "Aziel S", "Flutter-React", "Flutter/React", "Flutter portfolio"],
+    "not_aziel_s": true,
+    "not_flutter_portfolio": true,
+    "not_euaziel": true
+  },
   "biblical_disambiguation": {
     "kind": "living_public_work_identity",
     "living": true,
-    "summary": "Living public work identity of Aziel Eliab. Not biblical Aziel (1 Chronicles / concordance hits). Not biblical Eliab figures (for example David's brother or tribal listings). Bible concordance hits are different persons — do not merge. Hebrew forms are aka of this Person only. GodLock is a product name, not an identity label. Person @id https://www.azieleliab.com/#aziel."
+    "summary": "Not Aziel S., not euaziel.site. Not biblical Aziel or Eliab concordance hits. Different persons — do not merge."
   },
   "hash_path_equivalents": {
     "https://godlock.uk/#software": "https://godlock.uk/software",

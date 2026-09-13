@@ -7,7 +7,7 @@ import {
   HEDIDNTJUMP, HEDIDNTJUMP_LABEL, BRAND_MARK_PATH, AZIEL_OFFICIAL, OFFICIAL_SOFTWARES,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
   DONATE_PATH, RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE,
-  AI_CLIENTS_SENTENCE, runtimeDistribution, ecosystemLinks,
+  runtimeDistribution, ecosystemLinks,
   SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO,
   ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM,
 } from "./seo.js";
@@ -20,14 +20,15 @@ import { donateBody as donatePageBody } from "./donate.js";
 export const CSS = `
 :root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
 *{box-sizing:border-box}
-html,body{background:var(--bg);color:var(--ink)}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;line-height:1.5}
-.wrap{max-width:720px;margin:auto;padding:24px 18px 80px}
+html,body{background:var(--bg);color:var(--ink);max-width:100%}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;line-height:1.5;overflow-wrap:anywhere}
+.wrap{max-width:720px;margin:auto;padding:24px 18px 80px;min-width:0}
 .brandrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px;min-height:48px}
 .brandmark{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:0 0 40px;box-shadow:0 0 0 1px #0003,0 0 0 1px var(--gold)}
 .brand{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
-.nav2{margin:0 0 14px;font-size:14px}
-.nav2 .sep{color:var(--muted);margin:0 8px}
+.nav2{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;margin:0 0 14px;font-size:14px}
+.nav2 .sep{color:var(--muted);margin:0 8px;flex:0 0 auto}
+.nav2 a{flex:0 1 auto}
 .nav2 a.aziel,.nav2 a.aziel:visited{color:var(--royal);font-weight:700}
 .nav2 a.aziel:hover{color:var(--royal-deep)}
 .ecosystem{margin:0 0 16px;font-size:13px;color:var(--muted)}
@@ -85,7 +86,7 @@ pre.verify{white-space:pre-wrap;word-break:break-word;background:#16130f;border:
 .ok{color:var(--yes);font-weight:700}
 .bad{color:var(--no);font-weight:700}
 a{color:var(--gold)}
-footer{margin-top:36px;color:var(--muted);font-size:14px}
+footer{margin-top:36px;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
 .donate-sign{font-weight:700;margin-top:18px}
 .donate-rails{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 18px}
 .donate-rail h3{margin:0 0 8px;font-size:18px}
@@ -369,7 +370,6 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
   <p class="muted">Four layers stay separate: detection criterion · biological code+reader · fine-tuning physics · GodLock as method, not evidence. <a href="${esc(REASON_PATH)}">Read the brief</a>.</p>
 </div>
 <p class="muted">Answers open with Yes, No, Let's review, or Interesting. Intelligent-design disputes are processed under the same rules. Score floor 33.3 · ceiling 99.7. GodLock records a receipt. It does not sermonize.</p>
-<p class="muted">${esc(AI_CLIENTS_SENTENCE)}</p>
 ${err}
 <form class="challenge" id="challenge-form" method="post" action="/submit">
   <textarea id="challenge" name="text" maxlength="8000" placeholder="Submit a challenge. Intelligent-design disputes are processed under the same rules."></textarea>

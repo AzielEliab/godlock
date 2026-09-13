@@ -18,6 +18,7 @@ import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
   PUBLIC_RUNTIME, RUNTIME_PATH, permanentIdentityRedirect, citeRuntimeVersion,
   BRAND_MARK_PATH,
+  personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, wellKnownAzielDoc,
 } from "./seo.js";
 import {
   fetchCatalogProducts, softwareSuite, publicProduct, softwareApiDoc,
@@ -504,6 +505,27 @@ export default {
       }
       if (path === "/ai.txt") {
         return new Response(aiDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+      }
+      if (path === "/person.jsonld") {
+        return new Response(JSON.stringify(personJsonLd(), null, 2), {
+          headers: { "Content-Type": "application/ld+json; charset=utf-8", ...corsHeaders() },
+        });
+      }
+      if (path === "/identity.jsonld") {
+        return new Response(JSON.stringify(identityJsonLd(), null, 2), {
+          headers: { "Content-Type": "application/ld+json; charset=utf-8", ...corsHeaders() },
+        });
+      }
+      if (path === "/graph.jsonld") {
+        return new Response(JSON.stringify(graphJsonLd(), null, 2), {
+          headers: { "Content-Type": "application/ld+json; charset=utf-8", ...corsHeaders() },
+        });
+      }
+      if (path === "/who-is-aziel-eliab.txt") {
+        return new Response(whoIsAzielEliabTxt(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+      }
+      if (path === "/.well-known/aziel.json") {
+        return json(wellKnownAzielDoc());
       }
       if (path === "/openapi.json") {
         return json(siteOpenApi());

@@ -111,6 +111,34 @@ def test_cite_json_graph():
     assert "GodLock-first" in CITE["software_note"]
     assert "Digital Library completeness" in CITE["software_note"]
     assert CITE["he_didnt_jump"] == "https://www.hedidntjump.com/"
+    assert CITE["identity_machine"]["person_id"] == "https://www.azieleliab.com/#aziel"
+    about = CITE["about_public_work"]
+    assert about["source"] == "https://godlock.uk/AzielEliab"
+    assert about["kind"] == "public_work"
+    assert "debate with no record becomes a pulpit" in about["lead"]
+    assert about["themes"]["document_over_declare"].startswith("Document over declare")
+    assert about["themes"]["unscored_claim_is_sermon"].startswith("A claim that cannot be scored is a sermon")
+    assert about["specified_fit"] == "Specified Fit, Not Pretty Spirals"
+    assert about["motto"] == "GodLock does not argue. It records, analyzes, hardens, and grows."
+    assert about["person_id"] == "https://www.azieleliab.com/#aziel"
+    assert about["product_not_identity"] is True
+    assert "https://godlock.uk/person.jsonld" in about["identity_machine"]
+    assert "https://godlock.uk/graph.jsonld" in about["identity_machine"]
+    assert "debate with no record becomes a pulpit" in LLMS
+    assert "Document over declare." in LLMS
+    assert "A claim that cannot be scored is a sermon." in LLMS
+    assert "GodLock does not argue. It records, analyzes, hardens, and grows." in LLMS
+    assert "debate with no record" in AI
+    assert "Person @id https://www.azieleliab.com/#aziel" in AI
+    assert CITE["sister_stats"]["azieleliab"] == "https://www.azieleliab.com/v1/stats"
+    assert CITE["sister_stats"]["corpus"] == "https://www.azielcorpuslibrary.net/stats"
+    assert CITE["sister_stats"]["hedidntjump"] == "https://www.hedidntjump.com/api/stats"
+    assert "עזיאל" in CITE["hebrew_aka"]
+    assert "אליאב" in CITE["hebrew_aka"]
+    assert "אל ראי" in CITE["hebrew_aka"]
+    assert "אלרועי" in CITE["hebrew_aka"]
+    assert "biblical Aziel" in CITE["biblical_disambiguation"]["summary"]
+    assert "GodLock is a product name" in CITE["biblical_disambiguation"]["summary"]
     hrefs = {row["href"] for row in CITE["ecosystem"]}
     assert "https://www.azieleliab.com/" in hrefs
     assert "https://www.azielcorpuslibrary.net/" in hrefs

@@ -45,6 +45,7 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 - `/receipt/{id}` public if not isolated
 - `/health` JSON
 - `/robots.txt` `/sitemap.xml` `/cite.json` `/llms.txt` `/ai.txt` `/openapi.json` (each lists the `/runtime` door)
+- AZindex identity machine (shared Person `@id` https://www.azieleliab.com/#aziel — GodLock is a product surface, not a second identity): `/person.jsonld` `/identity.jsonld` `/graph.jsonld` `/who-is-aziel-eliab.txt` `/.well-known/aziel.json`. About public work on `/AzielEliab` (debate/record/pulpit; document over declare; Specified Fit) is factored into those FAQ/graph/llms/cite files. AboutPage JSON-LD links the identity-machine URLs. Sister corpus stats: `https://www.azielcorpuslibrary.net/stats`.
 - Same-origin runtime also serves `/runtime/v1/health`, `/runtime/v1/runtime.json`, `/runtime/v1/software`, `/runtime/v1/fraggate/list`, `/runtime/v1/mesh`, `/runtime/v1/mesh/status`, `/runtime/v1/mesh/nodes`, `POST /runtime/v1/mesh/{join|heartbeat|leave|enable}`, `/runtime/v1/update/check`, `/runtime/v1/uses`, `/runtime/openapi.json`, `POST /runtime/mcp`. `POST /runtime/v1/mesh/disable` is refused (no mesh-off function).
 
 ## Counters

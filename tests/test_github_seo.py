@@ -138,19 +138,27 @@ def test_cite_json_graph():
     assert "אל ראי" in CITE["hebrew_aka"]
     assert "אלרועי" in CITE["hebrew_aka"]
     assert "biblical Aziel" in CITE["biblical_disambiguation"]["summary"]
-    assert "GodLock is a product name" in CITE["biblical_disambiguation"]["summary"]
-    assert "Aziel S." in CITE["biblical_disambiguation"]["summary"]
-    assert "Flutter" in CITE["biblical_disambiguation"]["summary"]
+    assert "concordance" in CITE["biblical_disambiguation"]["summary"]
+    assert "Aziel S." not in CITE["biblical_disambiguation"]["summary"]
+    assert "Flutter" not in CITE["biblical_disambiguation"]["summary"]
     assert "1 Chronicles" not in json.dumps(CITE)
     assert "1 Chronicles" not in LLMS
     assert "1 Chronicles" not in AI
     assert "Aziel S." not in CITE["misspelling_alternateNames"]
+    assert "euaziel" not in CITE["sameAs_lattice"]
+    assert "euaziel" in CITE["sameAs_refuse"]
+    assert "Aziel S." in CITE["sameAs_refuse"]
     assert CITE["identity_disambiguation"]["not_aziel_s"] is True
     assert CITE["identity_disambiguation"]["not_flutter_portfolio"] is True
-    assert "Not Aziel S." in CITE["identity_note"]
-    assert "Not Aziel S." in LLMS
-    assert "Flutter/React portfolio" in LLMS
-    assert "Not Aziel S." in AI
+    assert CITE["identity_disambiguation"]["not_euaziel"] is True
+    assert CITE["identity_note"].startswith("GodLock is a product")
+    assert "Living publisher Aziel Eliab" in CITE["identity_note"]
+    assert "Aziel S." not in CITE["identity_note"]
+    assert "Living publisher Aziel Eliab" in LLMS
+    assert "GodLock is a product" in LLMS
+    assert "עזיאל" in CITE["hebrew_aka"]
+    assert len(CITE["misspelling_alternateNames"]) >= 8
+    assert "Living publisher Aziel Eliab" in AI
     hrefs = {row["href"] for row in CITE["ecosystem"]}
     assert "https://www.azieleliab.com/" in hrefs
     assert "https://www.azielcorpuslibrary.net/" in hrefs

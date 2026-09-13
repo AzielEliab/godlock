@@ -2,7 +2,18 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import worker, { publicPayload, processSubmit, parseDownloadTotal } from "./src/index.js";
 import { sha256hex } from "./src/ledger.js";
-import { CHALLENGE_NOT_RETAINED } from "./src/ui.js";
+import { CHALLENGE_NOT_RETAINED, receiptsBody, homeBody, navItems, topNav } from "./src/ui.js";
+import {
+  ACT_RECEIPT_HEADING,
+  ACT_RECEIPT_ORIGIN,
+  ACT_RECEIPT_SISTERS,
+  ACT_RECEIPT_SPEC,
+  ACT_RECEIPT_ZERO,
+  actRowsFromChallenges,
+  oneSentence,
+  sanitizeMeta,
+  verifyActChain,
+} from "./src/actReceipts.js";
 
 const PUBLIC_CHALLENGE =
   "Functionally specified digital information joined to a translation reader is the steel class. Pretty spirals are not a proof.";
@@ -368,6 +379,121 @@ describe("download tally is never views plus uses", () => {
     assert.equal(parseDownloadTotal({ count: 9 }), 9);
     assert.equal(parseDownloadTotal(null), null);
     assert.equal(parseDownloadTotal({ views: 1213, uses: 35 }), null);
+  });
+});
+
+describe("ACT-RECEIPT-1.0 section on /receipts only", () => {
+  it("keeps a single Receipts tab pointed at /receipts", () => {
+    const tabs = navItems().filter((it) => it.label === "Receipts");
+    assert.equal(tabs.length, 1);
+    assert.equal(tabs[0].href, "/receipts");
+    const nav = topNav("/receipts");
+    assert.match(nav, /href="\/receipts"[^>]*aria-current="page"/);
+    assert.equal((nav.match(/href="\/receipts"/g) || []).length, 1);
+    assert.doesNotMatch(nav, /act-receipts/);
+  });
+
+  it("keeps the challenge ledger first and adds the ACT lattice below", async () => {
+    const rec = recordingEnv();
+    const row = await processSubmit(rec.env, PUBLIC_CHALLENGE);
+    const htmlRes = await worker.fetch(
+      new Request("https://godlock.uk/receipts", {
+        headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
+      }),
+      rec.env,
+    );
+    const html = await htmlRes.text();
+    assert.match(html, /<h1 class="soft-heading">Receipts<\/h1>/);
+    assert.match(html, /Public questions and the hash-chained receipt list/);
+    assert.match(html, /Functionally specified digital information/);
+    assert.match(html, new RegExp("/receipt/" + row.id));
+    assert.match(html, /<h2>Public action receipts \(ACT-RECEIPT-1\.0\)<\/h2>/);
+    const challengeAt = html.indexOf("Public questions and the hash-chained receipt list");
+    const actAt = html.indexOf(ACT_RECEIPT_HEADING);
+    assert.ok(challengeAt > 0 && actAt > challengeAt);
+    assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/receipts"/);
+    assert.equal(ACT_RECEIPT_ORIGIN, "https://www.azielcorpuslibrary.net/receipts");
+    assert.match(html, /href="https:\/\/www\.azieleliab\.com\/receipts">ae</);
+    assert.match(html, /href="https:\/\/www\.hedidntjump\.com\/receipts">HDJ</);
+    assert.equal(ACT_RECEIPT_SISTERS[0].id, "ae");
+    assert.equal(ACT_RECEIPT_SISTERS[1].id, "HDJ");
+    assert.match(html, /href="https:\/\/www\.azieleliab\.com\/#aziel"/);
+    const actStart = html.indexOf('id="act-receipts"');
+    assert.ok(actStart > 0);
+    assert.doesNotMatch(html.slice(actStart), /1 Chronicles 15:20/);
+    assert.match(html, /<div class="k">Hash<\/div>/);
+    assert.match(html, /<div class="k">Action<\/div>/);
+    assert.match(html, /<div class="k">Output<\/div>/);
+    assert.match(html, /<div class="k">Event<\/div>/);
+    assert.match(html, /<div class="k">previous_hash<\/div>/);
+    assert.match(html, /chain verified/);
+    const home = await (await worker.fetch(
+      new Request("https://godlock.uk/", {
+        headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
+      }),
+      rec.env,
+    )).text();
+    assert.match(home, /<h2>Prior receipts<\/h2>/);
+    assert.doesNotMatch(home, /Public action receipts \(ACT-RECEIPT-1\.0\)/);
+  });
+
+  it("does not change homepage Prior chrome and leaves empty ACT list honest", () => {
+    const home = homeBody({ stats: { receipts: 0 }, latest: null, prior: [] });
+    assert.match(home, /<h2>Prior receipts<\/h2>/);
+    assert.doesNotMatch(home, /ACT-RECEIPT-1\.0/);
+    const empty = receiptsBody({ rows: [], total: 0, page: 1, pageSize: 50, stats: { receipts: 0 } });
+    assert.match(empty, /No public receipts yet/);
+    assert.match(empty, /Public action receipts \(ACT-RECEIPT-1\.0\)/);
+    assert.match(empty, /No public action receipts on this host yet/);
+    assert.doesNotMatch(empty, /1 Chronicles 15:20/);
+  });
+
+  it("verifies the four-field previous_hash chain from public challenge rows", () => {
+    assert.equal(oneSentence("Mint a receipt. Then publish."), "Mint a receipt.");
+    const clean = sanitizeMeta({
+      user: "nope",
+      email: "a@b.c",
+      ip: "1.2.3.4",
+      location: "home",
+      surface: "godlock.uk",
+      path: "/submit",
+    });
+    assert.equal(clean.user, undefined);
+    assert.equal(clean.email, undefined);
+    assert.equal(clean.ip, undefined);
+    assert.equal(clean.location, undefined);
+    assert.equal(clean.surface, "godlock.uk");
+    const rows = [
+      {
+        id: "old",
+        created_utc: "2026-09-10T12:00:00.000Z",
+        challenge_text: "First challenge asks whether specified fit holds.",
+        label: "Yes",
+        summary: "Specified fit holds on the steel class.",
+      },
+      {
+        id: "new",
+        created_utc: "2026-09-11T12:00:00.000Z",
+        challenge_text: "Second challenge asks about pretty spirals.",
+        label: "No",
+        summary: "Pretty spirals are not a proof.",
+      },
+    ];
+    const chained = actRowsFromChallenges(rows);
+    assert.equal(chained.length, 2);
+    assert.equal(chained[0].previous_hash, ACT_RECEIPT_ZERO);
+    assert.equal(chained[1].previous_hash, chained[0].hash);
+    assert.equal(chained[0].action, "First challenge asks whether specified fit holds.");
+    assert.equal(chained[1].output, "Pretty spirals are not a proof.");
+    assert.equal(chained[0].metadata.user, undefined);
+    assert.equal(chained[0].metadata.surface, "godlock.uk");
+    assert.equal(chained[0].spec, ACT_RECEIPT_SPEC);
+    const report = verifyActChain(chained);
+    assert.equal(report.ok, true);
+    assert.equal(report.entries, 2);
+    assert.equal(report.errors.length, 0);
+    const broken = chained.map((r, i) => i === 1 ? { ...r, previous_hash: ACT_RECEIPT_ZERO } : r);
+    assert.equal(verifyActChain(broken).ok, false);
   });
 });
 

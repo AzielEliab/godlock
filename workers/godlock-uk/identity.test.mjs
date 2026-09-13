@@ -544,20 +544,25 @@ describe("AZindex identity machine", () => {
     assert.equal(whoAlias.headers.get("Location"), WHO_IS_PATH);
   });
 
-  it("GROKBOT-FIX 1.1 — visible 15:20 lock on /who and person.jsonld", async () => {
+  it("GROKBOT-FIX 1.1 — machine 15:20 lock stays; no standalone visible paragraph on /who", async () => {
     const who = await fetchPath(WHO_PATH);
     assert.equal(who.status, 200);
     const html = await who.text();
     assert.match(html, /<h1>Who is Aziel Eliab<\/h1>/);
-    assert.ok(html.includes(VISIBLE_IDENTITY_LOCK));
     const body = html.replace(/^[\s\S]*<body>/i, "").replace(/<\/body>[\s\S]*$/i, "");
-    assert.ok(body.includes(VISIBLE_IDENTITY_LOCK));
+    const visible = body.replace(/<script[\s\S]*?<\/script>/gi, "");
+    assert.ok(!visible.includes(VISIBLE_IDENTITY_LOCK));
+    assert.doesNotMatch(visible, /<p class="identity-lock"/);
     assert.doesNotMatch(body, /Aziel Systems|legal name|county|employer/i);
-    assert.equal(whoPageHtml().includes(VISIBLE_IDENTITY_LOCK), true);
+    const whoHtml = whoPageHtml();
+    const whoVisible = whoHtml.replace(/^[\s\S]*<body>/i, "").replace(/<\/body>[\s\S]*$/i, "").replace(/<script[\s\S]*?<\/script>/gi, "");
+    assert.ok(!whoVisible.includes(VISIBLE_IDENTITY_LOCK));
+    assert.match(whoHtml, /Is Aziel Eliab the two musicians named in 1 Chronicles 15:20\?/);
     assert.equal(personJsonLd()["@id"], "https://www.azieleliab.com/#aziel");
     assert.deepEqual(identityJsonLd(), personJsonLd());
     assert.match(personJsonLd().disambiguatingDescription, /two Levitical musicians Aziel and Eliab/);
     assert.match(personJsonLd().disambiguatingDescription, /1 Chronicles 15:20/);
     assert.match(personJsonLd().disambiguatingDescription, /Not euaziel\.site/);
+    assert.ok(whoIsAzielEliabTxt().includes(VISIBLE_IDENTITY_LOCK));
   });
 });

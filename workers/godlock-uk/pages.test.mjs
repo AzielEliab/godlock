@@ -51,6 +51,7 @@ import {
   OFFICIAL_SOFTWARES,
   ABOUT_PUBLIC_WORK_LEAD,
   identityMachineUrls,
+  IDENTITY_LOCK_LINE,
   LOCAL_PERSON_STUB_ID,
   AI_CRAWLER_AGENTS,
   AI_CLIENTS,
@@ -207,9 +208,15 @@ describe("Aziel Eliab page chrome", () => {
     assert.match(html, /name="keywords" content="Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test, About Aziel Eliab"/);
     assert.ok(html.includes(AZIEL_MANIFESTO[0]));
     assert.ok(html.includes("— Aziel Eliab"));
+    assert.match(html, /GodLock is a product/);
+    assert.match(html, /Living publisher Aziel Eliab/);
+    assert.doesNotMatch(html, /1 Chronicles/);
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab">Aziel Eliab — Digital Library<\/a>/);
     assert.match(html, /href="https:\/\/www\.hedidntjump\.com\/">He Didn't Jump<\/a>/);
     const manifesto = html.match(/<section class="about-aziel"[\s\S]*?<\/section>/)[0];
+    assert.ok(!manifesto.includes(IDENTITY_LOCK_LINE));
+    assert.doesNotMatch(manifesto, /Person @id https:\/\/www\.azieleliab\.com\/#aziel/);
+    assert.doesNotMatch(azielEliabBody(), new RegExp(IDENTITY_LOCK_LINE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     assert.doesNotMatch(manifesto, /MCP|OpenAPI|runtime_session|Workers AI/i);
     assert.doesNotMatch(azielEliabBody(), /MCP|OpenAPI|runtime_session|Workers AI/i);
     assert.match(html, /Part of the Aziel Eliab ecosystem/);
@@ -218,7 +225,7 @@ describe("Aziel Eliab page chrome", () => {
     const person = ld["@graph"].find((n) => n["@type"] === "Person");
     assert.equal(person["@id"], AZIEL_PERSON_ID);
     assert.equal(person.name, "Aziel Eliab");
-    assert.deepEqual(person.alternateName, ["Aziel Elroi Eliab"]);
+    assert.deepEqual(person.alternateName, ["Aziel Elroi Eliab", "The Revealer of The Sealed", "Revealer of The Sealed"]);
     assert.equal(person.url, AZIEL_OFFICIAL);
     assert.ok(person.sameAs.includes("https://godlock.uk/AzielEliab"));
     assert.ok(person.sameAs.includes(LIBRARY_AZIEL));
@@ -602,6 +609,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(spec.paths["/reason"]);
     assert.ok(spec.paths["/AzielEliab"]);
     assert.ok(spec.paths["/who-is"]);
+    assert.ok(spec.paths["/person.jsonld"]);
+    assert.ok(spec.paths["/.well-known/person.jsonld"]);
     assert.ok(spec.paths["/count"]);
     assert.ok(spec.paths["/runtime"]);
     assert.ok(spec.paths["/runtime/v1/software"]);
@@ -865,6 +874,12 @@ describe("Aziel Eliab routes", () => {
     const body = await res.json();
     assert.equal(body.author, "Aziel Eliab");
     assert.equal(body.path, "/AzielEliab");
+    assert.equal(body.person_id, "https://www.azieleliab.com/#aziel");
+    assert.equal(body.host_kind, "product_surface");
+    assert.equal(body.product_not_identity, true);
+    assert.match(body.disambiguation, /concordance hits/);
+    assert.doesNotMatch(body.disambiguation, /1 Chronicles/);
+    assert.doesNotMatch(body.text, /Aziel S|Flutter|1 Chronicles/i);
     assert.ok(body.text.includes("The receipt is the argument that survives the speaker."));
   });
 

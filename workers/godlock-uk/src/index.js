@@ -16,14 +16,14 @@ import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
-  robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR, CATALOG,
-  PUBLIC_RUNTIME, RUNTIME_PATH, permanentIdentityRedirect, citeRuntimeVersion,
+  robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR,
+  PUBLIC_RUNTIME, RUNTIME_PATH, RUNTIME_VERSION, OFFICIAL_SOFTWARES, permanentIdentityRedirect, citeRuntimeVersion,
   BRAND_MARK_PATH,
   personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, wellKnownAzielDoc,
 } from "./seo.js";
 import {
-  fetchCatalogProducts, softwareSuite, publicProduct, softwareApiDoc,
-  loadCatalogForHtml, scheduleCatalogRefresh, SOFTWARE_HTML_CACHE_CONTROL,
+  fetchCatalogProducts, softwareSuite, softwareApiDoc, publicSoftwaresList,
+  SOFTWARE_HTML_CACHE_CONTROL,
 } from "./catalog.js";
 import {
   START, shouldIsolate, answerChallenge, clampScore, residualOf, hashReceipt,
@@ -572,16 +572,15 @@ export default {
         return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/cite.json") {
-        const fetched = await fetchCatalogProducts(env);
-        const products = softwareSuite(fetched.products, { version: fetched.version });
-        const catalogN = products.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "fraggate").length;
+        const products = publicSoftwaresList([], { version: RUNTIME_VERSION });
         const runtime = products.find((p) => p && p.slug === "aziel-runtime");
         return json({
           ...citeDoc(),
-          software_product_count: catalogN,
+          official_softwares: OFFICIAL_SOFTWARES,
+          software_product_count: products.length,
           software_slugs: products.map((p) => p.slug),
-          software_source: fetched.source,
-          runtime_version: citeRuntimeVersion((runtime && runtime.version) || fetched.version),
+          software_source: "godlock-uk",
+          runtime_version: citeRuntimeVersion((runtime && runtime.version) || RUNTIME_VERSION),
         });
       }
       if (path === "/llms.txt") {
@@ -814,41 +813,20 @@ export default {
             headers: { Location: SOFTWARE_PATH, ...corsHeaders(), ...extraHeadersFor(nodeId) },
           });
         }
-        const fetched = await fetchCatalogProducts(env);
-        const extras = { version: fetched.version, source: fetched.source };
-        return json(softwareApiDoc(fetched.products, extras), 200, extraHeadersFor(nodeId));
+        return json(softwareApiDoc([], { source: "godlock-uk", version: RUNTIME_VERSION }), 200, extraHeadersFor(nodeId));
       }
 
       if (path === SOFTWARE_PATH) {
+        const extras = { version: RUNTIME_VERSION, source: "godlock-uk" };
+        const products = publicSoftwaresList([], extras);
         if (wantsJson(request, url)) {
-          const fetched = await fetchCatalogProducts(env);
-          const extras = { version: fetched.version };
-          const products = softwareSuite(fetched.products, extras);
           return json({
-            ok: true,
-            product: "GodLock",
-            author: AUTHOR,
-            identity: AUTHOR,
+            ...softwareApiDoc([], extras),
             path: SOFTWARE_PATH,
-            catalog: PUBLIC_RUNTIME + "/v1/software",
-            catalog_origin: CATALOG + "/v1/software",
-            catalog_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/list",
-            catalog_fraggate_origin: CATALOG + "/v1/fraggate/list",
-            catalog_json: PUBLIC_RUNTIME + "/v1/catalog.json",
-            source: fetched.source,
-            sort: "plain-gate-lock",
-            clock_is_not_lock: true,
-            product_count: products.filter((p) => p.slug !== "aziel-runtime" && p.slug !== "fraggate").length,
-            suite_count: products.length,
             counters_fetched: 0,
-            products: products.map(publicProduct).filter(Boolean),
           }, 200, extraHeadersFor(nodeId));
         }
-        const fetched = await loadCatalogForHtml(env);
-        scheduleCatalogRefresh(ctx, env);
-        const extras = { version: fetched.version };
-        const products = softwareSuite(fetched.products, extras);
-        return html(page("Softwares", softwareBody({ products: fetched.products, extras }), { path: SOFTWARE_PATH, kind: "software", products }), {
+        return html(page("Softwares", softwareBody({ extras }), { path: SOFTWARE_PATH, kind: "software", products }), {
           extraHeaders: extraHeadersFor(nodeId, { "Cache-Control": SOFTWARE_HTML_CACHE_CONTROL }),
         });
       }
@@ -893,18 +871,16 @@ export default {
         }
         const prior = await publicReceipts(env, HOME_PRIOR_LIMIT + (rid ? 1 : 0));
         const priorFiltered = (latest ? prior.filter((p) => p.id !== latest.id) : prior).slice(0, HOME_PRIOR_LIMIT);
-        const fetched = await fetchCatalogProducts(env);
-        const extras = { version: fetched.version };
         if (wantsJson(request, url)) {
           return json({
             ok: true,
             stats,
             latest: latest ? publicPayload(latest) : null,
             receipts: priorFiltered.map(publicPayload),
-            software: softwareApiDoc(fetched.products, { ...extras, source: fetched.source }),
+            software: softwareApiDoc([], { source: "godlock-uk", version: RUNTIME_VERSION }),
           });
         }
-        return html(page("GodLock", homeBody({ stats, latest, prior: priorFiltered, products: fetched.products, extras }), { path: "/", kind: "home" }), {
+        return html(page("GodLock", homeBody({ stats, latest, prior: priorFiltered }), { path: "/", kind: "home" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

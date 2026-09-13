@@ -8,14 +8,15 @@
 import { randomBytes } from "node:crypto";
 import { json, html, corsHeaders, wantsJson, readCookie } from "./http.js";
 import {
-  page, homeBody, verifyBody, receiptBody, azielEliabBody, azielEliabText,
+  page, homeBody, verifyBody, receiptBody, receiptsBody, azielEliabBody, azielEliabText,
   reasonBody, reasonText, softwareBody, donateBody, AZIEL_ELIAB_PATH, REASON_PATH, SOFTWARE_PATH, DONATE_PATH,
+  RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE,
 } from "./ui.js";
 import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
-  robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, GITHUB, AUTHOR, CATALOG,
+  robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR, CATALOG,
   PUBLIC_RUNTIME, RUNTIME_PATH, permanentIdentityRedirect, citeRuntimeVersion,
   BRAND_MARK_PATH,
   personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, wellKnownAzielDoc,
@@ -201,33 +202,114 @@ async function usesCount(env) {
   return usesCountFromLedger({ ledgerSubmits: ledgerN, metadataUses: metaN });
 }
 
-async function fetchDownloads(env) {
+const DOWNLOAD_UA = { "User-Agent": "Mozilla/5.0", Accept: "application/json" };
+
+/** Tracker /count and /stats publish total as the download tally. Never views+uses. */
+export function parseDownloadTotal(doc) {
+  if (doc == null) return null;
+  if (typeof doc === "number") return Number.isFinite(doc) && doc >= 0 ? doc : null;
+  if (typeof doc !== "object") return null;
+  const n = Number(doc.total != null ? doc.total : (doc.downloads != null ? doc.downloads : doc.count));
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+async function readDownloadResponse(res) {
+  if (!res || !res.ok) {
+    try { if (res && res.body && typeof res.body.cancel === "function") await res.body.cancel(); } catch { /* ignore */ }
+    return null;
+  }
   try {
-    const r = await fetch(DOWNLOAD_STATS, { headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" } });
-    if (r.ok) {
-      const j = await r.json();
-      const n = Number(j && (j.total != null ? j.total : (j.downloads != null ? j.downloads : j.count)));
-      if (Number.isFinite(n)) {
-        try { await metaSet(env, "downloads_cache", String(n)); } catch { /* ignore */ }
-        return n;
+    return parseDownloadTotal(await res.json());
+  } catch {
+    return null;
+  }
+}
+
+async function downloadsFromTracker(env) {
+  if (env && env.DOWNLOAD_TRACKER && typeof env.DOWNLOAD_TRACKER.fetch === "function") {
+    try {
+      const res = await env.DOWNLOAD_TRACKER.fetch(new Request("https://godlock-download-tracker/count", {
+        method: "GET",
+        headers: DOWNLOAD_UA,
+      }));
+      const n = await readDownloadResponse(res);
+      if (n != null) return n;
+    } catch { /* binding optional */ }
+  }
+  for (const url of [DOWNLOAD_COUNT, DOWNLOAD_STATS]) {
+    try {
+      const n = await readDownloadResponse(await fetch(url, { headers: DOWNLOAD_UA }));
+      if (n != null) return n;
+    } catch { /* try next / KV */ }
+  }
+  return null;
+}
+
+/** Same KV namespace as godlock-download-tracker DOWNLOADS (skip runtime_uses|). */
+async function downloadsFromSharedKv(env) {
+  const kv = (env && env.DOWNLOADS && typeof env.DOWNLOADS.list === "function")
+    ? env.DOWNLOADS
+    : (env && env.RUNTIME_USES && typeof env.RUNTIME_USES.list === "function")
+      ? env.RUNTIME_USES
+      : null;
+  if (!kv) return null;
+  try {
+    let downloads = 0;
+    let found = false;
+    let cursor;
+    do {
+      const page = await kv.list(cursor ? { prefix: "godlock|", cursor } : { prefix: "godlock|" });
+      for (const k of page.keys || []) {
+        const name = String(k && k.name ? k.name : "");
+        if (!name || name.includes("__views__")) continue;
+        const parts = name.split("|");
+        if (parts.length < 5 || parts[0] !== "godlock") continue;
+        const n = parseInt(await kv.get(name), 10);
+        if (Number.isFinite(n) && n > 0) {
+          downloads += n;
+          found = true;
+        }
       }
-    }
-  } catch { /* tracker optional */ }
+      cursor = page.list_complete ? undefined : page.cursor;
+    } while (cursor);
+    return found ? downloads : null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchDownloads(env) {
+  let cached = 0;
   try {
-    const cached = parseInt(await metaGet(env, "downloads_cache", ""), 10);
-    if (Number.isFinite(cached) && cached > 0) return cached;
+    cached = parseInt(await metaGet(env, "downloads_cache", "0"), 10) || 0;
   } catch { /* ignore */ }
-  const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
-  const uses = parseInt(await metaGet(env, "uses", "0"), 10) || 0;
-  return views + uses;
+  const live = await downloadsFromTracker(env);
+  const kvN = live == null ? await downloadsFromSharedKv(env) : null;
+  const n = live != null ? live : kvN;
+  const out = Math.max(n != null && Number.isFinite(n) ? n : 0, cached);
+  if (out > cached) {
+    try { await metaSet(env, "downloads_cache", String(out)); } catch { /* ignore */ }
+  }
+  return out;
+}
+
+/** Public receipt count — same isolated=0 source as Prior receipts / /receipts. */
+async function receiptsCount(env) {
+  try {
+    const row = await env.DB.prepare("SELECT COUNT(*) AS n FROM receipts WHERE isolated=0").first();
+    return Number(row && row.n) || 0;
+  } catch {
+    return 0;
+  }
 }
 
 /** Public feed only: isolated=0, newest first. */
-async function publicReceipts(env, limit) {
-  const n = Math.min(Math.max(Number(limit) || 24, 1), 100);
+async function publicReceipts(env, limit, offset) {
+  const n = Math.min(Math.max(Number(limit) || HOME_PRIOR_LIMIT, 1), 200);
+  const off = Math.max(Number(offset) || 0, 0);
   const res = await env.DB.prepare(
-    "SELECT id, created_utc, text_sha256, challenge_text, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256 FROM receipts WHERE isolated=0 ORDER BY created_utc DESC LIMIT ?"
-  ).bind(n).all();
+    "SELECT id, created_utc, text_sha256, challenge_text, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256 FROM receipts WHERE isolated=0 ORDER BY created_utc DESC LIMIT ? OFFSET ?"
+  ).bind(n, off).all();
   return res.results || [];
 }
 
@@ -238,10 +320,11 @@ async function getReceipt(env, id) {
 async function gatherStats(env, { wrote, visiting } = {}) {
   const score = await currentScore(env);
   const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
-  const [siteNodes, downloads, uses, meshSnap] = await Promise.all([
+  const [siteNodes, downloads, uses, receipts, meshSnap] = await Promise.all([
     liveNodes(env, { wrote, visiting }),
     fetchDownloads(env),
     usesCount(env),
+    receiptsCount(env),
     fetchMeshSnapshot(env, meshSnapshotDeps(env)),
   ]);
   const mesh = publicMesh(meshSnap);
@@ -257,6 +340,7 @@ async function gatherStats(env, { wrote, visiting } = {}) {
     views,
     uses,
     downloads,
+    receipts,
     current_score: score,
     residual: residualOf(score),
     presence_ttl_ms: PRESENCE_TTL_MS,
@@ -389,7 +473,7 @@ async function healthPayload(env, { wrote } = {}) {
     const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM receipts").first();
     const p = await env.DB.prepare("SELECT COUNT(*) AS n FROM receipts WHERE isolated=0").first();
     const l = await env.DB.prepare("SELECT COUNT(*) AS n FROM ledger").first();
-    extra.receipts = Number(r && r.n) || 0;
+    extra.receipts_all = Number(r && r.n) || 0;
     extra.public_receipts = Number(p && p.n) || 0;
     extra.ledger_entries = Number(l && l.n) || 0;
     extra.d1 = "ok";
@@ -407,8 +491,8 @@ async function healthPayload(env, { wrote } = {}) {
     limitation: hideInternalDetermination(BANNER),
     download: DOWNLOAD,
     github: GITHUB,
-    ...stats,
     ...extra,
+    ...stats,
   };
 }
 
@@ -562,6 +646,9 @@ export default {
           mesh_locked: stats.mesh && stats.mesh.enabled && stats.mesh.rollup ? stats.mesh.rollup.locked : 0,
           mesh_isolated: stats.mesh && stats.mesh.enabled && stats.mesh.rollup ? stats.mesh.rollup.isolated : 0,
           uses: stats.uses,
+          downloads: stats.downloads,
+          receipts: stats.receipts,
+          views: stats.views,
         }, 200, extraHeadersFor(nodeId));
       }
 
@@ -635,6 +722,38 @@ export default {
           });
         }
         return html(page("Verify", verifyBody({ report }), { path: "/verify", kind: "verify" }), {
+          extraHeaders: extraHeadersFor(nodeId),
+        });
+      }
+
+      if (path === RECEIPTS_PATH) {
+        const pageNo = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10) || 1);
+        const pageSize = RECEIPTS_PAGE_SIZE;
+        const total = await receiptsCount(env);
+        const rows = await publicReceipts(env, pageSize, (pageNo - 1) * pageSize);
+        const stats = await gatherStats(env, { wrote });
+        if (wantsJson(request, url)) {
+          return json({
+            ok: true,
+            product: "GodLock",
+            site: "godlock.uk",
+            author: AUTHOR,
+            path: RECEIPTS_PATH,
+            identity: AUTHOR,
+            total,
+            page: pageNo,
+            page_size: pageSize,
+            receipts: rows.map(publicPayload),
+            stats,
+          }, 200, extraHeadersFor(nodeId));
+        }
+        return html(page("Receipts", receiptsBody({
+          rows,
+          total,
+          page: pageNo,
+          pageSize,
+          stats,
+        }), { path: RECEIPTS_PATH, kind: "receipts" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }
@@ -772,8 +891,8 @@ export default {
           const row = await getReceipt(env, rid);
           if (row && !Number(row.isolated)) latest = row;
         }
-        const prior = await publicReceipts(env, 24);
-        const priorFiltered = latest ? prior.filter((p) => p.id !== latest.id) : prior;
+        const prior = await publicReceipts(env, HOME_PRIOR_LIMIT + (rid ? 1 : 0));
+        const priorFiltered = (latest ? prior.filter((p) => p.id !== latest.id) : prior).slice(0, HOME_PRIOR_LIMIT);
         const fetched = await fetchCatalogProducts(env);
         const extras = { version: fetched.version };
         if (wantsJson(request, url)) {

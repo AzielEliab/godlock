@@ -22,17 +22,18 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 
 ## Routes
 
-- `/` engine (one screen; Specified Fit steel claim on the spine). Rose-star brand mark top-left (same-origin `/sigil.png`). Not "everblooming sigil" wording.
+- `/` engine (one screen; Specified Fit steel claim on the spine). Rose-star brand mark top-left (same-origin `/sigil.png`). Not "everblooming sigil" wording. Homepage Prior receipts shows the last 5 only; Donate rails live on `/donate`, not as a homepage section.
 - `/sigil.png` same-origin rose-star brand mark (Aziel Eliab). Worker UI chrome only — Softwares stays GodLock-first, not a Digital Library clone.
 - `/reason` Specified Fit, Not Pretty Spirals (public brief); `/specified-fit` 308 here
 - `POST /submit` challenge (`text`); JSON unless `Accept: text/html` (then 303)
 - `POST /heartbeat` live-node ping; JSON includes `live_nodes`, `mesh`, and `uses` so the homepage can update
-- `GET /stats` JSON: `live_nodes`, `site_live_nodes`, `mesh`, `uses`, views, downloads, score (site counters; not the download-tracker)
-- `GET /count` JSON: `{ live_nodes, site_live_nodes, mesh_enabled, mesh_live_nodes, mesh_locked, mesh_isolated, uses }` (site presence + optional QNM rollup + ledger-backed Uses; not downloads)
+- `GET /stats` JSON: `live_nodes`, `site_live_nodes`, `mesh`, `uses`, views, downloads, `receipts` (public isolated=0 count), score. Downloads come from the download-tracker `/count` (service bind, then HTTPS, then shared KV) and never from views+uses.
+- `GET /count` JSON: `{ live_nodes, site_live_nodes, mesh_enabled, mesh_live_nodes, mesh_locked, mesh_isolated, uses, downloads, receipts, views }`
 - `GET /mesh` JSON snapshot of QNM-BUILD-1.0 suite mesh (`rollup.live|locked|isolated` counts only; read-only, on; empty/unavailable when runtime `/v1/mesh/*` is missing). Payload includes the **QNS-CD-1.0** hub cite / Worker mesh cross-map (`qns_cd`; photon QNS1 packet transfer; no public qnsd proxy)
 - `GET /v1/mesh` and `GET /v1/mesh/status` same-origin proxies (parity with azieleliab.com / corpus hubs) so Live Nodes clients that hit `/v1/mesh/status` work. GET never enables. Public surface stamps `mesh_default: "on"`. This Worker has no mesh-off / disable path.
 - `/verify` walk the ledger
-- `/donate` AZL-DONATE-1.0 door (static copy + rails; no KV; payment is not a key). Each rail is a solid black-on-white PNG `<img>` at `/donate/qr/{btc,eth,ltc,xrp,doge,sol,trx}.png`. Same door: https://www.azieleliab.com/donate
+- `/donate` AZL-DONATE-1.0 door (static copy + rails; no KV; payment is not a key). Not embedded on the Engine homepage. Each rail is a solid black-on-white PNG `<img>` at `/donate/qr/{btc,eth,ltc,xrp,doge,sol,trx}.png`. Same door: https://www.azieleliab.com/donate
+- `/receipts` public Receipts tab: full questions + hash-chained public receipt list (paginated). `/prior` 308 here. Isolated rows stay off the feed.
 - `/` homepage Softwares one-liner features GodLock, then Aziel Runtime and FragGate as suite doors (not a Digital Library name dump)
 - `/software` Softwares heading, then the listed cards only (no Runtime CTA or suite-blurb filler). GodLock is the first featured card. Framing is suite doors available from GodLock — not a Digital Library Softwares page. Aziel Runtime card cites live **2.0.0-rc1** and adds Try on Glama / Official Runtime / Source on GitHub (verified `AzielEliab/aziel-runtime` listing — no invented Glama id) / Documentation/Architecture → `docs/2.0`. SEO abstracts lead with the runtime crawler abstract. HTML renders from the packed / edge-cached catalog and does not wait on slow upstream or per-card `/count` fan-out. Live catalog refresh is `waitUntil`. Full live aziel-runtime catalog from `GET /v1/software` (fallback `GET /v1/fraggate/list`, then catalog.json / snapshot) plus Aziel Runtime (`aziel-runtime`), AZBrowser (Plain), AZNet (Plain, `aznet-download-tracker`), AZHub (Plain, `azhub-download-tracker`, Blank Key / AIH-WP-1.0), AZInterface (Plain, `azinterface-download-tracker`, custodial page cycles / AIH-WP-1.0), AZCoherence (Plain, `azcoherence-download-tracker`, peer AZ-CLCE, not AKM-TRIAD), and a dedicated FragGate Gate card (`fraggate-download-tracker` Download/Worker, not GitHub-only), A–Z with DecisionGATE. Never mash “runtime 1.6.x FragGate” in Software blurbs or meta. Service-bind `AZIEL_RUNTIME` first, then HTTPS origin / library, then a snapshot fallback so the page never goes empty. New catalog slugs are included automatically. Each card tethers Worker, GitHub, and `/runtime`. AZBrowser, AZNet, AZHub, AZInterface, and AZCoherence stay separate cards. Never nest Hub with Interface. Sorted Plain A–Z → Gate A–Z → Lock A–Z (Clock is not Lock).
 - `/v1/software` same-origin Softwares JSON (live catalog or local fallback list; includes `azcoherence`). Sister-hub shape: `products` plus compact `software` name list. Runtime proxy remains `/runtime/v1/software`
@@ -57,6 +58,10 @@ MCP / FragGate read mesh through the same-origin runtime proxy: `GET https://god
 anon-broadcast is a local communique style tool (text → TTS / desk reel / metadata-culled MP4 + SHA-256 receipt). **Not a publish path on godlock.uk.** Not hosted on this Worker. No ffmpeg farm. Identity Aziel Eliab only. Mesh is not an anonymity network.
 
 **Uses** = `COUNT(*)` of receipt-ledger rows with action `SUBMIT` or `ISOLATE`, floored by durable `metadata.uses` so a parent ledger wipe does not drop the counter. That is a real submission that went through `POST /submit` and was hash-chained. Heartbeats, page views, downloads, and `/runtime` API traffic do not increment Uses. Isolated submissions count because they are ledgered (`ISOLATE`). `SCORE` rows do not count. Application code never resets Views, Uses, downloads, or Live Nodes.
+
+**Receipts** = `COUNT(*)` of `receipts` where `isolated=0` — the same public set as Prior receipts and `/receipts`. Isolated archive rows are not counted on the public counter. Heartbeat writes `#stat-receipts` the same way as Views / Uses / Downloads.
+
+**Downloads** = download-tracker tally (`total` / `downloads` on `/count` or `/stats`). Read via `DOWNLOAD_TRACKER` service bind, then HTTPS, then the shared DOWNLOADS KV (`godlock|…` keys). Floored by `metadata.downloads_cache`. Never `views + uses`.
 
 Parent-only history wipe (D1 `receipts` + `ledger` only — never counter KV): see `docs/d1-receipt-wipe.md`.
 

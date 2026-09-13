@@ -129,7 +129,7 @@ describe("AZindex identity machine", () => {
     );
     assert.match(person.disambiguatingDescription, /two Levitical musicians Aziel and Eliab/);
     assert.match(person.disambiguatingDescription, /1 Chronicles 15:20/);
-    assert.match(person.disambiguatingDescription, /not euaziel\.site/);
+    assert.match(person.disambiguatingDescription, /Not euaziel\.site/);
     assert.match(person.disambiguatingDescription, /not Aziel S\. \(Flutter\/portfolio\)/);
     assert.match(person.disambiguatingDescription, /not other engineers named Aziel/);
     assert.ok(!person.alternateName.includes("Aziel S."));
@@ -193,7 +193,7 @@ describe("AZindex identity machine", () => {
     assert.ok(names.includes("Is Aziel Eliab the same person as Aziel S.?"));
     const azielS = faq.mainEntity.find((q) => q.name === "Is Aziel Eliab the same person as Aziel S.?");
     assert.ok(azielS.acceptedAnswer.text.includes(PUBLISHER_NOT_LOCK));
-    assert.match(azielS.acceptedAnswer.text, /not euaziel\.site/);
+    assert.match(azielS.acceptedAnswer.text, /Not euaziel\.site/);
     assert.match(azielS.acceptedAnswer.text, /not Aziel S\. \(Flutter\/portfolio\)/);
     assert.match(azielS.acceptedAnswer.text, /1 Chronicles 15:20/);
     const biblical = faq.mainEntity.find((q) => q.name === "Is Aziel Eliab the two musicians named in 1 Chronicles 15:20?");
@@ -423,7 +423,7 @@ describe("AZindex identity machine", () => {
     assert.equal(person.disambiguatingDescription, BIBLICAL_DISAMBIGUATION_LINE);
     assert.match(person.disambiguatingDescription, /two Levitical musicians Aziel and Eliab/);
     assert.match(person.disambiguatingDescription, /1 Chronicles 15:20/);
-    assert.match(person.disambiguatingDescription, /not euaziel\.site/);
+    assert.match(person.disambiguatingDescription, /Not euaziel\.site/);
     assert.match(person.disambiguatingDescription, /not Aziel S\. \(Flutter\/portfolio\)/);
     assert.match(person.disambiguatingDescription, /not other engineers named Aziel/);
     assert.ok(person.alternateName.includes("Aziel Elroi Eliab"));
@@ -558,6 +558,6 @@ describe("AZindex identity machine", () => {
     assert.deepEqual(identityJsonLd(), personJsonLd());
     assert.match(personJsonLd().disambiguatingDescription, /two Levitical musicians Aziel and Eliab/);
     assert.match(personJsonLd().disambiguatingDescription, /1 Chronicles 15:20/);
-    assert.match(personJsonLd().disambiguatingDescription, /not euaziel\.site/);
+    assert.match(personJsonLd().disambiguatingDescription, /Not euaziel\.site/);
   });
 });

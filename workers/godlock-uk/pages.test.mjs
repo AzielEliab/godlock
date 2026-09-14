@@ -544,6 +544,13 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.mesh_status_local, CANON_HOST + "/v1/mesh/status");
     assert.equal(cite.mesh_get_never_enables, true);
     assert.equal(cite.mesh_spec, "QNM-BUILD-1.0");
+    assert.equal(cite.mesh_law, "SPLIT THE WIRES");
+    assert.equal(cite.mesh_law_spec, "SPLIT-THE-WIRES-1.0");
+    assert.equal(cite.mesh_cold_copy, "COLD-COPY SURVIVAL");
+    assert.equal(cite.mesh_phoenix_brings_uk_back, false);
+    assert.equal(cite.mesh_live_sync, false);
+    assert.equal(cite.mesh_server_pull_erases_records, false);
+    assert.equal(cite.mesh_data_outlives_creators, true);
     assert.equal(cite.mesh_default, "on");
     assert.equal(cite.mesh_readonly, true);
     assert.equal(cite.mesh_default_off, undefined);
@@ -629,6 +636,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Mesh status: https:\/\/godlock\.uk\/runtime\/v1\/mesh\/status/);
     assert.match(llms, /Mesh nodes: https:\/\/godlock\.uk\/runtime\/v1\/mesh\/nodes/);
     assert.match(llms, /QNM-BUILD-1\.0 rollup: live\|locked\|isolated counts only/);
+    assert.match(llms, /SPLIT THE WIRES/);
+    assert.match(llms, /COLD-COPY SURVIVAL/);
+    assert.match(llms, /Die-with-pull does not bring godlock\.uk back/);
     assert.match(llms, /No Node Gate/);
     assert.match(llms, /No auto-heal/);
     assert.match(llms, /anon-broadcast is not a publish path on godlock\.uk/);
@@ -824,6 +834,9 @@ describe("homepage stays a natural argument surface", () => {
     assert.match(html, /class="scorebox"/);
     assert.match(html, /id="mesh-status"/);
     assert.match(html, /Suite mesh: on \(read-only suite presence\)/);
+    assert.match(html, /SPLIT THE WIRES/);
+    assert.match(html, /COLD-COPY SURVIVAL/);
+    assert.match(html, /die-with-pull does not bring godlock\.uk back/);
     assert.doesNotMatch(html, /Suite mesh: off/);
     assert.match(html, /QNM-BUILD-1\.0/);
     assert.doesNotMatch(html, /id="node-gate"/);

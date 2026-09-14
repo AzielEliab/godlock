@@ -3,6 +3,8 @@
  * One input. Locked protocol. Append-only hash-chained receipts.
  * Not a forum, not a tunnel. Suite mesh is QNM-BUILD-1.0 (read-only, on):
  * live|locked|isolated counts only. No Node Gate. No auto-heal.
+ * SPLIT THE WIRES + COLD-COPY SURVIVAL bind refuse/status even when mesh
+ * is unavailable. Phoenix is local only — die-with-pull does not bring .uk back.
  * Not an anonymity network. Author: Aziel Eliab.
  */
 import { randomBytes } from "node:crypto";

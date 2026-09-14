@@ -38,6 +38,22 @@ import {
   meshDisableRefused,
   hubMeshStatusDoc,
   ORIGIN_MESH_READ_PATHS,
+  SPLIT_THE_WIRES,
+  SPLIT_THE_WIRES_SPEC,
+  SPLIT_THE_WIRES_LAW,
+  COLD_COPY_SURVIVAL,
+  COLD_COPY_SURVIVAL_SPEC,
+  COLD_COPY_SURVIVAL_LAW,
+  TIP_TICK_MIN_MS,
+  TIP_TICK_MAX_MS,
+  PAYLOAD_DWELL_S,
+  evaluateSplitTheWires,
+  evaluateColdCopySurvival,
+  evaluateMeshLaw,
+  phoenixBringsUkRefused,
+  liveSyncRefused,
+  serverPullEraseRefused,
+  stampMeshLaw,
 } from "./src/mesh.js";
 import { destFromRuntimePath } from "./src/runtimeRoot.js";
 import { AUTHOR } from "./src/seo.js";
@@ -78,6 +94,9 @@ describe("mesh contract", () => {
     assert.match(MESH_NOTE, /QNS-CD-1\.0/);
     assert.match(MESH_NOTE, /photon QNS1 packet transfer/);
     assert.match(MESH_NOTE, /read-only suite presence/);
+    assert.match(MESH_NOTE, /SPLIT THE WIRES/);
+    assert.match(MESH_NOTE, /COLD-COPY SURVIVAL/);
+    assert.match(MESH_NOTE, /die-with-pull does not bring godlock\.uk back/);
     assert.doesNotMatch(MESH_NOTE, /default off/i);
     assert.equal(MESH_DEFAULT, "on");
     assert.equal(MESH_DEFAULT_OFF, false);
@@ -101,6 +120,12 @@ describe("mesh contract", () => {
     assert.equal(originMeshWriteRefused().default_off, false);
     assert.equal(meshDisableRefused().code, "MESH-NO-DISABLE");
     assert.equal(meshDisableRefused().mesh_default, "on");
+    assert.equal(meshDisableRefused().law, SPLIT_THE_WIRES);
+    assert.equal(meshDisableRefused().cold_copy_survival, COLD_COPY_SURVIVAL);
+    assert.equal(meshDisableRefused().phoenix_brings_uk_back, false);
+    assert.match(meshDisableRefused().note, /COLD-COPY SURVIVAL/);
+    assert.equal(originMeshWriteRefused().law, SPLIT_THE_WIRES);
+    assert.equal(originMeshWriteRefused().live_sync, false);
     assert.equal(MESH_NODES_PATH, "/v1/mesh/nodes");
     assert.equal(MESH_LIST_PATH, "/v1/mesh/nodes");
     assert.equal(MESH_JOIN_PATH, "/v1/mesh/join");
@@ -264,7 +289,12 @@ describe("publicMesh and status line", () => {
     assert.equal(pub.list, "https://godlock.uk/runtime/v1/mesh/nodes");
     assert.equal(pub.leave, "https://godlock.uk/runtime/v1/mesh/leave");
     assert.match(meshStatusLine(pub), /Suite mesh: on · live 2 · locked 0 · isolated 0/);
+    assert.match(meshStatusLine(pub), /SPLIT THE WIRES/);
+    assert.match(meshStatusLine(pub), /COLD-COPY SURVIVAL/);
     assert.match(meshStatusLine(emptyMesh()), /Suite mesh: on \(read-only suite presence\)/);
+    assert.match(meshStatusLine(emptyMesh()), /SPLIT THE WIRES/);
+    assert.match(meshStatusLine(emptyMesh()), /COLD-COPY SURVIVAL/);
+    assert.match(meshStatusLine(emptyMesh()), /die-with-pull does not bring godlock\.uk back/);
     assert.doesNotMatch(meshStatusLine(emptyMesh()), /\boff\b/);
     assert.match(meshStatusLine(emptyMesh({ status: "unavailable" })), /unavailable/);
     const stamped = alignPublicMeshSurface({
@@ -527,6 +557,8 @@ describe("GodLock.uk mesh routes", () => {
     const html = await stats.text();
     assert.match(html, /id="stat-live-nodes">0</);
     assert.match(html, /Suite mesh: on · live 0 · locked 2 · isolated 1/);
+    assert.match(html, /SPLIT THE WIRES/);
+    assert.match(html, /COLD-COPY SURVIVAL/);
     assert.doesNotMatch(html, /id="node-gate"/);
     assert.doesNotMatch(html, /href="\/node-gate"/);
     const count = await (await worker.fetch(new Request("https://godlock.uk/count"), env)).json();
@@ -551,6 +583,8 @@ describe("GodLock.uk mesh routes", () => {
     const html = await (await worker.fetch(new Request("https://godlock.uk/"), env)).text();
     assert.match(html, /id="mesh-status"/);
     assert.match(html, /Suite mesh: on \(read-only suite presence\)/);
+    assert.match(html, /SPLIT THE WIRES/);
+    assert.match(html, /COLD-COPY SURVIVAL/);
     assert.doesNotMatch(html, /Suite mesh: off/);
     assert.match(html, /QNM-BUILD-1\.0/);
     assert.match(html, /QNS-CD-1\.0/);
@@ -667,5 +701,102 @@ describe("GodLock.uk origin /v1/mesh proxies", () => {
     assert.equal(fallback.enabled, false);
     assert.equal(fallback.get_never_enables, true);
     assert.equal(fallback.live_nodes, 0);
+    assert.equal(fallback.law, SPLIT_THE_WIRES);
+    assert.equal(fallback.cold_copy_survival, COLD_COPY_SURVIVAL);
+    assert.equal(fallback.phoenix_brings_uk_back, false);
+    assert.equal(status.law, SPLIT_THE_WIRES);
+    assert.equal(status.cold_copy_survival, COLD_COPY_SURVIVAL);
+    assert.match(status.note, /COLD-COPY SURVIVAL/);
+  });
+});
+
+describe("SPLIT THE WIRES + COLD-COPY SURVIVAL mesh law", () => {
+  it("locks tip/payload split, Phoenix local, and cold-copy survival", () => {
+    assert.equal(SPLIT_THE_WIRES, "SPLIT THE WIRES");
+    assert.equal(SPLIT_THE_WIRES_SPEC, "SPLIT-THE-WIRES-1.0");
+    assert.equal(COLD_COPY_SURVIVAL, "COLD-COPY SURVIVAL");
+    assert.equal(COLD_COPY_SURVIVAL_SPEC, "COLD-COPY-SURVIVAL-1.0");
+    assert.equal(TIP_TICK_MIN_MS, 500);
+    assert.equal(TIP_TICK_MAX_MS, 1000);
+    assert.equal(PAYLOAD_DWELL_S, 777);
+    assert.equal(SPLIT_THE_WIRES_LAW.sockets_share, false);
+    assert.equal(SPLIT_THE_WIRES_LAW.phoenix.scope, "local");
+    assert.equal(SPLIT_THE_WIRES_LAW.phoenix.brings_uk_back, false);
+    assert.equal(SPLIT_THE_WIRES_LAW.phoenix.die_with_pull, true);
+    assert.equal(SPLIT_THE_WIRES_LAW.payload.kind, "pull-only");
+    assert.equal(SPLIT_THE_WIRES_LAW.payload.update, "proof-not-timer");
+    assert.equal(SPLIT_THE_WIRES_LAW.equivocation, "ends-peer-not-chain");
+    assert.equal(SPLIT_THE_WIRES_LAW.emit_last, "locally");
+    assert.equal(SPLIT_THE_WIRES_LAW.partition, "no-auto-splice");
+    assert.equal(SPLIT_THE_WIRES_LAW.heartbeat_loss, "not-poison");
+    assert.equal(COLD_COPY_SURVIVAL_LAW.copies, "multiply");
+    assert.equal(COLD_COPY_SURVIVAL_LAW.live_sync, false);
+    assert.equal(COLD_COPY_SURVIVAL_LAW.tip_erase, "expensive");
+    assert.equal(COLD_COPY_SURVIVAL_LAW.server_pull_erases_records, false);
+    assert.equal(COLD_COPY_SURVIVAL_LAW.data_outlives_creators, true);
+    assert.equal(SPLIT_THE_WIRES_LAW.author, AUTHOR);
+    assert.equal(COLD_COPY_SURVIVAL_LAW.identity, AUTHOR);
+  });
+
+  it("refuses shared sockets, timer updates, Phoenix .uk restore, and live sync", () => {
+    assert.equal(evaluateSplitTheWires({ shares_socket: true }).code, "STW-SHARED-SOCKET");
+    assert.equal(evaluateSplitTheWires({ socket_1s: "same", socket_777s: "same" }).code, "STW-SHARED-SOCKET");
+    assert.equal(evaluateSplitTheWires({ plane: "tip", tick_ms: 50 }).code, "STW-TIP-TICK");
+    assert.equal(evaluateSplitTheWires({ plane: "tip", size: "variable" }).code, "STW-TIP-NOT-FIXED");
+    assert.equal(evaluateSplitTheWires({ plane: "payload", push: true }).code, "STW-PUSH-PAYLOAD");
+    assert.equal(evaluateSplitTheWires({ plane: "payload", update: "timer" }).code, "STW-TIMER-UPDATE");
+    assert.equal(evaluateSplitTheWires({ plane: "payload", cite_prev: false }).code, "STW-CITE-FAIL-CLOSED");
+    assert.equal(evaluateSplitTheWires({ plane: "payload", clock_desync: "yes" }).code, "STW-CLOCK-DESYNC");
+    assert.equal(evaluateSplitTheWires({ plane: "payload", ambiguous: true }).code, "STW-AMBIGUOUS-ISOLATE");
+    assert.equal(evaluateSplitTheWires({ equivocation: true, ends: "chain" }).code, "STW-EQUIVOCATION-CHAIN");
+    assert.equal(evaluateSplitTheWires({ emit_last: "remote" }).code, "STW-EMIT-LAST-REMOTE");
+    assert.equal(evaluateSplitTheWires({ bring_uk_back: true }).code, "STW-PHOENIX-UK");
+    assert.equal(evaluateSplitTheWires({ auto_splice: true }).code, "STW-AUTO-SPLICE");
+    assert.equal(evaluateSplitTheWires({ heartbeat_loss: true, poison: true }).code, "STW-LOSS-IS-POISON");
+    assert.equal(evaluateSplitTheWires({ heartbeat_loss: true, apply_last_packet: true }).code, "STW-APPLY-LAST-PACKET");
+    assert.equal(phoenixBringsUkRefused().code, "STW-PHOENIX-UK");
+    assert.equal(phoenixBringsUkRefused().phoenix_brings_uk_back, false);
+    assert.match(phoenixBringsUkRefused().error, /does not bring godlock\.uk back/);
+    assert.equal(evaluateColdCopySurvival({ live_sync: true }).code, "CCS-LIVE-SYNC");
+    assert.equal(evaluateColdCopySurvival({ single_live_copy: true }).code, "CCS-NO-MULTIPLY");
+    assert.equal(evaluateColdCopySurvival({ erase_tip: true }).code, "CCS-ERASE-TIP");
+    assert.equal(evaluateColdCopySurvival({ server_pull: true, erase_records: true }).code, "CCS-PULL-ERASES");
+    assert.equal(evaluateColdCopySurvival({ creator_gone: true, erase_data: true }).code, "CCS-CREATOR-DEATH-ERASE");
+    assert.equal(liveSyncRefused().code, "CCS-LIVE-SYNC");
+    assert.equal(serverPullEraseRefused().code, "CCS-PULL-ERASES");
+    assert.equal(evaluateMeshLaw({ live_sync: true }).code, "CCS-LIVE-SYNC");
+    assert.equal(evaluateMeshLaw({ bring_uk_back: true }).code, "STW-PHOENIX-UK");
+    const ok = evaluateMeshLaw({
+      plane: "tip",
+      tick_ms: 750,
+      carry: "presence+tip-hash",
+      size: "fixed",
+      emit_last: "locally",
+    });
+    assert.equal(ok.ok, true);
+    assert.equal(ok.law, SPLIT_THE_WIRES);
+    assert.equal(ok.cold_copy_survival, COLD_COPY_SURVIVAL);
+  });
+
+  it("stamps both laws on refuse/status even when mesh rollup is unavailable", () => {
+    const empty = emptyMesh();
+    assert.equal(empty.enabled, false);
+    assert.equal(empty.law, SPLIT_THE_WIRES);
+    assert.equal(empty.cold_copy_survival, COLD_COPY_SURVIVAL);
+    assert.equal(empty.phoenix_brings_uk_back, false);
+    assert.equal(empty.live_sync, false);
+    assert.equal(empty.law_binds_when_off, true);
+    assert.match(empty.note, /Cold copies multiply/);
+    const pub = publicMesh(empty);
+    assert.equal(pub.law, SPLIT_THE_WIRES);
+    assert.equal(pub.cold_copy.copies, "multiply");
+    assert.equal(pub.split_the_wires.phoenix.brings_uk_back, false);
+    const stamped = stampMeshLaw({ ok: true, note: "rollup missing" });
+    assert.match(stamped.note, /SPLIT THE WIRES/);
+    assert.match(stamped.note, /COLD-COPY SURVIVAL/);
+    const ops = meshOpsDoc();
+    assert.equal(ops.phoenix_brings_uk_back, false);
+    assert.equal(ops.server_pull_erases_records, false);
+    assert.equal(ops.data_outlives_creators, true);
   });
 });

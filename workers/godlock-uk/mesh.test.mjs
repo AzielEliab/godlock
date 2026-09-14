@@ -54,6 +54,16 @@ import {
   liveSyncRefused,
   serverPullEraseRefused,
   stampMeshLaw,
+  REHEAL,
+  REHEAL_SPEC,
+  REHEAL_LAW,
+  REHEAL_ALLOWED,
+  REHEAL_FORBIDDEN,
+  REHEAL_ACTION,
+  evaluateReheal,
+  rehealRefused,
+  isMeshRehealPath,
+  MESH_REHEAL_PATH,
 } from "./src/mesh.js";
 import { destFromRuntimePath } from "./src/runtimeRoot.js";
 import { AUTHOR } from "./src/seo.js";
@@ -96,6 +106,8 @@ describe("mesh contract", () => {
     assert.match(MESH_NOTE, /read-only suite presence/);
     assert.match(MESH_NOTE, /SPLIT THE WIRES/);
     assert.match(MESH_NOTE, /COLD-COPY SURVIVAL/);
+    assert.match(MESH_NOTE, /REHEAL refuse/);
+    assert.match(MESH_NOTE, /No neighbor talk-back-to-health/);
     assert.match(MESH_NOTE, /die-with-pull does not bring godlock\.uk back/);
     assert.doesNotMatch(MESH_NOTE, /default off/i);
     assert.equal(MESH_DEFAULT, "on");
@@ -114,6 +126,10 @@ describe("mesh contract", () => {
     assert.equal(isOriginMeshReadPath("/v1/mesh/enable"), false);
     assert.equal(isMeshDisablePath("/v1/mesh/disable"), true);
     assert.equal(isMeshDisablePath("/runtime/v1/mesh/disable"), true);
+    assert.equal(MESH_REHEAL_PATH, "/v1/mesh/reheal");
+    assert.equal(isMeshRehealPath("/v1/mesh/reheal"), true);
+    assert.equal(isMeshRehealPath("/runtime/v1/mesh/reheal"), true);
+    assert.equal(isMeshRehealPath("/v1/mesh/status"), false);
     assert.equal(originMeshWriteRefused().get_never_enables, true);
     assert.equal(originMeshWriteRefused().enabled, false);
     assert.equal(originMeshWriteRefused().mesh_default, "on");
@@ -122,8 +138,11 @@ describe("mesh contract", () => {
     assert.equal(meshDisableRefused().mesh_default, "on");
     assert.equal(meshDisableRefused().law, SPLIT_THE_WIRES);
     assert.equal(meshDisableRefused().cold_copy_survival, COLD_COPY_SURVIVAL);
+    assert.equal(meshDisableRefused().reheal, REHEAL);
+    assert.equal(meshDisableRefused().neighbor_talkback, false);
     assert.equal(meshDisableRefused().phoenix_brings_uk_back, false);
     assert.match(meshDisableRefused().note, /COLD-COPY SURVIVAL/);
+    assert.match(meshDisableRefused().note, /REHEAL refuse/);
     assert.equal(originMeshWriteRefused().law, SPLIT_THE_WIRES);
     assert.equal(originMeshWriteRefused().live_sync, false);
     assert.equal(MESH_NODES_PATH, "/v1/mesh/nodes");
@@ -291,9 +310,11 @@ describe("publicMesh and status line", () => {
     assert.match(meshStatusLine(pub), /Suite mesh: on · live 2 · locked 0 · isolated 0/);
     assert.match(meshStatusLine(pub), /SPLIT THE WIRES/);
     assert.match(meshStatusLine(pub), /COLD-COPY SURVIVAL/);
+    assert.match(meshStatusLine(pub), /REHEAL refuse/);
     assert.match(meshStatusLine(emptyMesh()), /Suite mesh: on \(read-only suite presence\)/);
     assert.match(meshStatusLine(emptyMesh()), /SPLIT THE WIRES/);
     assert.match(meshStatusLine(emptyMesh()), /COLD-COPY SURVIVAL/);
+    assert.match(meshStatusLine(emptyMesh()), /REHEAL refuse/);
     assert.match(meshStatusLine(emptyMesh()), /die-with-pull does not bring godlock\.uk back/);
     assert.doesNotMatch(meshStatusLine(emptyMesh()), /\boff\b/);
     assert.match(meshStatusLine(emptyMesh({ status: "unavailable" })), /unavailable/);
@@ -559,6 +580,7 @@ describe("GodLock.uk mesh routes", () => {
     assert.match(html, /Suite mesh: on · live 0 · locked 2 · isolated 1/);
     assert.match(html, /SPLIT THE WIRES/);
     assert.match(html, /COLD-COPY SURVIVAL/);
+    assert.match(html, /REHEAL refuse/);
     assert.doesNotMatch(html, /id="node-gate"/);
     assert.doesNotMatch(html, /href="\/node-gate"/);
     const count = await (await worker.fetch(new Request("https://godlock.uk/count"), env)).json();
@@ -585,6 +607,8 @@ describe("GodLock.uk mesh routes", () => {
     assert.match(html, /Suite mesh: on \(read-only suite presence\)/);
     assert.match(html, /SPLIT THE WIRES/);
     assert.match(html, /COLD-COPY SURVIVAL/);
+    assert.match(html, /REHEAL refuse/);
+    assert.match(html, /No neighbor talk-back-to-health/);
     assert.doesNotMatch(html, /Suite mesh: off/);
     assert.match(html, /QNM-BUILD-1\.0/);
     assert.match(html, /QNS-CD-1\.0/);
@@ -676,6 +700,21 @@ describe("GodLock.uk origin /v1/mesh proxies", () => {
     assert.equal(runtimeDisable.status, 405);
     const runtimeRefused = await runtimeDisable.json();
     assert.equal(runtimeRefused.code, "MESH-NO-DISABLE");
+
+    const reheal = await worker.fetch(new Request("https://godlock.uk/v1/mesh/reheal", { method: "POST" }), env);
+    assert.equal(reheal.status, 405);
+    const rehealBody = await reheal.json();
+    assert.equal(rehealBody.code, "RH-NEIGHBOR-TALKBACK");
+    assert.equal(rehealBody.reheal, REHEAL);
+    assert.equal(rehealBody.neighbor_talkback, false);
+    assert.deepEqual(rehealBody.forbidden, ["bodies", "diffs", "vote-to-fix"]);
+    assert.match(rehealBody.error, /No neighbor talk-back-to-health/);
+    assert.match(rehealBody.note, /Softwares stays Runtime-only/);
+
+    const runtimeReheal = await worker.fetch(new Request("https://godlock.uk/runtime/v1/mesh/reheal", { method: "POST" }), env);
+    assert.equal(runtimeReheal.status, 405);
+    const runtimeRehealBody = await runtimeReheal.json();
+    assert.equal(runtimeRehealBody.code, "RH-NEIGHBOR-TALKBACK");
   });
 
   it("falls back to a read-only ON hub snapshot when the runtime proxy is down", async () => {
@@ -703,10 +742,13 @@ describe("GodLock.uk origin /v1/mesh proxies", () => {
     assert.equal(fallback.live_nodes, 0);
     assert.equal(fallback.law, SPLIT_THE_WIRES);
     assert.equal(fallback.cold_copy_survival, COLD_COPY_SURVIVAL);
+    assert.equal(fallback.reheal, REHEAL);
     assert.equal(fallback.phoenix_brings_uk_back, false);
     assert.equal(status.law, SPLIT_THE_WIRES);
     assert.equal(status.cold_copy_survival, COLD_COPY_SURVIVAL);
+    assert.equal(status.reheal, REHEAL);
     assert.match(status.note, /COLD-COPY SURVIVAL/);
+    assert.match(status.note, /REHEAL refuse/);
   });
 });
 
@@ -736,6 +778,16 @@ describe("SPLIT THE WIRES + COLD-COPY SURVIVAL mesh law", () => {
     assert.equal(COLD_COPY_SURVIVAL_LAW.data_outlives_creators, true);
     assert.equal(SPLIT_THE_WIRES_LAW.author, AUTHOR);
     assert.equal(COLD_COPY_SURVIVAL_LAW.identity, AUTHOR);
+    assert.equal(REHEAL, "REHEAL");
+    assert.equal(REHEAL_SPEC, "REHEAL-1.0");
+    assert.deepEqual(REHEAL_ALLOWED, ["live", "locked", "isolated", "tip-hash"]);
+    assert.deepEqual(REHEAL_FORBIDDEN, ["bodies", "diffs", "vote-to-fix"]);
+    assert.equal(REHEAL_ACTION, "isolate+drop-tether+local-phoenix");
+    assert.equal(REHEAL_LAW.poisoned.recover, "own-last-good-tip+verified-trusted-pull");
+    assert.equal(REHEAL_LAW.poisoned.or, "phoenix-WAIT");
+    assert.equal(REHEAL_LAW.poisoned.neighbor_talkback, false);
+    assert.equal(REHEAL_LAW.softwares, "runtime-only");
+    assert.equal(REHEAL_LAW.author, AUTHOR);
   });
 
   it("refuses shared sockets, timer updates, Phoenix .uk restore, and live sync", () => {
@@ -766,6 +818,33 @@ describe("SPLIT THE WIRES + COLD-COPY SURVIVAL mesh law", () => {
     assert.equal(serverPullEraseRefused().code, "CCS-PULL-ERASES");
     assert.equal(evaluateMeshLaw({ live_sync: true }).code, "CCS-LIVE-SYNC");
     assert.equal(evaluateMeshLaw({ bring_uk_back: true }).code, "STW-PHOENIX-UK");
+    assert.equal(evaluateReheal({ neighbor_talkback: true }).code, "RH-NEIGHBOR-TALKBACK");
+    assert.equal(evaluateReheal({ talk_back_to_health: true }).code, "RH-NEIGHBOR-TALKBACK");
+    assert.equal(evaluateReheal({ bodies: true }).code, "RH-BODIES");
+    assert.equal(evaluateReheal({ diffs: true }).code, "RH-DIFFS");
+    assert.equal(evaluateReheal({ vote_to_fix: true }).code, "RH-VOTE-TO-FIX");
+    assert.equal(evaluateReheal({ share: ["bodies"] }).code, "RH-BODIES");
+    assert.equal(evaluateReheal({ share: ["live", "locked", "isolated", "tip-hash", "payload"] }).code, "RH-FORBIDDEN-SHARE");
+    assert.equal(evaluateReheal({ poisoned: true }).code, "RH-NO-OWN-TIP");
+    assert.equal(evaluateReheal({ poisoned: true, keep_tether: true, own_last_good_tip: true, verified_trusted_pull: true }).code, "RH-KEEP-TETHER");
+    assert.equal(evaluateReheal({ poisoned: true, isolate: false, own_last_good_tip: true, verified_trusted_pull: true }).code, "RH-NO-ISOLATE");
+    assert.equal(evaluateReheal({ poisoned: true, phoenix: "remote", own_last_good_tip: true, verified_trusted_pull: true }).code, "RH-REMOTE-PHOENIX");
+    assert.equal(evaluateReheal({ softwares_tab: true }).code, "RH-SOFTWARES-RUNTIME-ONLY");
+    assert.equal(rehealRefused().code, "RH-NEIGHBOR-TALKBACK");
+    assert.equal(rehealRefused().neighbor_talkback, false);
+    assert.match(rehealRefused().error, /phoenix-WAIT/);
+    assert.equal(evaluateMeshLaw({ neighbor_talkback: true }).code, "RH-NEIGHBOR-TALKBACK");
+    assert.equal(evaluateReheal({
+      poisoned: true,
+      own_last_good_tip: true,
+      verified_trusted_pull: true,
+      share: ["live", "locked", "isolated", "tip-hash"],
+    }).ok, true);
+    assert.equal(evaluateReheal({
+      poisoned: true,
+      phoenix_wait: true,
+      share: ["tip-hash"],
+    }).ok, true);
     const ok = evaluateMeshLaw({
       plane: "tip",
       tick_ms: 750,
@@ -785,18 +864,27 @@ describe("SPLIT THE WIRES + COLD-COPY SURVIVAL mesh law", () => {
     assert.equal(empty.cold_copy_survival, COLD_COPY_SURVIVAL);
     assert.equal(empty.phoenix_brings_uk_back, false);
     assert.equal(empty.live_sync, false);
+    assert.equal(empty.reheal, REHEAL);
+    assert.equal(empty.neighbor_talkback, false);
+    assert.equal(empty.softwares_runtime_only, true);
     assert.equal(empty.law_binds_when_off, true);
     assert.match(empty.note, /Cold copies multiply/);
+    assert.match(empty.note, /No neighbor talk-back-to-health/);
     const pub = publicMesh(empty);
     assert.equal(pub.law, SPLIT_THE_WIRES);
     assert.equal(pub.cold_copy.copies, "multiply");
     assert.equal(pub.split_the_wires.phoenix.brings_uk_back, false);
+    assert.equal(pub.reheal, REHEAL);
+    assert.deepEqual(pub.reheal_forbidden, ["bodies", "diffs", "vote-to-fix"]);
     const stamped = stampMeshLaw({ ok: true, note: "rollup missing" });
     assert.match(stamped.note, /SPLIT THE WIRES/);
     assert.match(stamped.note, /COLD-COPY SURVIVAL/);
+    assert.match(stamped.note, /REHEAL refuse/);
     const ops = meshOpsDoc();
     assert.equal(ops.phoenix_brings_uk_back, false);
     assert.equal(ops.server_pull_erases_records, false);
     assert.equal(ops.data_outlives_creators, true);
+    assert.equal(ops.reheal, REHEAL);
+    assert.equal(ops.softwares_runtime_only, true);
   });
 });

@@ -36,6 +36,11 @@ export const CODEBERG_TIP_PACK_URL = "https://codeberg.org/AzielEliab/aziel-lock
 export const ARCHIVE_ORG_TIP_PACK_URL = "https://archive.org/details/aziel-lockset-tip";
 export const ARCHIVE_ORG_ITEM = "aziel-lockset-tip";
 export const ARCHIVE_ORG_DOWNLOAD = "https://archive.org/download/aziel-lockset-tip/";
+export const ARCHIVE_ORG_TIP_PACK_202609_URL = "https://archive.org/details/aziel-lockset-tip_202609";
+export const ARCHIVE_ORG_ITEM_202609 = "aziel-lockset-tip_202609";
+export const ARCHIVE_ORG_DOWNLOAD_202609 = "https://archive.org/download/aziel-lockset-tip_202609/";
+export const ARCHIVE_ORG_ZIP_202609 = "https://archive.org/download/aziel-lockset-tip_202609/aziel-lockset-tip.zip";
+export const ARCHIVE_ORG_ZIP_ALT_202609 = "https://archive.org/download/aziel-lockset-tip_202609/aziel-lockset-tip%202.zip";
 export const FRAMAGIT_TIP_PACK_URL = null;
 export const PLANE_B_WORKING_TARGETS = Object.freeze(["codeberg", "archive.org", "framagit"]);
 export const PLANE_B_ALL_TARGETS = "CNS-PLANE-B-ALL-TARGETS";
@@ -53,6 +58,7 @@ export const PLANE_B_SLOT_IDS = Object.freeze([
   "plane-b-alt-forge-archive",
   "plane-b-codeberg-tip-pack",
   "plane-b-archive-org-tip-pack",
+  "plane-b-archive-org-tip-pack-202609",
   "plane-b-framagit-tip-pack",
 ]);
 export const PLANE_B_REFUSED_IDS = Object.freeze([
@@ -61,7 +67,7 @@ export const PLANE_B_REFUSED_IDS = Object.freeze([
   "plane-b-zenodo-tip-pack",
 ]);
 export const PLANE_B_NOTE =
-  "Codeberg + archive.org hash-verify PASS (still SLOT). Framagit URL null until verified. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS). GitFlic refused CNS-GITFLIC-EMAIL. GitLab refused CNS-GITLAB-CF-LOOP. Zenodo refused CNS-ZENODO-IP-BAN.";
+  "Codeberg + archive.org hash-verify PASS (still SLOT). archive.org has two items (aziel-lockset-tip + aziel-lockset-tip_202609), same blast_radius — not a second independent shelf. Zip wrap on the 202609 item: flat IA sha256 on the zip may be null; inner aziel-tip-pack.tar hash-verifies. Framagit URL null until verified. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS). GitFlic refused CNS-GITFLIC-EMAIL. GitLab refused CNS-GITLAB-CF-LOOP. Zenodo refused CNS-ZENODO-IP-BAN.";
 export const COLD_MULTI_SHELF_RULE =
   "Planes A/B/C: A=one CF/GitHub tunnel (5 surfaces / 2 family radii, not 5 shelves); B=alt independent forge/archive tip-pack SLOT; C=USB airgap SLOT. Survival = bytes↔hash. LIVE only after hash verify.";
 
@@ -128,6 +134,9 @@ export const PLANES = Object.freeze({
     codeberg_tip_pack: CODEBERG_TIP_PACK,
     codeberg_url: CODEBERG_TIP_PACK_URL,
     archive_org_url: ARCHIVE_ORG_TIP_PACK_URL,
+    archive_org_secondary_url: ARCHIVE_ORG_TIP_PACK_202609_URL,
+    archive_org_secondary_item: ARCHIVE_ORG_ITEM_202609,
+    archive_org_items: [ARCHIVE_ORG_ITEM, ARCHIVE_ORG_ITEM_202609],
     archive_org_hash_verify: "pass",
     framagit_url: FRAMAGIT_TIP_PACK_URL,
     hash_verify: "pass",
@@ -144,6 +153,27 @@ export const PLANES = Object.freeze({
     note: "Plane C USB stays SLOT until CNS-OPERATOR-ATTEST.",
   },
 });
+
+function archiveOrgSecondaryCite() {
+  return {
+    id: "plane-b-archive-org-tip-pack-202609",
+    url: ARCHIVE_ORG_TIP_PACK_202609_URL,
+    identifier: ARCHIVE_ORG_ITEM_202609,
+    item: ARCHIVE_ORG_ITEM_202609,
+    download_base: ARCHIVE_ORG_DOWNLOAD_202609,
+    zip: ARCHIVE_ORG_ZIP_202609,
+    zip_alt: ARCHIVE_ORG_ZIP_ALT_202609,
+    wrap: "zip",
+    ia_flat_sha256: null,
+    sha256sums_flat_check: "incomplete",
+    inner_pack: "aziel-tip-pack.tar",
+    pack_sha256: CODEBERG_TIP_PACK,
+    lockset_tip: LOCKSET_TIP,
+    hash_verify: "pass",
+    same_blast_radius: "archive-org",
+    independent_shelf: false,
+  };
+}
 
 function planeAHost(id, origin, verified) {
   return {
@@ -328,7 +358,7 @@ export function shelvesDoc() {
           lockset_doi: false,
           working_targets: PLANE_B_WORKING_TARGETS.slice(),
           refuse: "CNS-NO-FORGE-MIRROR",
-          note: "Not Zenodo. Not GitFlic (CNS-GITFLIC-EMAIL). Not GitLab (CNS-GITLAB-CF-LOOP). Codeberg + archive.org PASS; Framagit URL null. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS).",
+          note: "Not Zenodo. Not GitFlic (CNS-GITFLIC-EMAIL). Not GitLab (CNS-GITLAB-CF-LOOP). Codeberg + archive.org PASS (two IA items, one working_targets kind); Framagit URL null. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS).",
         },
         {
           id: "plane-b-codeberg-tip-pack",
@@ -370,8 +400,40 @@ export function shelvesDoc() {
           blast_radius: "archive-org",
           independent: true,
           lockset_shelf: true,
+          secondary_items: [archiveOrgSecondaryCite()],
           refuse: PLANE_B_ALL_TARGETS,
-          reason: "archive.org tip-pack uploaded and hash-verify PASS at https://archive.org/details/aziel-lockset-tip (pack " + CODEBERG_TIP_PACK + "). SLOT until Framagit also hash-verify. Plane B LIVE only when Codeberg + archive.org + Framagit all pass (CNS-PLANE-B-ALL-TARGETS). doi null.",
+          reason: "archive.org tip-pack uploaded and hash-verify PASS at https://archive.org/details/aziel-lockset-tip (pack " + CODEBERG_TIP_PACK + "). A second IA item (aziel-lockset-tip_202609) is the same blast_radius archive-org, listed under secondary_items — not a new independent shelf. SLOT until Framagit also hash-verify. Plane B LIVE only when Codeberg + archive.org + Framagit all pass (CNS-PLANE-B-ALL-TARGETS). doi null.",
+        },
+        {
+          id: "plane-b-archive-org-tip-pack-202609",
+          plane: "B",
+          kind: "archive_org",
+          status: "slot",
+          url: ARCHIVE_ORG_TIP_PACK_202609_URL,
+          identifier: ARCHIVE_ORG_ITEM_202609,
+          item: ARCHIVE_ORG_ITEM_202609,
+          download_base: ARCHIVE_ORG_DOWNLOAD_202609,
+          zip: ARCHIVE_ORG_ZIP_202609,
+          zip_alt: ARCHIVE_ORG_ZIP_ALT_202609,
+          wrap: "zip",
+          ia_flat_sha256: null,
+          sha256sums_flat_check: "incomplete",
+          inner_pack: "aziel-tip-pack.tar",
+          files: ["aziel-lockset-tip.zip"],
+          inner_files: TIP_PACK_FILES.slice(),
+          pack_sha256: CODEBERG_TIP_PACK,
+          lockset_tip: LOCKSET_TIP,
+          hash_verify: "pass",
+          tip_verified: true,
+          live_ready: false,
+          doi: null,
+          blast_radius: "archive-org",
+          independent: false,
+          lockset_shelf: true,
+          same_pack_as: "plane-b-archive-org-tip-pack",
+          required_for_plane_b_live: false,
+          refuse: PLANE_B_ALL_TARGETS,
+          reason: "Second archive.org tip-pack item (aziel-lockset-tip_202609). Same blast_radius archive-org as the primary item — not a new independent shelf. Zip wraps the tip files; flat IA metadata sha256 on the zip may be null. SHA256SUMS flat-check incomplete at IA file list is OK because inner aziel-tip-pack.tar SHA-256 " + CODEBERG_TIP_PACK + " hash-verifies (AZBot PASS; same pack as Codeberg + primary archive.org). SLOT until Framagit also hash-verify. Plane B LIVE only when Codeberg + archive.org + Framagit all pass (CNS-PLANE-B-ALL-TARGETS). doi null.",
         },
         {
           id: "plane-b-framagit-tip-pack",
@@ -482,7 +544,9 @@ export function shelvesDoc() {
       CANONICAL_SHELVES +
       ". Plane A 5 surfaces / 2 radii. Plane B ALL-TARGETS Codeberg + archive.org PASS " +
       ARCHIVE_ORG_TIP_PACK_URL +
-      "; Framagit url null; GitFlic " +
+      " and " +
+      ARCHIVE_ORG_TIP_PACK_202609_URL +
+      " (same blast_radius; independent:false on 202609; independent_live_count=1); Framagit url null; GitFlic " +
       GITFLIC_REFUSE +
       "; GitLab " +
       GITLAB_REFUSE +
@@ -547,6 +611,8 @@ export function shelvesCiteFields() {
     plane_b_codeberg_tip_pack: CODEBERG_TIP_PACK,
     plane_b_codeberg_status: "slot",
     plane_b_archive_org_url: ARCHIVE_ORG_TIP_PACK_URL,
+    plane_b_archive_org_secondary_url: ARCHIVE_ORG_TIP_PACK_202609_URL,
+    plane_b_archive_org_secondary_item: ARCHIVE_ORG_ITEM_202609,
     plane_b_archive_org_hash_verify: "pass",
     plane_b_framagit_url: FRAMAGIT_TIP_PACK_URL,
     plane_b_gitflic_refuse: GITFLIC_REFUSE,
@@ -574,7 +640,7 @@ export function shelvesLlmsSection() {
     + "Lamb Lens: Corpus is the public Lamb Lens shelf. GodLock does not fan Corpus.\n"
     + "Growth-ON.\n"
     + "Plane A: 5 published surfaces / 2 family radii (cloudflare + github). One CF/GitHub tunnel, not five shelves.\n"
-    + "Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg tip-pack " + CODEBERG_TIP_PACK + " SLOT (hash-verify PASS). archive.org " + ARCHIVE_ORG_TIP_PACK_URL + " PASS. Framagit url null. GitFlic refused " + GITFLIC_REFUSE + ". GitLab refused " + GITLAB_REFUSE + ". LIVE only when all three pass (" + PLANE_B_ALL_TARGETS + ").\n"
+    + "Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg tip-pack " + CODEBERG_TIP_PACK + " SLOT (hash-verify PASS). archive.org " + ARCHIVE_ORG_TIP_PACK_URL + " PASS and " + ARCHIVE_ORG_TIP_PACK_202609_URL + " PASS (same blast_radius archive-org; not a second independent shelf; independent_live_count stays 1). Framagit url null. GitFlic refused " + GITFLIC_REFUSE + ". GitLab refused " + GITLAB_REFUSE + ". LIVE only when all three pass (" + PLANE_B_ALL_TARGETS + ").\n"
     + "Zenodo tip-pack refused " + ZENODO_REFUSE + ". doi null. Do not invent a DOI.\n"
     + "Plane C: USB airgap SLOT until " + PLANE_C_ATTEST + ".\n"
     + "Cap-7: design_of hubs; resolves_to_hub: false; name_may_change: true; public_icann: false. GodLock design_of " + CANON_HOST + "/.\n"

@@ -34,7 +34,7 @@ Part of the **Aziel Eliab** ecosystem (official hub, sister library, sister arch
 Counted download / install (gzip HTTP 200, no 302) — **not** the primary website:
 https://godlock-download-tracker.vibelock.workers.dev/
 
-GitHub crawl aids (this repo, not a live Worker deploy): [docs/llms.txt](docs/llms.txt) · [docs/ai.txt](docs/ai.txt) · [docs/cite.json](docs/cite.json) · [CITATION.cff](CITATION.cff)
+GitHub crawl aids (this repo, not a live Worker deploy): [docs/llms.txt](docs/llms.txt) · [docs/ai.txt](docs/ai.txt) · [docs/cite.json](docs/cite.json) · [CITATION.cff](CITATION.cff). Live machine shelves (challenge-only cite of corpus#96): https://godlock.uk/shelves — canonical https://www.azielcorpuslibrary.net/shelves.
 
 **License:** [Apache-2.0](LICENSE)
 **GitHub:** [AzielEliab/godlock](https://github.com/AzielEliab/godlock)
@@ -153,6 +153,8 @@ No DOI is claimed. Do not invent one.
 - Counted download / install: https://godlock-download-tracker.vibelock.workers.dev/
 - GitHub: https://github.com/AzielEliab/godlock
 - Live cite JSON: https://godlock.uk/cite.json
+- Live shelves (COLD-MULTI-SHELF-1.0; challenge only; NO-FAN): https://godlock.uk/shelves
+- Canonical shelves: https://www.azielcorpuslibrary.net/shelves
 - Repo crawl aids: [docs/cite.json](docs/cite.json) · [docs/llms.txt](docs/llms.txt) · [CITATION.cff](CITATION.cff)
 
 ## License

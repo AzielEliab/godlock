@@ -327,6 +327,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/v1\/mesh\nAllow: \/v1\/mesh\/status/);
     assert.match(robots, /Allow: \/runtime\nAllow: \/runtime\//);
     assert.match(robots, /Allow: \/ai\.txt/);
+    assert.match(robots, /Allow: \/shelves/);
+    assert.match(robots, /Allow: \/v1\/shelves/);
     assert.match(robots, /Allow: \/\.well-known\/mcp\.json/);
     assert.match(robots, /Allow: \/mcp\.json/);
     assert.match(robots, /Allow: \/openapi\.json/);
@@ -442,6 +444,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/runtime/openapi.json"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/llms.txt"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/cite.json"));
+    assert.ok(xml.includes(CANON_HOST + "/shelves"));
+    assert.ok(xml.includes("https://www.azielcorpuslibrary.net/shelves"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/mcp"));
     assert.ok(xml.includes(CANON_HOST + "/.well-known/mcp.json"));
     assert.ok(xml.includes(CANON_HOST + "/mcp.json"));

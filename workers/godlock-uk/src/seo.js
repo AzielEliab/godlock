@@ -1,6 +1,7 @@
 /** Crawl/index metadata for GodLock.uk. Author: Aziel Eliab. */
 import { hideInternalDetermination } from "./publicCopy.js";
 import { ingestCiteFields, ingestLlmsSection } from "./ingestReceipt.js";
+import { shelvesCiteFields, shelvesLlmsSection } from "./shelves.js";
 
 export const CANON_HOST = "https://godlock.uk";
 export const FALLBACK_HOST = "https://godlock-uk.vibelock.workers.dev";
@@ -1187,6 +1188,7 @@ export function headMeta(opts) {
     linkRel("alternate", "/cite.json", " type=" + Q + "application/json" + Q),
     linkRel("alternate", "/llms.txt", " type=" + Q + "text/plain" + Q),
     linkRel("alternate", "/ai.txt", " type=" + Q + "text/plain" + Q),
+    linkRel("alternate", "/shelves", " type=" + Q + "application/json" + Q + " title=" + Q + "COLD-MULTI-SHELF" + Q),
     linkRel("alternate", "/person.jsonld", " type=" + Q + "application/ld+json" + Q),
     linkRel("alternate", "/identity.jsonld", " type=" + Q + "application/ld+json" + Q),
     linkRel("alternate", "/graph.jsonld", " type=" + Q + "application/ld+json" + Q),
@@ -1345,6 +1347,8 @@ export const PUBLIC_ALLOW = [
   "/cite.json",
   "/llms.txt",
   "/ai.txt",
+  "/shelves",
+  "/v1/shelves",
   "/person.jsonld",
   "/identity.jsonld",
   "/graph.jsonld",
@@ -1377,6 +1381,7 @@ export function robotsTxt() {
     "# Same-origin mesh: GET /v1/mesh and /v1/mesh/status (read-only suite presence). GET never enables. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health.",
     "# INGEST-AS-RECEIPT-1.0: first-screen SHA-256 + stable IDs + canonical URL. Many indexes, one tip. Cite, don't merge. Growth-ON.",
     "# RE-EXPAND-FROM-ARCHIVE-1.0: bytes survive, not summaries. Re-expand = archive verify then local node. Crawlers don't re-expand. AI ingest ≠ tarball.",
+    "# COLD-MULTI-SHELF-1.0: /shelves cites canonical https://www.azielcorpuslibrary.net/shelves (corpus#96). GodLock is challenge only. NO-FAN.",
     "",
   ];
   const star = [
@@ -1427,6 +1432,9 @@ export async function sitemapXml(env, extras = {}) {
   add(CANON_HOST + "/cite.json", "0.8", "weekly");
   add(CANON_HOST + "/llms.txt", "0.8", "weekly");
   add(CANON_HOST + "/ai.txt", "0.8", "weekly");
+  add(CANON_HOST + "/shelves", "0.8", "weekly");
+  add(CANON_HOST + "/v1/shelves", "0.7", "weekly");
+  add("https://www.azielcorpuslibrary.net/shelves", "0.55", "weekly");
   add(CANON_HOST + "/person.jsonld", "0.85", "weekly");
   add(CANON_HOST + "/identity.jsonld", "0.85", "weekly");
   add(CANON_HOST + "/graph.jsonld", "0.85", "weekly");
@@ -1535,6 +1543,9 @@ export function citeDoc() {
       cite: CANON_HOST + "/cite.json",
       llms: CANON_HOST + "/llms.txt",
       ai: CANON_HOST + "/ai.txt",
+      shelves: CANON_HOST + "/shelves",
+      shelves_json: CANON_HOST + "/v1/shelves",
+      canonical_shelves: "https://www.azielcorpuslibrary.net/shelves",
       person: CANON_HOST + "/person.jsonld",
       identity: CANON_HOST + "/identity.jsonld",
       graph: CANON_HOST + "/graph.jsonld",
@@ -1661,6 +1672,7 @@ export function citeDoc() {
     mesh_server_pull_erases_records: false,
     mesh_data_outlives_creators: true,
     ...ingestCiteFields(),
+    ...shelvesCiteFields(),
     mesh_default: "on",
     mesh_readonly: true,
     mesh_anonymity_network: false,
@@ -1759,6 +1771,8 @@ export function llmsDoc() {
     + "Cite: " + CANON_HOST + "/cite.json\n"
     + "LLMs: " + CANON_HOST + "/llms.txt\n"
     + "AI: " + CANON_HOST + "/ai.txt\n"
+    + "Shelves: " + CANON_HOST + "/shelves\n"
+    + "Canonical shelves: https://www.azielcorpuslibrary.net/shelves\n"
     + "MCP discovery: " + CANON_HOST + "/.well-known/mcp.json\n"
     + "MCP discovery alias: " + CANON_HOST + "/mcp.json\n"
     + "Person JSON-LD: " + CANON_HOST + "/person.jsonld\n"
@@ -1771,6 +1785,7 @@ export function llmsDoc() {
     + Object.entries(hashPathEquivalentUrls()).map(([from, to]) => from + " → " + to).join(" · ")
     + "\nSitemap lists the real paths only.\n"
     + ingestLlmsSection()
+    + shelvesLlmsSection()
     + "Aziel Corpus Library: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "He Didn't Jump: " + HEDIDNTJUMP + "\n"
@@ -1904,8 +1919,11 @@ export function siteOpenApi() {
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
       "/.well-known/mcp.json": { get: { operationId: "godlockUkWellKnownMcp", summary: "MCP discovery JSON pointing at POST /runtime/mcp (not a second FragGate door)", responses: { "200": { description: "OK" } } } },
       "/mcp.json": { get: { operationId: "godlockUkMcpDiscovery", summary: "Same body as /.well-known/mcp.json — discovery only", responses: { "200": { description: "OK" } } } },
-      "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record — INGEST-AS-RECEIPT tip + cite, don't merge + RE-EXPAND-FROM-ARCHIVE", responses: { "200": { description: "OK" } } } },
-      "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief — keep the hash; cite, don't merge; crawlers don't re-expand", responses: { "200": { description: "OK" } } } },
+      "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record — INGEST-AS-RECEIPT tip + cite, don't merge + RE-EXPAND-FROM-ARCHIVE + COLD-MULTI-SHELF", responses: { "200": { description: "OK" } } } },
+      "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief — keep the hash; cite, don't merge; crawlers don't re-expand; COLD-MULTI-SHELF cite", responses: { "200": { description: "OK" } } } },
+      "/ai.txt": { get: { operationId: "godlockUkAi", summary: "Alias of /llms.txt — machine crawl aid", responses: { "200": { description: "OK" } } } },
+      "/shelves": { get: { operationId: "godlockUkShelves", summary: "COLD-MULTI-SHELF-1.0 challenge cite of canonical corpus /shelves (corpus#96). NO-FAN. doi null.", responses: { "200": { description: "OK" } } } },
+      "/v1/shelves": { get: { operationId: "godlockUkShelvesJson", summary: "Same body as /shelves — machine alias", responses: { "200": { description: "OK" } } } },
       "/person.jsonld": { get: { operationId: "godlockUkPersonJsonLd", summary: "Shared AZindex Person (https://www.azieleliab.com/#aziel)", responses: { "200": { description: "OK" } } } },
       "/.well-known/person.jsonld": { get: { operationId: "godlockUkWellKnownPersonJsonLd", summary: "Same body as /person.jsonld — shared AZindex Person @id https://www.azieleliab.com/#aziel", responses: { "200": { description: "OK" } } } },
       "/identity.jsonld": { get: { operationId: "godlockUkIdentityJsonLd", summary: "Alias of /person.jsonld — same Person @id", responses: { "200": { description: "OK" } } } },

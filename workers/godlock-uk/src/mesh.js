@@ -1,11 +1,13 @@
 /**
- * Suite mesh client aligned to QNM-BUILD-1.0.
+ * Suite mesh client aligned to QNM-BUILD-1.0 + SPLIT THE WIRES + COLD-COPY SURVIVAL.
  * Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal.
  * Read-only suite presence ON. This Worker has no mesh-off function.
+ * Mesh may be unavailable on public GodLock — refuse/status still bind the law.
  * Not an anonymity network.
  * QNS-CD-1.0 is a hub cite / Worker mesh cross-map only (photon QNS1
  * packet transfer). Local qnsd lives in qnm-node. This Worker does not
  * implement qnsd and does not expose a public qnsd proxy.
+ * Phoenix is local only. Die-with-pull does not bring godlock.uk back.
  * Identity Aziel Eliab only. Runtime routes may not be merged yet — fail closed.
  * Author: Aziel Eliab.
  */
@@ -23,6 +25,75 @@ export const MESH_ANONYMITY_NETWORK = false;
 export const MESH_NODE_GATE = false;
 export const MESH_AUTO_HEAL = false;
 export const MESH_IDENTITY = AUTHOR;
+
+export const SPLIT_THE_WIRES = "SPLIT THE WIRES";
+export const SPLIT_THE_WIRES_SPEC = "SPLIT-THE-WIRES-1.0";
+export const COLD_COPY_SURVIVAL = "COLD-COPY SURVIVAL";
+export const COLD_COPY_SURVIVAL_SPEC = "COLD-COPY-SURVIVAL-1.0";
+export const TIP_TICK_MIN_MS = 500;
+export const TIP_TICK_MAX_MS = 1000;
+export const PAYLOAD_DWELL_S = 777;
+export const TIP_SOCKET = "1s";
+export const PAYLOAD_SOCKET = "777s";
+
+export const SPLIT_THE_WIRES_LAW = Object.freeze({
+  name: SPLIT_THE_WIRES,
+  spec: SPLIT_THE_WIRES_SPEC,
+  author: AUTHOR,
+  identity: AUTHOR,
+  tip: Object.freeze({
+    kind: "tip-only",
+    tick_ms: Object.freeze([TIP_TICK_MIN_MS, TIP_TICK_MAX_MS]),
+    carry: "presence+tip-hash",
+    size: "fixed",
+    socket: TIP_SOCKET,
+  }),
+  payload: Object.freeze({
+    kind: "pull-only",
+    update: "proof-not-timer",
+    cite: "prev+lockset",
+    fail: "closed",
+    dwell_s: PAYLOAD_DWELL_S,
+    socket: PAYLOAD_SOCKET,
+    clock_desync: "not-yes",
+    ambiguous: "isolate",
+  }),
+  sockets_share: false,
+  equivocation: "ends-peer-not-chain",
+  emit_last: "locally",
+  phoenix: Object.freeze({
+    scope: "local",
+    die_with_pull: true,
+    brings_uk_back: false,
+    note: "Phoenix is local only. Die-with-pull does not bring godlock.uk back.",
+  }),
+  partition: "no-auto-splice",
+  heartbeat_loss: "not-poison",
+  last_packet_on_loss: "not-apply",
+});
+
+export const COLD_COPY_SURVIVAL_LAW = Object.freeze({
+  name: COLD_COPY_SURVIVAL,
+  spec: COLD_COPY_SURVIVAL_SPEC,
+  author: AUTHOR,
+  identity: AUTHOR,
+  copies: "multiply",
+  live_sync: false,
+  tip_erase: "expensive",
+  server_pull_erases_records: false,
+  data_outlives_creators: true,
+  note: "Cold copies multiply. Live sync is refused. The tip is expensive to erase. A server pull does not erase records. Data outlives creators.",
+});
+
+export const SPLIT_THE_WIRES_NOTE =
+  "SPLIT THE WIRES. Tip-only 0.5–1s tick (presence+tip hash, fixed-size). Pull-only payload plane. Update is proof, not a timer (cite prev+lockset, fail-closed; 777s dwell after valid cite; clock desync is not yes; ambiguous isolates). Equivocation ends the peer, not the chain. Emit last locally. Phoenix is local only — die-with-pull does not bring godlock.uk back. Partition does not auto-splice. Heartbeat loss is not poison and does not apply the last packet. 1s and 777s never share a socket.";
+
+export const COLD_COPY_SURVIVAL_NOTE =
+  "COLD-COPY SURVIVAL. Cold copies multiply. Live sync is refused. The tip is expensive to erase. A server pull does not erase records. Data outlives creators.";
+
+export const MESH_LAW_NOTE =
+  SPLIT_THE_WIRES_NOTE + " " + COLD_COPY_SURVIVAL_NOTE
+  + " Law binds when public GodLock mesh is unavailable. Author Aziel Eliab only.";
 
 /** Hub cite / Worker mesh cross-map. Not a Softwares-tab product. No public qnsd proxy. */
 export const QNS_CD = Object.freeze({
@@ -53,7 +124,8 @@ export const QNS_CD = Object.freeze({
 });
 
 export const MESH_NOTE =
-  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in qnm-node; no public proxy). Suite mesh is on (read-only suite presence). Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network.";
+  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in qnm-node; no public proxy). Suite mesh is on (read-only suite presence). Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. "
+  + MESH_LAW_NOTE;
 export const MESH_NOTE_ON = MESH_NOTE;
 
 export const MESH_PATH = "/v1/mesh";
@@ -90,8 +162,165 @@ export function isMeshDisablePath(pathname) {
   return p === MESH_DISABLE_PATH || p === RUNTIME_PATH + MESH_DISABLE_PATH;
 }
 
-export function meshDisableRefused() {
+export function meshLawFields() {
   return {
+    law: SPLIT_THE_WIRES,
+    law_spec: SPLIT_THE_WIRES_SPEC,
+    split_the_wires: SPLIT_THE_WIRES_LAW,
+    cold_copy_survival: COLD_COPY_SURVIVAL,
+    cold_copy_survival_spec: COLD_COPY_SURVIVAL_SPEC,
+    cold_copy: COLD_COPY_SURVIVAL_LAW,
+    sockets_share: false,
+    phoenix: "local",
+    phoenix_die_with_pull: true,
+    phoenix_brings_uk_back: false,
+    live_sync: false,
+    server_pull_erases_records: false,
+    data_outlives_creators: true,
+    law_binds_when_off: true,
+    author: AUTHOR,
+    identity: AUTHOR,
+  };
+}
+
+export function stampMeshLaw(doc) {
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) return doc;
+  const out = { ...doc, ...meshLawFields() };
+  if (typeof out.note === "string") {
+    if (!/SPLIT THE WIRES/.test(out.note)) out.note = (out.note + " " + SPLIT_THE_WIRES_NOTE).trim();
+    if (!/COLD-COPY SURVIVAL/.test(out.note)) out.note = (out.note + " " + COLD_COPY_SURVIVAL_NOTE).trim();
+  } else {
+    out.note = MESH_LAW_NOTE;
+  }
+  return out;
+}
+
+function meshLawRefuse(code, error, extra = {}) {
+  return stampMeshLaw({
+    ok: false,
+    error,
+    code,
+    spec: QNM_SPEC,
+    author: AUTHOR,
+    identity: AUTHOR,
+    door: PUBLIC_MESH,
+    ...extra,
+  });
+}
+
+export function phoenixBringsUkRefused() {
+  return meshLawRefuse(
+    "STW-PHOENIX-UK",
+    "Phoenix is local only. Die-with-pull does not bring godlock.uk back.",
+    { phoenix: "local", phoenix_die_with_pull: true, phoenix_brings_uk_back: false },
+  );
+}
+
+export function liveSyncRefused() {
+  return meshLawRefuse(
+    "CCS-LIVE-SYNC",
+    "COLD-COPY SURVIVAL refuses live sync. Cold copies multiply.",
+  );
+}
+
+export function serverPullEraseRefused() {
+  return meshLawRefuse(
+    "CCS-PULL-ERASES",
+    "A server pull does not erase records. Data outlives creators.",
+    { server_pull_erases_records: false, data_outlives_creators: true },
+  );
+}
+
+export function evaluateSplitTheWires(act = {}) {
+  const a = act && typeof act === "object" ? act : {};
+  const reasons = [];
+  const tipSocket = a.tip_socket != null ? String(a.tip_socket) : TIP_SOCKET;
+  const payloadSocket = a.payload_socket != null ? String(a.payload_socket) : PAYLOAD_SOCKET;
+  if (a.shares_socket === true || a.tip_and_payload_same_socket === true || a.split === false) {
+    reasons.push("STW-SHARED-SOCKET");
+  }
+  if (a.socket_1s != null && a.socket_777s != null && String(a.socket_1s) === String(a.socket_777s)) {
+    reasons.push("STW-SHARED-SOCKET");
+  }
+  if (tipSocket && payloadSocket && tipSocket === payloadSocket) {
+    reasons.push("STW-SHARED-SOCKET");
+  }
+  if (a.plane === "tip") {
+    if (a.tick_ms != null && (Number(a.tick_ms) < TIP_TICK_MIN_MS || Number(a.tick_ms) > TIP_TICK_MAX_MS)) {
+      reasons.push("STW-TIP-TICK");
+    }
+    if (a.size && a.size !== "fixed") reasons.push("STW-TIP-NOT-FIXED");
+    if (a.carry && a.carry !== "presence+tip-hash") reasons.push("STW-TIP-NOT-FIXED");
+    if (a.payload && a.payload !== "presence+tip-hash") reasons.push("STW-TIP-NOT-FIXED");
+  }
+  if (a.plane === "payload" || a.plane === "pull") {
+    if (a.mode === "push" || a.push === true) reasons.push("STW-PUSH-PAYLOAD");
+    if (a.update === "timer" || a.update_is_timer === true) reasons.push("STW-TIMER-UPDATE");
+    if (a.cite_prev === false || a.lockset === false) reasons.push("STW-CITE-FAIL-CLOSED");
+    if (a.clock_desync === "yes" || a.clock_desync_is_yes === true) reasons.push("STW-CLOCK-DESYNC");
+    if (a.ambiguous === true && a.isolate !== true) reasons.push("STW-AMBIGUOUS-ISOLATE");
+    if (a.dwell_s != null && Number(a.dwell_s) !== PAYLOAD_DWELL_S && a.skip_dwell === true) {
+      reasons.push("STW-DWELL");
+    }
+  }
+  if (a.equivocation === true && (a.ends === "chain" || a.ends_chain === true)) {
+    reasons.push("STW-EQUIVOCATION-CHAIN");
+  }
+  if (a.emit_last === "remote" || a.emit_last_locally === false) {
+    reasons.push("STW-EMIT-LAST-REMOTE");
+  }
+  if (
+    a.phoenix === "hunt"
+    || a.phoenix_hunt === true
+    || a.bring_uk_back === true
+    || a.phoenix_brings_uk === true
+    || a.brings_uk_back === true
+  ) {
+    reasons.push("STW-PHOENIX-UK");
+  }
+  if (a.auto_splice === true || a.partition_splice === true) {
+    reasons.push("STW-AUTO-SPLICE");
+  }
+  if (a.heartbeat_loss === true) {
+    if (a.poison === true || a.treat_as_poison === true) reasons.push("STW-LOSS-IS-POISON");
+    if (a.apply_last_packet === true) reasons.push("STW-APPLY-LAST-PACKET");
+  }
+  if (!reasons.length) {
+    return stampMeshLaw({ ok: true, code: "STW-OK", spec: QNM_SPEC });
+  }
+  return meshLawRefuse(reasons[0], "SPLIT THE WIRES refuse: " + reasons[0], { reasons });
+}
+
+export function evaluateColdCopySurvival(act = {}) {
+  const a = act && typeof act === "object" ? act : {};
+  const reasons = [];
+  if (a.live_sync === true || a.sync === "live") reasons.push("CCS-LIVE-SYNC");
+  if (a.multiply === false || a.cold_copies === false || a.single_live_copy === true) {
+    reasons.push("CCS-NO-MULTIPLY");
+  }
+  if (a.erase_tip === true || a.tip_erase === "cheap" || a.tip_erase_cheap === true) {
+    reasons.push("CCS-ERASE-TIP");
+  }
+  if ((a.server_pull === true || a.pull === true) && (a.erase_records === true || a.erases_records === true)) {
+    reasons.push("CCS-PULL-ERASES");
+  }
+  if ((a.creator_gone === true || a.creators_dead === true) && a.erase_data === true) {
+    reasons.push("CCS-CREATOR-DEATH-ERASE");
+  }
+  if (!reasons.length) {
+    return stampMeshLaw({ ok: true, code: "CCS-OK", spec: QNM_SPEC });
+  }
+  return meshLawRefuse(reasons[0], "COLD-COPY SURVIVAL refuse: " + reasons[0], { reasons });
+}
+
+export function evaluateMeshLaw(act = {}) {
+  const wires = evaluateSplitTheWires(act);
+  if (!wires.ok) return wires;
+  return evaluateColdCopySurvival(act);
+}
+
+export function meshDisableRefused() {
+  return stampMeshLaw({
     ok: false,
     error: "mesh-off is not a function on this Worker",
     code: "MESH-NO-DISABLE",
@@ -107,11 +336,11 @@ export function meshDisableRefused() {
     spec: QNM_SPEC,
     note: "GodLock.uk presents read-only QNM suite presence. This Worker has no path that turns suite presence off.",
     door: PUBLIC_MESH,
-  };
+  });
 }
 
 export function originMeshWriteRefused() {
-  return {
+  return stampMeshLaw({
     ok: false,
     error: "method not allowed",
     get_never_enables: true,
@@ -126,7 +355,7 @@ export function originMeshWriteRefused() {
     spec: QNM_SPEC,
     note: "GET never enables. Read-only suite presence. This Worker has no mesh-off function.",
     door: PUBLIC_MESH,
-  };
+  });
 }
 
 export function scrubMeshOffCopy(text) {
@@ -177,7 +406,7 @@ export function alignPublicMeshSurface(doc) {
   if (out.mesh && typeof out.mesh === "object" && !Array.isArray(out.mesh)) {
     out.mesh = alignPublicMeshSurface(out.mesh);
   }
-  return out;
+  return stampMeshLaw(out);
 }
 
 export const PUBLIC_MESH = PUBLIC_RUNTIME + MESH_PATH;
@@ -287,7 +516,7 @@ export function emptyMesh(extra = {}) {
   const rollup = extra.rollup && typeof extra.rollup === "object"
     ? { ...emptyRollup(), ...extra.rollup }
     : emptyRollup();
-  return {
+  return stampMeshLaw({
     ok: true,
     spec: QNM_SPEC,
     enabled: false,
@@ -312,7 +541,7 @@ export function emptyMesh(extra = {}) {
     node_gate: false,
     auto_heal: false,
     anonymity_network: false,
-  };
+  });
 }
 
 export function compactMeshNode(raw) {
@@ -375,7 +604,7 @@ export function publicMesh(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   const enabled = !!m.enabled;
   const rollup = enabled ? meshRollup(m) : emptyRollup();
-  return {
+  return stampMeshLaw({
     spec: QNM_SPEC,
     enabled,
     default_off: false,
@@ -403,19 +632,19 @@ export function publicMesh(mesh) {
     ops: MESH_OPS.slice(),
     qns_cd: QNS_CD,
     note: scrubMeshOffCopy(m.note || MESH_NOTE),
-  };
+  });
 }
 
 export function meshStatusLine(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   if (m.enabled) {
     const r = meshRollup(m);
-    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated + ". QNS-CD-1.0. Not an anonymity network.";
+    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated + ". SPLIT THE WIRES. COLD-COPY SURVIVAL. QNS-CD-1.0. Not an anonymity network.";
   }
   if (m.status === "unavailable") {
-    return "Suite mesh: on (read-only suite presence). Rollup unavailable. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
+    return "Suite mesh: on (read-only suite presence). Rollup unavailable. SPLIT THE WIRES. Phoenix local only — die-with-pull does not bring godlock.uk back. COLD-COPY SURVIVAL. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
   }
-  return "Suite mesh: on (read-only suite presence). QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
+  return "Suite mesh: on (read-only suite presence). SPLIT THE WIRES. COLD-COPY SURVIVAL. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
 }
 
 /**
@@ -564,7 +793,7 @@ export function hubMeshStatusDoc(stats, path) {
   const mesh = publicMesh(stats && stats.mesh);
   const enabled = !!mesh.enabled;
   const rollup = enabled ? meshRollup(mesh) : emptyRollup();
-  return {
+  return stampMeshLaw({
     ok: true,
     product: "GodLock",
     site: "godlock.uk",
@@ -607,11 +836,11 @@ export function hubMeshStatusDoc(stats, path) {
     get_never_enables: true,
     author: AUTHOR,
     identity: AUTHOR,
-  };
+  });
 }
 
 export function meshOpsDoc() {
-  return {
+  return stampMeshLaw({
     spec: QNM_SPEC,
     door: PUBLIC_MESH,
     status_url: PUBLIC_MESH_STATUS,
@@ -639,5 +868,5 @@ export function meshOpsDoc() {
     anon_broadcast: ANON_BROADCAST,
     anon_broadcast_note: ANON_BROADCAST_NOTE,
     anon_broadcast_publish_path: false,
-  };
+  });
 }

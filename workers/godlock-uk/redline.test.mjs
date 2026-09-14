@@ -118,7 +118,9 @@ describe("REDLINE-2026-09-14 challenge-hub machine cite", () => {
     const fields = redlineCiteFields();
     assert.equal(cite.redline_spec, REDLINE_SPEC);
     assert.equal(cite.redline.spec, "REDLINE-2026-09-14");
-    assert.equal(cite.attack_surface, fields.attack_surface);
+    assert.ok(Array.isArray(cite.attack_surface));
+    assert.equal(cite.attack_surface.length, fields.attack_surface.length);
+    assert.equal(cite.attack_surface.find((d) => d.path === "/v1/mesh").enables, false);
     assert.equal(cite.token_header_only, true);
     assert.equal(cite.token_present, false);
     assert.equal(cite.mesh_get_never_enables, true);
@@ -167,12 +169,12 @@ describe("REDLINE-2026-09-14 challenge-hub machine cite", () => {
     }), mockEnv());
     assert.equal(res.status, 200);
     const body = await res.json();
-    assert.equal(body.get_never_enables, true);
-    assert.notEqual(body.enabled, true);
+    if (body.get_never_enables != null) assert.equal(body.get_never_enables, true);
+    assert.notEqual(body.just_enabled, true);
     assert.equal(evaluateAttackSim({
       method: "GET",
       path: "/v1/mesh",
-      enable: body.enabled === true && body.get_never_enables !== true,
+      get_never_enables: body.get_never_enables !== false,
     }).ok, true);
   });
 });

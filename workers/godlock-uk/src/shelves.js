@@ -574,7 +574,7 @@ export function shelvesLlmsSection() {
     + "Lamb Lens: Corpus is the public Lamb Lens shelf. GodLock does not fan Corpus.\n"
     + "Growth-ON.\n"
     + "Plane A: 5 published surfaces / 2 family radii (cloudflare + github). One CF/GitHub tunnel, not five shelves.\n"
-    + "Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg + archive.org hash-verify PASS (still SLOT). archive.org " + ARCHIVE_ORG_TIP_PACK_URL + ". Framagit url null. GitFlic refused " + GITFLIC_REFUSE + ". GitLab refused " + GITLAB_REFUSE + ". LIVE only when all three pass (" + PLANE_B_ALL_TARGETS + ").\n"
+    + "Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg tip-pack " + CODEBERG_TIP_PACK + " SLOT (hash-verify PASS). archive.org " + ARCHIVE_ORG_TIP_PACK_URL + " PASS. Framagit url null. GitFlic refused " + GITFLIC_REFUSE + ". GitLab refused " + GITLAB_REFUSE + ". LIVE only when all three pass (" + PLANE_B_ALL_TARGETS + ").\n"
     + "Zenodo tip-pack refused " + ZENODO_REFUSE + ". doi null. Do not invent a DOI.\n"
     + "Plane C: USB airgap SLOT until " + PLANE_C_ATTEST + ".\n"
     + "Cap-7: design_of hubs; resolves_to_hub: false; name_may_change: true; public_icann: false. GodLock design_of " + CANON_HOST + "/.\n"

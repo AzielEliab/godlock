@@ -299,6 +299,7 @@ export function ingestLlmsSection() {
     + NO_LIE_NO_REWRITE_RULE + "\n";
 }
 
+/** Kept for machine/tests. Homepage chrome does not render this; the Receipts tab holds the tip. */
 export function firstScreenSection() {
   const tip = firstScreenTip();
   const ids = ingestStableIds();

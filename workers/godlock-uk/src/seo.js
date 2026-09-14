@@ -855,7 +855,7 @@ export function defaultDescription(kind) {
       "Public GodLock.uk receipt chain. Full questions and hash-chained receipts. Stress-test engine, not a forum. Specified Fit, Not Pretty Spirals. Author Aziel Eliab.",
     );
   }
-  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Aziel Runtime door: " + PUBLIC_RUNTIME + " (aziel-runtime). Suite mesh is on (read-only suite presence; QNM-BUILD-1.0 live|locked|isolated counts only; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse; no Node Gate; no auto-heal): " + PUBLIC_RUNTIME + "/v1/mesh. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health. Softwares stays Runtime-only. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. " + AI_CLIENTS_SENTENCE);
+  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Author Aziel Eliab. " + AI_CLIENTS_SENTENCE);
 }
 
 function defaultKeywords(kind) {

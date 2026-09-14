@@ -2,6 +2,7 @@
 import { hideInternalDetermination } from "./publicCopy.js";
 import { ingestCiteFields, ingestLlmsSection } from "./ingestReceipt.js";
 import { shelvesCiteFields, shelvesLlmsSection } from "./shelves.js";
+import { redlineCiteFields, redlineLlmsSection } from "./redline.js";
 
 export const CANON_HOST = "https://godlock.uk";
 export const FALLBACK_HOST = "https://godlock-uk.vibelock.workers.dev";
@@ -1673,6 +1674,7 @@ export function citeDoc() {
     mesh_data_outlives_creators: true,
     ...ingestCiteFields(),
     ...shelvesCiteFields(),
+    ...redlineCiteFields(),
     mesh_default: "on",
     mesh_readonly: true,
     mesh_anonymity_network: false,
@@ -1786,6 +1788,7 @@ export function llmsDoc() {
     + "\nSitemap lists the real paths only.\n"
     + ingestLlmsSection()
     + shelvesLlmsSection()
+    + redlineLlmsSection()
     + "Aziel Corpus Library: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "He Didn't Jump: " + HEDIDNTJUMP + "\n"

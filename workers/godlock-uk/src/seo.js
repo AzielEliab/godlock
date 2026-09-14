@@ -46,7 +46,7 @@ export const LOCAL_PERSON_STUB_ID = CANON_HOST + "/AzielEliab#aziel-eliab";
 export const HUB_RUNTIME_URL = AZIEL_OFFICIAL.replace(/\/$/, "") + "/runtime";
 export const HUB_RUNTIME_ID = HUB_RUNTIME_URL + "#runtime";
 export const HUB_GODLOCK_TOOL_ID = HUB_RUNTIME_URL + "#godlock";
-export const BANNER = "Public HTTPS engine. QNM-BUILD-1.0. SPLIT THE WIRES. COLD-COPY SURVIVAL. Phoenix local only — die-with-pull does not bring godlock.uk back. Suite mesh is on (read-only suite presence). Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. Author Aziel Eliab.";
+export const BANNER = "Public HTTPS engine. QNM-BUILD-1.0. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health. Suite mesh is on (read-only suite presence). Live|locked|isolated counts only. No Node Gate. No auto-heal. Softwares stays Runtime-only. Not an anonymity network. Author Aziel Eliab.";
 export const ANON_BROADCAST = "https://github.com/AzielEliab/anon-broadcast";
 export const AZIEL_ELIAB_PATH = "/AzielEliab";
 export const AZIEL_CORPUS_PATH = "/AzielCorpusLibrary";
@@ -836,7 +836,7 @@ export function defaultDescription(kind) {
       RUNTIME_ABSTRACT
         + " " + RUNTIME_NAME + " " + RUNTIME_VERSION
         + " (aziel-runtime) on GodLock.uk. Same-origin /runtime/* proxies the live catalog door. OpenAPI "
-        + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. Suite mesh (QNM-BUILD-1.0, read-only, on; live|locked|isolated counts only; SPLIT THE WIRES; COLD-COPY SURVIVAL): "
+        + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. Suite mesh (QNM-BUILD-1.0, read-only, on; live|locked|isolated counts only; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse): "
         + PUBLIC_RUNTIME + "/v1/mesh. GET /v1/mesh never enables. Read-only suite presence. Phoenix local only — die-with-pull does not bring godlock.uk back. API uses log: "
         + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). "
         + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
@@ -852,7 +852,7 @@ export function defaultDescription(kind) {
       "Public GodLock.uk receipt chain. Full questions and hash-chained receipts. Stress-test engine, not a forum. Specified Fit, Not Pretty Spirals. Author Aziel Eliab.",
     );
   }
-  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Aziel Runtime door: " + PUBLIC_RUNTIME + " (aziel-runtime). Suite mesh is on (read-only suite presence; QNM-BUILD-1.0 live|locked|isolated counts only; SPLIT THE WIRES; COLD-COPY SURVIVAL; no Node Gate; no auto-heal): " + PUBLIC_RUNTIME + "/v1/mesh. Phoenix local only — die-with-pull does not bring godlock.uk back. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. " + AI_CLIENTS_SENTENCE);
+  return hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals. Submit a challenge, including intelligent-design disputes. Answers open with Yes, No, Let's review, or Interesting. Same-origin Aziel Runtime door: " + PUBLIC_RUNTIME + " (aziel-runtime). Suite mesh is on (read-only suite presence; QNM-BUILD-1.0 live|locked|isolated counts only; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse; no Node Gate; no auto-heal): " + PUBLIC_RUNTIME + "/v1/mesh. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health. Softwares stays Runtime-only. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. " + AI_CLIENTS_SENTENCE);
 }
 
 function defaultKeywords(kind) {
@@ -1373,7 +1373,7 @@ export function robotsTxt() {
     "# GodLock product surface. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.",
     "# Homepage hashes (#software #runtime #receipts #donate #reason #verify #AzielEliab) map to real paths.",
     "# Softwares HTML: /software. Catalog JSON: /v1/software (not a second FragGate door). Door: /runtime.",
-    "# Same-origin mesh: GET /v1/mesh and /v1/mesh/status (read-only suite presence). GET never enables. SPLIT THE WIRES. COLD-COPY SURVIVAL. Phoenix local only — die-with-pull does not bring godlock.uk back.",
+    "# Same-origin mesh: GET /v1/mesh and /v1/mesh/status (read-only suite presence). GET never enables. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health.",
     "",
   ];
   const star = [
@@ -1644,6 +1644,13 @@ export function citeDoc() {
     mesh_law_spec: "SPLIT-THE-WIRES-1.0",
     mesh_cold_copy: "COLD-COPY SURVIVAL",
     mesh_cold_copy_spec: "COLD-COPY-SURVIVAL-1.0",
+    mesh_reheal: "REHEAL",
+    mesh_reheal_spec: "REHEAL-1.0",
+    mesh_neighbor_talkback: false,
+    mesh_reheal_allowed: "live|locked|isolated|tip-hash",
+    mesh_reheal_forbidden: "bodies|diffs|vote-to-fix",
+    mesh_reheal_action: "isolate+drop-tether+local-phoenix",
+    mesh_softwares_runtime_only: true,
     mesh_phoenix: "local",
     mesh_phoenix_brings_uk_back: false,
     mesh_sockets_share: false,
@@ -1802,6 +1809,7 @@ export function llmsDoc() {
     + "SPLIT THE WIRES. Tip-only 0.5–1s tick. Pull-only payload. 1s and 777s never share a socket.\n"
     + "Phoenix is local only. Die-with-pull does not bring godlock.uk back.\n"
     + "COLD-COPY SURVIVAL. Cold copies multiply. Live sync is refused. A server pull does not erase records. Data outlives creators.\n"
+    + "REHEAL refuse. Poisoned node: own last good tip + verified trusted pull OR phoenix-WAIT. No neighbor talk-back-to-health. Allowed: live/locked/isolated/tip-hash. Forbidden: bodies/diffs/vote-to-fix. Isolate+drop tether+local phoenix. Softwares stays Runtime-only.\n"
     + "GET /v1/mesh never enables. Display rollup only. This Worker has no mesh-off function.\n"
     + "Same-origin mesh (Live Nodes clients): " + CANON_HOST + "/v1/mesh\n"
     + "Same-origin mesh status: " + CANON_HOST + "/v1/mesh/status\n"
@@ -1822,7 +1830,7 @@ export function llmsDoc() {
     + "Grok / Venice / Claude / Gemini / Copilot / others: OpenAPI or MCP POST " + PUBLIC_RUNTIME + "/mcp\n"
     + "Cursor / Glama: remote MCP " + PUBLIC_RUNTIME + "/mcp\n\n"
     + "Public HTTPS stress-test engine. Submit a challenge. Answers open with Yes, No, Let's review, or Interesting.\n"
-    + "Intelligent-design disputes are processed under the same rules. Suite mesh is on (read-only suite presence; QNM-BUILD-1.0). SPLIT THE WIRES. COLD-COPY SURVIVAL. Phoenix local only — die-with-pull does not bring godlock.uk back. Not an anonymity network.\n"
+    + "Intelligent-design disputes are processed under the same rules. Suite mesh is on (read-only suite presence; QNM-BUILD-1.0). SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health. Softwares stays Runtime-only. Not an anonymity network.\n"
     + "Do not invent DOIs.\n\n"
     + "Public HTML is Allow for User-agent * and named AI/search crawlers (GPTBot, ChatGPT-User, OAI-SearchBot, Venice, Grok, Google-Extended, GoogleOther, Google-CloudVertexBot, Claude*, Perplexity*, bingbot, Meta-External*, FacebookBot, facebookexternalhit, Applebot*, Amazonbot, DuckDuck*, MistralAI-User, YouBot, CCBot, cohere*, Diffbot, AI2Bot*, TikTokSpider, Baiduspider*, YandexBot, and others listed in /robots.txt).\n";
 }
@@ -1870,7 +1878,7 @@ export function siteOpenApi() {
       version: "0.1.0",
       summary: "Public HTTPS stress-test engine by Aziel Eliab.",
       description: hideInternalDetermination(
-        "GodLock.uk public routes plus same-origin FragGate / MCP door. Softwares lists Aziel Runtime only and points at " + OFFICIAL_SOFTWARES + ". Live catalog remains " + PUBLIC_RUNTIME + "/v1/software. Suite mesh (QNM-BUILD-1.0, read-only, on; SPLIT THE WIRES; COLD-COPY SURVIVAL): GET " + CANON_HOST + "/v1/mesh and GET " + CANON_HOST + "/v1/mesh/status (same-origin proxies; GET never enables) plus GET " + PUBLIC_RUNTIME + "/v1/mesh. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. Phoenix local only — die-with-pull does not bring godlock.uk back. This Worker has no mesh-off function. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
+        "GodLock.uk public routes plus same-origin FragGate / MCP door. Softwares lists Aziel Runtime only and points at " + OFFICIAL_SOFTWARES + ". Live catalog remains " + PUBLIC_RUNTIME + "/v1/software. Suite mesh (QNM-BUILD-1.0, read-only, on; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse): GET " + CANON_HOST + "/v1/mesh and GET " + CANON_HOST + "/v1/mesh/status (same-origin proxies; GET never enables) plus GET " + PUBLIC_RUNTIME + "/v1/mesh. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health. This Worker has no mesh-off function. Softwares stays Runtime-only. Not an anonymity network. anon-broadcast is not a publish path on godlock.uk. Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
       ),
       contact: { name: AUTHOR, url: CANON_HOST + AZIEL_ELIAB_PATH },
       license: { name: "Apache-2.0", url: "https://www.apache.org/licenses/LICENSE-2.0" },
@@ -1904,15 +1912,15 @@ export function siteOpenApi() {
       "/runtime/mcp": { post: { operationId: "godlockUkRuntimeMcp", summary: "Same-origin FragGate MCP door", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/software": { get: { operationId: "godlockUkRuntimeSoftware", summary: "Live software catalog proxy", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/fraggate/list": { get: { operationId: "godlockUkRuntimeFraggateList", summary: "FragGate list fallback catalog", responses: { "200": { description: "OK" } } } },
-      "/v1/mesh": { get: { operationId: "godlockUkOriginMesh", summary: "Same-origin QNM-BUILD-1.0 mesh proxy (read-only suite presence on; GET never enables; SPLIT THE WIRES; COLD-COPY SURVIVAL). Live Nodes clients hit this path.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
-      "/v1/mesh/status": { get: { operationId: "godlockUkOriginMeshStatus", summary: "Same-origin LIVE QNM rollup proxy (enabled?, bearers, live|locked|isolated). GET never enables. SPLIT THE WIRES. COLD-COPY SURVIVAL. Phoenix local only — die-with-pull does not bring godlock.uk back.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
-      "/runtime/v1/mesh": { get: { operationId: "godlockUkRuntimeMesh", summary: "QNM-BUILD-1.0 suite mesh status (read-only, on; live|locked|isolated counts only; SPLIT THE WIRES; COLD-COPY SURVIVAL; GET never enables; no Node Gate; no auto-heal; not an anonymity network)", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
-      "/runtime/v1/mesh/status": { get: { operationId: "godlockUkRuntimeMeshStatus", summary: "LIVE QNM-BUILD-1.0 suite rollup (enabled?, bearers, live|locked|isolated). GET never enables. SPLIT THE WIRES. COLD-COPY SURVIVAL. Phoenix local only — die-with-pull does not bring godlock.uk back.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
+      "/v1/mesh": { get: { operationId: "godlockUkOriginMesh", summary: "Same-origin QNM-BUILD-1.0 mesh proxy (read-only suite presence on; GET never enables; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse). Live Nodes clients hit this path.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
+      "/v1/mesh/status": { get: { operationId: "godlockUkOriginMeshStatus", summary: "Same-origin LIVE QNM rollup proxy (enabled?, bearers, live|locked|isolated). GET never enables. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
+      "/runtime/v1/mesh": { get: { operationId: "godlockUkRuntimeMesh", summary: "QNM-BUILD-1.0 suite mesh status (read-only, on; live|locked|isolated counts only; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse; GET never enables; no Node Gate; no auto-heal; not an anonymity network)", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
+      "/runtime/v1/mesh/status": { get: { operationId: "godlockUkRuntimeMeshStatus", summary: "LIVE QNM-BUILD-1.0 suite rollup (enabled?, bearers, live|locked|isolated). GET never enables. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. Phoenix local only — die-with-pull does not bring godlock.uk back.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
       "/runtime/v1/mesh/nodes": { get: { operationId: "godlockUkRuntimeMeshNodes", summary: "QNM roster with live|locked|isolated presence (5-minute TTL). Not a peer-list publish path. GET never enables.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
       "/runtime/v1/mesh/join": { post: { operationId: "godlockUkRuntimeMeshJoin", summary: "Join suite mesh (runtime proxy)", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
       "/runtime/v1/mesh/heartbeat": { post: { operationId: "godlockUkRuntimeMeshHeartbeat", summary: "Suite mesh heartbeat (runtime proxy)", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
       "/runtime/v1/mesh/enable": { post: { operationId: "godlockUkRuntimeMeshEnable", summary: "Enable suite mesh (runtime proxy; this Worker has no mesh-off function)", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
-      "/mesh": { get: { operationId: "godlockUkMesh", summary: "GodLock.uk QNM-BUILD-1.0 mesh snapshot (live|locked|isolated counts only; SPLIT THE WIRES; COLD-COPY SURVIVAL; Phoenix local only — die-with-pull does not bring godlock.uk back)", responses: { "200": { description: "OK" } } } },
+      "/mesh": { get: { operationId: "godlockUkMesh", summary: "GodLock.uk QNM-BUILD-1.0 mesh snapshot (live|locked|isolated counts only; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse; Phoenix local only — die-with-pull does not bring godlock.uk back; no neighbor talk-back-to-health)", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/update/check": { get: { operationId: "godlockUkRuntimeUpdateCheck", summary: "Client update check (prompt only; no silent overwrite)", responses: { "200": { description: "OK" } } } },
     },
   };

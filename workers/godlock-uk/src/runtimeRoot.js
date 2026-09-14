@@ -22,8 +22,10 @@ import {
 import {
   alignPublicMeshSurface,
   isMeshDisablePath,
+  isMeshRehealPath,
   isPublicMeshJsonPath,
   meshDisableRefused,
+  rehealRefused,
 } from "./mesh.js";
 
 export const RUNTIME_ORIGIN = CATALOG;
@@ -352,6 +354,9 @@ export async function handleRuntimeRoot(request, url, env, ctx) {
   const destPath = String(dest).split("?")[0];
   if (isMeshDisablePath(destPath) || isMeshDisablePath(url.pathname)) {
     return jsonError(meshDisableRefused(), 405);
+  }
+  if (isMeshRehealPath(destPath) || isMeshRehealPath(url.pathname)) {
+    return jsonError(rehealRefused(), 405);
   }
   if (isRuntimeUsesPath(destPath)) {
     if (request.method === "GET" || request.method === "HEAD") {

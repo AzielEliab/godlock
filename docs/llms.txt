@@ -92,6 +92,8 @@ Who is Aziel Eliab (txt): https://godlock.uk/who-is-aziel-eliab.txt
 Cite (live): https://godlock.uk/cite.json
 LLMs (live): https://godlock.uk/llms.txt
 AI (live): https://godlock.uk/ai.txt
+Shelves (live): https://godlock.uk/shelves
+Canonical shelves: https://www.azielcorpuslibrary.net/shelves
 Repo cite: docs/cite.json
 Repo AI alias: docs/ai.txt
 Citation file: CITATION.cff
@@ -126,6 +128,23 @@ Archive (bytes, not AI ingest): https://godlock-download-tracker.vibelock.worker
 ## CROSS-NETWORK-SURVIVAL
 
 If network + live data die tomorrow, the chain still survives via cold copies across independent shelves; survival = bytes↔hash.
+
+## Cold multi-shelf (CROSS-NETWORK-SURVIVAL executable)
+
+Spec: COLD-MULTI-SHELF-1.0
+Planes A/B/C: A=one CF/GitHub tunnel (5 surfaces / 2 family radii, not 5 shelves); B=alt independent forge/archive tip-pack SLOT; C=USB airgap SLOT. Survival = bytes↔hash. LIVE only after hash verify.
+GodLock is challenge only. NO-FAN. Canonical shelves: https://www.azielcorpuslibrary.net/shelves
+Local machine surface: https://godlock.uk/shelves · https://godlock.uk/v1/shelves
+Person @id: https://www.azieleliab.com/#aziel
+Lamb Lens: Corpus is the public Lamb Lens shelf. GodLock does not fan Corpus.
+Growth-ON.
+Plane A: 5 published surfaces / 2 family radii (cloudflare + github). One CF/GitHub tunnel, not five shelves.
+Plane B: Codeberg tip-pack b549362c0736ddb54ddc488812327c464e0da1167281f92fd1a4263eedf5df37 SLOT (hash-verify PASS). archive.org + GitFlic RU unverified. LIVE only when all three pass.
+Zenodo tip-pack refused CNS-ZENODO-IP-BAN. doi null. Do not invent a DOI.
+Plane C: USB airgap SLOT until CNS-OPERATOR-ATTEST.
+Cap-7: design_of hubs; resolves_to_hub: false; name_may_change: true; public_icann: false. GodLock design_of https://godlock.uk/.
+Lockset cite (GodLock does not write the public ledger): https://www.azielcorpuslibrary.net/lockset.json tip c831429befc221bd41caeb0a6d1c5361602db5684abab7af6d39714084b6b245
+Corpus roll: corpus#96. Operator roll: 2026-09-14.
 
 ## NO-LIE / NO-REWRITE
 

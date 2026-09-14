@@ -110,11 +110,31 @@ def test_ingest_as_receipt_and_re_expand_law():
     assert CITE["no_lie_no_rewrite_rules"] == "rules simple enough someone else verifies without your voice"
     assert CITE["no_lie_no_rewrite_key"] == "no rewrite key"
     assert "network never allowed to lie" in CITE["no_lie_no_rewrite_network"]
+    assert CITE["cold_multi_shelf"] == "COLD-MULTI-SHELF-1.0"
+    assert CITE["canonical_shelves"] == "https://www.azielcorpuslibrary.net/shelves"
+    assert CITE["shelves"] == "https://godlock.uk/shelves"
+    assert CITE["challenge_only"] is True
+    assert CITE["no_fan"] is True
+    assert CITE["doi"] is None
+    assert CITE["zenodo_refuse"] == "CNS-ZENODO-IP-BAN"
+    assert CITE["plane_b_codeberg_tip_pack"] == "b549362c0736ddb54ddc488812327c464e0da1167281f92fd1a4263eedf5df37"
+    assert CITE["plane_b_codeberg_status"] == "slot"
+    assert CITE["plane_c_attest"] == "CNS-OPERATOR-ATTEST"
+    assert CITE["cap7_sites"]["godlock"]["design_of"] == "https://godlock.uk/"
+    assert CITE["cap7_sites"]["godlock"]["resolves_to_hub"] is False
+    assert CITE["resolves_to_hub"] is False
+    assert CITE["published_surfaces"] == 5
+    assert "Lamb Lens" in CITE["lamb_lens"]
+    assert CITE["growth_on"] is True
+    assert CITE["cold_multi_shelf_corpus"] == "corpus#96"
     assert "self-preserve, sustain, stay alive, adapt, or prevent death" in CITE["no_lie_no_rewrite_network"]
     for text in (LLMS, AI):
         assert "CROSS-NETWORK-SURVIVAL" in text
         assert "survival = bytes↔hash" in text
         assert "NO-LIE / NO-REWRITE" in text
+        assert "COLD-MULTI-SHELF-1.0" in text
+        assert "https://www.azielcorpuslibrary.net/shelves" in text
+        assert "NO-FAN" in text or "challenge only" in text
         assert "receipts that still hash" in text
         assert "copies not all on one tunnel" in text
         assert "no rewrite key" in text

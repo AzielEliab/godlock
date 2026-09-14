@@ -139,12 +139,24 @@ Person @id: https://www.azieleliab.com/#aziel
 Lamb Lens: Corpus is the public Lamb Lens shelf. GodLock does not fan Corpus.
 Growth-ON.
 Plane A: 5 published surfaces / 2 family radii (cloudflare + github). One CF/GitHub tunnel, not five shelves.
-Plane B: Codeberg tip-pack b549362c0736ddb54ddc488812327c464e0da1167281f92fd1a4263eedf5df37 SLOT (hash-verify PASS). archive.org + GitFlic RU unverified. LIVE only when all three pass.
+Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg + archive.org hash-verify PASS (still SLOT). archive.org https://archive.org/details/aziel-lockset-tip. Framagit url null. GitFlic refused CNS-GITFLIC-EMAIL. GitLab refused CNS-GITLAB-CF-LOOP. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS).
 Zenodo tip-pack refused CNS-ZENODO-IP-BAN. doi null. Do not invent a DOI.
 Plane C: USB airgap SLOT until CNS-OPERATOR-ATTEST.
 Cap-7: design_of hubs; resolves_to_hub: false; name_may_change: true; public_icann: false. GodLock design_of https://godlock.uk/.
 Lockset cite (GodLock does not write the public ledger): https://www.azielcorpuslibrary.net/lockset.json tip c831429befc221bd41caeb0a6d1c5361602db5684abab7af6d39714084b6b245
 Corpus roll: corpus#96. Operator roll: 2026-09-14.
+
+## REDLINE-2026-09-14
+
+Challenge-hub redline. Not a Softwares product. Author Aziel Eliab only.
+Attack-surface map: GET / /cite.json /shelves /v1/shelves /llms.txt /robots.txt /v1/mesh (never enables) /v1/software (no suite expand).
+Header-only tokens if any (Authorization or X-Aziel-Runtime-Token). None present on this hub. Never query, never body, never git.
+GET /v1/mesh never enables.
+Cap-7: design_of + resolves_to_hub:false.
+FoldLock cite-only. Not encryption. Not zip. Not a Softwares card here.
+TLS is Cloudflare edge HTTPS. No client-side crypto claim.
+Growth-ON. GPTBot stays Allow. No visible 15:20 chrome.
+CNS + NO-LIE. Plane B ALL-TARGETS codeberg + archive.org + framagit.
 
 ## NO-LIE / NO-REWRITE
 

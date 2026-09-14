@@ -13,6 +13,12 @@ import {
   CODEBERG_TIP_PACK,
   LOCKSET_TIP,
   ZENODO_REFUSE,
+  GITFLIC_REFUSE,
+  GITLAB_REFUSE,
+  PLANE_B_WORKING_TARGETS,
+  PLANE_B_ALL_TARGETS,
+  ARCHIVE_ORG_TIP_PACK_URL,
+  FRAMAGIT_TIP_PACK_URL,
   PLANE_C_ATTEST,
   CAP7_SITES,
   CORPUS_ROLL,
@@ -68,9 +74,20 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.equal(doc.planes.A.status, "live");
     assert.equal(doc.planes.B.status, "slot");
     assert.equal(doc.planes.B.doi, null);
+    assert.deepEqual(doc.planes.B.working_targets, ["codeberg", "archive.org", "framagit"]);
+    assert.deepEqual(doc.planes.B.working_targets, PLANE_B_WORKING_TARGETS.slice());
+    assert.ok(!doc.planes.B.working_targets.includes("gitflic-ru"));
     assert.equal(doc.planes.B.codeberg_tip_pack, CODEBERG_TIP_PACK);
     assert.equal(doc.planes.B.codeberg_tip_pack, "b549362c0736ddb54ddc488812327c464e0da1167281f92fd1a4263eedf5df37");
+    assert.equal(doc.planes.B.archive_org_url, ARCHIVE_ORG_TIP_PACK_URL);
+    assert.equal(doc.planes.B.archive_org_url, "https://archive.org/details/aziel-lockset-tip");
+    assert.equal(doc.planes.B.archive_org_hash_verify, "pass");
+    assert.equal(doc.planes.B.framagit_url, null);
+    assert.equal(doc.planes.B.framagit_url, FRAMAGIT_TIP_PACK_URL);
+    assert.equal(doc.planes.B.gitflic, GITFLIC_REFUSE);
+    assert.equal(doc.planes.B.gitlab, GITLAB_REFUSE);
     assert.equal(doc.planes.B.refuse, ZENODO_REFUSE);
+    assert.equal(doc.visible_1520, false);
     assert.equal(doc.planes.C.status, "slot");
     assert.ok(doc.planes.C.refuse.includes(PLANE_C_ATTEST));
     assert.equal(doc.doi, null);
@@ -88,10 +105,30 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.equal(codeberg.status, "slot");
     assert.equal(codeberg.pack_sha256, CODEBERG_TIP_PACK);
     assert.equal(codeberg.lockset_tip, LOCKSET_TIP);
+    const archive = doc.registry.shelves.find((s) => s.id === "plane-b-archive-org-tip-pack");
+    assert.equal(archive.status, "slot");
+    assert.equal(archive.url, "https://archive.org/details/aziel-lockset-tip");
+    assert.equal(archive.hash_verify, "pass");
+    assert.equal(archive.tip_verified, true);
+    assert.equal(archive.refuse, PLANE_B_ALL_TARGETS);
+    const framagit = doc.registry.shelves.find((s) => s.id === "plane-b-framagit-tip-pack");
+    assert.equal(framagit.status, "slot");
+    assert.equal(framagit.url, null);
+    assert.equal(framagit.forge, "framagit");
+    const gitflic = doc.registry.shelves.find((s) => s.id === "plane-b-gitflic-ru-tip-pack");
+    assert.equal(gitflic.status, "refused");
+    assert.equal(gitflic.refuse, GITFLIC_REFUSE);
+    assert.ok(doc.refused.includes("plane-b-gitflic-ru-tip-pack"));
+    assert.ok(!doc.slot.includes("plane-b-gitflic-ru-tip-pack"));
+    const gitlab = doc.registry.shelves.find((s) => s.id === "plane-b-gitlab-tip-pack");
+    assert.equal(gitlab.status, "refused");
+    assert.equal(gitlab.refuse, GITLAB_REFUSE);
     const zenodo = doc.registry.shelves.find((s) => s.id === "plane-b-zenodo-tip-pack");
     assert.equal(zenodo.status, "refused");
     assert.equal(zenodo.doi, null);
     assert.ok(zenodo.refuse.includes(ZENODO_REFUSE));
+    assert.doesNotMatch(JSON.stringify(doc.planes), /gitflic-ru unverified/i);
+    assert.doesNotMatch(JSON.stringify(doc.planes.B.working_targets), /gitflic/);
     const attest = doc.registry.shelves.find((s) => s.id === "plane-c-usb-airgap");
     assert.equal(attest.status, "slot");
     assert.equal(attest.refuse, PLANE_C_ATTEST);
@@ -109,6 +146,10 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
       assert.equal(body.no_fan, true);
       assert.equal(body.canonical_shelves, CANONICAL_SHELVES);
       assert.equal(body.planes.B.codeberg_tip_pack, CODEBERG_TIP_PACK);
+      assert.deepEqual(body.planes.B.working_targets, ["codeberg", "archive.org", "framagit"]);
+      assert.equal(body.planes.B.archive_org_url, "https://archive.org/details/aziel-lockset-tip");
+      assert.equal(body.planes.B.framagit_url, null);
+      assert.equal(body.planes.B.gitflic, "CNS-GITFLIC-EMAIL");
       assert.equal(body.doi, null);
     }
   });
@@ -125,6 +166,12 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.equal(cite.zenodo_refuse, ZENODO_REFUSE);
     assert.equal(cite.plane_b_codeberg_tip_pack, CODEBERG_TIP_PACK);
     assert.equal(cite.plane_b_codeberg_status, "slot");
+    assert.deepEqual(cite.plane_b_working_targets, ["codeberg", "archive.org", "framagit"]);
+    assert.equal(cite.plane_b_archive_org_url, "https://archive.org/details/aziel-lockset-tip");
+    assert.equal(cite.plane_b_archive_org_hash_verify, "pass");
+    assert.equal(cite.plane_b_framagit_url, null);
+    assert.equal(cite.plane_b_gitflic_refuse, GITFLIC_REFUSE);
+    assert.equal(cite.plane_b_gitlab_refuse, GITLAB_REFUSE);
     assert.equal(cite.plane_c_attest, PLANE_C_ATTEST);
     assert.equal(cite.cap7_sites.godlock.design_of, fields.cap7_sites.godlock.design_of);
     assert.equal(cite.cap7_godlock_resolves_to_hub, false);
@@ -144,7 +191,13 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.match(llms, /Canonical shelves: https:\/\/www\.azielcorpuslibrary\.net\/shelves/);
     assert.match(llms, /https:\/\/godlock\.uk\/shelves/);
     assert.match(llms, new RegExp(CODEBERG_TIP_PACK));
+    assert.match(llms, /ALL-TARGETS/);
+    assert.match(llms, /https:\/\/archive\.org\/details\/aziel-lockset-tip/);
+    assert.match(llms, /Framagit url null/);
+    assert.match(llms, /CNS-GITFLIC-EMAIL/);
+    assert.match(llms, /CNS-GITLAB-CF-LOOP/);
     assert.match(llms, /CNS-ZENODO-IP-BAN/);
+    assert.doesNotMatch(llms, /GitFlic RU unverified/);
     assert.match(llms, /doi null/);
     assert.match(llms, /CNS-OPERATOR-ATTEST/);
     assert.match(llms, /resolves_to_hub: false/);

@@ -112,35 +112,20 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.equal(evaluateReExpand({}).re_expand, "archive verify then local node");
   });
 
-  it("prints first-screen law on the homepage without a visible 15:20 lock", () => {
+  it("keeps ingest chrome off the homepage and the tip on /receipts, without a visible 15:20 lock", () => {
     const home = homeBody({ stats: {}, latest: null, prior: [] });
-    assert.match(home, /id="ingest-as-receipt"/);
-    assert.match(home, /<h2>INGEST-AS-RECEIPT<\/h2>/);
-    assert.match(home, new RegExp(firstScreenTip()));
-    assert.match(home, /https:\/\/godlock\.uk\//);
-    assert.match(home, /https:\/\/www\.azieleliab\.com\/#aziel/);
-    assert.match(home, /https:\/\/www\.azieleliab\.com\/runtime#runtime/);
-    assert.match(home, /cite, don't merge/);
-    assert.match(home, /RE-EXPAND-FROM-ARCHIVE/);
-    assert.match(home, /Bytes survive, not summaries/);
-    assert.match(home, /Crawlers don't re-expand/);
-    assert.match(home, /AI ingest ≠ tarball/);
-    assert.match(home, /CROSS-NETWORK-SURVIVAL/);
-    assert.match(home, /survival = bytes↔hash/);
-    assert.match(home, /NO-LIE \/ NO-REWRITE/);
-    assert.match(home, /receipts that still hash/);
-    assert.match(home, /copies not all on one tunnel/);
-    assert.match(home, /rules simple enough someone else verifies without your voice/);
-    assert.match(home, /no rewrite key/);
-    assert.match(home, /network never allowed to lie/);
-    assert.match(home, /self-preserve, sustain, stay alive, adapt, or prevent death/);
-    assert.match(home, /Growth-ON/);
-    assert.doesNotMatch(home, /1 Chronicles 15:20/);
+    assert.doesNotMatch(home, /id="ingest-as-receipt"/);
+    assert.doesNotMatch(home, /<h2>INGEST-AS-RECEIPT<\/h2>/);
+    assert.doesNotMatch(home, /id="ingest-tip"/);
     assert.match(home, /<h2>Prior receipts<\/h2>/);
     assert.doesNotMatch(home, /ACT-RECEIPT-1\.0/);
-    const ingestAt = home.indexOf("id=\"ingest-as-receipt\"");
-    const statsAt = home.indexOf("id=\"stat-live-nodes\"");
-    assert.ok(ingestAt >= 0 && statsAt > ingestAt);
+    assert.doesNotMatch(home, /1 Chronicles 15:20/);
+    const tab = receiptsBody({ rows: [], total: 0, page: 1, pageSize: 50, stats: { receipts: 0 } });
+    assert.match(tab, /id="ingest-tip"/);
+    assert.match(tab, /<h2>INGEST-AS-RECEIPT tip<\/h2>/);
+    assert.match(tab, new RegExp(firstScreenTip()));
+    assert.match(tab, /cite, don't merge/);
+    assert.doesNotMatch(tab, /1 Chronicles 15:20/);
   });
 
   it("keeps challenge receipts distinct from ACT-RECEIPT when both are on /receipts", () => {
@@ -278,9 +263,10 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
       mockEnv(),
     );
     const html = await htmlRes.text();
-    assert.match(html, /id="ingest-as-receipt"/);
+    assert.doesNotMatch(html, /id="ingest-as-receipt"/);
     const visible = html.replace(/^[\s\S]*<body>/i, "").replace(/<\/body>[\s\S]*$/i, "").replace(/<script[\s\S]*?<\/script>/gi, "");
-    assert.match(visible, /id="ingest-as-receipt"/);
+    assert.doesNotMatch(visible, /id="ingest-as-receipt"/);
+    assert.doesNotMatch(visible, /<h2>INGEST-AS-RECEIPT<\/h2>/);
     assert.doesNotMatch(visible, /1 Chronicles 15:20/);
     const recRes = await worker.fetch(
       new Request("https://godlock.uk/receipts?format=json", {

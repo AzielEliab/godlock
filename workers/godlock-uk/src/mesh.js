@@ -787,12 +787,12 @@ export function meshStatusLine(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   if (m.enabled) {
     const r = meshRollup(m);
-    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated + ". SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. QNS-CD-1.0. Not an anonymity network.";
+    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated;
   }
   if (m.status === "unavailable") {
-    return "Suite mesh: on (read-only suite presence). Rollup unavailable. SPLIT THE WIRES. Phoenix local only — die-with-pull does not bring godlock.uk back. COLD-COPY SURVIVAL. REHEAL refuse. No neighbor talk-back-to-health. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
+    return "Suite mesh: on · rollup unavailable";
   }
-  return "Suite mesh: on (read-only suite presence). SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
+  return "Suite mesh: on";
 }
 
 /**

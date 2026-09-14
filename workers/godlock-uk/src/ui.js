@@ -18,7 +18,7 @@ import { receiptScoreDelta } from "./engine.js";
 import { publicSoftwaresList, invokeHref, workerHref, stripRuntimeFragGateMash, suiteFamily } from "./catalog.js";
 import { donateBody as donatePageBody } from "./donate.js";
 import { actReceiptsSection } from "./actReceipts.js";
-import { firstScreenSection, ingestTipSection, pasteHashSection } from "./ingestReceipt.js";
+import { ingestTipSection, pasteHashSection } from "./ingestReceipt.js";
 
 export const CSS = `
 :root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
@@ -61,7 +61,6 @@ footer .ecosystem{margin:16px 0 0}
 .pill.interesting{background:#2a2410;color:var(--gold);border-color:var(--gold)}
 .pill.ok{background:#14261c;color:var(--yes);border-color:#2e6b45}
 .author{color:var(--muted);margin:0 0 14px;font-size:14px}
-.banner{background:#1a140c;border:1px solid #8a5a2b;border-radius:12px;padding:12px 14px;margin:0 0 16px;color:#f0d0a8;font-size:15px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px;margin:0 0 16px}
 .stat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
 .stat b{display:block;font-size:22px;font-weight:800}
@@ -235,7 +234,6 @@ ${brandRow()}
 <p class="author">Author Aziel Eliab</p>
 ${topNav(p)}
 ${ecosystemNav()}
-<div class="banner">${esc(hideInternalDetermination(BANNER))}</div>
 ${body}
 <footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(RECEIPTS_PATH)}">Receipts</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
 ${ecosystemNav()}
@@ -287,10 +285,10 @@ ${ecosystemNav()}
       var locked=r.locked!=null?r.locked:0;
       var isolated=r.isolated!=null?r.isolated:0;
       meshEl.textContent=on
-        ?("Suite mesh: on · live "+live+" · locked "+locked+" · isolated "+isolated+". SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. QNS-CD-1.0. Not an anonymity network.")
+        ?("Suite mesh: on · live "+live+" · locked "+locked+" · isolated "+isolated)
         :(j.mesh.status==="unavailable"
-          ?"Suite mesh: on (read-only suite presence). Rollup unavailable. SPLIT THE WIRES. Phoenix local only — die-with-pull does not bring godlock.uk back. COLD-COPY SURVIVAL. REHEAL refuse. No neighbor talk-back-to-health. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network."
-          :"Suite mesh: on (read-only suite presence). SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.");
+          ?"Suite mesh: on · rollup unavailable"
+          :"Suite mesh: on");
     }
   }
   function beat(){
@@ -364,7 +362,6 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
   const shown = (prior || []).slice(0, HOME_PRIOR_LIMIT);
   const list = priorReceiptItems(shown) || `<p class="muted">No public receipts yet. Submit a challenge.</p>`;
   return `
-${firstScreenSection()}
 <div class="stats">
   <div class="stat"><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
   <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>

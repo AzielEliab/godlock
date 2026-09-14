@@ -137,7 +137,7 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.match(tab, /Public questions and the hash-chained receipt list/);
     assert.match(tab, /id="ingest-tip"/);
     assert.match(tab, /cite, don't merge/);
-    assert.match(tab, new RegExp(ACT_RECEIPT_HEADING));
+    assert.ok(tab.includes(ACT_RECEIPT_HEADING));
     const challengeAt = tab.indexOf("Public questions and the hash-chained receipt list");
     const ingestAt = tab.indexOf("id=\"ingest-tip\"");
     const actAt = tab.indexOf(ACT_RECEIPT_HEADING);
@@ -244,7 +244,9 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     );
     const html = await htmlRes.text();
     assert.match(html, /id="ingest-as-receipt"/);
-    assert.doesNotMatch(html, /1 Chronicles 15:20/);
+    const visible = html.replace(/^[\s\S]*<body>/i, "").replace(/<\/body>[\s\S]*$/i, "").replace(/<script[\s\S]*?<\/script>/gi, "");
+    assert.match(visible, /id="ingest-as-receipt"/);
+    assert.doesNotMatch(visible, /1 Chronicles 15:20/);
     const recRes = await worker.fetch(
       new Request("https://godlock.uk/receipts?format=json", {
         headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },

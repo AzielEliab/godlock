@@ -9,18 +9,16 @@
  * Author: Aziel Eliab only.
  */
 import { hashPayload } from "./ledger.js";
-import {
-  AUTHOR,
-  AZIEL_PERSON_ID,
-  CANON_HOST,
-  DOWNLOAD,
-  GITHUB,
-  HUB_GODLOCK_TOOL_ID,
-  HUB_RUNTIME_ID,
-  RECEIPTS_PATH,
-  VERIFY_PATH,
-} from "./seo.js";
 
+const AUTHOR = "Aziel Eliab";
+const CANON_HOST = "https://godlock.uk";
+const AZIEL_PERSON_ID = "https://www.azieleliab.com/#aziel";
+const HUB_RUNTIME_ID = "https://www.azieleliab.com/runtime#runtime";
+const HUB_GODLOCK_TOOL_ID = "https://www.azieleliab.com/runtime#godlock";
+const DOWNLOAD = "https://godlock-download-tracker.vibelock.workers.dev/download";
+const GITHUB = "https://github.com/AzielEliab/godlock";
+const RECEIPTS_PATH = "/receipts";
+const VERIFY_PATH = "/verify";
 const ACT_RECEIPT_SPEC = "ACT-RECEIPT-1.0";
 
 export const INGEST_AS_RECEIPT = "INGEST-AS-RECEIPT";

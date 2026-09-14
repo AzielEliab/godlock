@@ -123,6 +123,14 @@ Crawlers don't re-expand.
 AI ingest ≠ tarball.
 Archive (bytes, not AI ingest): https://godlock-download-tracker.vibelock.workers.dev/download
 
+## CROSS-NETWORK-SURVIVAL
+
+If network + live data die tomorrow, the chain still survives via cold copies across independent shelves; survival = bytes↔hash.
+
+## NO-LIE / NO-REWRITE
+
+receipts that still hash; copies not all on one tunnel; rules simple enough someone else verifies without your voice; no rewrite key; network never allowed to lie — even to self-preserve, sustain, stay alive, adapt, or prevent death.
+
 ## Compatible AI clients
 
 Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.

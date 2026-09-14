@@ -565,6 +565,11 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.re_expand_from_archive, "RE-EXPAND-FROM-ARCHIVE");
     assert.equal(cite.re_expand_crawlers, false);
     assert.equal(cite.re_expand_ai_ingest_is_tarball, false);
+    assert.equal(cite.cross_network_survival, "CROSS-NETWORK-SURVIVAL");
+    assert.match(cite.cross_network_survival_rule, /cold copies across independent shelves/);
+    assert.equal(cite.no_lie_no_rewrite, "NO-LIE / NO-REWRITE");
+    assert.match(cite.no_lie_no_rewrite_rule, /no rewrite key/);
+    assert.match(cite.no_lie_no_rewrite_network, /never allowed to lie/);
     assert.equal(cite.mesh_default, "on");
     assert.equal(cite.mesh_readonly, true);
     assert.equal(cite.mesh_default_off, undefined);
@@ -658,6 +663,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /## INGEST-AS-RECEIPT/);
     assert.match(llms, /cite, don't merge/i);
     assert.match(llms, /## RE-EXPAND-FROM-ARCHIVE/);
+    assert.match(llms, /## CROSS-NETWORK-SURVIVAL/);
+    assert.match(llms, /## NO-LIE \/ NO-REWRITE/);
+    assert.match(llms, /copies not all on one tunnel/);
     assert.match(llms, /Crawlers don't re-expand/);
     assert.match(llms, /AI ingest ≠ tarball/);
     assert.match(llms, /Die-with-pull does not bring godlock\.uk back/);

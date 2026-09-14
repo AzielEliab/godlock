@@ -547,6 +547,13 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.mesh_law, "SPLIT THE WIRES");
     assert.equal(cite.mesh_law_spec, "SPLIT-THE-WIRES-1.0");
     assert.equal(cite.mesh_cold_copy, "COLD-COPY SURVIVAL");
+    assert.equal(cite.mesh_reheal, "REHEAL");
+    assert.equal(cite.mesh_reheal_spec, "REHEAL-1.0");
+    assert.equal(cite.mesh_neighbor_talkback, false);
+    assert.equal(cite.mesh_reheal_allowed, "live|locked|isolated|tip-hash");
+    assert.equal(cite.mesh_reheal_forbidden, "bodies|diffs|vote-to-fix");
+    assert.equal(cite.mesh_reheal_action, "isolate+drop-tether+local-phoenix");
+    assert.equal(cite.mesh_softwares_runtime_only, true);
     assert.equal(cite.mesh_phoenix_brings_uk_back, false);
     assert.equal(cite.mesh_live_sync, false);
     assert.equal(cite.mesh_server_pull_erases_records, false);
@@ -638,6 +645,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /QNM-BUILD-1\.0 rollup: live\|locked\|isolated counts only/);
     assert.match(llms, /SPLIT THE WIRES/);
     assert.match(llms, /COLD-COPY SURVIVAL/);
+    assert.match(llms, /REHEAL refuse/);
+    assert.match(llms, /No neighbor talk-back-to-health/);
+    assert.match(llms, /Softwares stays Runtime-only/);
     assert.match(llms, /Die-with-pull does not bring godlock\.uk back/);
     assert.match(llms, /No Node Gate/);
     assert.match(llms, /No auto-heal/);
@@ -836,6 +846,7 @@ describe("homepage stays a natural argument surface", () => {
     assert.match(html, /Suite mesh: on \(read-only suite presence\)/);
     assert.match(html, /SPLIT THE WIRES/);
     assert.match(html, /COLD-COPY SURVIVAL/);
+    assert.match(html, /REHEAL refuse/);
     assert.match(html, /die-with-pull does not bring godlock\.uk back/);
     assert.doesNotMatch(html, /Suite mesh: off/);
     assert.match(html, /QNM-BUILD-1\.0/);

@@ -281,10 +281,10 @@ ${ecosystemNav()}
       var locked=r.locked!=null?r.locked:0;
       var isolated=r.isolated!=null?r.isolated:0;
       meshEl.textContent=on
-        ?("Suite mesh: on · live "+live+" · locked "+locked+" · isolated "+isolated+". SPLIT THE WIRES. COLD-COPY SURVIVAL. QNS-CD-1.0. Not an anonymity network.")
+        ?("Suite mesh: on · live "+live+" · locked "+locked+" · isolated "+isolated+". SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. QNS-CD-1.0. Not an anonymity network.")
         :(j.mesh.status==="unavailable"
-          ?"Suite mesh: on (read-only suite presence). Rollup unavailable. SPLIT THE WIRES. Phoenix local only — die-with-pull does not bring godlock.uk back. COLD-COPY SURVIVAL. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network."
-          :"Suite mesh: on (read-only suite presence). SPLIT THE WIRES. COLD-COPY SURVIVAL. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.");
+          ?"Suite mesh: on (read-only suite presence). Rollup unavailable. SPLIT THE WIRES. Phoenix local only — die-with-pull does not bring godlock.uk back. COLD-COPY SURVIVAL. REHEAL refuse. No neighbor talk-back-to-health. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network."
+          :"Suite mesh: on (read-only suite presence). SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.");
     }
   }
   function beat(){

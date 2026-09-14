@@ -307,17 +307,13 @@ describe("publicMesh and status line", () => {
     assert.equal(pub.status_url, "https://godlock.uk/runtime/v1/mesh/status");
     assert.equal(pub.list, "https://godlock.uk/runtime/v1/mesh/nodes");
     assert.equal(pub.leave, "https://godlock.uk/runtime/v1/mesh/leave");
-    assert.match(meshStatusLine(pub), /Suite mesh: on · live 2 · locked 0 · isolated 0/);
-    assert.match(meshStatusLine(pub), /SPLIT THE WIRES/);
-    assert.match(meshStatusLine(pub), /COLD-COPY SURVIVAL/);
-    assert.match(meshStatusLine(pub), /REHEAL refuse/);
-    assert.match(meshStatusLine(emptyMesh()), /Suite mesh: on \(read-only suite presence\)/);
-    assert.match(meshStatusLine(emptyMesh()), /SPLIT THE WIRES/);
-    assert.match(meshStatusLine(emptyMesh()), /COLD-COPY SURVIVAL/);
-    assert.match(meshStatusLine(emptyMesh()), /REHEAL refuse/);
-    assert.match(meshStatusLine(emptyMesh()), /die-with-pull does not bring godlock\.uk back/);
+    assert.equal(meshStatusLine(pub), "Suite mesh: on · live 2 · locked 0 · isolated 0");
+    assert.doesNotMatch(meshStatusLine(pub), /SPLIT THE WIRES|COLD-COPY SURVIVAL|REHEAL|anonymity network/);
+    assert.equal(meshStatusLine(emptyMesh()), "Suite mesh: on · rollup unavailable");
+    assert.equal(meshStatusLine({ enabled: false, status: "on" }), "Suite mesh: on");
+    assert.doesNotMatch(meshStatusLine(emptyMesh()), /SPLIT THE WIRES|COLD-COPY SURVIVAL|REHEAL|die-with-pull|anonymity network/);
     assert.doesNotMatch(meshStatusLine(emptyMesh()), /\boff\b/);
-    assert.match(meshStatusLine(emptyMesh({ status: "unavailable" })), /unavailable/);
+    assert.equal(meshStatusLine(emptyMesh({ status: "unavailable" })), "Suite mesh: on · rollup unavailable");
     const stamped = alignPublicMeshSurface({
       enabled: true,
       live_nodes: 37,
@@ -578,9 +574,8 @@ describe("GodLock.uk mesh routes", () => {
     const html = await stats.text();
     assert.match(html, /id="stat-live-nodes">0</);
     assert.match(html, /Suite mesh: on · live 0 · locked 2 · isolated 1/);
-    assert.match(html, /SPLIT THE WIRES/);
-    assert.match(html, /COLD-COPY SURVIVAL/);
-    assert.match(html, /REHEAL refuse/);
+    const visibleMesh = html.replace(/<script[\s\S]*?<\/script>/gi, "");
+    assert.doesNotMatch(visibleMesh, /SPLIT THE WIRES|COLD-COPY SURVIVAL|REHEAL refuse|Public HTTPS engine/);
     assert.doesNotMatch(html, /id="node-gate"/);
     assert.doesNotMatch(html, /href="\/node-gate"/);
     const count = await (await worker.fetch(new Request("https://godlock.uk/count"), env)).json();
@@ -604,15 +599,11 @@ describe("GodLock.uk mesh routes", () => {
     assert.equal(stats.live_nodes, stats.site_live_nodes);
     const html = await (await worker.fetch(new Request("https://godlock.uk/"), env)).text();
     assert.match(html, /id="mesh-status"/);
-    assert.match(html, /Suite mesh: on \(read-only suite presence\)/);
-    assert.match(html, /SPLIT THE WIRES/);
-    assert.match(html, /COLD-COPY SURVIVAL/);
-    assert.match(html, /REHEAL refuse/);
-    assert.match(html, /No neighbor talk-back-to-health/);
+    assert.match(html, /Suite mesh: on · rollup unavailable/);
+    const visibleHome = html.replace(/<script[\s\S]*?<\/script>/gi, "");
+    assert.doesNotMatch(visibleHome, /SPLIT THE WIRES|COLD-COPY SURVIVAL|REHEAL refuse|No neighbor talk-back-to-health/);
+    assert.doesNotMatch(visibleHome, /QNM-BUILD-1\.0|QNS-CD-1\.0|Not an anonymity network|Public HTTPS engine/);
     assert.doesNotMatch(html, /Suite mesh: off/);
-    assert.match(html, /QNM-BUILD-1\.0/);
-    assert.match(html, /QNS-CD-1\.0/);
-    assert.match(html, /Not an anonymity network/);
     assert.doesNotMatch(html, /id="node-gate"/);
     assert.doesNotMatch(html, /ffmpeg farm/);
   });

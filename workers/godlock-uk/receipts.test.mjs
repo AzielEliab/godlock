@@ -408,9 +408,12 @@ describe("ACT-RECEIPT-1.0 section on /receipts only", () => {
     assert.match(html, /Functionally specified digital information/);
     assert.match(html, new RegExp("/receipt/" + row.id));
     assert.match(html, /<h2>Public action receipts \(ACT-RECEIPT-1\.0\)<\/h2>/);
+    assert.match(html, /id="ingest-tip"/);
+    assert.match(html, /cite, don't merge/);
     const challengeAt = html.indexOf("Public questions and the hash-chained receipt list");
+    const ingestAt = html.indexOf('id="ingest-tip"');
     const actAt = html.indexOf(ACT_RECEIPT_HEADING);
-    assert.ok(challengeAt > 0 && actAt > challengeAt);
+    assert.ok(challengeAt > 0 && ingestAt > challengeAt && actAt > ingestAt);
     assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/receipts"/);
     assert.equal(ACT_RECEIPT_ORIGIN, "https://www.azielcorpuslibrary.net/receipts");
     assert.match(html, /href="https:\/\/www\.azieleliab\.com\/receipts">ae</);

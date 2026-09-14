@@ -64,6 +64,7 @@ export function ingestIndexes() {
     cite: host + "/cite.json",
     llms: host + "/llms.txt",
     ai: host + "/ai.txt",
+    shelves: host + "/shelves",
     robots: host + "/robots.txt",
   };
 }

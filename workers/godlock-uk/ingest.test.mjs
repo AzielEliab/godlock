@@ -88,6 +88,7 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.equal(indexes.cite, CANON_HOST + "/cite.json");
     assert.equal(indexes.llms, CANON_HOST + "/llms.txt");
     assert.equal(indexes.ai, CANON_HOST + "/ai.txt");
+    assert.equal(indexes.shelves, CANON_HOST + "/shelves");
     const cite = ingestCiteFields();
     assert.equal(cite.ingest_tip, tip);
     assert.equal(cite.ingest_sha256, tip);
@@ -235,6 +236,9 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.match(llms, /## RE-EXPAND-FROM-ARCHIVE/);
     assert.match(llms, /## CROSS-NETWORK-SURVIVAL/);
     assert.match(llms, /## NO-LIE \/ NO-REWRITE/);
+    assert.match(llms, /## Cold multi-shelf/);
+    assert.match(llms, /NO-FAN/);
+    assert.match(llms, /https:\/\/www\.azielcorpuslibrary\.net\/shelves/);
     assert.match(llms, /no rewrite key/);
     assert.match(llms, /network never allowed to lie/);
     assert.match(llms, new RegExp(firstScreenTip()));

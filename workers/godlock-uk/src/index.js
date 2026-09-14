@@ -27,6 +27,7 @@ import {
   personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, wellKnownAzielDoc,
   AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE, WHO_PATH,
 } from "./seo.js";
+import { shelvesDoc } from "./shelves.js";
 import {
   fetchCatalogProducts, softwareSuite, softwareApiDoc, publicSoftwaresList,
   SOFTWARE_HTML_CACHE_CONTROL,
@@ -601,6 +602,9 @@ export default {
       }
       if (path === "/ai.txt") {
         return new Response(aiDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+      }
+      if (path === "/shelves" || path === "/v1/shelves") {
+        return json(shelvesDoc());
       }
       if (path === "/person.jsonld" || path === "/.well-known/person.jsonld") {
         return new Response(JSON.stringify(personJsonLd(), null, 2), {

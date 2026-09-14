@@ -403,6 +403,7 @@ describe("AZindex identity machine", () => {
     assert.ok(!xml.includes(CANON_HOST + "/#software"));
     assert.ok(!xml.includes(CANON_HOST + "/#receipts"));
     assert.ok(xml.includes(CANON_HOST + "/llms.txt"));
+    assert.ok(xml.includes(CANON_HOST + "/shelves"));
     const cite = citeDoc();
     assert.equal(cite.identity_machine.person_id, AZIEL_PERSON_ID);
     assert.equal(cite.priority_pages.who_is_aziel_eliab, CANON_HOST + "/who-is-aziel-eliab.txt");

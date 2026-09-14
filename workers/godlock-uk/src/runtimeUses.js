@@ -28,6 +28,8 @@ const SEO_STATIC = new Set([
   "/cite.json",
   "/llms.txt",
   "/ai.txt",
+  "/shelves",
+  "/v1/shelves",
   "/robots.txt",
   "/sitemap.xml",
   "/sitemap-index.xml",

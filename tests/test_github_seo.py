@@ -119,6 +119,17 @@ def test_ingest_as_receipt_and_re_expand_law():
     assert CITE["zenodo_refuse"] == "CNS-ZENODO-IP-BAN"
     assert CITE["plane_b_codeberg_tip_pack"] == "b549362c0736ddb54ddc488812327c464e0da1167281f92fd1a4263eedf5df37"
     assert CITE["plane_b_codeberg_status"] == "slot"
+    assert CITE["plane_b_working_targets"] == ["codeberg", "archive.org", "framagit"]
+    assert CITE["plane_b_archive_org_url"] == "https://archive.org/details/aziel-lockset-tip"
+    assert CITE["plane_b_archive_org_hash_verify"] == "pass"
+    assert CITE["plane_b_framagit_url"] is None
+    assert CITE["plane_b_gitflic_refuse"] == "CNS-GITFLIC-EMAIL"
+    assert CITE["plane_b_gitlab_refuse"] == "CNS-GITLAB-CF-LOOP"
+    assert CITE["redline_spec"] == "REDLINE-2026-09-14"
+    assert CITE["token_header_only"] is True
+    assert CITE["foldlock_cite_only"] is True
+    assert CITE["foldlock_encryption"] is False
+    assert CITE["visible_1520"] is False
     assert CITE["plane_c_attest"] == "CNS-OPERATOR-ATTEST"
     assert CITE["cap7_sites"]["godlock"]["design_of"] == "https://godlock.uk/"
     assert CITE["cap7_sites"]["godlock"]["resolves_to_hub"] is False
@@ -134,6 +145,10 @@ def test_ingest_as_receipt_and_re_expand_law():
         assert "NO-LIE / NO-REWRITE" in text
         assert "COLD-MULTI-SHELF-1.0" in text
         assert "https://www.azielcorpuslibrary.net/shelves" in text
+        assert "ALL-TARGETS" in text or "framagit" in text
+        assert "https://archive.org/details/aziel-lockset-tip" in text
+        assert "CNS-GITFLIC-EMAIL" in text
+        assert "Framagit url null" in text or "framagit url null" in text.lower()
         assert "NO-FAN" in text or "challenge only" in text
         assert "receipts that still hash" in text
         assert "copies not all on one tunnel" in text

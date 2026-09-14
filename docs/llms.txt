@@ -139,7 +139,7 @@ Person @id: https://www.azieleliab.com/#aziel
 Lamb Lens: Corpus is the public Lamb Lens shelf. GodLock does not fan Corpus.
 Growth-ON.
 Plane A: 5 published surfaces / 2 family radii (cloudflare + github). One CF/GitHub tunnel, not five shelves.
-Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg + archive.org hash-verify PASS (still SLOT). archive.org https://archive.org/details/aziel-lockset-tip. Framagit url null. GitFlic refused CNS-GITFLIC-EMAIL. GitLab refused CNS-GITLAB-CF-LOOP. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS).
+Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg + archive.org hash-verify PASS (still SLOT). archive.org https://archive.org/details/aziel-lockset-tip PASS and https://archive.org/details/aziel-lockset-tip_202609 PASS (same blast_radius archive-org; not a second independent shelf; independent_live_count stays 1). Framagit url null. GitFlic refused CNS-GITFLIC-EMAIL. GitLab refused CNS-GITLAB-CF-LOOP. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS).
 Zenodo tip-pack refused CNS-ZENODO-IP-BAN. doi null. Do not invent a DOI.
 Plane C: USB airgap SLOT until CNS-OPERATOR-ATTEST.
 Cap-7: design_of hubs; resolves_to_hub: false; name_may_change: true; public_icann: false. GodLock design_of https://godlock.uk/.

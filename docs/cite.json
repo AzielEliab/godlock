@@ -59,6 +59,8 @@
   "plane_b_codeberg_tip_pack": "b549362c0736ddb54ddc488812327c464e0da1167281f92fd1a4263eedf5df37",
   "plane_b_codeberg_status": "slot",
   "plane_b_archive_org_url": "https://archive.org/details/aziel-lockset-tip",
+  "plane_b_archive_org_secondary_url": "https://archive.org/details/aziel-lockset-tip_202609",
+  "plane_b_archive_org_secondary_item": "aziel-lockset-tip_202609",
   "plane_b_archive_org_hash_verify": "pass",
   "plane_b_framagit_url": null,
   "plane_b_gitflic_refuse": "CNS-GITFLIC-EMAIL",

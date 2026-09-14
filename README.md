@@ -153,7 +153,7 @@ No DOI is claimed. Do not invent one.
 - Counted download / install: https://godlock-download-tracker.vibelock.workers.dev/
 - GitHub: https://github.com/AzielEliab/godlock
 - Live cite JSON: https://godlock.uk/cite.json
-- Live shelves (COLD-MULTI-SHELF-1.0; challenge only; NO-FAN; Plane B ALL-TARGETS codeberg + archive.org PASS https://archive.org/details/aziel-lockset-tip; Framagit url null; GitFlic CNS-GITFLIC-EMAIL; GitLab CNS-GITLAB-CF-LOOP; Zenodo CNS-ZENODO-IP-BAN): https://godlock.uk/shelves
+- Live shelves (COLD-MULTI-SHELF-1.0; challenge only; NO-FAN; Plane B ALL-TARGETS codeberg + archive.org PASS https://archive.org/details/aziel-lockset-tip and https://archive.org/details/aziel-lockset-tip_202609, same blast_radius, independent_live_count=1; Framagit url null; GitFlic CNS-GITFLIC-EMAIL; GitLab CNS-GITLAB-CF-LOOP; Zenodo CNS-ZENODO-IP-BAN): https://godlock.uk/shelves
 - Canonical shelves: https://www.azielcorpuslibrary.net/shelves
 - Repo crawl aids: [docs/cite.json](docs/cite.json) · [docs/llms.txt](docs/llms.txt) · [CITATION.cff](CITATION.cff)
 

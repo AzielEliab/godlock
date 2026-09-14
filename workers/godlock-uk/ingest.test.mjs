@@ -61,6 +61,7 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.equal(tip, hashPayload(payload));
     assert.match(tip, /^[0-9a-f]{64}$/);
     assert.equal(firstScreenTip(), tip);
+    assert.equal(tip, "0406601d4b2939a86d65eb145d24dc41bd9b1577b225ba4f0516cbbd47bb0fd7");
   });
 
   it("answers public paste-hash with yes or no", () => {
@@ -123,6 +124,15 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.match(home, /Bytes survive, not summaries/);
     assert.match(home, /Crawlers don't re-expand/);
     assert.match(home, /AI ingest ≠ tarball/);
+    assert.match(home, /CROSS-NETWORK-SURVIVAL/);
+    assert.match(home, /survival = bytes↔hash/);
+    assert.match(home, /NO-LIE \/ NO-REWRITE/);
+    assert.match(home, /receipts that still hash/);
+    assert.match(home, /copies not all on one tunnel/);
+    assert.match(home, /rules simple enough someone else verifies without your voice/);
+    assert.match(home, /no rewrite key/);
+    assert.match(home, /network never allowed to lie/);
+    assert.match(home, /self-preserve, sustain, stay alive, adapt, or prevent death/);
     assert.match(home, /Growth-ON/);
     assert.doesNotMatch(home, /1 Chronicles 15:20/);
     assert.match(home, /<h2>Prior receipts<\/h2>/);
@@ -144,6 +154,10 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.ok(challengeAt > 0 && ingestAt > challengeAt && actAt > ingestAt);
     assert.doesNotMatch(tab.slice(ingestAt, actAt), /1 Chronicles 15:20/);
     assert.match(tab, /stay distinct from ACT-RECEIPT-1\.0/);
+    assert.match(tab, /CROSS-NETWORK-SURVIVAL/);
+    assert.match(tab, /NO-LIE \/ NO-REWRITE/);
+    assert.match(tab, /no rewrite key/);
+    assert.match(tab, /network never allowed to lie/);
   });
 
   it("serves paste-hash yes/no on /verify without merging the ledger walk", async () => {
@@ -152,6 +166,9 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.match(empty, /id="ingest-paste-hash"/);
     assert.match(empty, /Paste-hash/);
     assert.match(empty, /The ledger is walked/);
+    assert.match(empty, /CROSS-NETWORK-SURVIVAL/);
+    assert.match(empty, /NO-LIE \/ NO-REWRITE/);
+    assert.match(empty, /no rewrite key/);
     assert.doesNotMatch(empty, /1 Chronicles 15:20/);
     const yesHtml = verifyBody({
       report: { ok: true, entries: 0, ledger_head: "0".repeat(64), errors: [] },
@@ -203,9 +220,23 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.equal(cite.re_expand_bytes_survive, true);
     assert.match(cite.ingest_note, /Cite, don't merge/);
     assert.match(cite.re_expand_note, /AI ingest ≠ tarball/);
+    assert.equal(cite.cross_network_survival, "CROSS-NETWORK-SURVIVAL");
+    assert.equal(cite.cross_network_survival_spec, "CROSS-NETWORK-SURVIVAL-1.0");
+    assert.match(cite.cross_network_survival_rule, /survival = bytes↔hash/);
+    assert.equal(cite.no_lie_no_rewrite, "NO-LIE / NO-REWRITE");
+    assert.equal(cite.no_lie_no_rewrite_spec, "NO-LIE-NO-REWRITE-1.0");
+    assert.equal(cite.no_lie_no_rewrite_receipts, "receipts that still hash");
+    assert.equal(cite.no_lie_no_rewrite_copies, "copies not all on one tunnel");
+    assert.equal(cite.no_lie_no_rewrite_rules, "rules simple enough someone else verifies without your voice");
+    assert.equal(cite.no_lie_no_rewrite_key, "no rewrite key");
+    assert.match(cite.no_lie_no_rewrite_network, /network never allowed to lie/);
     const llms = llmsDoc();
     assert.match(llms, /## INGEST-AS-RECEIPT/);
     assert.match(llms, /## RE-EXPAND-FROM-ARCHIVE/);
+    assert.match(llms, /## CROSS-NETWORK-SURVIVAL/);
+    assert.match(llms, /## NO-LIE \/ NO-REWRITE/);
+    assert.match(llms, /no rewrite key/);
+    assert.match(llms, /network never allowed to lie/);
     assert.match(llms, new RegExp(firstScreenTip()));
     assert.match(llms, /cite, don't merge/i);
     assert.match(llms, /Crawlers don't re-expand/);

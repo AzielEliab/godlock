@@ -38,4 +38,7 @@ INGEST-AS-RECEIPT: first-screen SHA-256 + stable IDs + canonical URL. Many index
 
 RE-EXPAND-FROM-ARCHIVE: bytes survive, not summaries. Re-expand = archive verify then local node. Crawlers don't re-expand. AI ingest ≠ tarball.
 
+CROSS-NETWORK-SURVIVAL: If network + live data die tomorrow, the chain still survives via cold copies across independent shelves; survival = bytes↔hash.
+NO-LIE / NO-REWRITE: receipts that still hash; copies not all on one tunnel; rules simple enough someone else verifies without your voice; no rewrite key; network never allowed to lie — even to self-preserve, sustain, stay alive, adapt, or prevent death.
+
 See docs/llms.txt for the full brief.

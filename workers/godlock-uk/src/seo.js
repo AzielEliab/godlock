@@ -1,5 +1,6 @@
 /** Crawl/index metadata for GodLock.uk. Author: Aziel Eliab. */
 import { hideInternalDetermination } from "./publicCopy.js";
+import { ingestCiteFields, ingestLlmsSection } from "./ingestReceipt.js";
 
 export const CANON_HOST = "https://godlock.uk";
 export const FALLBACK_HOST = "https://godlock-uk.vibelock.workers.dev";
@@ -1374,6 +1375,8 @@ export function robotsTxt() {
     "# Homepage hashes (#software #runtime #receipts #donate #reason #verify #AzielEliab) map to real paths.",
     "# Softwares HTML: /software. Catalog JSON: /v1/software (not a second FragGate door). Door: /runtime.",
     "# Same-origin mesh: GET /v1/mesh and /v1/mesh/status (read-only suite presence). GET never enables. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health.",
+    "# INGEST-AS-RECEIPT-1.0: first-screen SHA-256 + stable IDs + canonical URL. Many indexes, one tip. Cite, don't merge. Growth-ON.",
+    "# RE-EXPAND-FROM-ARCHIVE-1.0: bytes survive, not summaries. Re-expand = archive verify then local node. Crawlers don't re-expand. AI ingest ≠ tarball.",
     "",
   ];
   const star = [
@@ -1657,6 +1660,7 @@ export function citeDoc() {
     mesh_live_sync: false,
     mesh_server_pull_erases_records: false,
     mesh_data_outlives_creators: true,
+    ...ingestCiteFields(),
     mesh_default: "on",
     mesh_readonly: true,
     mesh_anonymity_network: false,
@@ -1766,7 +1770,7 @@ export function llmsDoc() {
     + "Homepage hashes are not crawl paths. Equivalents: "
     + Object.entries(hashPathEquivalentUrls()).map(([from, to]) => from + " → " + to).join(" · ")
     + "\nSitemap lists the real paths only.\n"
-    + "\n"
+    + ingestLlmsSection()
     + "Aziel Corpus Library: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "He Didn't Jump: " + HEDIDNTJUMP + "\n"
@@ -1890,7 +1894,7 @@ export function siteOpenApi() {
       "/v1/software": { get: { operationId: "godlockUkSoftwareApi", summary: "Same-origin Softwares JSON (Aziel Runtime only; official listing at azieleliab.com/software)", responses: { "200": { description: "OK" } } } },
       "/donate": { get: { operationId: "godlockUkDonate", summary: "AZL-DONATE-1.0 door (static rails; no KV; payment is not a key)", responses: { "200": { description: "HTML or JSON" } } } },
       "/receipts": { get: { operationId: "godlockUkReceipts", summary: "Public questions + hash-chained receipt list (newest first; isolated omitted)", responses: { "200": { description: "HTML or JSON" } } } },
-      "/verify": { get: { operationId: "godlockUkVerify", summary: "Walk the public hash-chained ledger", responses: { "200": { description: "HTML or JSON" } } } },
+      "/verify": { get: { operationId: "godlockUkVerify", summary: "Walk the public hash-chained ledger; INGEST-AS-RECEIPT paste-hash yes/no against the first-screen tip", responses: { "200": { description: "HTML or JSON" } } } },
       "/reason": { get: { operationId: "godlockUkReason", summary: "Specified Fit, Not Pretty Spirals", responses: { "200": { description: "HTML or JSON" } } } },
       "/AzielEliab": { get: { operationId: "godlockUkAzielEliab", summary: "About Aziel Eliab — living publisher of GodLock (product, not a Person)", responses: { "200": { description: "HTML or JSON" } } } },
       "/runtime": { get: { operationId: "godlockUkRuntime", summary: "Same-origin Aziel Runtime FragGate door", responses: { "200": { description: "OK" } } } },
@@ -1900,8 +1904,8 @@ export function siteOpenApi() {
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
       "/.well-known/mcp.json": { get: { operationId: "godlockUkWellKnownMcp", summary: "MCP discovery JSON pointing at POST /runtime/mcp (not a second FragGate door)", responses: { "200": { description: "OK" } } } },
       "/mcp.json": { get: { operationId: "godlockUkMcpDiscovery", summary: "Same body as /.well-known/mcp.json — discovery only", responses: { "200": { description: "OK" } } } },
-      "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record", responses: { "200": { description: "OK" } } } },
-      "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief", responses: { "200": { description: "OK" } } } },
+      "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record — INGEST-AS-RECEIPT tip + cite, don't merge + RE-EXPAND-FROM-ARCHIVE", responses: { "200": { description: "OK" } } } },
+      "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief — keep the hash; cite, don't merge; crawlers don't re-expand", responses: { "200": { description: "OK" } } } },
       "/person.jsonld": { get: { operationId: "godlockUkPersonJsonLd", summary: "Shared AZindex Person (https://www.azieleliab.com/#aziel)", responses: { "200": { description: "OK" } } } },
       "/.well-known/person.jsonld": { get: { operationId: "godlockUkWellKnownPersonJsonLd", summary: "Same body as /person.jsonld — shared AZindex Person @id https://www.azieleliab.com/#aziel", responses: { "200": { description: "OK" } } } },
       "/identity.jsonld": { get: { operationId: "godlockUkIdentityJsonLd", summary: "Alias of /person.jsonld — same Person @id", responses: { "200": { description: "OK" } } } },

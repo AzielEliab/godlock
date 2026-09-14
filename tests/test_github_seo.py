@@ -81,6 +81,47 @@ def test_readme_does_not_claim_digital_library_completeness():
         assert phrase not in json.dumps(CITE)
 
 
+def test_ingest_as_receipt_and_re_expand_law():
+    for text in (README, SKILL, LLMS, AI):
+        assert "INGEST-AS-RECEIPT" in text
+        assert "cite, don't merge" in text
+        assert "RE-EXPAND-FROM-ARCHIVE" in text
+        assert "Crawlers don't re-expand" in text
+        assert "AI ingest" in text
+        assert "tarball" in text
+    assert CITE["ingest_as_receipt"] == "INGEST-AS-RECEIPT"
+    assert CITE["ingest_as_receipt_spec"] == "INGEST-AS-RECEIPT-1.0"
+    assert CITE["ingest_growth"] == "ON"
+    assert CITE["ingest_cite_dont_merge"] == "cite, don't merge"
+    assert CITE["ingest_many_indexes_one_tip"] is True
+    assert CITE["re_expand_from_archive"] == "RE-EXPAND-FROM-ARCHIVE"
+    assert CITE["re_expand_crawlers"] is False
+    assert CITE["re_expand_ai_ingest_is_tarball"] is False
+    assert CITE["re_expand_bytes_survive"] is True
+    assert "archive verify then local node" in CITE["re_expand_path"]
+    assert CITE["cross_network_survival"] == "CROSS-NETWORK-SURVIVAL"
+    assert CITE["cross_network_survival_spec"] == "CROSS-NETWORK-SURVIVAL-1.0"
+    assert "survival = bytes↔hash" in CITE["cross_network_survival_rule"]
+    assert "cold copies across independent shelves" in CITE["cross_network_survival_rule"]
+    assert CITE["no_lie_no_rewrite"] == "NO-LIE / NO-REWRITE"
+    assert CITE["no_lie_no_rewrite_spec"] == "NO-LIE-NO-REWRITE-1.0"
+    assert CITE["no_lie_no_rewrite_receipts"] == "receipts that still hash"
+    assert CITE["no_lie_no_rewrite_copies"] == "copies not all on one tunnel"
+    assert CITE["no_lie_no_rewrite_rules"] == "rules simple enough someone else verifies without your voice"
+    assert CITE["no_lie_no_rewrite_key"] == "no rewrite key"
+    assert "network never allowed to lie" in CITE["no_lie_no_rewrite_network"]
+    assert "self-preserve, sustain, stay alive, adapt, or prevent death" in CITE["no_lie_no_rewrite_network"]
+    for text in (LLMS, AI):
+        assert "CROSS-NETWORK-SURVIVAL" in text
+        assert "survival = bytes↔hash" in text
+        assert "NO-LIE / NO-REWRITE" in text
+        assert "receipts that still hash" in text
+        assert "copies not all on one tunnel" in text
+        assert "no rewrite key" in text
+        assert "network never allowed to lie" in text
+    assert "GodLock-first" in CITE["software_note"]
+
+
 def test_readme_godlock_first_softwares():
     assert "GodLock-first" in README
     assert "Softwares heading → list" in README or "heading → list" in README

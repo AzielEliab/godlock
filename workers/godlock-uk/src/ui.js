@@ -18,6 +18,7 @@ import { receiptScoreDelta } from "./engine.js";
 import { publicSoftwaresList, invokeHref, workerHref, stripRuntimeFragGateMash, suiteFamily } from "./catalog.js";
 import { donateBody as donatePageBody } from "./donate.js";
 import { actReceiptsSection } from "./actReceipts.js";
+import { firstScreenSection, ingestTipSection, pasteHashSection } from "./ingestReceipt.js";
 
 export const CSS = `
 :root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
@@ -98,6 +99,11 @@ footer{margin-top:36px;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
 .donate-qr{margin:12px 0 0;width:128px;height:128px;padding:0;background:#fff;border-radius:4px;overflow:hidden}
 .donate-qr img{display:block;width:128px;height:128px;background:#fff}
 .prior-more{margin:10px 0 0}
+.ingest-receipt{margin:0 0 16px;padding:14px 16px;background:var(--paper);border:1px solid var(--line);border-radius:14px}
+.ingest-receipt h2{margin:0 0 8px;font-size:16px;letter-spacing:-.02em}
+.ingest-receipt .k{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:10px 0 4px}
+.ingest-receipt p{margin:0 0 8px}
+.ingest-tip{margin:22px 0 0;padding:18px 16px}
 .act-receipts{margin:28px 0 0;padding:22px 0 0;border-top:1px solid var(--line)}
 .act-receipts h2{margin:0 0 10px;font-size:18px;letter-spacing:-.02em}
 .act-receipts .k{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:10px 0 4px}
@@ -358,6 +364,7 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
   const shown = (prior || []).slice(0, HOME_PRIOR_LIMIT);
   const list = priorReceiptItems(shown) || `<p class="muted">No public receipts yet. Submit a challenge.</p>`;
   return `
+${firstScreenSection()}
 <div class="stats">
   <div class="stat"><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
   <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
@@ -440,6 +447,7 @@ export function receiptsBody({ rows, total, page, pageSize, stats }) {
 <p class="muted"><a href="/">Submit a challenge</a> on the Engine.</p>
 ${receiptsPager({ page, pages, total: total != null ? total : receipts })}
 <ul class="prior">${list}</ul>
+${ingestTipSection()}
 ${actReceiptsSection(rows)}
 `;
 }
@@ -461,7 +469,7 @@ export function answerCard(row, latest) {
   </article>`;
 }
 
-export function verifyBody({ report }) {
+export function verifyBody({ report, paste }) {
   const v = report || { ok: false };
   const cls = v.ok ? "ok" : "bad";
   const title = v.ok ? "VERIFIED" : "VERIFICATION FAILED";
@@ -476,7 +484,7 @@ export function verifyBody({ report }) {
     errors: v.errors || [],
     verified_utc: new Date().toISOString(),
   };
-  return `<div class="card"><h2 class="${cls}">${title}</h2><p class="muted">The ledger is walked. Each entry_hash is recomputed from canonical JSON (sorted keys, comma-colon separators) without the stored hash. Isolated submissions stay in the archive and are omitted from the public feed.</p><pre class="verify">${esc(JSON.stringify(safe, null, 2))}</pre><p class="actions"><a class="button" href="/">Back</a></p></div>`;
+  return `${pasteHashSection(paste)}<div class="card"><h2 class="${cls}">${title}</h2><p class="muted">The ledger is walked. Each entry_hash is recomputed from canonical JSON (sorted keys, comma-colon separators) without the stored hash. Isolated submissions stay in the archive and are omitted from the public feed. Challenge ledger walk stays distinct from ACT-RECEIPT and from the first-screen paste-hash above.</p><pre class="verify">${esc(JSON.stringify(safe, null, 2))}</pre><p class="actions"><a class="button" href="/">Back</a></p></div>`;
 }
 
 export function specifiedFitPublicHtml() {

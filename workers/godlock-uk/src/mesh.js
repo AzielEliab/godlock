@@ -1,5 +1,5 @@
 /**
- * Suite mesh client aligned to QNM-BUILD-1.0 + SPLIT THE WIRES + COLD-COPY SURVIVAL.
+ * Suite mesh client aligned to QNM-BUILD-1.0 + SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL.
  * Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal.
  * Read-only suite presence ON. This Worker has no mesh-off function.
  * Mesh may be unavailable on public GodLock — refuse/status still bind the law.
@@ -8,6 +8,8 @@
  * packet transfer). Local qnsd lives in qnm-node. This Worker does not
  * implement qnsd and does not expose a public qnsd proxy.
  * Phoenix is local only. Die-with-pull does not bring godlock.uk back.
+ * REHEAL refuse: poisoned node uses own last good tip + verified trusted pull
+ * OR phoenix-WAIT. No neighbor talk-back-to-health. Softwares stays Runtime-only.
  * Identity Aziel Eliab only. Runtime routes may not be merged yet — fail closed.
  * Author: Aziel Eliab.
  */
@@ -30,6 +32,13 @@ export const SPLIT_THE_WIRES = "SPLIT THE WIRES";
 export const SPLIT_THE_WIRES_SPEC = "SPLIT-THE-WIRES-1.0";
 export const COLD_COPY_SURVIVAL = "COLD-COPY SURVIVAL";
 export const COLD_COPY_SURVIVAL_SPEC = "COLD-COPY-SURVIVAL-1.0";
+export const REHEAL = "REHEAL";
+export const REHEAL_SPEC = "REHEAL-1.0";
+export const REHEAL_ALLOWED = Object.freeze(["live", "locked", "isolated", "tip-hash"]);
+export const REHEAL_FORBIDDEN = Object.freeze(["bodies", "diffs", "vote-to-fix"]);
+export const REHEAL_ACTION = "isolate+drop-tether+local-phoenix";
+export const REHEAL_RECOVER = "own-last-good-tip+verified-trusted-pull";
+export const REHEAL_OR = "phoenix-WAIT";
 export const TIP_TICK_MIN_MS = 500;
 export const TIP_TICK_MAX_MS = 1000;
 export const PAYLOAD_DWELL_S = 777;
@@ -91,8 +100,33 @@ export const SPLIT_THE_WIRES_NOTE =
 export const COLD_COPY_SURVIVAL_NOTE =
   "COLD-COPY SURVIVAL. Cold copies multiply. Live sync is refused. The tip is expensive to erase. A server pull does not erase records. Data outlives creators.";
 
+export const REHEAL_LAW = Object.freeze({
+  name: REHEAL,
+  spec: REHEAL_SPEC,
+  author: AUTHOR,
+  identity: AUTHOR,
+  poisoned: Object.freeze({
+    recover: REHEAL_RECOVER,
+    or: REHEAL_OR,
+    neighbor_talkback: false,
+    action: REHEAL_ACTION,
+  }),
+  allowed: REHEAL_ALLOWED,
+  forbidden: REHEAL_FORBIDDEN,
+  isolate: true,
+  drop_tether: true,
+  phoenix: "local",
+  phoenix_wait: true,
+  talk_back_to_health: false,
+  softwares: "runtime-only",
+  softwares_tab: false,
+  note: "REHEAL refuse. Poisoned node: own last good tip + verified trusted pull OR phoenix-WAIT. No neighbor talk-back-to-health. Allowed: live/locked/isolated/tip-hash. Forbidden: bodies/diffs/vote-to-fix. Isolate+drop tether+local phoenix. Softwares stays Runtime-only.",
+});
+
+export const REHEAL_NOTE = REHEAL_LAW.note;
+
 export const MESH_LAW_NOTE =
-  SPLIT_THE_WIRES_NOTE + " " + COLD_COPY_SURVIVAL_NOTE
+  SPLIT_THE_WIRES_NOTE + " " + COLD_COPY_SURVIVAL_NOTE + " " + REHEAL_NOTE
   + " Law binds when public GodLock mesh is unavailable. Author Aziel Eliab only.";
 
 /** Hub cite / Worker mesh cross-map. Not a Softwares-tab product. No public qnsd proxy. */
@@ -136,6 +170,7 @@ export const MESH_HEARTBEAT_PATH = "/v1/mesh/heartbeat";
 export const MESH_LEAVE_PATH = "/v1/mesh/leave";
 export const MESH_ENABLE_PATH = "/v1/mesh/enable";
 export const MESH_DISABLE_PATH = "/v1/mesh/disable";
+export const MESH_REHEAL_PATH = "/v1/mesh/reheal";
 /** @deprecated LIVE QNM rollup is GET /v1/mesh/status and /v1/mesh/nodes. /list 404s. */
 export const MESH_LIST_PATH = MESH_NODES_PATH;
 
@@ -162,6 +197,11 @@ export function isMeshDisablePath(pathname) {
   return p === MESH_DISABLE_PATH || p === RUNTIME_PATH + MESH_DISABLE_PATH;
 }
 
+export function isMeshRehealPath(pathname) {
+  const p = String(pathname || "").replace(/\/+$/, "") || "/";
+  return p === MESH_REHEAL_PATH || p === RUNTIME_PATH + MESH_REHEAL_PATH;
+}
+
 export function meshLawFields() {
   return {
     law: SPLIT_THE_WIRES,
@@ -177,6 +217,16 @@ export function meshLawFields() {
     live_sync: false,
     server_pull_erases_records: false,
     data_outlives_creators: true,
+    reheal: REHEAL,
+    reheal_spec: REHEAL_SPEC,
+    reheal_law: REHEAL_LAW,
+    neighbor_talkback: false,
+    reheal_allowed: REHEAL_ALLOWED,
+    reheal_forbidden: REHEAL_FORBIDDEN,
+    reheal_poisoned: REHEAL_RECOVER + "|" + REHEAL_OR,
+    reheal_action: REHEAL_ACTION,
+    softwares_runtime_only: true,
+    softwares_tab: false,
     law_binds_when_off: true,
     author: AUTHOR,
     identity: AUTHOR,
@@ -189,6 +239,7 @@ export function stampMeshLaw(doc) {
   if (typeof out.note === "string") {
     if (!/SPLIT THE WIRES/.test(out.note)) out.note = (out.note + " " + SPLIT_THE_WIRES_NOTE).trim();
     if (!/COLD-COPY SURVIVAL/.test(out.note)) out.note = (out.note + " " + COLD_COPY_SURVIVAL_NOTE).trim();
+    if (!/\bREHEAL\b/.test(out.note)) out.note = (out.note + " " + REHEAL_NOTE).trim();
   } else {
     out.note = MESH_LAW_NOTE;
   }
@@ -228,6 +279,21 @@ export function serverPullEraseRefused() {
     "CCS-PULL-ERASES",
     "A server pull does not erase records. Data outlives creators.",
     { server_pull_erases_records: false, data_outlives_creators: true },
+  );
+}
+
+export function rehealRefused() {
+  return meshLawRefuse(
+    "RH-NEIGHBOR-TALKBACK",
+    REHEAL_NOTE,
+    {
+      reheal: REHEAL,
+      neighbor_talkback: false,
+      allowed: REHEAL_ALLOWED,
+      forbidden: REHEAL_FORBIDDEN,
+      action: REHEAL_ACTION,
+      softwares: "runtime-only",
+    },
   );
 }
 
@@ -313,10 +379,92 @@ export function evaluateColdCopySurvival(act = {}) {
   return meshLawRefuse(reasons[0], "COLD-COPY SURVIVAL refuse: " + reasons[0], { reasons });
 }
 
+function rehealShareItems(act) {
+  const raw = act.share != null ? act.share : (act.gossip != null ? act.gossip : act.exchange);
+  if (raw == null) return [];
+  if (Array.isArray(raw)) return raw.map((item) => String(item || "").trim()).filter(Boolean);
+  return String(raw).split(/[|,/+\s]+/).map((item) => item.trim()).filter(Boolean);
+}
+
+function rehealPhoenixWait(act) {
+  const phoenix = String(act.phoenix || "").trim();
+  return act.phoenix_wait === true
+    || phoenix === "WAIT"
+    || phoenix === "phoenix-WAIT"
+    || act.or === REHEAL_OR;
+}
+
+function rehealOwnTipPull(act) {
+  const ownTip = act.own_last_good_tip === true
+    || act.last_good_tip === "own"
+    || act.tip === "own-last-good";
+  const trustedPull = act.verified_trusted_pull === true
+    || act.trusted_pull === "verified"
+    || act.pull === "verified-trusted";
+  return ownTip && trustedPull;
+}
+
+export function evaluateReheal(act = {}) {
+  const a = act && typeof act === "object" ? act : {};
+  const reasons = [];
+  if (
+    a.neighbor_talkback === true
+    || a.talk_back_to_health === true
+    || a.neighbor_heal === true
+    || a.heal_from_neighbor === true
+    || a.talkback === true
+  ) {
+    reasons.push("RH-NEIGHBOR-TALKBACK");
+  }
+  const share = rehealShareItems(a);
+  if (a.bodies === true || a.share_bodies === true || share.includes("bodies")) {
+    reasons.push("RH-BODIES");
+  }
+  if (a.diffs === true || a.share_diffs === true || share.includes("diffs")) {
+    reasons.push("RH-DIFFS");
+  }
+  if (
+    a.vote_to_fix === true
+    || a.vote === "fix"
+    || a.vote === "vote-to-fix"
+    || share.includes("vote-to-fix")
+  ) {
+    reasons.push("RH-VOTE-TO-FIX");
+  }
+  for (const item of share) {
+    if (!REHEAL_ALLOWED.includes(item) && !REHEAL_FORBIDDEN.includes(item)) {
+      reasons.push("RH-FORBIDDEN-SHARE");
+      break;
+    }
+  }
+  if (a.softwares_tab === true || a.softwares === "sprawl" || a.add_softwares === true || a.softwares_runtime_only === false) {
+    reasons.push("RH-SOFTWARES-RUNTIME-ONLY");
+  }
+  const poisoned = a.poisoned === true || a.node === "poisoned";
+  if (poisoned) {
+    if (a.isolate === false || a.isolated === false) reasons.push("RH-NO-ISOLATE");
+    if (a.drop_tether === false || a.keep_tether === true || a.tether === "keep") {
+      reasons.push("RH-KEEP-TETHER");
+    }
+    if (a.phoenix === "remote" || a.phoenix === "hunt" || a.phoenix_local === false) {
+      reasons.push("RH-REMOTE-PHOENIX");
+    }
+    if (!rehealPhoenixWait(a) && !rehealOwnTipPull(a)) {
+      reasons.push("RH-NO-OWN-TIP");
+    }
+  }
+  if (!reasons.length) {
+    return stampMeshLaw({ ok: true, code: "RH-OK", spec: QNM_SPEC });
+  }
+  return meshLawRefuse(reasons[0], "REHEAL refuse: " + reasons[0], { reasons });
+}
+
 export function evaluateMeshLaw(act = {}) {
   const wires = evaluateSplitTheWires(act);
   if (!wires.ok) return wires;
-  return evaluateColdCopySurvival(act);
+  const cold = evaluateColdCopySurvival(act);
+  if (!cold.ok) return cold;
+  return evaluateReheal(act);
 }
 
 export function meshDisableRefused() {
@@ -639,12 +787,12 @@ export function meshStatusLine(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   if (m.enabled) {
     const r = meshRollup(m);
-    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated + ". SPLIT THE WIRES. COLD-COPY SURVIVAL. QNS-CD-1.0. Not an anonymity network.";
+    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated + ". SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. QNS-CD-1.0. Not an anonymity network.";
   }
   if (m.status === "unavailable") {
-    return "Suite mesh: on (read-only suite presence). Rollup unavailable. SPLIT THE WIRES. Phoenix local only — die-with-pull does not bring godlock.uk back. COLD-COPY SURVIVAL. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
+    return "Suite mesh: on (read-only suite presence). Rollup unavailable. SPLIT THE WIRES. Phoenix local only — die-with-pull does not bring godlock.uk back. COLD-COPY SURVIVAL. REHEAL refuse. No neighbor talk-back-to-health. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
   }
-  return "Suite mesh: on (read-only suite presence). SPLIT THE WIRES. COLD-COPY SURVIVAL. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
+  return "Suite mesh: on (read-only suite presence). SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. QNM-BUILD-1.0. QNS-CD-1.0. Not an anonymity network.";
 }
 
 /**

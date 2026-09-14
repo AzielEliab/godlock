@@ -3,8 +3,9 @@
  * One input. Locked protocol. Append-only hash-chained receipts.
  * Not a forum, not a tunnel. Suite mesh is QNM-BUILD-1.0 (read-only, on):
  * live|locked|isolated counts only. No Node Gate. No auto-heal.
- * SPLIT THE WIRES + COLD-COPY SURVIVAL bind refuse/status even when mesh
+ * SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL bind refuse/status even when mesh
  * is unavailable. Phoenix is local only — die-with-pull does not bring .uk back.
+ * REHEAL refuse: no neighbor talk-back-to-health. Softwares stays Runtime-only.
  * Not an anonymity network. Author: Aziel Eliab.
  */
 import { randomBytes } from "node:crypto";
@@ -46,8 +47,10 @@ import {
   meshOpsDoc,
   isOriginMeshReadPath,
   isMeshDisablePath,
+  isMeshRehealPath,
   originMeshWriteRefused,
   meshDisableRefused,
+  rehealRefused,
   hubMeshStatusDoc,
   alignPublicMeshSurface,
 } from "./mesh.js";
@@ -662,6 +665,10 @@ export default {
 
       if (isMeshDisablePath(path)) {
         return json(meshDisableRefused(), 405, extraHeadersFor(nodeId));
+      }
+
+      if (isMeshRehealPath(path)) {
+        return json(rehealRefused(), 405, extraHeadersFor(nodeId));
       }
 
       if (isOriginMeshReadPath(path)) {

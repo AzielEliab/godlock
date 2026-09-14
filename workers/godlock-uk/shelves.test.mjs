@@ -18,12 +18,13 @@ import {
   PLANE_B_WORKING_TARGETS,
   PLANE_B_ALL_TARGETS,
   ARCHIVE_ORG_TIP_PACK_URL,
+  ARCHIVE_ORG_TIP_PACK_202609_URL,
   FRAMAGIT_TIP_PACK_URL,
   PLANE_C_ATTEST,
   CAP7_SITES,
   CORPUS_ROLL,
 } from "./src/shelves.js";
-import { azielEliabBody, whoPageHtml, homeBody } from "./src/ui.js";
+import { azielEliabBody, whoPageHtml, homeBody, softwareBody } from "./src/ui.js";
 
 function mockEnv() {
   const stmt = {
@@ -81,7 +82,15 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.equal(doc.planes.B.codeberg_tip_pack, "b549362c0736ddb54ddc488812327c464e0da1167281f92fd1a4263eedf5df37");
     assert.equal(doc.planes.B.archive_org_url, ARCHIVE_ORG_TIP_PACK_URL);
     assert.equal(doc.planes.B.archive_org_url, "https://archive.org/details/aziel-lockset-tip");
+    assert.equal(doc.planes.B.archive_org_secondary_url, ARCHIVE_ORG_TIP_PACK_202609_URL);
+    assert.equal(doc.planes.B.archive_org_secondary_url, "https://archive.org/details/aziel-lockset-tip_202609");
+    assert.equal(doc.planes.B.archive_org_secondary_item, "aziel-lockset-tip_202609");
+    assert.deepEqual(doc.planes.B.archive_org_items, ["aziel-lockset-tip", "aziel-lockset-tip_202609"]);
+    assert.equal(doc.planes.B.working_targets.filter((t) => t === "archive.org").length, 1);
     assert.equal(doc.planes.B.archive_org_hash_verify, "pass");
+    assert.equal(doc.planes.B.live_ready, false);
+    assert.equal(doc.independent_live_count, 1);
+    assert.equal(doc.independent_requirement_met, false);
     assert.equal(doc.planes.B.framagit_url, null);
     assert.equal(doc.planes.B.framagit_url, FRAMAGIT_TIP_PACK_URL);
     assert.equal(doc.planes.B.gitflic, GITFLIC_REFUSE);
@@ -110,7 +119,33 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.equal(archive.url, "https://archive.org/details/aziel-lockset-tip");
     assert.equal(archive.hash_verify, "pass");
     assert.equal(archive.tip_verified, true);
+    assert.equal(archive.independent, true);
     assert.equal(archive.refuse, PLANE_B_ALL_TARGETS);
+    assert.equal(archive.secondary_items[0].id, "plane-b-archive-org-tip-pack-202609");
+    assert.equal(archive.secondary_items[0].url, "https://archive.org/details/aziel-lockset-tip_202609");
+    assert.equal(archive.secondary_items[0].independent_shelf, false);
+    assert.equal(archive.secondary_items[0].pack_sha256, CODEBERG_TIP_PACK);
+    const archive202609 = doc.registry.shelves.find((s) => s.id === "plane-b-archive-org-tip-pack-202609");
+    assert.equal(archive202609.status, "slot");
+    assert.equal(archive202609.url, "https://archive.org/details/aziel-lockset-tip_202609");
+    assert.equal(archive202609.identifier, "aziel-lockset-tip_202609");
+    assert.equal(archive202609.hash_verify, "pass");
+    assert.equal(archive202609.tip_verified, true);
+    assert.equal(archive202609.pack_sha256, CODEBERG_TIP_PACK);
+    assert.equal(archive202609.pack_sha256, "b549362c0736ddb54ddc488812327c464e0da1167281f92fd1a4263eedf5df37");
+    assert.equal(archive202609.blast_radius, "archive-org");
+    assert.equal(archive202609.blast_radius, archive.blast_radius);
+    assert.equal(archive202609.independent, false);
+    assert.equal(archive202609.ia_flat_sha256, null);
+    assert.equal(archive202609.sha256sums_flat_check, "incomplete");
+    assert.equal(archive202609.wrap, "zip");
+    assert.equal(archive202609.same_pack_as, "plane-b-archive-org-tip-pack");
+    assert.equal(archive202609.required_for_plane_b_live, false);
+    assert.equal(archive202609.live_ready, false);
+    assert.equal(archive202609.doi, null);
+    assert.equal(archive202609.refuse, PLANE_B_ALL_TARGETS);
+    assert.ok(doc.slot.includes("plane-b-archive-org-tip-pack-202609"));
+    assert.ok(!doc.live.includes("plane-b-archive-org-tip-pack-202609"));
     const framagit = doc.registry.shelves.find((s) => s.id === "plane-b-framagit-tip-pack");
     assert.equal(framagit.status, "slot");
     assert.equal(framagit.url, null);
@@ -148,6 +183,8 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
       assert.equal(body.planes.B.codeberg_tip_pack, CODEBERG_TIP_PACK);
       assert.deepEqual(body.planes.B.working_targets, ["codeberg", "archive.org", "framagit"]);
       assert.equal(body.planes.B.archive_org_url, "https://archive.org/details/aziel-lockset-tip");
+      assert.equal(body.planes.B.archive_org_secondary_url, "https://archive.org/details/aziel-lockset-tip_202609");
+      assert.equal(body.independent_live_count, 1);
       assert.equal(body.planes.B.framagit_url, null);
       assert.equal(body.planes.B.gitflic, "CNS-GITFLIC-EMAIL");
       assert.equal(body.doi, null);
@@ -168,6 +205,8 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.equal(cite.plane_b_codeberg_status, "slot");
     assert.deepEqual(cite.plane_b_working_targets, ["codeberg", "archive.org", "framagit"]);
     assert.equal(cite.plane_b_archive_org_url, "https://archive.org/details/aziel-lockset-tip");
+    assert.equal(cite.plane_b_archive_org_secondary_url, "https://archive.org/details/aziel-lockset-tip_202609");
+    assert.equal(cite.plane_b_archive_org_secondary_item, "aziel-lockset-tip_202609");
     assert.equal(cite.plane_b_archive_org_hash_verify, "pass");
     assert.equal(cite.plane_b_framagit_url, null);
     assert.equal(cite.plane_b_gitflic_refuse, GITFLIC_REFUSE);
@@ -193,6 +232,8 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.match(llms, new RegExp(CODEBERG_TIP_PACK));
     assert.match(llms, /ALL-TARGETS/);
     assert.match(llms, /https:\/\/archive\.org\/details\/aziel-lockset-tip/);
+    assert.match(llms, /https:\/\/archive\.org\/details\/aziel-lockset-tip_202609/);
+    assert.match(llms, /not a second independent shelf/);
     assert.match(llms, /Framagit url null/);
     assert.match(llms, /CNS-GITFLIC-EMAIL/);
     assert.match(llms, /CNS-GITLAB-CF-LOOP/);
@@ -207,6 +248,8 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.match(shelvesLlmsSection(), /NO-FAN/);
 
     const home = homeBody({ stats: {}, latest: null, prior: [] });
+    const software = softwareBody({ products: [] });
+    assert.match(software, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.doesNotMatch(visibleBody(home), /1 Chronicles 15:20/);
     assert.doesNotMatch(visibleBody(azielEliabBody()), /1 Chronicles 15:20/);
     assert.doesNotMatch(visibleBody(whoPageHtml()), /<p class="identity-lock"/);

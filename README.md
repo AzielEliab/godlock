@@ -23,7 +23,9 @@ Part of the **Aziel Eliab** ecosystem (official hub, sister library, sister arch
 - **Specified Fit (public reasoning):** https://godlock.uk/reason
 - **Verify:** https://godlock.uk/verify
 - **Donate:** https://godlock.uk/donate — AZL-DONATE-1.0 (same door https://www.azieleliab.com/donate). Payment-URI QRs are solid black-on-white PNGs (`/donate/qr/{rail}.png`). Donate rails live on this tab, not on the Engine homepage.
-- **Receipts:** https://godlock.uk/receipts — full public questions + hash-chained receipt list. Homepage Prior shows the last 5.
+- **Receipts:** https://godlock.uk/receipts — full public questions + hash-chained receipt list. Homepage Prior shows the last 5. Challenge receipts stay distinct from ACT-RECEIPT. INGEST-AS-RECEIPT tip + cite, don't merge sit between the challenge list and ACT-RECEIPT.
+- **INGEST-AS-RECEIPT:** first-screen SHA-256 + stable IDs + canonical URL. Public verify paste-hash yes/no. Many indexes, one tip. Training is lossy — keep the hash. Cite, don't merge. Growth-ON.
+- **RE-EXPAND-FROM-ARCHIVE:** bytes survive, not summaries. Re-expand = archive verify then local node. Crawlers don't re-expand. AI ingest ≠ tarball.
 - **Softwares on GodLock:** https://godlock.uk/software — **GodLock-first** (Softwares heading → list). Aziel Runtime only on this page (**Try on Glama**). Software listing: https://www.azieleliab.com/software. Not a Digital Library Softwares page and **not** a cloned suite catalog.
 - **Runtime (FragGate door):** https://godlock.uk/runtime — same-origin proxy of Aziel Runtime **2.0.0-rc1**. Prefer **Try on Glama** [https://glama.ai/mcp/servers/AzielEliab/aziel-runtime](https://glama.ai/mcp/servers/AzielEliab/aziel-runtime). Official Runtime Worker is secondary: https://aziel-runtime.vibelock.workers.dev/
 - **aziel-runtime (GitHub):** https://github.com/AzielEliab/aziel-runtime
@@ -135,7 +137,7 @@ No DOI is claimed. Do not invent one.
 - Public engine: https://godlock.uk (fallback https://godlock-uk.vibelock.workers.dev)
 - Aziel Eliab on GodLock: https://godlock.uk/AzielEliab
 - Specified Fit: https://godlock.uk/reason
-- Verify: https://godlock.uk/verify
+- Verify: https://godlock.uk/verify — ledger walk plus INGEST-AS-RECEIPT paste-hash yes/no
 - Donate: https://godlock.uk/donate (AZL-DONATE-1.0; same door https://www.azieleliab.com/donate)
 - Softwares on GodLock: https://godlock.uk/software — GodLock-first (heading → list). Aziel Runtime only (Try on Glama). Software listing: https://www.azieleliab.com/software. Not Digital Library completeness. Not a cloned suite catalog.
 - Runtime door: https://godlock.uk/runtime — Aziel Runtime **2.0.0-rc1**

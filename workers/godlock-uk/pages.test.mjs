@@ -558,6 +558,13 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.mesh_live_sync, false);
     assert.equal(cite.mesh_server_pull_erases_records, false);
     assert.equal(cite.mesh_data_outlives_creators, true);
+    assert.equal(cite.ingest_as_receipt, "INGEST-AS-RECEIPT");
+    assert.equal(cite.ingest_as_receipt_spec, "INGEST-AS-RECEIPT-1.0");
+    assert.equal(cite.ingest_growth, "ON");
+    assert.equal(cite.ingest_cite_dont_merge, "cite, don't merge");
+    assert.equal(cite.re_expand_from_archive, "RE-EXPAND-FROM-ARCHIVE");
+    assert.equal(cite.re_expand_crawlers, false);
+    assert.equal(cite.re_expand_ai_ingest_is_tarball, false);
     assert.equal(cite.mesh_default, "on");
     assert.equal(cite.mesh_readonly, true);
     assert.equal(cite.mesh_default_off, undefined);
@@ -648,6 +655,11 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /REHEAL refuse/);
     assert.match(llms, /No neighbor talk-back-to-health/);
     assert.match(llms, /Softwares stays Runtime-only/);
+    assert.match(llms, /## INGEST-AS-RECEIPT/);
+    assert.match(llms, /cite, don't merge/i);
+    assert.match(llms, /## RE-EXPAND-FROM-ARCHIVE/);
+    assert.match(llms, /Crawlers don't re-expand/);
+    assert.match(llms, /AI ingest ≠ tarball/);
     assert.match(llms, /Die-with-pull does not bring godlock\.uk back/);
     assert.match(llms, /No Node Gate/);
     assert.match(llms, /No auto-heal/);

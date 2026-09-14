@@ -31,7 +31,10 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 - `GET /count` JSON: `{ live_nodes, site_live_nodes, mesh_enabled, mesh_live_nodes, mesh_locked, mesh_isolated, uses, downloads, receipts, views }`
 - `GET /mesh` JSON snapshot of QNM-BUILD-1.0 suite mesh (`rollup.live|locked|isolated` counts only; read-only, on; empty/unavailable when runtime `/v1/mesh/*` is missing). Payload includes the **QNS-CD-1.0** hub cite / Worker mesh cross-map (`qns_cd`; photon QNS1 packet transfer; no public qnsd proxy) plus **SPLIT THE WIRES**, **COLD-COPY SURVIVAL**, and **REHEAL** refuse/status stamps. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health.
 - `GET /v1/mesh` and `GET /v1/mesh/status` same-origin proxies (parity with azieleliab.com / corpus hubs) so Live Nodes clients that hit `/v1/mesh/status` work. GET never enables. Public surface stamps `mesh_default: "on"`. This Worker has no mesh-off / disable path. Law binds when the rollup is unavailable.
-- `/verify` walk the ledger
+- `/verify` walk the ledger; INGEST-AS-RECEIPT paste-hash yes/no (`?hash=`) against the first-screen tip. Challenge ledger walk stays distinct from ACT-RECEIPT.
+- First-screen `/` shows INGEST-AS-RECEIPT SHA-256 + stable IDs + canonical URL. Many indexes, one tip. Cite, don't merge. Growth-ON.
+- `/receipts` challenge list, then INGEST-AS-RECEIPT tip, then ACT-RECEIPT-1.0 (kept distinct).
+- RE-EXPAND-FROM-ARCHIVE: bytes survive, not summaries. Re-expand = archive verify then local node. Crawlers don't re-expand. AI ingest ≠ tarball.
 - `/donate` AZL-DONATE-1.0 door (static copy + rails; no KV; payment is not a key). Not embedded on the Engine homepage. Each rail is a solid black-on-white PNG `<img>` at `/donate/qr/{btc,eth,ltc,xrp,doge,sol,trx}.png`. Same door: https://www.azieleliab.com/donate
 - `/receipts` public Receipts tab: full questions + hash-chained public receipt list (paginated). `/prior` 308 here. Isolated rows stay off the feed.
 - `/` homepage Softwares one-liner lists Aziel Runtime and points at https://www.azieleliab.com/software. No GodLock or FragGate Softwares chips.

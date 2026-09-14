@@ -6,6 +6,8 @@
  * SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL bind refuse/status even when mesh
  * is unavailable. Phoenix is local only — die-with-pull does not bring .uk back.
  * REHEAL refuse: no neighbor talk-back-to-health. Softwares stays Runtime-only.
+ * INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE: first-screen SHA-256 tip;
+ * paste-hash yes/no; cite, don't merge; crawlers don't re-expand; AI ingest ≠ tarball.
  * Not an anonymity network. Author: Aziel Eliab.
  */
 import { randomBytes } from "node:crypto";
@@ -54,6 +56,11 @@ import {
   hubMeshStatusDoc,
   alignPublicMeshSurface,
 } from "./mesh.js";
+import {
+  ingestPublicDoc,
+  reExpandPublicDoc,
+  verifyPasteHash,
+} from "./ingestReceipt.js";
 
 const TEXT_MAX = 8000;
 const NODE_COOKIE = "godlock_node";
@@ -723,6 +730,10 @@ export default {
 
       if (path === "/verify") {
         const report = await verifyLedger(env);
+        const pasted = url.searchParams.get("hash") || url.searchParams.get("tip") || "";
+        const paste = verifyPasteHash(pasted);
+        const ingest = ingestPublicDoc({ paste });
+        const re_expand = reExpandPublicDoc();
         if (wantsJson(request, url)) {
           return json({
             ok: report.ok,
@@ -734,9 +745,12 @@ export default {
             ledger_head: report.ledger_head,
             errors: report.errors,
             verified_utc: new Date().toISOString(),
+            ingest_as_receipt: ingest,
+            re_expand_from_archive: re_expand,
+            yes_no: paste.yes_no,
           });
         }
-        return html(page("Verify", verifyBody({ report }), { path: "/verify", kind: "verify" }), {
+        return html(page("Verify", verifyBody({ report, paste }), { path: "/verify", kind: "verify" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }
@@ -760,6 +774,8 @@ export default {
             page_size: pageSize,
             receipts: rows.map(publicPayload),
             stats,
+            ingest_as_receipt: ingestPublicDoc(),
+            re_expand_from_archive: reExpandPublicDoc(),
           }, 200, extraHeadersFor(nodeId));
         }
         return html(page("Receipts", receiptsBody({
@@ -898,6 +914,8 @@ export default {
             latest: latest ? publicPayload(latest) : null,
             receipts: priorFiltered.map(publicPayload),
             software: softwareApiDoc([], { source: "godlock-uk", version: RUNTIME_VERSION }),
+            ingest_as_receipt: ingestPublicDoc(),
+            re_expand_from_archive: reExpandPublicDoc(),
           });
         }
         return html(page("GodLock", homeBody({ stats, latest, prior: priorFiltered }), { path: "/", kind: "home" }), {

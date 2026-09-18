@@ -512,5 +512,6 @@ describe("schema migration", () => {
     assert.equal(res.status, 200);
     assert.ok(rec.sqls.some((s) => /ALTER TABLE receipts ADD COLUMN challenge_text TEXT/i.test(s)));
     assert.ok(rec.sqls.some((s) => /CREATE TABLE IF NOT EXISTS receipts/i.test(s) && /challenge_text TEXT/i.test(s)));
+    assert.ok(rec.sqls.some((s) => /CREATE TABLE IF NOT EXISTS submit_guard/i.test(s)));
   });
 });

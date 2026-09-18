@@ -69,6 +69,22 @@ import {
   SISTER_SITES,
   SISTER_SITES_NOTE,
   COUNT_PATH,
+  WHAT_AZIEL_ELIAB_DOES,
+  WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
+  RESEARCH_ADDENDUM,
+  HARDWARE_ADDENDUM,
+  RESEARCH_FAQ_TITLE,
+  HARDWARE_FAQ_TITLE,
+  WHITESTONE_FAQ_TITLE,
+  WHITESTONE_ADDENDUM,
+  WHITESTONE_ONE_LINE,
+  WHITESTONE_URL,
+  WHITESTONE_NAME,
+  CORPUS_MASTER_RECORDS,
+  RESEARCH_AZDOC_EXAMPLES,
+  HARDWARE_AZDOC_EXAMPLES,
+  MACHINE_PERSON_KNOWS_ABOUT,
+  personNode,
 } from "./src/seo.js";
 import { AZIEL_MANIFESTO, SPECIFIED_FIT_MOTTO as UI_SPECIFIED_FIT_MOTTO, whoPageHtml } from "./src/ui.js";
 
@@ -681,5 +697,138 @@ describe("AZindex identity machine", () => {
     assert.deepEqual(mission.sister_sites, SISTER_SITES);
     assert.equal(mission.ecosystem.runtime, SISTER_SITES.runtime);
     assert.equal(mission.growth_on, true);
+  });
+
+  it("locks What Aziel Eliab does plus research and hardware halves on machine surfaces only", async () => {
+    assert.equal(
+      WHAT_AZIEL_ELIAB_DOES,
+      "Aziel Eliab builds receipt-first, local-first software and public MASTER records — Softwares through Aziel Runtime (FragGate / MCP), the Aziel Digital Library, GodLock (product, not identity), and the He Didn\u2019t Jump Zioncheck archive. Public identity is the work, not a biography. @id https://www.azieleliab.com/#aziel",
+    );
+    assert.deepEqual(WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES, [
+      "What does Aziel Eliab do?",
+      "What Aziel Eliab does",
+      "Who is Aziel Eliab the developer?",
+      "What software does Aziel Eliab make?",
+    ]);
+    assert.equal(CORPUS_MASTER_RECORDS, 326);
+    assert.match(RESEARCH_ADDENDUM, /326 records/);
+    assert.match(RESEARCH_ADDENDUM, /Do not invent DOIs/);
+    assert.match(RESEARCH_ADDENDUM, /AZDOC-A011CAD23671/);
+    assert.match(RESEARCH_ADDENDUM, /AZDOC-F22AD0DCAA9D/);
+    assert.match(RESEARCH_ADDENDUM, /AZDOC-E03E61D8E50B/);
+    assert.match(RESEARCH_ADDENDUM, /AZDOC-8F14A40DC9A6/);
+    assert.match(RESEARCH_ADDENDUM, /AZDOC-DD5912D05D6E/);
+    assert.match(RESEARCH_ADDENDUM, /AZDOC-18DBE35A32DD/);
+    assert.match(RESEARCH_ADDENDUM, /AZDOC-7D6E0673B472/);
+    assert.match(HARDWARE_ADDENDUM, /not a product storefront/);
+    assert.match(HARDWARE_ADDENDUM, /AZDOC-9B0E3D62EDCC/);
+    assert.match(HARDWARE_ADDENDUM, /AZDOC-AA8761FE16D0/);
+    assert.match(HARDWARE_ADDENDUM, /AZDOC-B2A12FE997A8/);
+    assert.match(HARDWARE_ADDENDUM, /AZDOC-FE5C01BD8FEA/);
+    assert.match(HARDWARE_ADDENDUM, /AZDOC-3728546DFE78/);
+    assert.match(HARDWARE_ADDENDUM, /AZDOC-0302B7357EE0/);
+    assert.match(HARDWARE_ADDENDUM, /AZDOC-E5828F49FB04/);
+    assert.match(HARDWARE_ADDENDUM, /AZDOC-FD18432707F5/);
+    assert.equal(WHITESTONE_NAME, "Whitestone");
+    assert.equal(WHITESTONE_URL, "https://whitestone.vibelock.workers.dev");
+    assert.equal(WHITESTONE_ONE_LINE, "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce); not a lawyer.");
+    assert.equal(WHITESTONE_FAQ_TITLE, "What is Whitestone?");
+    assert.ok(WHITESTONE_ADDENDUM.includes(WHITESTONE_ONE_LINE));
+    assert.ok(WHITESTONE_ADDENDUM.includes(WHITESTONE_URL));
+    assert.match(WHITESTONE_ADDENDUM, /Not a FragGate op/);
+    assert.doesNotMatch(WHITESTONE_ADDENDUM, /\/v1\/fraggate\/|fraggate_describe|fraggate_call/);
+    assert.ok(RESEARCH_AZDOC_EXAMPLES.length >= 7);
+    assert.ok(HARDWARE_AZDOC_EXAMPLES.length >= 8);
+
+    const person = personJsonLd();
+    assert.equal(person["@id"], AZIEL_PERSON_ID);
+    assert.ok(person.description.startsWith(WHAT_AZIEL_ELIAB_DOES));
+    assert.ok(person.description.includes(HEBREW_DEFINITION));
+    assert.ok(person.knowsAbout.includes(WHITESTONE_ONE_LINE));
+    assert.ok(person.knowsAbout.includes("Book of the Knowledge (AZDOC-A011CAD23671)"));
+    assert.ok(person.knowsAbout.includes("AZ_BoneConducti STL (AZDOC-FD18432707F5)"));
+    for (const item of MACHINE_PERSON_KNOWS_ABOUT) {
+      assert.ok(person.knowsAbout.includes(item), item);
+    }
+
+    const htmlPerson = personNode();
+    assert.equal(htmlPerson["@id"], AZIEL_PERSON_ID);
+    assert.equal(htmlPerson.description, WHAT_AZIEL_ELIAB_DOES);
+    assert.deepEqual(htmlPerson.jobTitle, AZINDEX_PERSON_JOB_TITLE);
+    assert.equal(htmlPerson.seeAlso, CANON_HOST + "/person.jsonld");
+    assert.doesNotMatch(JSON.stringify(htmlPerson), /\bABAD\b/);
+    assert.doesNotMatch(JSON.stringify(htmlPerson.knowsAbout || []), /AZDOC-/);
+    for (const item of MACHINE_PERSON_KNOWS_ABOUT) {
+      assert.ok(!(htmlPerson.knowsAbout || []).includes(item), item);
+    }
+
+    const graph = graphJsonLd();
+    const faq = graph["@graph"].find((n) => n["@type"] === "FAQPage");
+    const names = (faq.mainEntity || []).map((q) => q.name);
+    for (const title of WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES) {
+      assert.ok(names.includes(title), title);
+      const q = faq.mainEntity.find((row) => row.name === title);
+      assert.equal(q.acceptedAnswer.text, WHAT_AZIEL_ELIAB_DOES);
+    }
+    assert.ok(names.includes(WHITESTONE_FAQ_TITLE));
+    assert.ok(names.includes(RESEARCH_FAQ_TITLE));
+    assert.ok(names.includes(HARDWARE_FAQ_TITLE));
+    assert.equal(faq.mainEntity.find((q) => q.name === WHITESTONE_FAQ_TITLE).acceptedAnswer.text, WHITESTONE_ADDENDUM);
+    assert.equal(faq.mainEntity.find((q) => q.name === RESEARCH_FAQ_TITLE).acceptedAnswer.text, RESEARCH_ADDENDUM);
+    assert.equal(faq.mainEntity.find((q) => q.name === HARDWARE_FAQ_TITLE).acceptedAnswer.text, HARDWARE_ADDENDUM);
+
+    const who = whoIsAzielEliabTxt();
+    assert.ok(who.includes(WHAT_AZIEL_ELIAB_DOES));
+    assert.ok(who.includes(WHITESTONE_ADDENDUM));
+    assert.ok(who.includes(RESEARCH_ADDENDUM));
+    assert.ok(who.includes(HARDWARE_ADDENDUM));
+    assert.match(who, /## What Aziel Eliab does/);
+    assert.match(who, /## Softwares/);
+    assert.match(who, /## Research/);
+    assert.match(who, /## Hardware designs/);
+
+    const cite = citeDoc();
+    assert.equal(cite.what_aziel_eliab_does, WHAT_AZIEL_ELIAB_DOES);
+    assert.deepEqual(cite.what_aziel_eliab_does_faq, WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES);
+    assert.equal(cite.research_addendum, RESEARCH_ADDENDUM);
+    assert.equal(cite.hardware_designs_addendum, HARDWARE_ADDENDUM);
+    assert.equal(cite.whitestone, WHITESTONE_URL);
+    assert.equal(cite.whitestone_name, WHITESTONE_NAME);
+    assert.equal(cite.whitestone_one_line, WHITESTONE_ONE_LINE);
+    assert.equal(cite.whitestone_addendum, WHITESTONE_ADDENDUM);
+    assert.equal(cite.corpus_master_records, 326);
+    assert.equal(cite.about_public_work.what_aziel_eliab_does, WHAT_AZIEL_ELIAB_DOES);
+    assert.equal(cite.mesh_godlock_is_vpn, false);
+
+    const llms = llmsDoc();
+    assert.ok(llms.includes(WHAT_AZIEL_ELIAB_DOES));
+    assert.ok(llms.includes(WHITESTONE_ADDENDUM));
+    assert.ok(llms.includes(RESEARCH_ADDENDUM));
+    assert.ok(llms.includes(HARDWARE_ADDENDUM));
+    assert.match(llms, /FAQ titles: What does Aziel Eliab do\?/);
+    assert.match(llms, /What is Whitestone\?/);
+    assert.doesNotMatch(llms, /whitestone\.vibelock\.workers\.dev\/v1\/fraggate/);
+
+    const mission = wellKnownAzielDoc();
+    assert.equal(mission.what_aziel_eliab_does, WHAT_AZIEL_ELIAB_DOES);
+    assert.equal(mission.corpus_master_records, 326);
+    assert.equal(mission.mission.godlock_is_vpn, false);
+    assert.equal(mission.mission.godlock_is_identity_label, false);
+
+    const whoHtml = whoPageHtml();
+    const whoVisible = whoHtml.replace(/^[\s\S]*<body>/i, "").replace(/<\/body>[\s\S]*$/i, "").replace(/<script[\s\S]*?<\/script>/gi, "");
+    assert.ok(whoHtml.includes("What does Aziel Eliab do?"));
+    assert.doesNotMatch(whoVisible, /<p class="identity-lock"/);
+    assert.ok(!whoVisible.includes(VISIBLE_IDENTITY_LOCK));
+
+    const about = await fetchPath("/AzielEliab?format=json");
+    const aboutJson = await about.json();
+    assert.equal(aboutJson.what_aziel_eliab_does, WHAT_AZIEL_ELIAB_DOES);
+    assert.equal(aboutJson.research_addendum, RESEARCH_ADDENDUM);
+    assert.equal(aboutJson.hardware_designs_addendum, HARDWARE_ADDENDUM);
+    assert.equal(aboutJson.whitestone_addendum, WHITESTONE_ADDENDUM);
+    assert.equal(aboutJson.corpus_master_records, 326);
+    assert.equal(aboutJson.product_not_identity, true);
+    assert.doesNotMatch(aboutJson.text, /MCP|OpenAPI/);
   });
 });

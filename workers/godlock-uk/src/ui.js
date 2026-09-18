@@ -11,6 +11,10 @@ import {
   SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO,
   ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM,
   VISIBLE_IDENTITY_LOCK, IDENTITY_ANSWER,
+  WHAT_AZIEL_ELIAB_DOES, WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
+  RESEARCH_FAQ_TITLE, RESEARCH_ADDENDUM,
+  HARDWARE_FAQ_TITLE, HARDWARE_ADDENDUM,
+  WHITESTONE_FAQ_TITLE, WHITESTONE_ADDENDUM,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
@@ -557,6 +561,26 @@ export function whoPageHtml() {
     url: "https://www.azieleliab.com/who",
     name: "Who is Aziel Eliab?",
     mainEntity: [
+      ...WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.map((name) => ({
+        "@type": "Question",
+        name,
+        acceptedAnswer: { "@type": "Answer", text: WHAT_AZIEL_ELIAB_DOES },
+      })),
+      {
+        "@type": "Question",
+        name: WHITESTONE_FAQ_TITLE,
+        acceptedAnswer: { "@type": "Answer", text: WHITESTONE_ADDENDUM },
+      },
+      {
+        "@type": "Question",
+        name: RESEARCH_FAQ_TITLE,
+        acceptedAnswer: { "@type": "Answer", text: RESEARCH_ADDENDUM },
+      },
+      {
+        "@type": "Question",
+        name: HARDWARE_FAQ_TITLE,
+        acceptedAnswer: { "@type": "Answer", text: HARDWARE_ADDENDUM },
+      },
       {
         "@type": "Question",
         name: "Who is Aziel Eliab?",

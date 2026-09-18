@@ -20,6 +20,7 @@ import {
   enforceProtocolScore,
   challengeHolds,
   receiptScoreDelta,
+  scoreEngagement,
 } from "./src/engine.js";
 import { hideInternalDetermination as hideCopy, publicSafeFields } from "./src/publicCopy.js";
 
@@ -48,6 +49,17 @@ describe("score bounds and labels", () => {
 
   it("keeps the four public labels", () => {
     assert.deepEqual(LABELS, ["Yes", "No", "Let's review", "Interesting"]);
+  });
+
+  it("does not score null, missing, empty, or whitespace-only arguments", () => {
+    for (const bad of [null, undefined, "", "   ", "\n\t", "\u200b\u200c"]) {
+      const eng = scoreEngagement(bad);
+      assert.equal(eng.score, 0, String(bad));
+      assert.deepEqual(eng.hits, []);
+    }
+    const scored = scoreEngagement(SPECIFIED_FIT);
+    assert.ok(scored.hits.length > 0);
+    assert.ok(scored.score > 0);
   });
 });
 

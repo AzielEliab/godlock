@@ -2181,7 +2181,9 @@ describe("receipts UI and public payload", () => {
     const html = page("GodLock", homeBody({ stats: { current_score: 50, residual: 50, uses: 0 }, latest: null, prior: [] }), { path: "/", kind: "home" });
     assert.match(html, /id="stat-current-score"/);
     assert.match(html, /id="stat-residual"/);
-    assert.match(html, /if\(j&&j\.stats\)\{applyStats\(j\.stats\);\}/);
+    assert.match(html, /if\(j\.stats\)\{applyStats\(j\.stats\);\}/);
+    assert.match(html, /j\.ok===false/);
+    assert.match(html, /Empty text is not scored/);
     assert.match(html, /scoreEl&&j\.current_score!=null/);
     assert.match(html, /residualEl&&j\.residual!=null/);
     assert.match(html, /usesEl&&j\.uses!=null/);

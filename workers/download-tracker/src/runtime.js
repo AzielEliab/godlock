@@ -257,17 +257,30 @@ function openapiDoc() {
   };
 }
 
+function refuseChallengeArg(body) {
+  if (body == null || typeof body !== "object" || !Object.prototype.hasOwnProperty.call(body, "text") || body.text == null) {
+    return { ok: false, code: "GODLOCK-NULL-ARG", error: "Challenge text is null or missing. Nothing was scored or archived." };
+  }
+  if (typeof body.text !== "string" || !String(body.text).replace(/[\s\u200b\u200c\u200d\ufeff]/g, "")) {
+    return { ok: false, code: "GODLOCK-EMPTY-TEXT", error: "Challenge text is empty. Nothing was scored or archived." };
+  }
+  return { ok: true, text: String(body.text) };
+}
+
 async function handleScore(body) {
-  const text = body && body.text != null ? String(body.text) : "";
-  if (!text.trim()) return runtimeJson(withBanner({ ok: false, error: "text is required" }), 400);
+  const checked = refuseChallengeArg(body);
+  if (!checked.ok) return runtimeJson(withBanner({ ok: false, code: checked.code, error: checked.error, scored: false }), 400);
+  const text = checked.text;
   if (text.length > MAX_TEXT) return runtimeJson(withBanner({ ok: false, error: "text too large", max: MAX_TEXT }), 413);
   const engagement = scoreEngagement(text);
   return runtimeJson(withBanner({ ok: true, product: PRODUCT, engagement, durable: false }));
 }
 
 async function handleSubmit(body) {
-  const text = body && body.text != null ? String(body.text).trim() : "";
-  if (!text) return runtimeJson(withBanner({ ok: false, error: "text is required" }), 400);
+  const checked = refuseChallengeArg(body);
+  if (!checked.ok) return runtimeJson(withBanner({ ok: false, code: checked.code, error: checked.error, scored: false, archived: false }), 400);
+  const text = checked.text.trim();
+  if (!text) return runtimeJson(withBanner({ ok: false, code: "GODLOCK-EMPTY-TEXT", error: "Challenge text is empty. Nothing was scored or archived.", scored: false, archived: false }), 400);
   if (text.length > MAX_TEXT) return runtimeJson(withBanner({ ok: false, error: "text too large", max: MAX_TEXT }), 413);
   const pair = airlockPair();
   const id = crypto.randomUUID();

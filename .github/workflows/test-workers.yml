@@ -1,0 +1,42 @@
+name: Test Workers
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths:
+      - "workers/godlock-uk/**"
+      - "workers/download-tracker/**"
+      - ".github/workflows/test-workers.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  godlock-uk:
+    name: Test godlock-uk
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: workers/godlock-uk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm test
+
+  download-tracker:
+    name: Test download-tracker
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: workers/download-tracker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm test

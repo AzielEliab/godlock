@@ -1922,6 +1922,18 @@ export function siteOpenApi() {
       "/donate": { get: { operationId: "godlockUkDonate", summary: "AZL-DONATE-1.0 door (static rails; no KV; payment is not a key)", responses: { "200": { description: "HTML or JSON" } } } },
       "/receipts": { get: { operationId: "godlockUkReceipts", summary: "Public questions + hash-chained receipt list (newest first; isolated omitted)", responses: { "200": { description: "HTML or JSON" } } } },
       "/verify": { get: { operationId: "godlockUkVerify", summary: "Walk the public hash-chained ledger; INGEST-AS-RECEIPT paste-hash yes/no against the first-screen tip", responses: { "200": { description: "HTML or JSON" } } } },
+      "/submit": {
+        post: {
+          operationId: "godlockUkSubmit",
+          summary: "Submit a challenge. Null/empty/whitespace-only text is refused and not scored.",
+          requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["text"], properties: { text: { type: "string", minLength: 1 } } } } } },
+          responses: {
+            "200": { description: "Receipt + score (floor 33.3 · ceiling 99.7)" },
+            "400": { description: "GODLOCK-NULL-ARG or GODLOCK-EMPTY-TEXT — nothing archived" },
+            "429": { description: "GODLOCK-RATE-LIMIT or GODLOCK-DUP-TEXT — Retry-After" },
+          },
+        },
+      },
       "/reason": { get: { operationId: "godlockUkReason", summary: "Specified Fit, Not Pretty Spirals", responses: { "200": { description: "HTML or JSON" } } } },
       "/AzielEliab": { get: { operationId: "godlockUkAzielEliab", summary: "About Aziel Eliab — living publisher of GodLock (product, not a Person)", responses: { "200": { description: "HTML or JSON" } } } },
       "/runtime": { get: { operationId: "godlockUkRuntime", summary: "Same-origin Aziel Runtime FragGate door", responses: { "200": { description: "OK" } } } },

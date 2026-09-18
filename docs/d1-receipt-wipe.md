@@ -54,6 +54,7 @@ Do **not** run DELETE/UPDATE that resets these. Do **not** put such SQL in appli
 | Live Nodes | D1 `heartbeats` | all rows | 5-minute presence; expires on its own |
 | Downloads | KV `DOWNLOADS` on `godlock-download-tracker` | `project\|owner\|repo\|branch\|fork` | Counted gzip downloads |
 | Runtime API uses | KV `RUNTIME_USES` on `godlock-uk` | `runtime_uses\|…` | FragGate / MCP / session log — not product Uses |
+| Submit throttle | D1 `submit_guard` | `kind` + `key` | IP / identical-text window. Not a receipt. Not Uses. App may DELETE expired rows. |
 
 Never:
 

@@ -50,6 +50,17 @@ CREATE TABLE IF NOT EXISTS heartbeats (
 CREATE INDEX IF NOT EXISTS idx_heartbeats_last ON heartbeats(last_utc);
 CREATE INDEX IF NOT EXISTS idx_heartbeats_last_ms ON heartbeats(last_ms);
 
+-- Anti-spam window for POST /submit (IP fingerprint + identical text sha256).
+-- Not a receipt. Not a score. Application may DELETE expired rows.
+CREATE TABLE IF NOT EXISTS submit_guard (
+  kind TEXT NOT NULL,
+  key TEXT NOT NULL,
+  last_ms INTEGER NOT NULL,
+  count INTEGER NOT NULL DEFAULT 1,
+  PRIMARY KEY (kind, key)
+);
+CREATE INDEX IF NOT EXISTS idx_submit_guard_last ON submit_guard(last_ms);
+
 INSERT OR IGNORE INTO metadata(key, value) VALUES ('current_score', '50');
 INSERT OR IGNORE INTO metadata(key, value) VALUES ('views', '0');
 INSERT OR IGNORE INTO metadata(key, value) VALUES ('uses', '0');

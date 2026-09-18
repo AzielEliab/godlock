@@ -62,8 +62,16 @@ import {
   reExpandPublicDoc,
   verifyPasteHash,
 } from "./ingestReceipt.js";
+import {
+  TEXT_MAX,
+  REFUSE,
+  readChallengeText,
+  validateChallengeText,
+  refuseBody,
+  ChallengeRefuse,
+} from "./challengeText.js";
+import { checkSubmitGuard } from "./submitGuard.js";
 
-const TEXT_MAX = 8000;
 const NODE_COOKIE = "godlock_node";
 const LEDGER_CHALLENGE_PREVIEW = 160;
 const RECEIPT_INSERT = "INSERT INTO receipts(id, created_utc, text_sha256, challenge_text, label, summary, explanation, score_before, score_after, residual, isolated, content_sha256) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
@@ -101,6 +109,10 @@ async function ensureSchema(env) {
     env.DB.prepare("INSERT OR IGNORE INTO metadata(key, value) VALUES ('current_score', '50')"),
     env.DB.prepare("INSERT OR IGNORE INTO metadata(key, value) VALUES ('views', '0')"),
     env.DB.prepare("INSERT OR IGNORE INTO metadata(key, value) VALUES ('uses', '0')"),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS submit_guard (
+      kind TEXT NOT NULL, key TEXT NOT NULL, last_ms INTEGER NOT NULL,
+      count INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (kind, key))`),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_submit_guard_last ON submit_guard(last_ms)"),
   ]);
   try {
     await env.DB.prepare("ALTER TABLE receipts ADD COLUMN challenge_text TEXT").run();
@@ -361,16 +373,22 @@ async function gatherStats(env, { wrote, visiting } = {}) {
   };
 }
 
-async function readChallengeText(request) {
-  const ct = (request.headers.get("Content-Type") || "").toLowerCase();
-  if (ct.includes("application/json")) {
-    const body = await request.json().catch(() => ({}));
-    return String((body && (body.text || body.challenge || body.body)) || "").slice(0, TEXT_MAX);
+export { readChallengeText, validateChallengeText, REFUSE, TEXT_MAX };
+
+async function submitRefuseResponse(request, url, refused) {
+  const status = refused.status || 400;
+  const extra = {};
+  if (refused.retryAfter) extra["Retry-After"] = String(refused.retryAfter);
+  const body = refuseBody(refused.code, refused.error, {
+    retry_after: refused.retryAfter || undefined,
+  });
+  if (wantsJson(request, url)) {
+    return json(body, status, extra);
   }
-  const form = await request.formData().catch(() => null);
-  if (form) return String(form.get("text") || form.get("challenge") || form.get("body") || "").slice(0, TEXT_MAX);
-  const raw = await request.text().catch(() => "");
-  return String(raw || "").slice(0, TEXT_MAX);
+  return html(page("GodLock", homeBody({ stats: {}, error: refused.error }), { path: "/", kind: "home" }), {
+    status,
+    extraHeaders: extra,
+  });
 }
 
 export function publicPayload(row) {
@@ -400,9 +418,13 @@ export function publicPayload(row) {
 }
 
 export async function processSubmit(env, text) {
+  const checked = validateChallengeText(text);
+  if (!checked.ok) {
+    throw ChallengeRefuse(checked.code, checked.error, checked.status);
+  }
   const created_utc = new Date().toISOString();
   const id = newId();
-  const challenge_text = String(text ?? "");
+  const challenge_text = checked.text;
   const text_sha256 = sha256hex(challenge_text);
   const isolated = shouldIsolate(challenge_text) ? 1 : 0;
   const score_before = await currentScore(env);
@@ -563,6 +585,14 @@ export default {
     try {
       await ensureSchema(env);
       const cookieId = readCookie(request, NODE_COOKIE);
+      const isSubmitPost = (path === "/submit" || path === "/") && request.method === "POST";
+      let parsedSubmit = null;
+      if (isSubmitPost) {
+        parsedSubmit = await readChallengeText(request);
+        if (!parsedSubmit.ok) return submitRefuseResponse(request, url, parsedSubmit);
+        const guard = await checkSubmitGuard(env, request, parsedSubmit.text);
+        if (!guard.ok) return submitRefuseResponse(request, url, guard);
+      }
       const hb = await touchHeartbeat(env, request, cookieId || newId());
       const nodeId = hb.id;
       const wrote = hb.wrote;
@@ -883,9 +913,8 @@ export default {
         return html(page("Receipt", receiptBody({ id, row, entries }), { path: "/receipt/" + id, kind: "receipt" }));
       }
 
-      if ((path === "/submit" || path === "/") && request.method === "POST") {
-        const text = await readChallengeText(request);
-        const row = await processSubmit(env, text);
+      if (isSubmitPost) {
+        const row = await processSubmit(env, parsedSubmit.text);
         const stats = await gatherStats(env, { wrote });
         if (wantsJson(request, url)) {
           if (row.isolated === true || row.isolated === 1) {
@@ -933,6 +962,9 @@ export default {
 
       return html(page("Not found", `<div class="card"><h2>Not found</h2><p><a href="/">Back</a></p></div>`, { path, kind: "notfound" }), { status: 404 });
     } catch (err) {
+      if (err && err.refused) {
+        return submitRefuseResponse(request, new URL(request.url), err);
+      }
       return json({ ok: false, error: String(err && err.message ? err.message : err), author: AUTHOR, banner: BANNER }, 500);
     }
   },

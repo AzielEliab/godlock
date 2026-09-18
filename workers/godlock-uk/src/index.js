@@ -27,7 +27,7 @@ import {
   personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, wellKnownAzielDoc,
   AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE, WHO_PATH,
   WHAT_AZIEL_ELIAB_DOES, WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
-  RESEARCH_ADDENDUM, HARDWARE_ADDENDUM, CORPUS_MASTER_RECORDS,
+  RESEARCH_ADDENDUM, HARDWARE_ADDENDUM, WHITESTONE_ADDENDUM, WHITESTONE_URL, WHITESTONE_NAME, WHITESTONE_ONE_LINE, CORPUS_MASTER_RECORDS,
 } from "./seo.js";
 import { shelvesDoc } from "./shelves.js";
 import {
@@ -874,6 +874,10 @@ export default {
             what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
             research_addendum: RESEARCH_ADDENDUM,
             hardware_designs_addendum: HARDWARE_ADDENDUM,
+            whitestone: WHITESTONE_URL,
+            whitestone_name: WHITESTONE_NAME,
+            whitestone_one_line: WHITESTONE_ONE_LINE,
+            whitestone_addendum: WHITESTONE_ADDENDUM,
             corpus_master_records: CORPUS_MASTER_RECORDS,
             text: azielEliabText(),
           }, 200, extraHeadersFor(nodeId));

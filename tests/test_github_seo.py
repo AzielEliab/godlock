@@ -329,14 +329,27 @@ def test_cite_json_graph():
     assert "Do not invent DOIs" in CITE["research_addendum"]
     assert "not a product storefront" in CITE["hardware_designs_addendum"]
     assert "AZDOC-9B0E3D62EDCC" in CITE["hardware_designs_addendum"]
+    assert CITE["whitestone"] == "https://whitestone.vibelock.workers.dev"
+    assert CITE["whitestone_name"] == "Whitestone"
+    assert CITE["whitestone_one_line"] == (
+        "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce); not a lawyer."
+    )
+    assert CITE["whitestone_addendum"] == (
+        "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce); not a lawyer. "
+        "Live https://whitestone.vibelock.workers.dev. Softwares list cite only. "
+        "Not a FragGate op — do not invent door ops. Not a godlock.uk Softwares card."
+    )
     assert CITE["about_public_work"]["what_aziel_eliab_does"] == CITE["what_aziel_eliab_does"]
+    assert CITE["about_public_work"]["whitestone_addendum"] == CITE["whitestone_addendum"]
     assert CITE["godlock_is_vpn"] is False
     assert CITE["what_aziel_eliab_does"] in LLMS
     assert CITE["research_addendum"] in LLMS
     assert CITE["hardware_designs_addendum"] in LLMS
+    assert CITE["whitestone_addendum"] in LLMS
     assert CITE["what_aziel_eliab_does"] in AI
     assert CITE["research_addendum"] in AI
     assert CITE["hardware_designs_addendum"] in AI
+    assert CITE["whitestone_addendum"] in AI
     assert SITE_BLURB in LLMS
     assert SITE_BLURB in AI
     assert "Roles: researcher, digital rights activist, software developer, author, and philosopher" in LLMS

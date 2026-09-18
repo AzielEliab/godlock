@@ -14,6 +14,7 @@ import {
   WHAT_AZIEL_ELIAB_DOES, WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
   RESEARCH_FAQ_TITLE, RESEARCH_ADDENDUM,
   HARDWARE_FAQ_TITLE, HARDWARE_ADDENDUM,
+  WHITESTONE_FAQ_TITLE, WHITESTONE_ADDENDUM,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
@@ -565,6 +566,11 @@ export function whoPageHtml() {
         name,
         acceptedAnswer: { "@type": "Answer", text: WHAT_AZIEL_ELIAB_DOES },
       })),
+      {
+        "@type": "Question",
+        name: WHITESTONE_FAQ_TITLE,
+        acceptedAnswer: { "@type": "Answer", text: WHITESTONE_ADDENDUM },
+      },
       {
         "@type": "Question",
         name: RESEARCH_FAQ_TITLE,

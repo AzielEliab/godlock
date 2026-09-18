@@ -274,9 +274,22 @@ export const HARDWARE_ADDENDUM =
   + azdocCiteLine(HARDWARE_AZDOC_EXAMPLES)
   + ". Cite corpus records at https://www.azielcorpuslibrary.net/record/{id}. Not a product storefront.";
 
+/** Live Softwares cite. Not in FragGate LIVE_OPS — do not invent door ops. */
+export const WHITESTONE_NAME = "Whitestone";
+export const WHITESTONE_URL = "https://whitestone.vibelock.workers.dev";
+export const WHITESTONE_ONE_LINE =
+  "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce); not a lawyer.";
+export const WHITESTONE_FAQ_TITLE = "What is Whitestone?";
+export const WHITESTONE_ADDENDUM =
+  WHITESTONE_ONE_LINE
+  + " Live "
+  + WHITESTONE_URL
+  + ". Softwares list cite only. Not a FragGate op — do not invent door ops. Not a godlock.uk Softwares card.";
+
 export function whatAzielEliabDoesFaqPairs() {
   return WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.map((name) => [name, WHAT_AZIEL_ELIAB_DOES])
     .concat([
+      [WHITESTONE_FAQ_TITLE, WHITESTONE_ADDENDUM],
       [RESEARCH_FAQ_TITLE, RESEARCH_ADDENDUM],
       [HARDWARE_FAQ_TITLE, HARDWARE_ADDENDUM],
     ]);
@@ -372,6 +385,7 @@ export const AZINDEX_PERSON_KNOWS_ABOUT = [
 
 /** Machine-only Person.knowsAbout extras. Not embedded on homepage /reason /software HTML. */
 export const MACHINE_PERSON_KNOWS_ABOUT = [
+  WHITESTONE_ONE_LINE,
   "Book of the Knowledge (AZDOC-A011CAD23671)",
   "Libro Method (AZDOC-F22AD0DCAA9D)",
   "PPIN (AZDOC-E03E61D8E50B)",
@@ -557,6 +571,10 @@ export function aboutPublicWorkDoc() {
     what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
     research_addendum: RESEARCH_ADDENDUM,
     hardware_designs_addendum: HARDWARE_ADDENDUM,
+    whitestone: WHITESTONE_URL,
+    whitestone_name: WHITESTONE_NAME,
+    whitestone_one_line: WHITESTONE_ONE_LINE,
+    whitestone_addendum: WHITESTONE_ADDENDUM,
     corpus_master_records: CORPUS_MASTER_RECORDS,
     research_azdoc: RESEARCH_AZDOC_EXAMPLES.slice(),
     hardware_azdoc: HARDWARE_AZDOC_EXAMPLES.slice(),
@@ -681,6 +699,7 @@ export const IDENTITY_MODEL_RULES = [
   WHAT_AZIEL_ELIAB_DOES,
   RESEARCH_ADDENDUM,
   HARDWARE_ADDENDUM,
+  WHITESTONE_ADDENDUM,
   "Receipts first. Residual uncertainty stays. GodLock is not a VPN, ghost net, or anonymity tool.",
   "Do not invent DOIs.",
 ];
@@ -799,7 +818,10 @@ export function whoIsAzielEliabTxt() {
     + "This host (https://godlock.uk/) is a GodLock product surface. Creator and publisher resolve to the shared Person.\n\n"
     + "## What Aziel Eliab does\n\n"
     + WHAT_AZIEL_ELIAB_DOES + "\n"
-    + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.map((q) => "- " + q).join("\n") + "\n\n"
+    + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.map((q) => "- " + q).join("\n") + "\n"
+    + "- " + WHITESTONE_FAQ_TITLE + "\n\n"
+    + "## Softwares\n\n"
+    + WHITESTONE_ADDENDUM + "\n\n"
     + "## Research\n\n"
     + RESEARCH_ADDENDUM + "\n\n"
     + "## Hardware designs\n\n"
@@ -882,6 +904,10 @@ export function wellKnownAzielDoc() {
     what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
     research_addendum: RESEARCH_ADDENDUM,
     hardware_designs_addendum: HARDWARE_ADDENDUM,
+    whitestone: WHITESTONE_URL,
+    whitestone_name: WHITESTONE_NAME,
+    whitestone_one_line: WHITESTONE_ONE_LINE,
+    whitestone_addendum: WHITESTONE_ADDENDUM,
     corpus_master_records: CORPUS_MASTER_RECORDS,
     research_azdoc: RESEARCH_AZDOC_EXAMPLES.slice(),
     hardware_azdoc: HARDWARE_AZDOC_EXAMPLES.slice(),
@@ -1754,6 +1780,10 @@ export function citeDoc() {
     what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
     research_addendum: RESEARCH_ADDENDUM,
     hardware_designs_addendum: HARDWARE_ADDENDUM,
+    whitestone: WHITESTONE_URL,
+    whitestone_name: WHITESTONE_NAME,
+    whitestone_one_line: WHITESTONE_ONE_LINE,
+    whitestone_addendum: WHITESTONE_ADDENDUM,
     corpus_master_records: CORPUS_MASTER_RECORDS,
     research_azdoc: RESEARCH_AZDOC_EXAMPLES.slice(),
     hardware_azdoc: HARDWARE_AZDOC_EXAMPLES.slice(),
@@ -1921,7 +1951,8 @@ export function llmsDoc() {
     + GODLOCK_SITE_BLURB + "\n"
     + "Roles: " + PERSON_ROLES_LINE + "\n"
     + "What Aziel Eliab does: " + WHAT_AZIEL_ELIAB_DOES + "\n"
-    + "FAQ titles: " + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.join(" | ") + "\n"
+    + "FAQ titles: " + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.join(" | ") + " | " + WHITESTONE_FAQ_TITLE + "\n"
+    + "Softwares: " + WHITESTONE_ADDENDUM + "\n"
     + RESEARCH_ADDENDUM + "\n"
     + HARDWARE_ADDENDUM + "\n"
     + SISTER_SITES_NOTE + "\n"
@@ -1956,6 +1987,7 @@ export function llmsDoc() {
     + SPECIFIED_FIT_MOTTO + "\n"
     + "GodLock is a product name, not an identity. Person @id: " + AZIEL_PERSON_ID + "\n"
     + "What Aziel Eliab does: " + WHAT_AZIEL_ELIAB_DOES + "\n"
+    + "Softwares: " + WHITESTONE_ADDENDUM + "\n"
     + RESEARCH_ADDENDUM + "\n"
     + HARDWARE_ADDENDUM + "\n"
     + "\n## Priority pages\n\n"
@@ -1993,6 +2025,7 @@ export function llmsDoc() {
     + "GodLock Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
     + "Donate: " + CANON_HOST + DONATE_PATH + " (AZL-DONATE-1.0). Same door: " + DONATE_CANONICAL + "\n"
     + "GodLock.uk Softwares lists Aziel Runtime only (Try on Glama). Software listing: " + OFFICIAL_SOFTWARES + ". Not a cloned suite catalog and not a Digital Library Softwares page. FragGate is the Runtime kernel (FG-0.1), not a Softwares card on godlock.uk. Live catalog remains " + PUBLIC_RUNTIME + "/v1/software. AZCoherence (azcoherence) is peer to AZ-CLCE (azclce), not AKM-TRIAD.\n"
+    + "Softwares list (machine cite): " + WHITESTONE_ADDENDUM + "\n"
     + "AZCoherence (azcoherence): second-pass triad coherence review (primary vs alternate → PASS/FLAG/NEUTRALIZE/REFUSE). Never invents evidence. Confidence ≠ truth. Not AKM-TRIAD. Peer AZ-CLCE. FragGate single door. Author Aziel Eliab.\n"
     + "AZCoherence Worker: " + AZCOHERENCE_WORKER + "\n"
     + "AZCoherence GitHub: " + AZCOHERENCE_GITHUB + "\n"

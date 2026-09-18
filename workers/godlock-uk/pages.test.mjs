@@ -898,6 +898,7 @@ describe("homepage stays a natural argument surface", () => {
     assert.doesNotMatch(html, /Use with Grok, ChatGPT, Venice/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock|paste-block|how the argument works/i);
     assert.doesNotMatch(html, /\bABAD\b/);
+    assert.doesNotMatch(html, /Whitestone/);
   });
 
   it("does not serve the internal operator brief", async () => {
@@ -1068,6 +1069,7 @@ describe("Specified Fit /reason", () => {
     assert.match(html, /A\. Detection/);
     assert.match(html, /D\. GodLock as method/);
     assert.doesNotMatch(html, /\bABAD\b/);
+    assert.doesNotMatch(html, /Whitestone/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock/i);
   });
 
@@ -1460,6 +1462,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.doesNotMatch(html, /Catalog unavailable/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA/i);
     assert.doesNotMatch(html, /\bABAD\b/);
+    assert.doesNotMatch(html, /Whitestone/);
     const jsonRes = await worker.fetch(new Request("https://godlock.uk/software?format=json"), mockEnv());
     const body = await jsonRes.json();
     assert.equal(body.author, "Aziel Eliab");

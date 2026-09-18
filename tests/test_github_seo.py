@@ -339,17 +339,32 @@ def test_cite_json_graph():
         "Live https://whitestone.vibelock.workers.dev. Softwares list cite only. "
         "Not a FragGate op — do not invent door ops. Not a godlock.uk Softwares card."
     )
+    assert CITE["the_ark_name"] == "The ARK"
+    assert CITE["the_ark_slug"] == "ark"
+    assert CITE["the_ark_one_line"] == "The ARK — Keep a local deniable vault; one phrase opens one vault."
+    assert CITE["the_ark_addendum"] == (
+        "The ARK — Keep a local deniable vault; one phrase opens one vault. "
+        "Live catalog slug ark. Counters: https://ark-download-tracker.vibelock.workers.dev/stats "
+        "and https://ark-download-tracker.vibelock.workers.dev/count. "
+        "Do not invent download numbers. Not a godlock.uk Softwares card."
+    )
+    assert "52" not in CITE["the_ark_addendum"]
+    assert CITE["the_ark_stats"] == "https://ark-download-tracker.vibelock.workers.dev/stats"
+    assert CITE["the_ark_count"] == "https://ark-download-tracker.vibelock.workers.dev/count"
     assert CITE["about_public_work"]["what_aziel_eliab_does"] == CITE["what_aziel_eliab_does"]
     assert CITE["about_public_work"]["whitestone_addendum"] == CITE["whitestone_addendum"]
+    assert CITE["about_public_work"]["the_ark_addendum"] == CITE["the_ark_addendum"]
     assert CITE["godlock_is_vpn"] is False
     assert CITE["what_aziel_eliab_does"] in LLMS
     assert CITE["research_addendum"] in LLMS
     assert CITE["hardware_designs_addendum"] in LLMS
     assert CITE["whitestone_addendum"] in LLMS
+    assert CITE["the_ark_addendum"] in LLMS
     assert CITE["what_aziel_eliab_does"] in AI
     assert CITE["research_addendum"] in AI
     assert CITE["hardware_designs_addendum"] in AI
     assert CITE["whitestone_addendum"] in AI
+    assert CITE["the_ark_addendum"] in AI
     assert SITE_BLURB in LLMS
     assert SITE_BLURB in AI
     assert "Roles: researcher, digital rights activist, software developer, author, and philosopher" in LLMS

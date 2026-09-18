@@ -368,6 +368,10 @@ export const AZINDEX_PERSON_KNOWS_ABOUT = [
   "Aziel Digital Library",
   "Marion Zioncheck historical archive",
   "Hebrew name forms for Aziel Elroi Eliab (SEO / onomastic tether only)",
+];
+
+/** Machine-only Person.knowsAbout extras. Not embedded on homepage /reason /software HTML. */
+export const MACHINE_PERSON_KNOWS_ABOUT = [
   "Book of the Knowledge (AZDOC-A011CAD23671)",
   "Libro Method (AZDOC-F22AD0DCAA9D)",
   "PPIN (AZDOC-E03E61D8E50B)",
@@ -450,20 +454,35 @@ function linkRel(rel, href, extra) {
   return "<link rel=" + Q + rel + Q + " href=" + Q + esc(href) + Q + extra + ">";
 }
 
+/** HTML-embedded Person: roles + locked Softwares sentence. Full lattice lives at /person.jsonld. */
+export const HTML_PERSON_ALTERNATE_NAMES = [
+  "Aziel Elroi Eliab",
+  "Elias Artista",
+  "The Revealer of The Sealed",
+  "Revealer of The Sealed",
+];
+
 export function personNode() {
-  const identity = identityPersonNode();
   return {
-    ...identity,
+    "@type": "Person",
+    "@id": AZIEL_PERSON_ID,
+    name: AUTHOR,
     givenName: "Aziel",
     familyName: "Eliab",
+    url: AZIEL_OFFICIAL,
+    identifier: AUTHOR,
     image: BRAND_MARK,
     hasOccupation: { "@type": "Occupation", name: "Author" },
-    knowsAbout: uniquePreserve([].concat(identity.knowsAbout || [], [SITE, "FragGate", "Aziel Runtime"])),
+    jobTitle: AZINDEX_PERSON_JOB_TITLE.slice(),
+    description: WHAT_AZIEL_ELIAB_DOES,
+    alternateName: HTML_PERSON_ALTERNATE_NAMES.slice(),
+    knowsAbout: uniquePreserve([].concat(AZINDEX_PERSON_KNOWS_ABOUT, [SITE, "FragGate", "Aziel Runtime"])),
     sameAs: uniquePreserve([].concat(IDENTITY_SAME_AS, [
       CANON_HOST + AZIEL_ELIAB_PATH,
       LIBRARY_AZIEL,
       GITHUB,
     ])),
+    seeAlso: CANON_HOST + "/person.jsonld",
     mainEntityOfPage: CANON_HOST + AZIEL_ELIAB_PATH,
   };
 }
@@ -679,7 +698,7 @@ export function identityPersonNode() {
     description: PERSON_DESCRIPTION,
     disambiguatingDescription: PUBLISHER_NOT_LOCK,
     jobTitle: AZINDEX_PERSON_JOB_TITLE.slice(),
-    knowsAbout: AZINDEX_PERSON_KNOWS_ABOUT.slice(),
+    knowsAbout: uniquePreserve(AZINDEX_PERSON_KNOWS_ABOUT.concat(MACHINE_PERSON_KNOWS_ABOUT)),
     knowsLanguage: ["en", "he"],
     sameAs: IDENTITY_SAME_AS.slice(),
     mainEntityOfPage: "https://www.azieleliab.com/who",

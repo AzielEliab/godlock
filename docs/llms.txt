@@ -68,7 +68,7 @@ GodLock Softwares is GodLock-first (Softwares heading → list). Aziel Runtime o
 
 Aziel Runtime is not merely an API orchestrator or software aggregator; it is a node-meshed orchestration suite of MCP-connected software designed to coordinate specialized tools through a shared, security-gated runtime while preserving provenance, chain-of-custody, temporal integrity, and auditable execution. It functions as a digital forensic, investigative, verification, research, intelligence-support, and systems-auditing environment in which individual engines can analyze evidence, validate records, inspect trajectories and patterns, track lineage, enforce capability boundaries, generate receipts, and exchange structured results without collapsing into one opaque model or unrestricted control plane. Its architecture emphasizes compartmentalization, deterministic routing, explicit refusal states, append-only evidence handling, and machine-readable metadata, making it suitable for distributed analysis workflows where trust, reproducibility, attribution, and post-hoc auditability matter as much as the result itself.
 
-Live version: 2.0.0-rc1 (certification-point freeze). Changelog stays below this abstract.
+Live version: 2.0.0-rc1 (certification-point freeze). SoT LIVE: main 6a3798a / version_id 105fa1ee / 2.0.0-rc1. Changelog stays below this abstract.
 Try on Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime (verified listing AzielEliab/aziel-runtime; not an invented server id)
 Official Runtime (same-origin): https://godlock.uk/runtime
 Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/
@@ -76,6 +76,19 @@ Source on GitHub: https://github.com/AzielEliab/aziel-runtime
 Documentation/Architecture: https://github.com/AzielEliab/aziel-runtime/tree/main/docs/2.0
 Kernel: https://github.com/AzielEliab/fraggate (FG-0.1)
 One door — discover, route, refuse. FragGate list → describe → call.
+
+## Softwares + runtime launch readiness
+
+SoT LIVE: main 6a3798a / version_id 105fa1ee / 2.0.0-rc1.
+Aziel Runtime 2.0.0-rc1 (main 6a3798a / version_id 105fa1ee / 2.0.0-rc1) launch readiness: human UI + MCP fraggate_call + FragGate sole door + mesh/AZVPN (HTTPS/WS REAL; WireGuard/OpenVPN SLOT) + radios channel cites worker_hardware:false + /download suite pack. Not . GodLock is a challenge stress-test product, not a VPN identity. Identity Aziel Eliab only. Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.
+Human UI: yes. MCP door: fraggate_call. FragGate is THE single door (https://github.com/AzielEliab/fraggate).
+mesh/AZVPN: HTTPS/WS REAL; WireGuard/OpenVPN SLOT. GET /v1/mesh cites the bind and never opens a session.
+Radios channel cites worker_hardware:false. Invented hardware: false.
+Suite pack: https://aziel-runtime.vibelock.workers.dev/download (also https://aziel-runtime.vibelock.workers.dev/v1/suite/download). Not .
+Try on Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
+GodLock Softwares stays heading → list only. No Digital Library chrome. No Works-with assistants subsection.
+Plane B Framagit stays SLOT CNS-NO-FORGE-MIRROR. Plane C stays SLOT CNS-OPERATOR-ATTEST. No LIVE flip.
+Identity Aziel Eliab only. No visible 15:20. Lamb Lens. NO-LIE. Growth-ON.
 
 ## Priority pages
 
@@ -139,9 +152,9 @@ Person @id: https://www.azieleliab.com/#aziel
 Lamb Lens: Corpus is the public Lamb Lens shelf. GodLock does not fan Corpus.
 Growth-ON.
 Plane A: 5 published surfaces / 2 family radii (cloudflare + github). One CF/GitHub tunnel, not five shelves.
-Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg + archive.org hash-verify PASS (still SLOT). archive.org https://archive.org/details/aziel-lockset-tip PASS and https://archive.org/details/aziel-lockset-tip_202609 PASS (same blast_radius archive-org; not a second independent shelf; independent_live_count stays 1). Framagit url null. GitFlic refused CNS-GITFLIC-EMAIL. GitLab refused CNS-GITLAB-CF-LOOP. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS).
+Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg + archive.org hash-verify PASS (still SLOT). archive.org https://archive.org/details/aziel-lockset-tip PASS and https://archive.org/details/aziel-lockset-tip_202609 PASS (same blast_radius archive-org; not a second independent shelf; independent_live_count stays 1). Framagit url null. SLOT CNS-NO-FORGE-MIRROR. No LIVE flip. GitFlic refused CNS-GITFLIC-EMAIL. GitLab refused CNS-GITLAB-CF-LOOP. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS).
 Zenodo tip-pack refused CNS-ZENODO-IP-BAN. doi null. Do not invent a DOI.
-Plane C: USB airgap SLOT until CNS-OPERATOR-ATTEST.
+Plane C: USB airgap SLOT until CNS-OPERATOR-ATTEST. No LIVE flip.
 Cap-7: design_of hubs; resolves_to_hub: false; name_may_change: true; public_icann: false. GodLock design_of https://godlock.uk/.
 Lockset cite (GodLock does not write the public ledger): https://www.azielcorpuslibrary.net/lockset.json tip c831429befc221bd41caeb0a6d1c5361602db5684abab7af6d39714084b6b245
 Corpus roll: corpus#96. Operator roll: 2026-09-14.
@@ -156,7 +169,7 @@ Cap-7: design_of + resolves_to_hub:false.
 FoldLock cite-only. Not encryption. Not zip. Not a Softwares card here.
 TLS is Cloudflare edge HTTPS. No client-side crypto claim.
 Growth-ON. GPTBot stays Allow. No visible 15:20 chrome.
-CNS + NO-LIE. Plane B ALL-TARGETS codeberg + archive.org + framagit.
+CNS + NO-LIE. Plane B ALL-TARGETS codeberg + archive.org + framagit. Framagit SLOT CNS-NO-FORGE-MIRROR. Plane C SLOT CNS-OPERATOR-ATTEST. No LIVE flip.
 
 ## NO-LIE / NO-REWRITE
 

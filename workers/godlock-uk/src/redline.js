@@ -5,6 +5,7 @@
 import {
   ARCHIVE_ORG_TIP_PACK_URL,
   FRAMAGIT_TIP_PACK_URL,
+  FRAMAGIT_REFUSE,
   GITFLIC_REFUSE,
   GITLAB_REFUSE,
   PLANE_B_ALL_TARGETS,
@@ -121,6 +122,7 @@ export function redlineDoc() {
     plane_b_all_targets: PLANE_B_ALL_TARGETS,
     plane_b_archive_org_url: ARCHIVE_ORG_TIP_PACK_URL,
     plane_b_framagit_url: FRAMAGIT_TIP_PACK_URL,
+    plane_b_framagit_refuse: FRAMAGIT_REFUSE,
     gitflic_refuse: GITFLIC_REFUSE,
     gitlab_refuse: GITLAB_REFUSE,
     zenodo_refuse: ZENODO_REFUSE,
@@ -246,5 +248,5 @@ export function redlineLlmsSection() {
     + "FoldLock cite-only. Not encryption. Not zip. Not a Softwares card here.\n"
     + "TLS is Cloudflare edge HTTPS. No client-side crypto claim.\n"
     + "Growth-ON. GPTBot stays Allow. No visible 15:20 chrome.\n"
-    + "CNS + NO-LIE. Plane B ALL-TARGETS codeberg + archive.org + framagit.\n";
+    + "CNS + NO-LIE. Plane B ALL-TARGETS codeberg + archive.org + framagit. Framagit SLOT CNS-NO-FORGE-MIRROR. Plane C SLOT CNS-OPERATOR-ATTEST. No LIVE flip.\n";
 }

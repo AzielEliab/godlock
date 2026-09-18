@@ -899,6 +899,7 @@ describe("homepage stays a natural argument surface", () => {
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock|paste-block|how the argument works/i);
     assert.doesNotMatch(html, /\bABAD\b/);
     assert.doesNotMatch(html, /Whitestone/);
+    assert.doesNotMatch(html, /The ARK/);
   });
 
   it("does not serve the internal operator brief", async () => {
@@ -1070,6 +1071,7 @@ describe("Specified Fit /reason", () => {
     assert.match(html, /D\. GodLock as method/);
     assert.doesNotMatch(html, /\bABAD\b/);
     assert.doesNotMatch(html, /Whitestone/);
+    assert.doesNotMatch(html, /The ARK/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock/i);
   });
 
@@ -1287,6 +1289,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /Specified Fit \/ GodLock score/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock/i);
     assert.doesNotMatch(html, /\bABAD\b/);
+    assert.doesNotMatch(html, /Whitestone/);
     const extras = new Set([...EXTRA_SUITE_SLUGS, FRAGGATE_CARD.slug]);
     const invented = ids.filter((id) => !extras.has(id) && !CATALOG_SLUGS.includes(id));
     assert.deepEqual(invented, []);
@@ -1463,6 +1466,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.doesNotMatch(html, /INTERNAL_CRITERIA/i);
     assert.doesNotMatch(html, /\bABAD\b/);
     assert.doesNotMatch(html, /Whitestone/);
+    assert.doesNotMatch(html, /The ARK/);
     const jsonRes = await worker.fetch(new Request("https://godlock.uk/software?format=json"), mockEnv());
     const body = await jsonRes.json();
     assert.equal(body.author, "Aziel Eliab");

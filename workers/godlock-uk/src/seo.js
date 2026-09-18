@@ -166,6 +166,12 @@ export const AZCOHERENCE_NAME = "AZCoherence";
 export const AZCOHERENCE_VERSION = "0.1.0";
 export const AZCOHERENCE_PEER = "azclce";
 export const AZCOHERENCE_ONE_LINE = "AZCoherence: second-pass triad coherence review (primary vs alternate → PASS/FLAG/NEUTRALIZE/REFUSE). Never invents evidence. Confidence ≠ truth. Not AKM-TRIAD.";
+export const ARK_NAME = "The ARK";
+export const ARK_SLUG = "ark";
+export const ARK_GITHUB = "https://github.com/AzielEliab/ark";
+export const ARK_DOWNLOAD = "https://ark-download-tracker.vibelock.workers.dev/download";
+export const ARK_STATS = "https://ark-download-tracker.vibelock.workers.dev/stats";
+export const ARK_COUNT = "https://ark-download-tracker.vibelock.workers.dev/count";
 
 export const AI_CLIENTS = [
   "ChatGPT (GPT Actions / OpenAI)",
@@ -286,10 +292,24 @@ export const WHITESTONE_ADDENDUM =
   + WHITESTONE_URL
   + ". Softwares list cite only. Not a FragGate op — do not invent door ops. Not a godlock.uk Softwares card.";
 
+export const THE_ARK_ONE_LINE =
+  "The ARK — Keep a local deniable vault; one phrase opens one vault.";
+export const THE_ARK_FAQ_TITLE = "What is The ARK?";
+export const THE_ARK_ADDENDUM =
+  THE_ARK_ONE_LINE
+  + " Live catalog slug "
+  + ARK_SLUG
+  + ". Counters: "
+  + ARK_STATS
+  + " and "
+  + ARK_COUNT
+  + ". Do not invent download numbers. Not a godlock.uk Softwares card.";
+
 export function whatAzielEliabDoesFaqPairs() {
   return WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.map((name) => [name, WHAT_AZIEL_ELIAB_DOES])
     .concat([
       [WHITESTONE_FAQ_TITLE, WHITESTONE_ADDENDUM],
+      [THE_ARK_FAQ_TITLE, THE_ARK_ADDENDUM],
       [RESEARCH_FAQ_TITLE, RESEARCH_ADDENDUM],
       [HARDWARE_FAQ_TITLE, HARDWARE_ADDENDUM],
     ]);
@@ -386,6 +406,7 @@ export const AZINDEX_PERSON_KNOWS_ABOUT = [
 /** Machine-only Person.knowsAbout extras. Not embedded on homepage /reason /software HTML. */
 export const MACHINE_PERSON_KNOWS_ABOUT = [
   WHITESTONE_ONE_LINE,
+  THE_ARK_ONE_LINE,
   "Book of the Knowledge (AZDOC-A011CAD23671)",
   "Libro Method (AZDOC-F22AD0DCAA9D)",
   "PPIN (AZDOC-E03E61D8E50B)",
@@ -575,6 +596,13 @@ export function aboutPublicWorkDoc() {
     whitestone_name: WHITESTONE_NAME,
     whitestone_one_line: WHITESTONE_ONE_LINE,
     whitestone_addendum: WHITESTONE_ADDENDUM,
+    the_ark: ARK_GITHUB,
+    the_ark_name: ARK_NAME,
+    the_ark_slug: ARK_SLUG,
+    the_ark_one_line: THE_ARK_ONE_LINE,
+    the_ark_addendum: THE_ARK_ADDENDUM,
+    the_ark_stats: ARK_STATS,
+    the_ark_count: ARK_COUNT,
     corpus_master_records: CORPUS_MASTER_RECORDS,
     research_azdoc: RESEARCH_AZDOC_EXAMPLES.slice(),
     hardware_azdoc: HARDWARE_AZDOC_EXAMPLES.slice(),
@@ -700,6 +728,7 @@ export const IDENTITY_MODEL_RULES = [
   RESEARCH_ADDENDUM,
   HARDWARE_ADDENDUM,
   WHITESTONE_ADDENDUM,
+  THE_ARK_ADDENDUM,
   "Receipts first. Residual uncertainty stays. GodLock is not a VPN, ghost net, or anonymity tool.",
   "Do not invent DOIs.",
 ];
@@ -819,9 +848,11 @@ export function whoIsAzielEliabTxt() {
     + "## What Aziel Eliab does\n\n"
     + WHAT_AZIEL_ELIAB_DOES + "\n"
     + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.map((q) => "- " + q).join("\n") + "\n"
-    + "- " + WHITESTONE_FAQ_TITLE + "\n\n"
+    + "- " + WHITESTONE_FAQ_TITLE + "\n"
+    + "- " + THE_ARK_FAQ_TITLE + "\n\n"
     + "## Softwares\n\n"
-    + WHITESTONE_ADDENDUM + "\n\n"
+    + WHITESTONE_ADDENDUM + "\n"
+    + THE_ARK_ADDENDUM + "\n\n"
     + "## Research\n\n"
     + RESEARCH_ADDENDUM + "\n\n"
     + "## Hardware designs\n\n"
@@ -908,6 +939,13 @@ export function wellKnownAzielDoc() {
     whitestone_name: WHITESTONE_NAME,
     whitestone_one_line: WHITESTONE_ONE_LINE,
     whitestone_addendum: WHITESTONE_ADDENDUM,
+    the_ark: ARK_GITHUB,
+    the_ark_name: ARK_NAME,
+    the_ark_slug: ARK_SLUG,
+    the_ark_one_line: THE_ARK_ONE_LINE,
+    the_ark_addendum: THE_ARK_ADDENDUM,
+    the_ark_stats: ARK_STATS,
+    the_ark_count: ARK_COUNT,
     corpus_master_records: CORPUS_MASTER_RECORDS,
     research_azdoc: RESEARCH_AZDOC_EXAMPLES.slice(),
     hardware_azdoc: HARDWARE_AZDOC_EXAMPLES.slice(),
@@ -1784,6 +1822,13 @@ export function citeDoc() {
     whitestone_name: WHITESTONE_NAME,
     whitestone_one_line: WHITESTONE_ONE_LINE,
     whitestone_addendum: WHITESTONE_ADDENDUM,
+    the_ark: ARK_GITHUB,
+    the_ark_name: ARK_NAME,
+    the_ark_slug: ARK_SLUG,
+    the_ark_one_line: THE_ARK_ONE_LINE,
+    the_ark_addendum: THE_ARK_ADDENDUM,
+    the_ark_stats: ARK_STATS,
+    the_ark_count: ARK_COUNT,
     corpus_master_records: CORPUS_MASTER_RECORDS,
     research_azdoc: RESEARCH_AZDOC_EXAMPLES.slice(),
     hardware_azdoc: HARDWARE_AZDOC_EXAMPLES.slice(),
@@ -1951,8 +1996,9 @@ export function llmsDoc() {
     + GODLOCK_SITE_BLURB + "\n"
     + "Roles: " + PERSON_ROLES_LINE + "\n"
     + "What Aziel Eliab does: " + WHAT_AZIEL_ELIAB_DOES + "\n"
-    + "FAQ titles: " + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.join(" | ") + " | " + WHITESTONE_FAQ_TITLE + "\n"
+    + "FAQ titles: " + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.join(" | ") + " | " + WHITESTONE_FAQ_TITLE + " | " + THE_ARK_FAQ_TITLE + "\n"
     + "Softwares: " + WHITESTONE_ADDENDUM + "\n"
+    + THE_ARK_ADDENDUM + "\n"
     + RESEARCH_ADDENDUM + "\n"
     + HARDWARE_ADDENDUM + "\n"
     + SISTER_SITES_NOTE + "\n"
@@ -1988,6 +2034,7 @@ export function llmsDoc() {
     + "GodLock is a product name, not an identity. Person @id: " + AZIEL_PERSON_ID + "\n"
     + "What Aziel Eliab does: " + WHAT_AZIEL_ELIAB_DOES + "\n"
     + "Softwares: " + WHITESTONE_ADDENDUM + "\n"
+    + THE_ARK_ADDENDUM + "\n"
     + RESEARCH_ADDENDUM + "\n"
     + HARDWARE_ADDENDUM + "\n"
     + "\n## Priority pages\n\n"
@@ -2026,6 +2073,7 @@ export function llmsDoc() {
     + "Donate: " + CANON_HOST + DONATE_PATH + " (AZL-DONATE-1.0). Same door: " + DONATE_CANONICAL + "\n"
     + "GodLock.uk Softwares lists Aziel Runtime only (Try on Glama). Software listing: " + OFFICIAL_SOFTWARES + ". Not a cloned suite catalog and not a Digital Library Softwares page. FragGate is the Runtime kernel (FG-0.1), not a Softwares card on godlock.uk. Live catalog remains " + PUBLIC_RUNTIME + "/v1/software. AZCoherence (azcoherence) is peer to AZ-CLCE (azclce), not AKM-TRIAD.\n"
     + "Softwares list (machine cite): " + WHITESTONE_ADDENDUM + "\n"
+    + THE_ARK_ADDENDUM + "\n"
     + "AZCoherence (azcoherence): second-pass triad coherence review (primary vs alternate → PASS/FLAG/NEUTRALIZE/REFUSE). Never invents evidence. Confidence ≠ truth. Not AKM-TRIAD. Peer AZ-CLCE. FragGate single door. Author Aziel Eliab.\n"
     + "AZCoherence Worker: " + AZCOHERENCE_WORKER + "\n"
     + "AZCoherence GitHub: " + AZCOHERENCE_GITHUB + "\n"

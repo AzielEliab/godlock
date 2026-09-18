@@ -80,6 +80,13 @@ import {
   WHITESTONE_ONE_LINE,
   WHITESTONE_URL,
   WHITESTONE_NAME,
+  THE_ARK_FAQ_TITLE,
+  THE_ARK_ADDENDUM,
+  THE_ARK_ONE_LINE,
+  ARK_NAME,
+  ARK_SLUG,
+  ARK_STATS,
+  ARK_COUNT,
   CORPUS_MASTER_RECORDS,
   RESEARCH_AZDOC_EXAMPLES,
   HARDWARE_AZDOC_EXAMPLES,
@@ -737,6 +744,15 @@ describe("AZindex identity machine", () => {
     assert.ok(WHITESTONE_ADDENDUM.includes(WHITESTONE_URL));
     assert.match(WHITESTONE_ADDENDUM, /Not a FragGate op/);
     assert.doesNotMatch(WHITESTONE_ADDENDUM, /\/v1\/fraggate\/|fraggate_describe|fraggate_call/);
+    assert.equal(ARK_NAME, "The ARK");
+    assert.equal(ARK_SLUG, "ark");
+    assert.equal(THE_ARK_ONE_LINE, "The ARK — Keep a local deniable vault; one phrase opens one vault.");
+    assert.equal(THE_ARK_FAQ_TITLE, "What is The ARK?");
+    assert.ok(THE_ARK_ADDENDUM.includes(THE_ARK_ONE_LINE));
+    assert.ok(THE_ARK_ADDENDUM.includes(ARK_STATS));
+    assert.ok(THE_ARK_ADDENDUM.includes(ARK_COUNT));
+    assert.match(THE_ARK_ADDENDUM, /Do not invent download numbers/);
+    assert.doesNotMatch(THE_ARK_ADDENDUM, /\b\d{2,}\b/);
     assert.ok(RESEARCH_AZDOC_EXAMPLES.length >= 7);
     assert.ok(HARDWARE_AZDOC_EXAMPLES.length >= 8);
 
@@ -745,6 +761,7 @@ describe("AZindex identity machine", () => {
     assert.ok(person.description.startsWith(WHAT_AZIEL_ELIAB_DOES));
     assert.ok(person.description.includes(HEBREW_DEFINITION));
     assert.ok(person.knowsAbout.includes(WHITESTONE_ONE_LINE));
+    assert.ok(person.knowsAbout.includes(THE_ARK_ONE_LINE));
     assert.ok(person.knowsAbout.includes("Book of the Knowledge (AZDOC-A011CAD23671)"));
     assert.ok(person.knowsAbout.includes("AZ_BoneConducti STL (AZDOC-FD18432707F5)"));
     for (const item of MACHINE_PERSON_KNOWS_ABOUT) {
@@ -771,15 +788,18 @@ describe("AZindex identity machine", () => {
       assert.equal(q.acceptedAnswer.text, WHAT_AZIEL_ELIAB_DOES);
     }
     assert.ok(names.includes(WHITESTONE_FAQ_TITLE));
+    assert.ok(names.includes(THE_ARK_FAQ_TITLE));
     assert.ok(names.includes(RESEARCH_FAQ_TITLE));
     assert.ok(names.includes(HARDWARE_FAQ_TITLE));
     assert.equal(faq.mainEntity.find((q) => q.name === WHITESTONE_FAQ_TITLE).acceptedAnswer.text, WHITESTONE_ADDENDUM);
+    assert.equal(faq.mainEntity.find((q) => q.name === THE_ARK_FAQ_TITLE).acceptedAnswer.text, THE_ARK_ADDENDUM);
     assert.equal(faq.mainEntity.find((q) => q.name === RESEARCH_FAQ_TITLE).acceptedAnswer.text, RESEARCH_ADDENDUM);
     assert.equal(faq.mainEntity.find((q) => q.name === HARDWARE_FAQ_TITLE).acceptedAnswer.text, HARDWARE_ADDENDUM);
 
     const who = whoIsAzielEliabTxt();
     assert.ok(who.includes(WHAT_AZIEL_ELIAB_DOES));
     assert.ok(who.includes(WHITESTONE_ADDENDUM));
+    assert.ok(who.includes(THE_ARK_ADDENDUM));
     assert.ok(who.includes(RESEARCH_ADDENDUM));
     assert.ok(who.includes(HARDWARE_ADDENDUM));
     assert.match(who, /## What Aziel Eliab does/);
@@ -796,6 +816,12 @@ describe("AZindex identity machine", () => {
     assert.equal(cite.whitestone_name, WHITESTONE_NAME);
     assert.equal(cite.whitestone_one_line, WHITESTONE_ONE_LINE);
     assert.equal(cite.whitestone_addendum, WHITESTONE_ADDENDUM);
+    assert.equal(cite.the_ark_name, ARK_NAME);
+    assert.equal(cite.the_ark_slug, ARK_SLUG);
+    assert.equal(cite.the_ark_one_line, THE_ARK_ONE_LINE);
+    assert.equal(cite.the_ark_addendum, THE_ARK_ADDENDUM);
+    assert.equal(cite.the_ark_stats, ARK_STATS);
+    assert.equal(cite.the_ark_count, ARK_COUNT);
     assert.equal(cite.corpus_master_records, 326);
     assert.equal(cite.about_public_work.what_aziel_eliab_does, WHAT_AZIEL_ELIAB_DOES);
     assert.equal(cite.mesh_godlock_is_vpn, false);
@@ -803,10 +829,13 @@ describe("AZindex identity machine", () => {
     const llms = llmsDoc();
     assert.ok(llms.includes(WHAT_AZIEL_ELIAB_DOES));
     assert.ok(llms.includes(WHITESTONE_ADDENDUM));
+    assert.ok(llms.includes(THE_ARK_ADDENDUM));
     assert.ok(llms.includes(RESEARCH_ADDENDUM));
     assert.ok(llms.includes(HARDWARE_ADDENDUM));
     assert.match(llms, /FAQ titles: What does Aziel Eliab do\?/);
     assert.match(llms, /What is Whitestone\?/);
+    assert.match(llms, /What is The ARK\?/);
+    assert.doesNotMatch(THE_ARK_ADDENDUM, /\b52\b|\b124\b/);
     assert.doesNotMatch(llms, /whitestone\.vibelock\.workers\.dev\/v1\/fraggate/);
 
     const mission = wellKnownAzielDoc();
@@ -827,6 +856,7 @@ describe("AZindex identity machine", () => {
     assert.equal(aboutJson.research_addendum, RESEARCH_ADDENDUM);
     assert.equal(aboutJson.hardware_designs_addendum, HARDWARE_ADDENDUM);
     assert.equal(aboutJson.whitestone_addendum, WHITESTONE_ADDENDUM);
+    assert.equal(aboutJson.the_ark_addendum, THE_ARK_ADDENDUM);
     assert.equal(aboutJson.corpus_master_records, 326);
     assert.equal(aboutJson.product_not_identity, true);
     assert.doesNotMatch(aboutJson.text, /MCP|OpenAPI/);

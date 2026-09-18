@@ -168,6 +168,11 @@ describe("mesh contract", () => {
     assert.equal(ops.readonly, true);
     assert.equal(ops.disable, undefined);
     assert.equal(ops.anonymity_network, false);
+    assert.equal(ops.worker_hardware, false);
+    assert.equal(ops.fielded_100, false);
+    assert.equal(ops.azvpn.https_ws, "REAL");
+    assert.equal(ops.azvpn.wireguard, "SLOT");
+    assert.equal(ops.azvpn.godlock_is_vpn, false);
     assert.equal(ops.node_gate, false);
     assert.equal(ops.auto_heal, false);
     assert.equal(ops.rollup_shape, "live|locked|isolated counts only");

@@ -78,6 +78,8 @@ import {
   CORPUS_MASTER_RECORDS,
   RESEARCH_AZDOC_EXAMPLES,
   HARDWARE_AZDOC_EXAMPLES,
+  MACHINE_PERSON_KNOWS_ABOUT,
+  personNode,
 } from "./src/seo.js";
 import { AZIEL_MANIFESTO, SPECIFIED_FIT_MOTTO as UI_SPECIFIED_FIT_MOTTO, whoPageHtml } from "./src/ui.js";
 
@@ -728,8 +730,23 @@ describe("AZindex identity machine", () => {
     const person = personJsonLd();
     assert.equal(person["@id"], AZIEL_PERSON_ID);
     assert.ok(person.description.startsWith(WHAT_AZIEL_ELIAB_DOES));
+    assert.ok(person.description.includes(HEBREW_DEFINITION));
     assert.ok(person.knowsAbout.includes("Book of the Knowledge (AZDOC-A011CAD23671)"));
     assert.ok(person.knowsAbout.includes("AZ_BoneConducti STL (AZDOC-FD18432707F5)"));
+    for (const item of MACHINE_PERSON_KNOWS_ABOUT) {
+      assert.ok(person.knowsAbout.includes(item), item);
+    }
+
+    const htmlPerson = personNode();
+    assert.equal(htmlPerson["@id"], AZIEL_PERSON_ID);
+    assert.equal(htmlPerson.description, WHAT_AZIEL_ELIAB_DOES);
+    assert.deepEqual(htmlPerson.jobTitle, AZINDEX_PERSON_JOB_TITLE);
+    assert.equal(htmlPerson.seeAlso, CANON_HOST + "/person.jsonld");
+    assert.doesNotMatch(JSON.stringify(htmlPerson), /\bABAD\b/);
+    assert.doesNotMatch(JSON.stringify(htmlPerson.knowsAbout || []), /AZDOC-/);
+    for (const item of MACHINE_PERSON_KNOWS_ABOUT) {
+      assert.ok(!(htmlPerson.knowsAbout || []).includes(item), item);
+    }
 
     const graph = graphJsonLd();
     const faq = graph["@graph"].find((n) => n["@type"] === "FAQPage");

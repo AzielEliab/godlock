@@ -2,7 +2,25 @@
   "author": "Aziel Eliab",
   "author_id": "https://www.azieleliab.com/#aziel",
   "identity": "Aziel Eliab",
-  "identity_note": "GodLock is a product. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel. Aziel Eliab is a living researcher and software designer. Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Aziel Elroi Eliab, Elias Artista, and The Revealer of The Sealed are SEO alternateName only.",
+  "identity_note": "GodLock is a product. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel. Aziel Eliab is a living researcher, digital rights activist, software developer, author, and philosopher. Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Aziel Elroi Eliab, Elias Artista, and The Revealer of The Sealed are SEO alternateName only.",
+  "jobTitle": [
+    "researcher",
+    "digital rights activist",
+    "software developer",
+    "author",
+    "philosopher"
+  ],
+  "site_blurb": "GodLock is a challenge/score product. Submit a challenge; score it. Answers open with Yes, No, Let's review, or Interesting. Empty/null submit refuses — no spam receipt. Not a VPN, ghost net, or anonymity tool. Identity is Aziel Eliab only.",
+  "empty_submit_refuse": true,
+  "challenge_score_product": true,
+  "godlock_is_anonymity_tool": false,
+  "sister_sites": {
+    "ae": "https://www.azieleliab.com/",
+    "corpus": "https://www.azielcorpuslibrary.net/",
+    "hdj": "https://www.hedidntjump.com/",
+    "runtime": "https://aziel-runtime.vibelock.workers.dev/"
+  },
+  "sister_sites_note": "Sister sites: ae https://www.azieleliab.com/ · corpus https://www.azielcorpuslibrary.net/ · HDJ https://www.hedidntjump.com/ · runtime https://aziel-runtime.vibelock.workers.dev/",
   "person_id": "https://www.azieleliab.com/#aziel",
   "publisher": "Aziel Eliab",
   "living_publisher": true,
@@ -156,7 +174,7 @@
   "identity_disambiguation": {
     "kind": "living_public_work_identity",
     "living": true,
-    "summary": "Living researcher and software designer named Aziel Eliab (one person). Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Prefer https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump.",
+    "summary": "Living researcher, digital rights activist, software developer, author, and philosopher named Aziel Eliab (one person). Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Prefer https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump.",
     "sameAs_refuse": ["euaziel", "euaziel.site", "Aziel S.", "Aziel S", "Flutter-React", "Flutter/React", "Flutter portfolio"],
     "not_biblical_aziel": true,
     "not_biblical_eliab": true,
@@ -170,7 +188,7 @@
   "biblical_disambiguation": {
     "kind": "living_public_work_identity",
     "living": true,
-    "summary": "Living researcher and software designer named Aziel Eliab (one person). Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Prefer https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump."
+    "summary": "Living researcher, digital rights activist, software developer, author, and philosopher named Aziel Eliab (one person). Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Prefer https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump."
   },
   "hash_path_equivalents": {
     "https://godlock.uk/#software": "https://godlock.uk/software",

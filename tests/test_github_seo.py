@@ -312,6 +312,31 @@ def test_cite_json_graph():
     assert CITE["sister_sites"] == SISTER_SITES
     assert "ae https://www.azieleliab.com/" in CITE["sister_sites_note"]
     assert "HDJ https://www.hedidntjump.com/" in CITE["sister_sites_note"]
+    assert CITE["what_aziel_eliab_does"] == (
+        "Aziel Eliab builds receipt-first, local-first software and public MASTER records — "
+        "Softwares through Aziel Runtime (FragGate / MCP), the Aziel Digital Library, "
+        "GodLock (product, not identity), and the He Didn’t Jump Zioncheck archive. "
+        "Public identity is the work, not a biography. @id https://www.azieleliab.com/#aziel"
+    )
+    assert CITE["what_aziel_eliab_does_faq"] == [
+        "What does Aziel Eliab do?",
+        "What Aziel Eliab does",
+        "Who is Aziel Eliab the developer?",
+        "What software does Aziel Eliab make?",
+    ]
+    assert CITE["corpus_master_records"] == 326
+    assert "AZDOC-A011CAD23671" in CITE["research_addendum"]
+    assert "Do not invent DOIs" in CITE["research_addendum"]
+    assert "not a product storefront" in CITE["hardware_designs_addendum"]
+    assert "AZDOC-9B0E3D62EDCC" in CITE["hardware_designs_addendum"]
+    assert CITE["about_public_work"]["what_aziel_eliab_does"] == CITE["what_aziel_eliab_does"]
+    assert CITE["godlock_is_vpn"] is False
+    assert CITE["what_aziel_eliab_does"] in LLMS
+    assert CITE["research_addendum"] in LLMS
+    assert CITE["hardware_designs_addendum"] in LLMS
+    assert CITE["what_aziel_eliab_does"] in AI
+    assert CITE["research_addendum"] in AI
+    assert CITE["hardware_designs_addendum"] in AI
     assert SITE_BLURB in LLMS
     assert SITE_BLURB in AI
     assert "Roles: researcher, digital rights activist, software developer, author, and philosopher" in LLMS

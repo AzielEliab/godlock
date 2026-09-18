@@ -26,6 +26,8 @@ import {
   BRAND_MARK_PATH,
   personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, wellKnownAzielDoc,
   AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE, WHO_PATH,
+  WHAT_AZIEL_ELIAB_DOES, WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
+  RESEARCH_ADDENDUM, HARDWARE_ADDENDUM, CORPUS_MASTER_RECORDS,
 } from "./seo.js";
 import { shelvesDoc } from "./shelves.js";
 import {
@@ -868,6 +870,11 @@ export default {
             product_not_identity: true,
             disambiguation: BIBLICAL_DISAMBIGUATION_LINE,
             library: "https://www.azielcorpuslibrary.net/AzielEliab",
+            what_aziel_eliab_does: WHAT_AZIEL_ELIAB_DOES,
+            what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
+            research_addendum: RESEARCH_ADDENDUM,
+            hardware_designs_addendum: HARDWARE_ADDENDUM,
+            corpus_master_records: CORPUS_MASTER_RECORDS,
             text: azielEliabText(),
           }, 200, extraHeadersFor(nodeId));
         }

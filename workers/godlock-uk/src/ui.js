@@ -15,6 +15,7 @@ import {
   RESEARCH_FAQ_TITLE, RESEARCH_ADDENDUM,
   HARDWARE_FAQ_TITLE, HARDWARE_ADDENDUM,
   WHITESTONE_FAQ_TITLE, WHITESTONE_ADDENDUM,
+  THE_ARK_FAQ_TITLE, THE_ARK_ADDENDUM,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
@@ -570,6 +571,11 @@ export function whoPageHtml() {
         "@type": "Question",
         name: WHITESTONE_FAQ_TITLE,
         acceptedAnswer: { "@type": "Answer", text: WHITESTONE_ADDENDUM },
+      },
+      {
+        "@type": "Question",
+        name: THE_ARK_FAQ_TITLE,
+        acceptedAnswer: { "@type": "Answer", text: THE_ARK_ADDENDUM },
       },
       {
         "@type": "Question",

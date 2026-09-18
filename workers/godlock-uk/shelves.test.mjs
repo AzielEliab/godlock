@@ -150,6 +150,12 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.equal(framagit.status, "slot");
     assert.equal(framagit.url, null);
     assert.equal(framagit.forge, "framagit");
+    assert.equal(framagit.refuse, "CNS-NO-FORGE-MIRROR");
+    assert.equal(framagit.live_ready, false);
+    assert.equal(doc.planes.B.framagit_refuse, "CNS-NO-FORGE-MIRROR");
+    assert.equal(doc.planes.B.framagit_status, "slot");
+    assert.equal(doc.planes.B.live_ready, false);
+    assert.equal(doc.planes.C.live_ready, false);
     const gitflic = doc.registry.shelves.find((s) => s.id === "plane-b-gitflic-ru-tip-pack");
     assert.equal(gitflic.status, "refused");
     assert.equal(gitflic.refuse, GITFLIC_REFUSE);
@@ -209,6 +215,9 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.equal(cite.plane_b_archive_org_secondary_item, "aziel-lockset-tip_202609");
     assert.equal(cite.plane_b_archive_org_hash_verify, "pass");
     assert.equal(cite.plane_b_framagit_url, null);
+    assert.equal(cite.plane_b_framagit_refuse, "CNS-NO-FORGE-MIRROR");
+    assert.equal(cite.plane_b_framagit_status, "slot");
+    assert.equal(cite.plane_c_live_ready, false);
     assert.equal(cite.plane_b_gitflic_refuse, GITFLIC_REFUSE);
     assert.equal(cite.plane_b_gitlab_refuse, GITLAB_REFUSE);
     assert.equal(cite.plane_c_attest, PLANE_C_ATTEST);
@@ -235,6 +244,8 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.match(llms, /https:\/\/archive\.org\/details\/aziel-lockset-tip_202609/);
     assert.match(llms, /not a second independent shelf/);
     assert.match(llms, /Framagit url null/);
+    assert.match(llms, /SLOT CNS-NO-FORGE-MIRROR/);
+    assert.match(llms, /Plane C: USB airgap SLOT until CNS-OPERATOR-ATTEST\. No LIVE flip/);
     assert.match(llms, /CNS-GITFLIC-EMAIL/);
     assert.match(llms, /CNS-GITLAB-CF-LOOP/);
     assert.match(llms, /CNS-ZENODO-IP-BAN/);

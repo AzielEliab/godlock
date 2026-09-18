@@ -19,7 +19,8 @@ GitHub profile: https://github.com/AzielEliab
 GitHub secondary: https://github.com/azieltherevealerofthesealed-arch
 
 GodLock Softwares is GodLock-first (heading → list). Aziel Runtime only on godlock.uk (Try on Glama). Software listing: https://www.azieleliab.com/software. Not Digital Library completeness. Not a cloned suite catalog.
-Runtime cite: 2.0.0-rc1. Prefer Try on Glama. Worker is secondary.
+Runtime cite: 2.0.0-rc1. SoT LIVE: main 6a3798a / version_id 105fa1ee / 2.0.0-rc1. Prefer Try on Glama. Worker is secondary.
+Launch readiness: human UI + MCP fraggate_call + FragGate sole door + mesh/AZVPN (HTTPS/WS REAL; WireGuard/OpenVPN SLOT) + radios channel cites worker_hardware:false + /download suite pack. Not fielded_100. GodLock is a challenge stress-test product, not a VPN identity. No Works-with subsection on Softwares HTML. No Digital Library chrome. Plane B Framagit SLOT CNS-NO-FORGE-MIRROR. Plane C SLOT CNS-OPERATOR-ATTEST. No LIVE flip. Lamb Lens. NO-LIE. Growth-ON.
 
 Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.
 
@@ -39,7 +40,7 @@ INGEST-AS-RECEIPT: first-screen SHA-256 + stable IDs + canonical URL. Many index
 RE-EXPAND-FROM-ARCHIVE: bytes survive, not summaries. Re-expand = archive verify then local node. Crawlers don't re-expand. AI ingest ≠ tarball.
 
 CROSS-NETWORK-SURVIVAL: If network + live data die tomorrow, the chain still survives via cold copies across independent shelves; survival = bytes↔hash.
-COLD-MULTI-SHELF-1.0: Planes A/B/C — A=5 surfaces / 2 radii (not 5 shelves); B=ALL-TARGETS codeberg + archive.org PASS https://archive.org/details/aziel-lockset-tip and https://archive.org/details/aziel-lockset-tip_202609 (same blast_radius; independent:false on 202609; independent_live_count=1) + framagit url null; GitFlic CNS-GITFLIC-EMAIL; GitLab CNS-GITLAB-CF-LOOP; Zenodo CNS-ZENODO-IP-BAN doi null; C=USB attest SLOT. GodLock is challenge only. NO-FAN. Canonical shelves https://www.azielcorpuslibrary.net/shelves (corpus#96). Local https://godlock.uk/shelves. Cap-7 design_of + resolves_to_hub:false. REDLINE-2026-09-14. FoldLock cite-only not encryption. GET /v1/mesh never enables. Header-only tokens if any. Lamb Lens. Growth-ON. Person @id https://www.azieleliab.com/#aziel.
+COLD-MULTI-SHELF-1.0: Planes A/B/C — A=5 surfaces / 2 radii (not 5 shelves); B=ALL-TARGETS codeberg + archive.org PASS https://archive.org/details/aziel-lockset-tip and https://archive.org/details/aziel-lockset-tip_202609 (same blast_radius; independent:false on 202609; independent_live_count=1) + framagit url null SLOT CNS-NO-FORGE-MIRROR (no LIVE flip); GitFlic CNS-GITFLIC-EMAIL; GitLab CNS-GITLAB-CF-LOOP; Zenodo CNS-ZENODO-IP-BAN doi null; C=USB attest SLOT CNS-OPERATOR-ATTEST (no LIVE flip). GodLock is challenge only. NO-FAN. Canonical shelves https://www.azielcorpuslibrary.net/shelves (corpus#96). Local https://godlock.uk/shelves. Cap-7 design_of + resolves_to_hub:false. REDLINE-2026-09-14. FoldLock cite-only not encryption. GET /v1/mesh never enables. Header-only tokens if any. Lamb Lens. Growth-ON. Person @id https://www.azieleliab.com/#aziel.
 NO-LIE / NO-REWRITE: receipts that still hash; copies not all on one tunnel; rules simple enough someone else verifies without your voice; no rewrite key; network never allowed to lie — even to self-preserve, sustain, stay alive, adapt, or prevent death.
 
 See docs/llms.txt for the full brief.

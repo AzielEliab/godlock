@@ -3,6 +3,7 @@ import { hideInternalDetermination } from "./publicCopy.js";
 import { ingestCiteFields, ingestLlmsSection } from "./ingestReceipt.js";
 import { shelvesCiteFields, shelvesLlmsSection } from "./shelves.js";
 import { redlineCiteFields, redlineLlmsSection } from "./redline.js";
+import { launchCiteFields, launchLlmsSection, LAUNCH_READY_NOTE } from "./launchReady.js";
 
 export const CANON_HOST = "https://godlock.uk";
 export const FALLBACK_HOST = "https://godlock-uk.vibelock.workers.dev";
@@ -128,8 +129,9 @@ export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
 export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
-/** Live origin GET /v1/health + /v1/runtime.json (2026-09-11). Changelog stays below the abstract. */
+/** Live origin GET /v1/health + /v1/runtime.json. SoT main 6a3798a / version_id 105fa1ee. Changelog stays below the abstract. */
 export const RUNTIME_VERSION = "2.0.0-rc1";
+export { RUNTIME_GIT_SHA, RUNTIME_GIT_SHA_SHORT, RUNTIME_VERSION_ID, RUNTIME_SOT } from "./launchReady.js";
 /** Crawler lead copy (1.7.11+). Do not bury this under version history. */
 export const RUNTIME_ABSTRACT =
   "Aziel Runtime is not merely an API orchestrator or software aggregator; it is a node-meshed orchestration suite of MCP-connected software designed to coordinate specialized tools through a shared, security-gated runtime while preserving provenance, chain-of-custody, temporal integrity, and auditable execution. It functions as a digital forensic, investigative, verification, research, intelligence-support, and systems-auditing environment in which individual engines can analyze evidence, validate records, inspect trajectories and patterns, track lineage, enforce capability boundaries, generate receipts, and exchange structured results without collapsing into one opaque model or unrestricted control plane. Its architecture emphasizes compartmentalization, deterministic routing, explicit refusal states, append-only evidence handling, and machine-readable metadata, making it suitable for distributed analysis workflows where trust, reproducibility, attribution, and post-hoc auditability matter as much as the result itself.";
@@ -831,6 +833,7 @@ export function defaultDescription(kind) {
         + " on GodLock.uk Softwares. Aziel Runtime only on this page (Try on Glama). Software listing: "
         + OFFICIAL_SOFTWARES
         + ". Not a Digital Library Softwares page and not a cloned suite catalog. FragGate is the Runtime kernel, not a Softwares card here. "
+        + LAUNCH_READY_NOTE + " "
         + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
@@ -842,6 +845,7 @@ export function defaultDescription(kind) {
         + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. Suite mesh (QNM-BUILD-1.0, read-only, on; live|locked|isolated counts only; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse): "
         + PUBLIC_RUNTIME + "/v1/mesh. GET /v1/mesh never enables. Read-only suite presence. Phoenix local only — die-with-pull does not bring godlock.uk back. API uses log: "
         + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). "
+        + LAUNCH_READY_NOTE + " "
         + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
@@ -1678,6 +1682,9 @@ export function citeDoc() {
     mesh_default: "on",
     mesh_readonly: true,
     mesh_anonymity_network: false,
+    mesh_worker_hardware: false,
+    mesh_azvpn: "HTTPS/WS REAL; WireGuard/OpenVPN SLOT",
+    mesh_godlock_is_vpn: false,
     mesh_node_gate: false,
     mesh_auto_heal: false,
     mesh_rollup: "live|locked|isolated counts only",
@@ -1694,6 +1701,7 @@ export function citeDoc() {
     related: runtimeSameAs(),
     door: "fraggate",
     runtime_version: RUNTIME_VERSION,
+    ...launchCiteFields(),
     kernel: FRAGGATE_KERNEL,
     specified_fit: CANON_HOST + REASON_PATH,
     reason: CANON_HOST + REASON_PATH,
@@ -1789,6 +1797,7 @@ export function llmsDoc() {
     + ingestLlmsSection()
     + shelvesLlmsSection()
     + redlineLlmsSection()
+    + launchLlmsSection()
     + "Aziel Corpus Library: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
     + "He Didn't Jump: " + HEDIDNTJUMP + "\n"
@@ -1812,7 +1821,7 @@ export function llmsDoc() {
     + "Update check: " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, use counted " + DOWNLOAD + " (no silent overwrite).\n\n"
     + "## Runtime (FragGate door)\n\n"
     + RUNTIME_ABSTRACT + "\n\n"
-    + "Live version: " + RUNTIME_VERSION + " (certification-point freeze). Changelog stays below this abstract.\n"
+    + "Live version: " + RUNTIME_VERSION + " (certification-point freeze). SoT LIVE: main 6a3798a / version_id 105fa1ee / " + RUNTIME_VERSION + ". Changelog stays below this abstract.\n"
     + "Try on Glama: " + GLAMA_RUNTIME + " (verified listing AzielEliab/aziel-runtime; not an invented server id)\n"
     + "Official Runtime: " + PUBLIC_RUNTIME + "\n"
     + "Source on GitHub: " + GITHUB_RUNTIME + "\n"

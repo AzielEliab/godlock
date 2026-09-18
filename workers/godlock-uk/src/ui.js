@@ -16,6 +16,7 @@ import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import { receiptScoreDelta } from "./engine.js";
 import { publicSoftwaresList, invokeHref, workerHref, stripRuntimeFragGateMash, suiteFamily } from "./catalog.js";
+import { launchReadyHtml } from "./launchReady.js";
 import { donateBody as donatePageBody } from "./donate.js";
 import { actReceiptsSection } from "./actReceipts.js";
 import { ingestTipSection, pasteHashSection } from "./ingestReceipt.js";
@@ -23,8 +24,8 @@ import { ingestTipSection, pasteHashSection } from "./ingestReceipt.js";
 export const CSS = `
 :root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
 *{box-sizing:border-box}
-html,body{background:var(--bg);color:var(--ink);max-width:100%}
-body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;line-height:1.5;overflow-wrap:anywhere}
+html,body{background:var(--bg);color:var(--ink);max-width:100%;overflow-x:hidden}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;line-height:1.5;overflow-wrap:anywhere;overflow-x:hidden}
 .wrap{max-width:720px;margin:auto;padding:24px 18px 80px;min-width:0}
 .brandrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px;min-height:48px}
 .brandmark{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:0 0 40px;box-shadow:0 0 0 1px #0003,0 0 0 1px var(--gold)}
@@ -47,6 +48,7 @@ footer .ecosystem{margin:16px 0 0}
 .soft-heading{margin:4px 0 14px;font-size:22px;letter-spacing:-.02em}
 .home-software{margin:18px 0}
 .soft-line{margin:0 0 10px;line-height:1.7}
+.launch-ready{margin:12px 0 0;max-width:100%;overflow-wrap:anywhere;word-break:break-word}
 .soft-name{font-weight:700}
 .soft-grid{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 18px}
 .soft-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
@@ -616,7 +618,8 @@ export function softwareBody({ products, extras } = {}) {
   const cards = list.map((p) => softwaresCard(p, { featured: true })).join("");
   return `<h2 class="soft-heading">Softwares</h2>
 <div class="soft-grid">${cards}</div>
-${officialSoftwaresPointer()}`;
+${officialSoftwaresPointer()}
+${launchReadyHtml()}`;
 }
 
 export function donateBody() {

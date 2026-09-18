@@ -63,6 +63,10 @@ import {
   AI_CLIENTS,
   AI_CLIENTS_SENTENCE,
   RUNTIME_VERSION,
+  RUNTIME_GIT_SHA,
+  RUNTIME_GIT_SHA_SHORT,
+  RUNTIME_VERSION_ID,
+  RUNTIME_SOT,
   RUNTIME_ABSTRACT,
   GLAMA_RUNTIME,
   RUNTIME_DOCS_2_0,
@@ -179,6 +183,8 @@ describe("Aziel Eliab page chrome", () => {
     assert.match(CSS, /\.brandmark\{width:40px;height:40px/);
     assert.match(CSS, /\.nav2\{display:flex;flex-wrap:wrap/);
     assert.match(CSS, /overflow-wrap:anywhere/);
+    assert.match(CSS, /overflow-x:hidden/);
+    assert.match(CSS, /\.launch-ready\{[^}]*overflow-wrap:anywhere/);
   });
 
   it("puts the rose-star brand mark top-left and scrubs everblooming-sigil wording", () => {
@@ -2267,5 +2273,102 @@ describe("receipts UI and public payload", () => {
     }, false);
     assert.doesNotMatch(html, /<script>alert/);
     assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+  });
+});
+
+describe("Hub launch-update parity — Softwares + runtime SoT", () => {
+  it("pins live runtime SoT main 6a3798a / version_id 105fa1ee / 2.0.0-rc1", () => {
+    assert.equal(RUNTIME_VERSION, "2.0.0-rc1");
+    assert.equal(RUNTIME_GIT_SHA_SHORT, "6a3798a");
+    assert.equal(RUNTIME_GIT_SHA, "6a3798af3a94bfba3ed2e7aaadeed8777ea32bb4");
+    assert.equal(RUNTIME_VERSION_ID, "105fa1ee");
+    assert.equal(RUNTIME_SOT, "main 6a3798a / version_id 105fa1ee / 2.0.0-rc1");
+    const cite = citeDoc();
+    assert.equal(cite.runtime_version, "2.0.0-rc1");
+    assert.equal(cite.runtime_git_sha, RUNTIME_GIT_SHA);
+    assert.equal(cite.runtime_git_sha_short, "6a3798a");
+    assert.equal(cite.runtime_version_id, "105fa1ee");
+    assert.equal(cite.runtime_sot, RUNTIME_SOT);
+    assert.equal(cite.runtime_sot_live, true);
+    assert.equal(cite.fielded_100, false);
+    assert.equal(cite.worker_hardware, false);
+    assert.equal(cite.invented_hardware, false);
+    assert.equal(cite.godlock_is_vpn, false);
+    assert.equal(cite.fraggate_sole_door, true);
+    assert.equal(cite.mcp_fraggate_call, true);
+    assert.equal(cite.azvpn_https_ws, "REAL");
+    assert.equal(cite.azvpn_wireguard, "SLOT");
+    assert.equal(cite.azvpn_openvpn, "SLOT");
+    assert.equal(cite.suite_download, "https://aziel-runtime.vibelock.workers.dev/download");
+    assert.match(cite.launch_ready_note, /fraggate_call/);
+    assert.match(cite.launch_ready_note, /worker_hardware:false/);
+    assert.match(cite.launch_ready_note, /Not fielded_100/);
+    assert.match(cite.launch_ready_note, /not a VPN identity/);
+    assert.match(cite.launch_ready_note, /Try on Glama/);
+    assert.match(cite.launch_ready_note, /Lamb Lens/);
+    assert.match(cite.launch_ready_note, /NO-LIE/);
+    assert.match(cite.launch_ready_note, /Growth-ON/);
+    assert.equal(cite.launch_readiness.visible_1520, false);
+    assert.equal(cite.launch_readiness.works_with_subsection, false);
+    assert.equal(cite.launch_readiness.digital_library_chrome, false);
+    assert.equal(cite.launch_readiness.identity, "Aziel Eliab");
+    assert.equal(cite.plane_b_framagit_refuse, "CNS-NO-FORGE-MIRROR");
+    assert.equal(cite.plane_b_framagit_status, "slot");
+    assert.equal(cite.plane_b_live_ready, false);
+    assert.equal(cite.plane_c_status, "slot");
+    assert.equal(cite.plane_c_attest, "CNS-OPERATOR-ATTEST");
+    assert.equal(cite.plane_c_live_ready, false);
+    assert.equal(cite.visible_1520, false);
+  });
+
+  it("cites launch readiness after Softwares list, not between heading and cards", () => {
+    const html = softwareBody({ products: [] });
+    assert.match(html, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
+    const between = html.match(/<h2 class="soft-heading">Softwares<\/h2>([\s\S]*?)<div class="soft-grid">/);
+    assert.ok(between);
+    assert.doesNotMatch(between[1], /launch readiness/);
+    assert.doesNotMatch(between[1], /About Aziel/);
+    assert.doesNotMatch(between[1], /#godlock/);
+    assert.doesNotMatch(between[1], /Works with/);
+    assert.match(html, /class="muted launch-ready"/);
+    assert.ok(html.indexOf("soft-grid") < html.indexOf("launch-ready"));
+    assert.match(html, /fraggate_call/);
+    assert.match(html, /HTTPS\/WS REAL/);
+    assert.match(html, /WireGuard\/OpenVPN SLOT/);
+    assert.match(html, /worker_hardware:false/);
+    assert.match(html, /\/download/);
+    assert.match(html, /Not fielded_100/);
+    assert.match(html, /not a VPN identity/);
+    assert.match(html, /Try on Glama/);
+    assert.doesNotMatch(html, /Works with ChatGPT/);
+    assert.doesNotMatch(html, /1 Chronicles 15:20/);
+    assert.doesNotMatch(html, /Ask Jeeves|MASTER·WRITABLE|library search/i);
+    const home = homeBody({ stats: {}, latest: null, prior: [] });
+    assert.doesNotMatch(home, /class="muted launch-ready"/);
+    assert.doesNotMatch(home, /Works with ChatGPT \(GPT Actions \/ OpenAI\)/);
+  });
+
+  it("stamps /v1/software and llms with the same SoT and no LIVE shelf flip", () => {
+    const body = softwareApiDoc([]);
+    assert.equal(body.runtime_version, "2.0.0-rc1");
+    assert.equal(body.runtime_git_sha_short, "6a3798a");
+    assert.equal(body.runtime_version_id, "105fa1ee");
+    assert.equal(body.fielded_100, false);
+    assert.equal(body.godlock_is_vpn, false);
+    assert.equal(body.worker_hardware, false);
+    assert.equal(body.runtime_distribution[0].label, "Try on Glama");
+    const llms = llmsDoc();
+    assert.match(llms, /## Softwares \+ runtime launch readiness/);
+    assert.match(llms, /SoT LIVE: main 6a3798a \/ version_id 105fa1ee \/ 2\.0\.0-rc1/);
+    assert.match(llms, /Framagit stays SLOT CNS-NO-FORGE-MIRROR/);
+    assert.match(llms, /Plane C stays SLOT CNS-OPERATOR-ATTEST/);
+    assert.match(llms, /No LIVE flip/);
+    assert.match(llms, /No Works-with assistants subsection/);
+    assert.match(llms, /heading → list only/);
+    assert.doesNotMatch(llms, /fielded_100: true/);
+    const softwareMeta = defaultDescription("software");
+    assert.match(softwareMeta, /6a3798a/);
+    assert.match(softwareMeta, /105fa1ee/);
+    assert.match(defaultDescription("runtime"), /fraggate_call/);
   });
 });

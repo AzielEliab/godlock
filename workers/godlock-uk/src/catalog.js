@@ -20,6 +20,7 @@ import {
   AZCOHERENCE_SLUG, AZCOHERENCE_NAME, AZCOHERENCE_VERSION, AZCOHERENCE_ONE_LINE,
   DOWNLOAD, GITHUB,
 } from "./seo.js";
+import { launchCiteFields, launchReadiness } from "./launchReady.js";
 
 export const SOFTWARE_JSON_PATH = "/v1/software";
 export const FRAGGATE_LIST_PATH = "/v1/fraggate/list";
@@ -760,6 +761,7 @@ export function softwareNameList(products) {
 export function softwareApiDoc(products, extras = {}) {
   const list = publicSoftwaresList(products, extras);
   const runtime = list.find((p) => p && p.slug === RUNTIME_SLUG);
+  const ready = launchReadiness();
   return {
     ok: true,
     product: "GodLock",
@@ -770,6 +772,8 @@ export function softwareApiDoc(products, extras = {}) {
     runtime_distribution: runtimeDistribution(),
     runtime_glama: GLAMA_RUNTIME,
     runtime_docs: RUNTIME_DOCS_2_0,
+    ...launchCiteFields(),
+    launch_ready_note: ready.note,
     via: SOFTWARE_JSON_PATH,
     html: CANON_HOST + SOFTWARE_PATH,
     aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,

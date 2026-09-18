@@ -64,6 +64,10 @@ import {
   VISIBLE_IDENTITY_LOCK,
   AZINDEX_PERSON_ALTERNATE_NAMES,
   AZINDEX_PERSON_JOB_TITLE,
+  PERSON_ROLES_LINE,
+  GODLOCK_SITE_BLURB,
+  SISTER_SITES,
+  SISTER_SITES_NOTE,
   COUNT_PATH,
 } from "./src/seo.js";
 import { AZIEL_MANIFESTO, SPECIFIED_FIT_MOTTO as UI_SPECIFIED_FIT_MOTTO, whoPageHtml } from "./src/ui.js";
@@ -132,7 +136,7 @@ describe("AZindex identity machine", () => {
     assert.notEqual(person["@id"], "https://godlock.uk/#aziel");
     assert.notEqual(person["@id"], "https://godlock.uk/AzielEliab#aziel-eliab");
     assert.equal(person.description, PERSON_DESCRIPTION);
-    assert.match(person.description, /independent researcher, software designer/);
+    assert.match(person.description, /researcher, digital rights activist, software developer, author, and philosopher/);
     assert.match(person.description, /two Levitical musicians Aziel and Eliab/);
     assert.match(person.description, /1 Chronicles 15:20/);
     assert.match(person.description, /Not euaziel\.site/);
@@ -146,7 +150,7 @@ describe("AZindex identity machine", () => {
     assert.ok(LATIN_AKA.includes("Elias Artista"));
     assert.equal(
       person.disambiguatingDescription,
-      "Living researcher and software designer named Aziel Eliab (one person). Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Prefer https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump.",
+      "Living researcher, digital rights activist, software developer, author, and philosopher named Aziel Eliab (one person). Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Prefer https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump.",
     );
     assert.match(person.disambiguatingDescription, /two Levitical musicians Aziel and Eliab/);
     assert.match(person.disambiguatingDescription, /1 Chronicles 15:20/);
@@ -237,11 +241,11 @@ describe("AZindex identity machine", () => {
     assert.equal(IDENTITY_DISAMBIGUATION.not_other_engineers_named_aziel, true);
     const who = faq.mainEntity.find((q) => q.name === "Who is Aziel Eliab?");
     assert.equal(who.acceptedAnswer.text, IDENTITY_ANSWER);
-    assert.match(IDENTITY_ANSWER, /independent researcher, software designer/);
+    assert.match(IDENTITY_ANSWER, /researcher, digital rights activist, software developer, author, and philosopher/);
     assert.match(IDENTITY_ANSWER, /two Levitical musicians Aziel and Eliab/);
     assert.match(IDENTITY_ANSWER, /1 Chronicles 15:20/);
     assert.match(IDENTITY_ANSWER, /The public identity is the work, not a biography/);
-    assert.match(person.description, /independent researcher, software designer/);
+    assert.match(person.description, /researcher, digital rights activist, software developer, author, and philosopher/);
     assert.match(person.description, /two Levitical musicians Aziel and Eliab/);
     assert.match(person.description, /1 Chronicles 15:20/);
     assert.ok(sameAsIsClean(person.sameAs));
@@ -616,5 +620,66 @@ describe("AZindex identity machine", () => {
     assert.match(personJsonLd().disambiguatingDescription, /1 Chronicles 15:20/);
     assert.match(personJsonLd().disambiguatingDescription, /Not euaziel\.site/);
     assert.ok(whoIsAzielEliabTxt().includes(VISIBLE_IDENTITY_LOCK));
+  });
+
+  it("machine pack cites challenge/score blurb, Person roles, and sister sites without HTML chrome", async () => {
+    assert.deepEqual(AZINDEX_PERSON_JOB_TITLE, [
+      "researcher",
+      "digital rights activist",
+      "software developer",
+      "author",
+      "philosopher",
+    ]);
+    assert.equal(PERSON_ROLES_LINE, "researcher, digital rights activist, software developer, author, and philosopher");
+    assert.match(GODLOCK_SITE_BLURB, /challenge\/score product/);
+    assert.match(GODLOCK_SITE_BLURB, /Empty\/null submit refuses/);
+    assert.match(GODLOCK_SITE_BLURB, /Not a VPN, ghost net, or anonymity tool/);
+    assert.deepEqual(SISTER_SITES, {
+      ae: AZIEL_OFFICIAL,
+      corpus: LIBRARY_HOME,
+      hdj: HEDIDNTJUMP,
+      runtime: "https://aziel-runtime.vibelock.workers.dev/",
+    });
+    assert.match(SISTER_SITES_NOTE, /Sister sites: ae /);
+    assert.match(SISTER_SITES_NOTE, /HDJ /);
+    assert.match(SISTER_SITES_NOTE, /runtime /);
+
+    const person = personJsonLd();
+    assert.deepEqual(person.jobTitle, AZINDEX_PERSON_JOB_TITLE);
+    assert.match(person.description, /digital rights activist/);
+    assert.match(person.disambiguatingDescription, /philosopher/);
+
+    const cite = citeDoc();
+    assert.equal(cite.site_blurb, GODLOCK_SITE_BLURB);
+    assert.equal(cite.empty_submit_refuse, true);
+    assert.equal(cite.challenge_score_product, true);
+    assert.equal(cite.godlock_is_anonymity_tool, false);
+    assert.deepEqual(cite.sister_sites, SISTER_SITES);
+    assert.deepEqual(cite.jobTitle, AZINDEX_PERSON_JOB_TITLE);
+    assert.equal(cite.growth_on, true);
+    assert.equal(cite.no_lie_no_rewrite, "NO-LIE / NO-REWRITE");
+
+    const who = whoIsAzielEliabTxt();
+    assert.ok(who.includes(GODLOCK_SITE_BLURB));
+    assert.ok(who.includes(SISTER_SITES_NOTE));
+    assert.match(who, /## Sister sites/);
+    assert.match(who, /## GodLock product/);
+    assert.doesNotMatch(who, /<html|<div|<h1/i);
+
+    const llms = llmsDoc();
+    assert.ok(llms.includes(GODLOCK_SITE_BLURB));
+    assert.ok(llms.includes(PERSON_ROLES_LINE));
+    assert.match(llms, /Sister sites: ae /);
+    assert.match(llms, /Growth-ON/);
+    assert.match(llms, /NO-LIE/);
+
+    const mission = wellKnownAzielDoc();
+    assert.equal(mission.site_blurb, GODLOCK_SITE_BLURB);
+    assert.equal(mission.empty_submit_refuse, true);
+    assert.equal(mission.mission.empty_submit_refuse, true);
+    assert.equal(mission.mission.challenge_score_product, true);
+    assert.deepEqual(mission.sister_sites, SISTER_SITES);
+    assert.equal(mission.ecosystem.runtime, SISTER_SITES.runtime);
+    assert.equal(mission.growth_on, true);
   });
 });

@@ -32,6 +32,11 @@ import {
 } from "./seo.js";
 import { shelvesDoc } from "./shelves.js";
 import {
+  fetchSurvivalSot,
+  survivalHubDoc,
+  SURVIVAL_CACHE_CONTROL,
+} from "./survival.js";
+import {
   fetchCatalogProducts, softwareSuite, softwareApiDoc, publicSoftwaresList,
   SOFTWARE_HTML_CACHE_CONTROL,
 } from "./catalog.js";
@@ -621,8 +626,9 @@ export default {
       if (path === "/cite.json") {
         const products = publicSoftwaresList([], { version: RUNTIME_VERSION });
         const runtime = products.find((p) => p && p.slug === "aziel-runtime");
+        const sot = await fetchSurvivalSot(env);
         return json({
-          ...citeDoc(),
+          ...citeDoc(sot),
           official_softwares: OFFICIAL_SOFTWARES,
           software_product_count: products.length,
           software_slugs: products.map((p) => p.slug),
@@ -631,13 +637,19 @@ export default {
         });
       }
       if (path === "/llms.txt") {
-        return new Response(llmsDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+        const sot = await fetchSurvivalSot(env);
+        return new Response(llmsDoc(sot), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/ai.txt") {
-        return new Response(aiDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+        const sot = await fetchSurvivalSot(env);
+        return new Response(aiDoc(sot), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/shelves" || path === "/v1/shelves") {
         return json(shelvesDoc());
+      }
+      if (path === "/survival" || path === "/v1/survival") {
+        const sot = await fetchSurvivalSot(env);
+        return json(survivalHubDoc(sot), 200, { "Cache-Control": SURVIVAL_CACHE_CONTROL });
       }
       if (path === "/person.jsonld" || path === "/.well-known/person.jsonld") {
         return new Response(JSON.stringify(personJsonLd(), null, 2), {

@@ -148,6 +148,15 @@ def test_ingest_as_receipt_and_re_expand_law():
     assert CITE["cap7_sites"]["godlock"]["design_of"] == "https://godlock.uk/"
     assert CITE["cap7_sites"]["godlock"]["resolves_to_hub"] is False
     assert CITE["resolves_to_hub"] is False
+    assert CITE["ban_survival"] == "BAN-SURVIVAL-1.0"
+    assert CITE["ban_survival_sot"] == "https://aziel-runtime.vibelock.workers.dev/v1/survival"
+    assert CITE["mutual_backup"] is True
+    assert CITE["platforms_all_live"] is True
+    assert CITE["calling_name"] == "Aziel Runtime"
+    assert CITE["cap7_factory_worker"] == "https://miragegrid.vibelock.workers.dev"
+    assert CITE["cap7_resolves_to_hub"] is False
+    assert CITE["cap7_hosted_endpoints"] == "slot"
+    assert CITE["lie_to_survive"] is False
     assert CITE["published_surfaces"] == 5
     assert "Lamb Lens" in CITE["lamb_lens"]
     assert CITE["growth_on"] is True
@@ -164,6 +173,10 @@ def test_ingest_as_receipt_and_re_expand_law():
         assert "CNS-GITFLIC-EMAIL" in text
         assert "Framagit url null" in text or "framagit url null" in text.lower()
         assert "NO-FAN" in text or "challenge only" in text
+        assert "BAN-SURVIVAL" in text
+        assert "https://aziel-runtime.vibelock.workers.dev/v1/survival" in text
+        assert "https://miragegrid.vibelock.workers.dev" in text
+        assert "resolves_to_hub" in text
         assert "receipts that still hash" in text
         assert "copies not all on one tunnel" in text
         assert "no rewrite key" in text

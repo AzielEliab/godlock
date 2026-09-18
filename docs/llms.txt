@@ -177,6 +177,18 @@ Cap-7: design_of hubs; resolves_to_hub: false; name_may_change: true; public_ica
 Lockset cite (GodLock does not write the public ledger): https://www.azielcorpuslibrary.net/lockset.json tip c831429befc221bd41caeb0a6d1c5361602db5684abab7af6d39714084b6b245
 Corpus roll: corpus#96. Operator roll: 2026-09-14.
 
+## BAN-SURVIVAL (hub pull)
+
+Spec: BAN-SURVIVAL-1.0 (LIVE). SoT: https://aziel-runtime.vibelock.workers.dev/v1/survival (short TTL 60000 ms).
+Local cite: https://godlock.uk/survival · https://godlock.uk/v1/survival · runtime https://godlock.uk/runtime/survival
+Mutual backup: cold shelves back up death-by-ban; live multi-front backs up cold-shelf death. Keep both. Shelves are not /mcp.
+Live doors: workers-dev, library-runtime, author-runtime, godlock-runtime.
+Platforms: BAN-PLATFORMS-1.0 all_live:true native_app_store:false (windows, mac, linux, android, ios). Not five native store binaries.
+Calling name: Aziel Runtime. Identity Aziel Eliab only. ChainLock/AKM do not rewrite identity.
+Cap-7: factory MirageGrid Worker https://miragegrid.vibelock.workers.dev LIVE. resolves_to_hub: false. Public pair azgrid + azbooth LIVE Worker HTTPS. AZNet-side SLOT. GodLock design_of sites: azcloak, azstandby.
+Cap-7 cite+AZNet verify LIVE. Hosted Cap-7 /mcp slot. Shuffle: ping MirageGrid until one site lands — do not hardcode a host.
+Never invent a live door. Never claim a banned host is LIVE. GodLock is a product name, not identity. Person @id https://www.azieleliab.com/#aziel. Lamb Lens. NO-LIE. No visible 15:20.
+
 ## REDLINE-2026-09-14
 
 Challenge-hub redline. Not a Softwares product. Author Aziel Eliab only.

@@ -48,7 +48,7 @@ import {
   AUTHOR_GITHUB,
   GITHUB,
   GITHUB_SECONDARY,
-  HEBREW_DEFINITION,
+  WHAT_AZIEL_ELIAB_DOES,
   AZIEL_PERSON_ID,
   AZIEL_OFFICIAL,
   OFFICIAL_SOFTWARES,
@@ -213,7 +213,10 @@ describe("Aziel Eliab page chrome", () => {
     assert.equal(person.name, "Aziel Eliab");
     assert.equal(person.image, BRAND_MARK);
     assert.ok(person.alternateName.includes("Elias Artista"));
-    assert.ok(person.description.includes(HEBREW_DEFINITION));
+    assert.equal(person.description, WHAT_AZIEL_ELIAB_DOES);
+    assert.equal(person.seeAlso, "https://godlock.uk/person.jsonld");
+    assert.doesNotMatch(JSON.stringify(person), /\bABAD\b/);
+    assert.doesNotMatch(JSON.stringify(person.knowsAbout || []), /AZDOC-/);
     assert.ok(person.sameAs.includes(AUTHOR_GITHUB));
     assert.ok(person.sameAs.includes(GITHUB_SECONDARY));
     assert.doesNotMatch(html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, ""), /Elias Artista/);
@@ -252,9 +255,11 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(person.alternateName.includes("Elias Artista"));
     assert.ok(person.alternateName.includes("The Revealer of The Sealed"));
     assert.ok(person.alternateName.includes("Revealer of The Sealed"));
-    assert.ok(person.alternateName.includes("עזיאל אל ראי אליאב"));
+    assert.ok(!person.alternateName.includes("עזיאל אל ראי אליאב"));
     assert.ok(!person.alternateName.includes("Everblooming Flower"));
-    assert.ok(person.description.includes(HEBREW_DEFINITION));
+    assert.equal(person.description, WHAT_AZIEL_ELIAB_DOES);
+    assert.equal(person.seeAlso, "https://godlock.uk/person.jsonld");
+    assert.doesNotMatch(JSON.stringify(person), /\bABAD\b/);
     assert.equal(person.url, AZIEL_OFFICIAL);
     assert.ok(person.sameAs.includes("https://godlock.uk/AzielEliab"));
     assert.ok(person.sameAs.includes(LIBRARY_AZIEL));
@@ -306,7 +311,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(person["@id"], AZIEL_PERSON_ID);
     assert.deepEqual(personRef(), { "@id": "https://www.azieleliab.com/#aziel" });
     assert.ok(person.alternateName.includes("Elias Artista"));
-    assert.ok(person.description.includes(HEBREW_DEFINITION));
+    assert.equal(person.description, WHAT_AZIEL_ELIAB_DOES);
+    assert.equal(person.seeAlso, CANON_HOST + "/person.jsonld");
+    assert.doesNotMatch(JSON.stringify(person.knowsAbout || []), /AZDOC-/);
     assert.ok(person.sameAs.includes(CANON_HOST + "/AzielEliab"));
     assert.ok(person.sameAs.includes(LIBRARY_AZIEL));
     assert.ok(person.sameAs.includes("https://www.azielcorpuslibrary.net/"));
@@ -891,6 +898,7 @@ describe("homepage stays a natural argument surface", () => {
     assert.doesNotMatch(html, /Use with Grok, ChatGPT, Venice/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock|paste-block|how the argument works/i);
     assert.doesNotMatch(html, /\bABAD\b/);
+    assert.doesNotMatch(html, /Whitestone/);
   });
 
   it("does not serve the internal operator brief", async () => {
@@ -989,12 +997,13 @@ describe("Aziel Eliab routes", () => {
     assert.doesNotMatch(html, /Works with ChatGPT/);
     assert.doesNotMatch(body, /Elias Artista/);
     assert.doesNotMatch(body, /God is my strength/);
-    const machinePerson = personNode();
-    assert.equal(machinePerson["@id"], "https://www.azieleliab.com/#aziel");
-    assert.ok(machinePerson.alternateName.includes("Elias Artista"));
-    assert.ok(machinePerson.description.includes(HEBREW_DEFINITION));
-    assert.ok(machinePerson.sameAs.includes(AUTHOR_GITHUB));
-    assert.ok(machinePerson.sameAs.includes(GITHUB_SECONDARY));
+    const htmlPerson = personNode();
+    assert.equal(htmlPerson["@id"], "https://www.azieleliab.com/#aziel");
+    assert.ok(htmlPerson.alternateName.includes("Elias Artista"));
+    assert.equal(htmlPerson.description, WHAT_AZIEL_ELIAB_DOES);
+    assert.equal(htmlPerson.seeAlso, CANON_HOST + "/person.jsonld");
+    assert.ok(htmlPerson.sameAs.includes(AUTHOR_GITHUB));
+    assert.ok(htmlPerson.sameAs.includes(GITHUB_SECONDARY));
   });
 
   it("serves the manifesto at /AzielEliab", async () => {
@@ -1060,6 +1069,7 @@ describe("Specified Fit /reason", () => {
     assert.match(html, /A\. Detection/);
     assert.match(html, /D\. GodLock as method/);
     assert.doesNotMatch(html, /\bABAD\b/);
+    assert.doesNotMatch(html, /Whitestone/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock/i);
   });
 
@@ -1452,6 +1462,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.doesNotMatch(html, /Catalog unavailable/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA/i);
     assert.doesNotMatch(html, /\bABAD\b/);
+    assert.doesNotMatch(html, /Whitestone/);
     const jsonRes = await worker.fetch(new Request("https://godlock.uk/software?format=json"), mockEnv());
     const body = await jsonRes.json();
     assert.equal(body.author, "Aziel Eliab");
@@ -1980,7 +1991,8 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.ok(person.sameAs.includes(AUTHOR_GITHUB));
     assert.ok(person.sameAs.includes(GITHUB_SECONDARY));
     assert.ok(person.alternateName.includes("Elias Artista"));
-    assert.ok(person.description.includes(HEBREW_DEFINITION));
+    assert.equal(person.description, WHAT_AZIEL_ELIAB_DOES);
+    assert.equal(person.seeAlso, CANON_HOST + "/person.jsonld");
     const stub = personLocalStub();
     assert.equal(stub["@id"], LOCAL_PERSON_STUB_ID);
     assert.equal(stub["@type"], undefined);

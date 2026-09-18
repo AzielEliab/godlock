@@ -219,11 +219,88 @@ export const IDENTITY_LOCK_LINE =
 export const PERSON_ROLES_LINE =
   "researcher, digital rights activist, software developer, author, and philosopher";
 
+/** Locked Softwares short sentence. Do not fork. Machine surfaces only. */
+export const WHAT_AZIEL_ELIAB_DOES =
+  "Aziel Eliab builds receipt-first, local-first software and public MASTER records — Softwares through Aziel Runtime (FragGate / MCP), the Aziel Digital Library, GodLock (product, not identity), and the He Didn\u2019t Jump Zioncheck archive. Public identity is the work, not a biography. @id https://www.azieleliab.com/#aziel";
+
+export const WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES = [
+  "What does Aziel Eliab do?",
+  "What Aziel Eliab does",
+  "Who is Aziel Eliab the developer?",
+  "What software does Aziel Eliab make?",
+];
+
+export const RESEARCH_FAQ_TITLE = "What research does Aziel Eliab publish?";
+export const HARDWARE_FAQ_TITLE = "What hardware designs has Aziel Eliab published?";
+
+/** Packed MASTER count from https://www.azielcorpuslibrary.net/v1/library-index (records_packed). */
+export const CORPUS_MASTER_RECORDS = 326;
+export const CORPUS_RECORD_HOME = LIBRARY + "/record/";
+
+export const RESEARCH_AZDOC_EXAMPLES = [
+  { name: "Book of the Knowledge", id: "AZDOC-A011CAD23671" },
+  { name: "Libro Method", id: "AZDOC-F22AD0DCAA9D" },
+  { name: "PPIN", id: "AZDOC-E03E61D8E50B" },
+  { name: "Lenses as Viewpoint Constraints", id: "AZDOC-8F14A40DC9A6" },
+  { name: "ABAD Copper Scroll", id: "AZDOC-DD5912D05D6E" },
+  { name: "Zioncheck archive", id: "AZDOC-18DBE35A32DD" },
+  { name: "Blemmyes frameworks", id: "AZDOC-7D6E0673B472" },
+];
+
+export const HARDWARE_AZDOC_EXAMPLES = [
+  { name: "Adaptive AI Dog Leash", id: "AZDOC-9B0E3D62EDCC" },
+  { name: "Wearable Dual-Tether Web-Sling", id: "AZDOC-AA8761FE16D0" },
+  { name: "PLA Recycler V1", id: "AZDOC-B2A12FE997A8" },
+  { name: "TAA-1 whitepaper", id: "AZDOC-FE5C01BD8FEA" },
+  { name: "TAA-1 engineering package", id: "AZDOC-3728546DFE78" },
+  { name: "AEEM HVAC Energy Valve", id: "AZDOC-0302B7357EE0" },
+  { name: "AZ Mandible family", id: "AZDOC-E5828F49FB04" },
+  { name: "AZ_BoneConducti STL", id: "AZDOC-FD18432707F5" },
+];
+
+function azdocCiteLine(rows) {
+  return rows.map((row) => row.name + " (" + row.id + ")").join("; ");
+}
+
+export const RESEARCH_ADDENDUM =
+  "Research half: Aziel Eliab publishes public MASTER records on the Aziel Digital Library (https://www.azielcorpuslibrary.net/; "
+  + CORPUS_MASTER_RECORDS
+  + " records). Cite AZDOC ids. Do not invent DOIs. Examples: "
+  + azdocCiteLine(RESEARCH_AZDOC_EXAMPLES)
+  + ". Zioncheck archive door: https://www.hedidntjump.com/. GodLock is a product, not identity.";
+
+export const HARDWARE_ADDENDUM =
+  "Hardware designs half (public engineering only; not a product storefront): "
+  + azdocCiteLine(HARDWARE_AZDOC_EXAMPLES)
+  + ". Cite corpus records at https://www.azielcorpuslibrary.net/record/{id}. Not a product storefront.";
+
+/** Live Softwares cite. Not in FragGate LIVE_OPS — do not invent door ops. */
+export const WHITESTONE_NAME = "Whitestone";
+export const WHITESTONE_URL = "https://whitestone.vibelock.workers.dev";
+export const WHITESTONE_ONE_LINE =
+  "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce); not a lawyer.";
+export const WHITESTONE_FAQ_TITLE = "What is Whitestone?";
+export const WHITESTONE_ADDENDUM =
+  WHITESTONE_ONE_LINE
+  + " Live "
+  + WHITESTONE_URL
+  + ". Softwares list cite only. Not a FragGate op — do not invent door ops. Not a godlock.uk Softwares card.";
+
+export function whatAzielEliabDoesFaqPairs() {
+  return WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.map((name) => [name, WHAT_AZIEL_ELIAB_DOES])
+    .concat([
+      [WHITESTONE_FAQ_TITLE, WHITESTONE_ADDENDUM],
+      [RESEARCH_FAQ_TITLE, RESEARCH_ADDENDUM],
+      [HARDWARE_FAQ_TITLE, HARDWARE_ADDENDUM],
+    ]);
+}
+
 export const VISIBLE_IDENTITY_LOCK =
   "Aziel Eliab is a living researcher, digital rights activist, software developer, author, and philosopher. Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20.";
 
 export const PERSON_DESCRIPTION =
-  "Aziel Eliab (also Aziel Elroi Eliab; also Elias Artista; also The Revealer of The Sealed) is a researcher, digital rights activist, software developer, author, and philosopher. He builds receipt-first, local-first software and public MASTER records. Canonical person: https://www.azieleliab.com/#aziel. Primary surfaces: azieleliab.com, azielcorpuslibrary.net, godlock.uk, hedidntjump.com, github.com/AzielEliab, github.com/AzielEliab/aziel-runtime, github.com/azieltherevealerofthesealed-arch. He is one living person. He is not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. The public identity is the work, not a biography. Also known forms include Aziel Elroi Eliab, Elias Artista, and The Revealer of The Sealed. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Hebrew: "
+  WHAT_AZIEL_ELIAB_DOES
+  + " Aziel Eliab (also Aziel Elroi Eliab; also Elias Artista; also The Revealer of The Sealed) is a researcher, digital rights activist, software developer, author, and philosopher. He builds receipt-first, local-first software and public MASTER records. Canonical person: https://www.azieleliab.com/#aziel. Primary surfaces: azieleliab.com, azielcorpuslibrary.net, godlock.uk, hedidntjump.com, github.com/AzielEliab, github.com/AzielEliab/aziel-runtime, github.com/azieltherevealerofthesealed-arch. He is one living person. He is not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. The public identity is the work, not a biography. Also known forms include Aziel Elroi Eliab, Elias Artista, and The Revealer of The Sealed. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Hebrew: "
   + HEBREW_DEFINITION;
 
 export const PERSON_PAGE_DESCRIPTION =
@@ -306,6 +383,26 @@ export const AZINDEX_PERSON_KNOWS_ABOUT = [
   "Hebrew name forms for Aziel Elroi Eliab (SEO / onomastic tether only)",
 ];
 
+/** Machine-only Person.knowsAbout extras. Not embedded on homepage /reason /software HTML. */
+export const MACHINE_PERSON_KNOWS_ABOUT = [
+  WHITESTONE_ONE_LINE,
+  "Book of the Knowledge (AZDOC-A011CAD23671)",
+  "Libro Method (AZDOC-F22AD0DCAA9D)",
+  "PPIN (AZDOC-E03E61D8E50B)",
+  "Lenses as Viewpoint Constraints (AZDOC-8F14A40DC9A6)",
+  "ABAD Copper Scroll (AZDOC-DD5912D05D6E)",
+  "Zioncheck archive (AZDOC-18DBE35A32DD)",
+  "Blemmyes frameworks (AZDOC-7D6E0673B472)",
+  "Adaptive AI Dog Leash (AZDOC-9B0E3D62EDCC)",
+  "Wearable Dual-Tether Web-Sling (AZDOC-AA8761FE16D0)",
+  "PLA Recycler V1 (AZDOC-B2A12FE997A8)",
+  "TAA-1 whitepaper (AZDOC-FE5C01BD8FEA)",
+  "TAA-1 engineering package (AZDOC-3728546DFE78)",
+  "AEEM HVAC Energy Valve (AZDOC-0302B7357EE0)",
+  "AZ Mandible family (AZDOC-E5828F49FB04)",
+  "AZ_BoneConducti STL (AZDOC-FD18432707F5)",
+];
+
 /** Never Person.sameAs — other people / other portfolios. */
 export const SAME_AS_REFUSE = [
   "euaziel",
@@ -371,20 +468,35 @@ function linkRel(rel, href, extra) {
   return "<link rel=" + Q + rel + Q + " href=" + Q + esc(href) + Q + extra + ">";
 }
 
+/** HTML-embedded Person: roles + locked Softwares sentence. Full lattice lives at /person.jsonld. */
+export const HTML_PERSON_ALTERNATE_NAMES = [
+  "Aziel Elroi Eliab",
+  "Elias Artista",
+  "The Revealer of The Sealed",
+  "Revealer of The Sealed",
+];
+
 export function personNode() {
-  const identity = identityPersonNode();
   return {
-    ...identity,
+    "@type": "Person",
+    "@id": AZIEL_PERSON_ID,
+    name: AUTHOR,
     givenName: "Aziel",
     familyName: "Eliab",
+    url: AZIEL_OFFICIAL,
+    identifier: AUTHOR,
     image: BRAND_MARK,
     hasOccupation: { "@type": "Occupation", name: "Author" },
-    knowsAbout: uniquePreserve([].concat(identity.knowsAbout || [], [SITE, "FragGate", "Aziel Runtime"])),
+    jobTitle: AZINDEX_PERSON_JOB_TITLE.slice(),
+    description: WHAT_AZIEL_ELIAB_DOES,
+    alternateName: HTML_PERSON_ALTERNATE_NAMES.slice(),
+    knowsAbout: uniquePreserve([].concat(AZINDEX_PERSON_KNOWS_ABOUT, [SITE, "FragGate", "Aziel Runtime"])),
     sameAs: uniquePreserve([].concat(IDENTITY_SAME_AS, [
       CANON_HOST + AZIEL_ELIAB_PATH,
       LIBRARY_AZIEL,
       GITHUB,
     ])),
+    seeAlso: CANON_HOST + "/person.jsonld",
     mainEntityOfPage: CANON_HOST + AZIEL_ELIAB_PATH,
   };
 }
@@ -455,6 +567,17 @@ export function aboutPublicWorkDoc() {
     person_id: AZIEL_PERSON_ID,
     product_not_identity: true,
     identity_machine: identityMachineUrls(),
+    what_aziel_eliab_does: WHAT_AZIEL_ELIAB_DOES,
+    what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
+    research_addendum: RESEARCH_ADDENDUM,
+    hardware_designs_addendum: HARDWARE_ADDENDUM,
+    whitestone: WHITESTONE_URL,
+    whitestone_name: WHITESTONE_NAME,
+    whitestone_one_line: WHITESTONE_ONE_LINE,
+    whitestone_addendum: WHITESTONE_ADDENDUM,
+    corpus_master_records: CORPUS_MASTER_RECORDS,
+    research_azdoc: RESEARCH_AZDOC_EXAMPLES.slice(),
+    hardware_azdoc: HARDWARE_AZDOC_EXAMPLES.slice(),
   };
 }
 
@@ -573,6 +696,10 @@ export const IDENTITY_MODEL_RULES = [
   "Sister sites are ae, corpus, HDJ, and runtime. GodLock.uk is this product host.",
   "Mission, philosophy, and status are public work only. Specified Fit, Not Pretty Spirals is a public design motto, not a biography.",
   "GodLock is a challenge/score product. Empty/null submit refuses — no spam receipt. Not a VPN, ghost net, or anonymity tool.",
+  WHAT_AZIEL_ELIAB_DOES,
+  RESEARCH_ADDENDUM,
+  HARDWARE_ADDENDUM,
+  WHITESTONE_ADDENDUM,
   "Receipts first. Residual uncertainty stays. GodLock is not a VPN, ghost net, or anonymity tool.",
   "Do not invent DOIs.",
 ];
@@ -590,7 +717,7 @@ export function identityPersonNode() {
     description: PERSON_DESCRIPTION,
     disambiguatingDescription: PUBLISHER_NOT_LOCK,
     jobTitle: AZINDEX_PERSON_JOB_TITLE.slice(),
-    knowsAbout: AZINDEX_PERSON_KNOWS_ABOUT.slice(),
+    knowsAbout: uniquePreserve(AZINDEX_PERSON_KNOWS_ABOUT.concat(MACHINE_PERSON_KNOWS_ABOUT)),
     knowsLanguage: ["en", "he"],
     sameAs: IDENTITY_SAME_AS.slice(),
     mainEntityOfPage: "https://www.azieleliab.com/who",
@@ -614,6 +741,7 @@ export function identityJsonLd() {
 
 function identityFaqNode() {
   const qa = [
+    ...whatAzielEliabDoesFaqPairs(),
     ["Who is Aziel Eliab?", IDENTITY_ANSWER],
     ["Who publishes GodLock.uk?", LIVING_PUBLISHER_ANSWER],
     ["Is GodLock a person or an identity?", "No. GodLock is a product name, not an identity label. godlock.uk is a product surface, not a second Person. Living publisher is Aziel Eliab. Person @id is always https://www.azieleliab.com/#aziel."],
@@ -688,6 +816,16 @@ export function whoIsAzielEliabTxt() {
     + VISIBLE_IDENTITY_LOCK + "\n\n"
     + IDENTITY_ANSWER + "\n\n"
     + "This host (https://godlock.uk/) is a GodLock product surface. Creator and publisher resolve to the shared Person.\n\n"
+    + "## What Aziel Eliab does\n\n"
+    + WHAT_AZIEL_ELIAB_DOES + "\n"
+    + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.map((q) => "- " + q).join("\n") + "\n"
+    + "- " + WHITESTONE_FAQ_TITLE + "\n\n"
+    + "## Softwares\n\n"
+    + WHITESTONE_ADDENDUM + "\n\n"
+    + "## Research\n\n"
+    + RESEARCH_ADDENDUM + "\n\n"
+    + "## Hardware designs\n\n"
+    + HARDWARE_ADDENDUM + "\n\n"
     + "## Living identity\n\n"
     + IDENTITY_LOCK_LINE + "\n"
     + VISIBLE_IDENTITY_LOCK + "\n"
@@ -762,6 +900,17 @@ export function wellKnownAzielDoc() {
       status: "public_work",
     },
     about_public_work: aboutPublicWorkDoc(),
+    what_aziel_eliab_does: WHAT_AZIEL_ELIAB_DOES,
+    what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
+    research_addendum: RESEARCH_ADDENDUM,
+    hardware_designs_addendum: HARDWARE_ADDENDUM,
+    whitestone: WHITESTONE_URL,
+    whitestone_name: WHITESTONE_NAME,
+    whitestone_one_line: WHITESTONE_ONE_LINE,
+    whitestone_addendum: WHITESTONE_ADDENDUM,
+    corpus_master_records: CORPUS_MASTER_RECORDS,
+    research_azdoc: RESEARCH_AZDOC_EXAMPLES.slice(),
+    hardware_azdoc: HARDWARE_AZDOC_EXAMPLES.slice(),
   };
 }
 
@@ -1627,6 +1776,17 @@ export function citeDoc() {
       note: "Shared Person @id is always https://www.azieleliab.com/#aziel. GodLock product surface. Living publisher Aziel Eliab.",
     },
     about_public_work: aboutPublicWorkDoc(),
+    what_aziel_eliab_does: WHAT_AZIEL_ELIAB_DOES,
+    what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
+    research_addendum: RESEARCH_ADDENDUM,
+    hardware_designs_addendum: HARDWARE_ADDENDUM,
+    whitestone: WHITESTONE_URL,
+    whitestone_name: WHITESTONE_NAME,
+    whitestone_one_line: WHITESTONE_ONE_LINE,
+    whitestone_addendum: WHITESTONE_ADDENDUM,
+    corpus_master_records: CORPUS_MASTER_RECORDS,
+    research_azdoc: RESEARCH_AZDOC_EXAMPLES.slice(),
+    hardware_azdoc: HARDWARE_AZDOC_EXAMPLES.slice(),
     hebrew_aka: HEBREW_AKA.slice(),
     hebrew_definition: HEBREW_DEFINITION,
     latin_aka: LATIN_AKA.slice(),
@@ -1790,6 +1950,11 @@ export function llmsDoc() {
     + "GodLock is a product name, not an identity. Identity is Aziel Eliab only.\n"
     + GODLOCK_SITE_BLURB + "\n"
     + "Roles: " + PERSON_ROLES_LINE + "\n"
+    + "What Aziel Eliab does: " + WHAT_AZIEL_ELIAB_DOES + "\n"
+    + "FAQ titles: " + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.join(" | ") + " | " + WHITESTONE_FAQ_TITLE + "\n"
+    + "Softwares: " + WHITESTONE_ADDENDUM + "\n"
+    + RESEARCH_ADDENDUM + "\n"
+    + HARDWARE_ADDENDUM + "\n"
     + SISTER_SITES_NOTE + "\n"
     + "Growth-ON. NO-LIE.\n"
     + "Aziel Elroi Eliab, Elias Artista, and The Revealer of The Sealed are SEO alternateName only.\n"
@@ -1821,6 +1986,10 @@ export function llmsDoc() {
     + SPECIFIED_FIT_TITLE + ".\n"
     + SPECIFIED_FIT_MOTTO + "\n"
     + "GodLock is a product name, not an identity. Person @id: " + AZIEL_PERSON_ID + "\n"
+    + "What Aziel Eliab does: " + WHAT_AZIEL_ELIAB_DOES + "\n"
+    + "Softwares: " + WHITESTONE_ADDENDUM + "\n"
+    + RESEARCH_ADDENDUM + "\n"
+    + HARDWARE_ADDENDUM + "\n"
     + "\n## Priority pages\n\n"
     + "Home: " + CANON_HOST + "/\n"
     + "Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
@@ -1856,6 +2025,7 @@ export function llmsDoc() {
     + "GodLock Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
     + "Donate: " + CANON_HOST + DONATE_PATH + " (AZL-DONATE-1.0). Same door: " + DONATE_CANONICAL + "\n"
     + "GodLock.uk Softwares lists Aziel Runtime only (Try on Glama). Software listing: " + OFFICIAL_SOFTWARES + ". Not a cloned suite catalog and not a Digital Library Softwares page. FragGate is the Runtime kernel (FG-0.1), not a Softwares card on godlock.uk. Live catalog remains " + PUBLIC_RUNTIME + "/v1/software. AZCoherence (azcoherence) is peer to AZ-CLCE (azclce), not AKM-TRIAD.\n"
+    + "Softwares list (machine cite): " + WHITESTONE_ADDENDUM + "\n"
     + "AZCoherence (azcoherence): second-pass triad coherence review (primary vs alternate → PASS/FLAG/NEUTRALIZE/REFUSE). Never invents evidence. Confidence ≠ truth. Not AKM-TRIAD. Peer AZ-CLCE. FragGate single door. Author Aziel Eliab.\n"
     + "AZCoherence Worker: " + AZCOHERENCE_WORKER + "\n"
     + "AZCoherence GitHub: " + AZCOHERENCE_GITHUB + "\n"

@@ -250,17 +250,35 @@ ${ecosystemNav()}
       ev.preventDefault();
       var text=ta.value;
       var btn=form.querySelector("button[type=submit]");
+      function showError(msg){
+        var el=document.getElementById("challenge-error");
+        if(!el)return;
+        if(msg){el.hidden=false;el.textContent=msg;}
+        else{el.hidden=true;el.textContent="";}
+      }
+      if(!String(text||"").replace(/[\s\u200b\u200c\u200d\ufeff]/g,"").length){
+        showError("Enter a challenge. Empty text is not scored.");
+        if(btn){btn.disabled=false;}
+        return;
+      }
+      showError("");
       if(btn){btn.disabled=true;}
       fetch("/submit",{method:"POST",headers:{"Accept":"application/json","Content-Type":"application/x-www-form-urlencoded"},body:"text="+encodeURIComponent(text),credentials:"same-origin"})
-        .then(function(r){return r.json();})
-        .then(function(j){
+        .then(function(r){return r.json().then(function(j){return {ok:r.ok,status:r.status,body:j};});})
+        .then(function(res){
+          var j=res.body;
+          if(!res.ok || !j || j.ok===false){
+            if(btn){btn.disabled=false;}
+            showError((j&&(j.error||j.code))||"Submit refused.");
+            return;
+          }
           ta.value="";
-          if(j&&j.stats){applyStats(j.stats);}
-          if(j&&j.isolated){location.href="/";return;}
-          if(j&&j.id){location.href="/?r="+encodeURIComponent(j.id);return;}
+          if(j.stats){applyStats(j.stats);}
+          if(j.isolated){location.href="/";return;}
+          if(j.id){location.href="/?r="+encodeURIComponent(j.id);return;}
           location.href="/";
         })
-        .catch(function(){ta.value="";form.submit();});
+        .catch(function(){if(btn){btn.disabled=false;}showError("Submit refused.");});
     });
   }
   function applyStats(j){
@@ -359,7 +377,9 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
   const score = s.current_score != null ? s.current_score : 50;
   const residual = s.residual != null ? s.residual : 50;
   const meshLine = meshStatusLine(s.mesh);
-  const err = error ? `<p class="bad">${esc(error)}</p>` : "";
+  const err = error
+    ? `<p class="bad" id="challenge-error">${esc(error)}</p>`
+    : `<p class="bad" id="challenge-error" hidden></p>`;
   const latestHtml = latest && !latest.isolated ? answerCard(latest, true) : "";
   const shown = (prior || []).slice(0, HOME_PRIOR_LIMIT);
   const list = priorReceiptItems(shown) || `<p class="muted">No public receipts yet. Submit a challenge.</p>`;
@@ -385,7 +405,7 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
 <p class="muted">Answers open with Yes, No, Let's review, or Interesting. Intelligent-design disputes are processed under the same rules. Score floor 33.3 · ceiling 99.7. GodLock records a receipt. It does not sermonize.</p>
 ${err}
 <form class="challenge" id="challenge-form" method="post" action="/submit">
-  <textarea id="challenge" name="text" maxlength="8000" placeholder="Submit a challenge. Intelligent-design disputes are processed under the same rules."></textarea>
+  <textarea id="challenge" name="text" maxlength="8000" required placeholder="Submit a challenge. Intelligent-design disputes are processed under the same rules."></textarea>
   <div class="actions">
     <button type="submit">Submit</button>
     <a class="button ghost" href="/verify">Verify</a>

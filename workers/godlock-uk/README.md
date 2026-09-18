@@ -25,7 +25,7 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 - `/` engine (one screen; Specified Fit steel claim on the spine). Rose-star brand mark top-left (same-origin `/sigil.png`). Not "everblooming sigil" wording. Homepage Prior receipts shows the last 5 only; Donate rails live on `/donate`, not as a homepage section.
 - `/sigil.png` same-origin rose-star brand mark (Aziel Eliab). Worker UI chrome only — Softwares stays GodLock-first (Aziel Runtime + official listing), not a Digital Library clone.
 - `/reason` Specified Fit, Not Pretty Spirals (public brief); `/specified-fit` 308 here
-- `POST /submit` challenge (`text`); JSON unless `Accept: text/html` (then 303)
+- `POST /submit` challenge (`text` JSON or form). Null, missing, empty, or whitespace-only text is refused (`ok: false`, `GODLOCK-NULL-ARG` / `GODLOCK-EMPTY-TEXT`, HTTP 400) and does **not** create a receipt, id, score, or heartbeat. Duplicate identical text (same sha256) inside 120s is `GODLOCK-DUP-TEXT`; more than 8 submits / 60s per IP fingerprint is `GODLOCK-RATE-LIMIT` (HTTP 429 + `Retry-After`). JSON unless `Accept: text/html` (then 303 on success)
 - `POST /heartbeat` live-node ping; JSON includes `live_nodes`, `mesh`, and `uses` so the homepage can update
 - `GET /stats` JSON: `live_nodes`, `site_live_nodes`, `mesh`, `uses`, views, downloads, `receipts` (public isolated=0 count), score. Downloads come from the download-tracker `/count` (service bind, then HTTPS, then shared KV) and never from views+uses.
 - `GET /count` JSON: `{ live_nodes, site_live_nodes, mesh_enabled, mesh_live_nodes, mesh_locked, mesh_isolated, uses, downloads, receipts, views }`
@@ -62,7 +62,7 @@ MCP / FragGate read mesh through the same-origin runtime proxy: `GET https://god
 
 anon-broadcast is a local communique style tool (text → TTS / desk reel / metadata-culled MP4 + SHA-256 receipt). **Not a publish path on godlock.uk.** Not hosted on this Worker. No ffmpeg farm. Identity Aziel Eliab only. Mesh is not an anonymity network.
 
-**Uses** = `COUNT(*)` of receipt-ledger rows with action `SUBMIT` or `ISOLATE`, floored by durable `metadata.uses` so a parent ledger wipe does not drop the counter. That is a real submission that went through `POST /submit` and was hash-chained. Heartbeats, page views, downloads, and `/runtime` API traffic do not increment Uses. Isolated submissions count because they are ledgered (`ISOLATE`). `SCORE` rows do not count. Application code never resets Views, Uses, downloads, or Live Nodes.
+**Uses** = `COUNT(*)` of receipt-ledger rows with action `SUBMIT` or `ISOLATE`, floored by durable `metadata.uses` so a parent ledger wipe does not drop the counter. That is a real submission that went through `POST /submit` and was hash-chained. Refused empty/null/whitespace/rate-limited/duplicate posts are not Uses. Heartbeats, page views, downloads, and `/runtime` API traffic do not increment Uses. Isolated submissions count because they are ledgered (`ISOLATE`). `SCORE` rows do not count. Application code never resets Views, Uses, downloads, or Live Nodes. There is no uploads counter.
 
 **Receipts** = `COUNT(*)` of `receipts` where `isolated=0` — the same public set as Prior receipts and `/receipts`. Isolated archive rows are not counted on the public counter. Heartbeat writes `#stat-receipts` the same way as Views / Uses / Downloads.
 

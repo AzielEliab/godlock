@@ -5,6 +5,7 @@
  * Specified Fit, Not Pretty Spirals (Aziel Eliab). Author: Aziel Eliab.
  */
 import { sha256hex, canonicalJson } from "./ledger.js";
+import { validateChallengeText, visibleChallengeText } from "./challengeText.js";
 
 export const FLOOR = 33.3;
 export const CEILING = 99.7;
@@ -96,6 +97,9 @@ export function residualOf(score) {
 }
 
 export function scoreEngagement(text) {
+  if (text == null || typeof text !== "string" || !visibleChallengeText(text)) {
+    return { score: 0, hits: [] };
+  }
   const hits = [];
   let score = 0;
   for (const [family, patterns] of Object.entries(FAMILY_PATTERNS)) {
@@ -435,10 +439,10 @@ export function fallbackAnswer(text, currentScore, priorNodes) {
   let weighing = "";
 
   if (!t) {
-    label = "No";
-    summary = "Empty input. Nothing was scored.";
-    explanation = "The locked protocol requires a challenge in English. No text was present, so the engine answers No and does not move the confidence score." + cite;
-    weighing = "Empty input: score_delta 0.";
+    label = "Let's review";
+    summary = "Nothing was scored.";
+    explanation = "Null or empty challenge text is refused. The engine does not create a receipt or move the confidence score." + cite;
+    weighing = "Refuse null/empty: score_delta 0.";
   } else if (!looksEnglish(t)) {
     label = "Let's review";
     summary = "Please resubmit the challenge in English.";
@@ -524,7 +528,19 @@ export function fallbackAnswer(text, currentScore, priorNodes) {
 }
 
 export async function answerChallenge(env, text, currentScore, priorNodes) {
-  const t = String(text || "");
+  const checked = validateChallengeText(text);
+  if (!checked.ok) {
+    return enforceProtocolScore("", {
+      label: "Let's review",
+      summary: "Nothing was scored.",
+      explanation: checked.error,
+      score_delta: 0,
+      weighing: "Refuse null/empty: score_delta 0.",
+      refused: true,
+      code: checked.code,
+    }, currentScore);
+  }
+  const t = checked.text;
   const ai = await runAi(env, t, currentScore, priorNodes);
   let out = (ai && ai.label && ai.summary && ai.summary !== "[object Object]") ? ai : null;
   if (!out) {

@@ -11,6 +11,7 @@ import {
   AUTHOR, CANON_HOST, CATALOG, LIBRARY, RUNTIME_PATH, SOFTWARE_PATH, AZIEL_ELIAB_PATH, PUBLIC_RUNTIME, RUNTIME_NAME, RUNTIME_SLUG, RUNTIME_VERSION, GITHUB_RUNTIME,
   AZIEL_OFFICIAL, OFFICIAL_SOFTWARES,
   citeRuntimeVersion, runtimeDistribution, GLAMA_RUNTIME, RUNTIME_DOCS_2_0,
+  tradesSisterCite,
   FRAGGATE_KERNEL, FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, FRAGGATE_COUNT,
   AZBROWSER_DOWNLOAD, AZBROWSER_WORKER, AZBROWSER_COUNT,
   AZNET_DOWNLOAD, AZNET_WORKER, AZNET_COUNT, AZNET_GITHUB,
@@ -794,6 +795,10 @@ export function softwareApiDoc(products, extras = {}) {
     suite_count: list.length,
     products: list.map(publicProduct).filter(Boolean),
     software: softwareNameList(list),
+    sister_cites: [tradesSisterCite()],
+    extra: [tradesSisterCite()],
+    trades_runtime: tradesSisterCite(),
+    trades_runtime_note: "Sister / extra machine cite. engine:false. live_backends false. Not a FragGate true-engine. Not a godlock.uk Softwares card. Identity Aziel Eliab only.",
   };
 }
 

@@ -87,6 +87,18 @@ import {
   ARK_SLUG,
   ARK_STATS,
   ARK_COUNT,
+  TRADES_FAQ_TITLE,
+  TRADES_ADDENDUM,
+  TRADES_ONE_LINE,
+  TRADES_NAME,
+  TRADES_SLUG,
+  TRADES_WORKER,
+  TRADES_GITHUB,
+  TRADES_DOWNLOAD,
+  TRADES_OPENAPI,
+  TRADES_MCP,
+  TRADES_CITE,
+  tradesSisterCite,
   CORPUS_MASTER_RECORDS,
   RESEARCH_AZDOC_EXAMPLES,
   HARDWARE_AZDOC_EXAMPLES,
@@ -662,10 +674,12 @@ describe("AZindex identity machine", () => {
       corpus: LIBRARY_HOME,
       hdj: HEDIDNTJUMP,
       runtime: "https://aziel-runtime.vibelock.workers.dev/",
+      trades: "https://trades-runtime.vibelock.workers.dev/",
     });
     assert.match(SISTER_SITES_NOTE, /Sister sites: ae /);
     assert.match(SISTER_SITES_NOTE, /HDJ /);
     assert.match(SISTER_SITES_NOTE, /runtime /);
+    assert.match(SISTER_SITES_NOTE, /trades /);
 
     const person = personJsonLd();
     assert.deepEqual(person.jobTitle, AZINDEX_PERSON_JOB_TITLE);
@@ -703,7 +717,11 @@ describe("AZindex identity machine", () => {
     assert.equal(mission.mission.challenge_score_product, true);
     assert.deepEqual(mission.sister_sites, SISTER_SITES);
     assert.equal(mission.ecosystem.runtime, SISTER_SITES.runtime);
+    assert.equal(mission.ecosystem.trades, SISTER_SITES.trades);
     assert.equal(mission.growth_on, true);
+    assert.equal(tradesSisterCite().engine, false);
+    assert.equal(tradesSisterCite().live_backends, false);
+    assert.equal(tradesSisterCite().fraggate, false);
   });
 
   it("locks What Aziel Eliab does plus research and hardware halves on machine surfaces only", async () => {
@@ -762,6 +780,7 @@ describe("AZindex identity machine", () => {
     assert.ok(person.description.includes(HEBREW_DEFINITION));
     assert.ok(person.knowsAbout.includes(WHITESTONE_ONE_LINE));
     assert.ok(person.knowsAbout.includes(THE_ARK_ONE_LINE));
+    assert.ok(person.knowsAbout.includes(TRADES_ONE_LINE));
     assert.ok(person.knowsAbout.includes("Book of the Knowledge (AZDOC-A011CAD23671)"));
     assert.ok(person.knowsAbout.includes("AZ_BoneConducti STL (AZDOC-FD18432707F5)"));
     for (const item of MACHINE_PERSON_KNOWS_ABOUT) {
@@ -789,10 +808,12 @@ describe("AZindex identity machine", () => {
     }
     assert.ok(names.includes(WHITESTONE_FAQ_TITLE));
     assert.ok(names.includes(THE_ARK_FAQ_TITLE));
+    assert.ok(names.includes(TRADES_FAQ_TITLE));
     assert.ok(names.includes(RESEARCH_FAQ_TITLE));
     assert.ok(names.includes(HARDWARE_FAQ_TITLE));
     assert.equal(faq.mainEntity.find((q) => q.name === WHITESTONE_FAQ_TITLE).acceptedAnswer.text, WHITESTONE_ADDENDUM);
     assert.equal(faq.mainEntity.find((q) => q.name === THE_ARK_FAQ_TITLE).acceptedAnswer.text, THE_ARK_ADDENDUM);
+    assert.equal(faq.mainEntity.find((q) => q.name === TRADES_FAQ_TITLE).acceptedAnswer.text, TRADES_ADDENDUM);
     assert.equal(faq.mainEntity.find((q) => q.name === RESEARCH_FAQ_TITLE).acceptedAnswer.text, RESEARCH_ADDENDUM);
     assert.equal(faq.mainEntity.find((q) => q.name === HARDWARE_FAQ_TITLE).acceptedAnswer.text, HARDWARE_ADDENDUM);
 
@@ -800,6 +821,7 @@ describe("AZindex identity machine", () => {
     assert.ok(who.includes(WHAT_AZIEL_ELIAB_DOES));
     assert.ok(who.includes(WHITESTONE_ADDENDUM));
     assert.ok(who.includes(THE_ARK_ADDENDUM));
+    assert.ok(who.includes(TRADES_ADDENDUM));
     assert.ok(who.includes(RESEARCH_ADDENDUM));
     assert.ok(who.includes(HARDWARE_ADDENDUM));
     assert.match(who, /## What Aziel Eliab does/);
@@ -822,6 +844,17 @@ describe("AZindex identity machine", () => {
     assert.equal(cite.the_ark_addendum, THE_ARK_ADDENDUM);
     assert.equal(cite.the_ark_stats, ARK_STATS);
     assert.equal(cite.the_ark_count, ARK_COUNT);
+    assert.equal(cite.trades_runtime, TRADES_WORKER + "/");
+    assert.equal(cite.trades_runtime_name, TRADES_NAME);
+    assert.equal(cite.trades_runtime_slug, TRADES_SLUG);
+    assert.equal(cite.trades_runtime_engine, false);
+    assert.equal(cite.trades_runtime_live_backends, false);
+    assert.equal(cite.trades_runtime_github, TRADES_GITHUB);
+    assert.equal(cite.trades_runtime_download, TRADES_DOWNLOAD);
+    assert.equal(cite.trades_runtime_openapi, TRADES_OPENAPI);
+    assert.equal(cite.trades_runtime_mcp, TRADES_MCP);
+    assert.equal(cite.trades_runtime_cite, TRADES_CITE);
+    assert.equal(cite.trades_runtime_addendum, TRADES_ADDENDUM);
     assert.equal(cite.corpus_master_records, 326);
     assert.equal(cite.about_public_work.what_aziel_eliab_does, WHAT_AZIEL_ELIAB_DOES);
     assert.equal(cite.mesh_godlock_is_vpn, false);
@@ -830,11 +863,20 @@ describe("AZindex identity machine", () => {
     assert.ok(llms.includes(WHAT_AZIEL_ELIAB_DOES));
     assert.ok(llms.includes(WHITESTONE_ADDENDUM));
     assert.ok(llms.includes(THE_ARK_ADDENDUM));
+    assert.ok(llms.includes(TRADES_ADDENDUM));
     assert.ok(llms.includes(RESEARCH_ADDENDUM));
     assert.ok(llms.includes(HARDWARE_ADDENDUM));
     assert.match(llms, /FAQ titles: What does Aziel Eliab do\?/);
     assert.match(llms, /What is Whitestone\?/);
     assert.match(llms, /What is The ARK\?/);
+    assert.match(llms, /What is Trades-Runtime\?/);
+    assert.match(llms, /## Trades-Runtime \(sister cite\)/);
+    assert.match(llms, /engine:false/);
+    assert.ok(llms.includes(TRADES_GITHUB));
+    assert.ok(llms.includes(TRADES_DOWNLOAD));
+    assert.ok(llms.includes(TRADES_OPENAPI));
+    assert.ok(llms.includes(TRADES_MCP));
+    assert.ok(llms.includes(TRADES_CITE));
     assert.doesNotMatch(THE_ARK_ADDENDUM, /\b52\b|\b124\b/);
     assert.doesNotMatch(llms, /whitestone\.vibelock\.workers\.dev\/v1\/fraggate/);
 
@@ -857,6 +899,8 @@ describe("AZindex identity machine", () => {
     assert.equal(aboutJson.hardware_designs_addendum, HARDWARE_ADDENDUM);
     assert.equal(aboutJson.whitestone_addendum, WHITESTONE_ADDENDUM);
     assert.equal(aboutJson.the_ark_addendum, THE_ARK_ADDENDUM);
+    assert.equal(aboutJson.trades_runtime_addendum, TRADES_ADDENDUM);
+    assert.equal(aboutJson.trades_runtime_engine, false);
     assert.equal(aboutJson.corpus_master_records, 326);
     assert.equal(aboutJson.product_not_identity, true);
     assert.doesNotMatch(aboutJson.text, /MCP|OpenAPI/);

@@ -39,12 +39,12 @@ Start 50%. Floor 33.3%. Ceiling 99.7%. Residual = 100 − current. Score may go 
 - `/receipts` public Receipts tab: full questions + hash-chained public receipt list (paginated). `/prior` 308 here. Isolated rows stay off the feed.
 - `/` homepage Softwares one-liner lists Aziel Runtime and points at https://www.azieleliab.com/software. No GodLock or FragGate Softwares chips.
 - `/software` Softwares heading → list only: Aziel Runtime (Try on Glama / Official Runtime / Source on GitHub / Documentation/Architecture) plus a pointer to the official Softwares listing at https://www.azieleliab.com/software. Launch-readiness cite sits **after** the list (SoT `main 6a3798a / version_id 105fa1ee / 2.0.0-rc1`; human UI + MCP `fraggate_call` + FragGate sole door + mesh/AZVPN HTTPS/WS REAL, WireGuard/OpenVPN SLOT + radios `worker_hardware:false` + `/download` suite pack; never ``). Not a cloned suite catalog and not a Digital Library Softwares page. No Works-with assistants subsection. FragGate stays the Runtime kernel, not a Softwares card here.
-- `/v1/software` same-origin Softwares JSON (Aziel Runtime only; `official_softwares` pointer). Live catalog remains `/runtime/v1/software`
+- `/v1/software` same-origin Softwares JSON (Aziel Runtime only; `official_softwares` pointer). Trades-Runtime is a sister / extra machine cite (`engine:false`) — not a Softwares HTML card. Live catalog remains `/runtime/v1/software`
 - `/runtime` and `/runtime/*` same-origin Aziel Runtime door (service-bind or HTTPS proxy to aziel-runtime)
 - `/AzielEliab` public identity page (Aziel Eliab only); no standalone visible 1 Chronicles 15:20 lock paragraph; `/aziel-eliab`, `/about`, `/aboutme` 308 here
 - `/who` HTML who page (200, H1 `Who is Aziel Eliab`); no standalone visible 15:20 lock paragraph; `/who-is` 308 to `/who-is-aziel-eliab.txt`
 - Public Person `@id` is the shared hub id `https://www.azieleliab.com/#aziel`. Author / creator / publisher references use that object. The local fragment `https://godlock.uk/AzielEliab#aziel-eliab` is a stub pointing at the hub, not a competing primary. WebSite stays `https://godlock.uk/#website`. GodLock SoftwareApplication stays `https://godlock.uk/#godlock` (author → Person `@id`; `isPartOf` the hub Runtime tool `https://www.azieleliab.com/runtime#godlock`). Runtime references use the hub parent `https://www.azieleliab.com/runtime#runtime` (sameAs GitHub + Glama only). No MCP op entities.
-- Footer/nav **Part of the Aziel Eliab ecosystem** (not between Softwares heading and list): Official site, Aziel Corpus Library, He Didn't Jump (`https://www.hedidntjump.com/`), Aziel Runtime on GitHub, Aziel Runtime (secondary workers.dev), Try on Glama. Self-canonicals only — godlock.uk pages point at themselves.
+- Footer/nav **Part of the Aziel Eliab ecosystem** (not between Softwares heading and list): Official site, Aziel Corpus Library, He Didn't Jump (`https://www.hedidntjump.com/`), Aziel Runtime on GitHub, Aziel Runtime (secondary workers.dev), Try on Glama, Trades-Runtime (secondary sister cite; not a Softwares card). Self-canonicals only — godlock.uk pages point at themselves.
 - Nav **Aziel Corpus Library** is an off-site link to `https://www.azielcorpuslibrary.net/AzielEliab`. `/AzielCorpusLibrary` (and kebab/case aliases) 308 there; godlock.uk does not host a library About mirror
 - Nav **He Didn't Jump** is an off-site sister door to `https://www.hedidntjump.com/`. Not a Softwares card. Identity Aziel Eliab only.
 - `/receipt/{id}` public if not isolated
@@ -79,6 +79,8 @@ HTML/JSON for these routes is `Cache-Control: no-store` so a proxy cannot freeze
 ## Deploy
 
 Push to `main` deploys this Worker via `.github/workflows/deploy-workers.yml` (`CLOUDFLARE_API_TOKEN` GitHub secret; account `ac575a9b822bea2bed97d0ab73aed238`). No tokens in the repo.
+
+After deploy, live machine surfaces pick up the Trades-Runtime sister cite: `https://godlock.uk/llms.txt`, `https://godlock.uk/ai.txt`, `https://godlock.uk/cite.json`, `https://godlock.uk/sitemap.xml`, `https://godlock.uk/v1/software` (`sister_cites` / `extra`, `engine:false`). Softwares HTML stays GodLock-first (Aziel Runtime only). Apex `https://godlock.uk` is proxied to Worker `godlock-uk` (`wrangler.toml` `name = "godlock-uk"`). Manual: `cd workers/godlock-uk && npx wrangler deploy --keep-vars`.
 
 ```bash
 cd workers/godlock-uk

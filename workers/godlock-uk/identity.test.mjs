@@ -93,7 +93,11 @@ import {
   SPECTRALLOCK_NAME,
   SPECTRALLOCK_SLUG,
   SPECTRALLOCK_UNREDACT,
+  SPECTRALLOCK_RECOVER,
+  SPECTRALLOCK_HANDWRITING,
   SPECTRALLOCK_REFUSE,
+  SPECTRALLOCK_RECOVER_REFUSE,
+  SPECTRALLOCK_HANDWRITING_REFUSE,
   SPECTRALLOCK_HONESTY,
   TRADES_FAQ_TITLE,
   TRADES_ADDENDUM,
@@ -784,12 +788,19 @@ describe("AZindex identity machine", () => {
     assert.equal(SPECTRALLOCK_ONE_LINE, "Preview a small overlay on an image; leftover container bytes recover honestly, opaque rewrite refuses.");
     assert.equal(SPECTRALLOCK_FAQ_TITLE, "What is SpectralLock?");
     assert.equal(SPECTRALLOCK_REFUSE, "SL-UNREDACT-OPAQUE");
+    assert.equal(SPECTRALLOCK_RECOVER_REFUSE, "SL-RECOVER-NO-BYTES");
+    assert.equal(SPECTRALLOCK_HANDWRITING_REFUSE, "SL-HANDWRITING-NO-INK");
     assert.ok(SPECTRALLOCK_ADDENDUM.includes(SPECTRALLOCK_ONE_LINE));
     assert.ok(SPECTRALLOCK_ADDENDUM.includes(SPECTRALLOCK_UNREDACT));
+    assert.ok(SPECTRALLOCK_ADDENDUM.includes(SPECTRALLOCK_RECOVER));
+    assert.ok(SPECTRALLOCK_ADDENDUM.includes(SPECTRALLOCK_HANDWRITING));
     assert.match(SPECTRALLOCK_ADDENDUM, /SL-UNREDACT-OPAQUE/);
     assert.match(SPECTRALLOCK_ADDENDUM, /Never invent letters/);
     assert.match(SPECTRALLOCK_ADDENDUM, /\/v1\/unredact LIVE/);
-    assert.match(SPECTRALLOCK_HONESTY, /not a FragGate door op/);
+    assert.match(SPECTRALLOCK_ADDENDUM, /\/v1\/recover LIVE/);
+    assert.match(SPECTRALLOCK_ADDENDUM, /\/v1\/handwriting LIVE/);
+    assert.match(SPECTRALLOCK_HONESTY, /not a lab/);
+    assert.match(SPECTRALLOCK_HONESTY, /not FragGate door ops/);
     assert.doesNotMatch(SPECTRALLOCK_ADDENDUM, /Works with ChatGPT/);
     assert.ok(RESEARCH_AZDOC_EXAMPLES.length >= 7);
     assert.ok(HARDWARE_AZDOC_EXAMPLES.length >= 8);
@@ -873,11 +884,24 @@ describe("AZindex identity machine", () => {
     assert.equal(cite.spectrallock_one_line, SPECTRALLOCK_ONE_LINE);
     assert.equal(cite.spectrallock_addendum, SPECTRALLOCK_ADDENDUM);
     assert.equal(cite.spectrallock_unredact, SPECTRALLOCK_UNREDACT);
+    assert.equal(cite.spectrallock_recover, SPECTRALLOCK_RECOVER);
+    assert.equal(cite.spectrallock_handwriting, SPECTRALLOCK_HANDWRITING);
     assert.equal(cite.spectrallock_opaque_refuse, SPECTRALLOCK_REFUSE);
+    assert.equal(cite.spectrallock_recover_refuse, SPECTRALLOCK_RECOVER_REFUSE);
+    assert.equal(cite.spectrallock_handwriting_refuse, SPECTRALLOCK_HANDWRITING_REFUSE);
     assert.equal(cite.spectrallock_leftover_bytes_recover, true);
     assert.equal(cite.spectrallock_invent_letters, false);
     assert.equal(cite.spectrallock_unredact_live, true);
+    assert.equal(cite.spectrallock_recover_live, true);
+    assert.equal(cite.spectrallock_handwriting_live, true);
+    assert.equal(cite.spectrallock_handwriting_lab, false);
+    assert.equal(cite.spectrallock_esda, false);
+    assert.equal(cite.spectrallock_writer_identity, false);
+    assert.equal(cite.spectrallock_court_finding, false);
+    assert.equal(cite.spectrallock_forensic_certification, false);
     assert.equal(cite.spectrallock_fraggate_unredact, false);
+    assert.equal(cite.spectrallock_fraggate_recover, false);
+    assert.equal(cite.spectrallock_fraggate_handwriting, false);
     assert.equal(cite.spectrallock_godlock_softwares_html_card, false);
     assert.equal(cite.trades_runtime, TRADES_WORKER + "/");
     assert.equal(cite.trades_runtime_name, TRADES_NAME);
@@ -907,9 +931,12 @@ describe("AZindex identity machine", () => {
     assert.match(llms, /What is The ARK\?/);
     assert.match(llms, /What is SpectralLock\?/);
     assert.match(llms, /What is Trades-Runtime\?/);
-    assert.match(llms, /## SpectralLock \(Lock A–Z \/ leftover-bytes\)/);
+    assert.match(llms, /## SpectralLock \(Lock A–Z \/ leftover-bytes \+ recover \+ handwriting\)/);
     assert.match(llms, /SL-UNREDACT-OPAQUE/);
     assert.match(llms, /\/v1\/unredact LIVE/);
+    assert.match(llms, /\/v1\/recover LIVE/);
+    assert.match(llms, /\/v1\/handwriting LIVE/);
+    assert.match(llms, /not a lab/);
     assert.match(llms, /## Trades-Runtime \(sister cite\)/);
     assert.match(llms, /engine:false/);
     assert.ok(llms.includes(TRADES_GITHUB));
@@ -941,6 +968,9 @@ describe("AZindex identity machine", () => {
     assert.equal(aboutJson.the_ark_addendum, THE_ARK_ADDENDUM);
     assert.equal(aboutJson.spectrallock_addendum, SPECTRALLOCK_ADDENDUM);
     assert.equal(aboutJson.spectrallock_opaque_refuse, SPECTRALLOCK_REFUSE);
+    assert.equal(aboutJson.spectrallock_recover, SPECTRALLOCK_RECOVER);
+    assert.equal(aboutJson.spectrallock_handwriting, SPECTRALLOCK_HANDWRITING);
+    assert.equal(aboutJson.spectrallock_handwriting_lab, false);
     assert.equal(aboutJson.trades_runtime_addendum, TRADES_ADDENDUM);
     assert.equal(aboutJson.trades_runtime_engine, false);
     assert.equal(aboutJson.corpus_master_records, 326);

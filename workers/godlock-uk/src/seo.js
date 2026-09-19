@@ -420,7 +420,7 @@ export const THE_ARK_ADDENDUM =
   + ARK_COUNT
   + ". Do not invent download numbers. Not a godlock.uk Softwares card.";
 
-/** Catalog Lock A–Z / leftover-bytes honesty. Inherited from runtime /v1/software after #137. */
+/** Catalog Lock A–Z leftover-bytes + recover + handwriting honesty after spectrallock#13. one_line inherits runtime /v1/software after #137. */
 export const SPECTRALLOCK_NAME = "SpectralLock";
 export const SPECTRALLOCK_SLUG = "spectrallock";
 export const SPECTRALLOCK_VERSION = "0.3.0";
@@ -430,13 +430,17 @@ export const SPECTRALLOCK_DOWNLOAD = SPECTRALLOCK_WORKER + "/download";
 export const SPECTRALLOCK_UNREDACT = SPECTRALLOCK_WORKER + "/v1/unredact";
 export const SPECTRALLOCK_LIFT = SPECTRALLOCK_WORKER + "/v1/lift";
 export const SPECTRALLOCK_REDACT_LOCATE = SPECTRALLOCK_WORKER + "/v1/redact-locate";
+export const SPECTRALLOCK_RECOVER = SPECTRALLOCK_WORKER + "/v1/recover";
+export const SPECTRALLOCK_HANDWRITING = SPECTRALLOCK_WORKER + "/v1/handwriting";
 export const SPECTRALLOCK_CITE = SPECTRALLOCK_WORKER + "/cite.json";
 export const SPECTRALLOCK_REFUSE = "SL-UNREDACT-OPAQUE";
+export const SPECTRALLOCK_RECOVER_REFUSE = "SL-RECOVER-NO-BYTES";
+export const SPECTRALLOCK_HANDWRITING_REFUSE = "SL-HANDWRITING-NO-INK";
 /** Exact runtime /v1/software one_line after aziel-runtime#137. Do not invent a fork. */
 export const SPECTRALLOCK_ONE_LINE =
   "Preview a small overlay on an image; leftover container bytes recover honestly, opaque rewrite refuses.";
 export const SPECTRALLOCK_HONESTY =
-  "Leftover bytes recover. Opaque empty refuses SL-UNREDACT-OPAQUE. Never invent letters. Worker /v1/unredact LIVE. Unredact is not a FragGate door op.";
+  "Leftover bytes recover. Opaque empty refuses SL-UNREDACT-OPAQUE. Never invent letters. Worker /v1/unredact LIVE. Recover /v1/recover LIVE (present bytes only). Handwriting /v1/handwriting LIVE is pixel heuristics, not a lab. Unredact, recover, and handwriting are not FragGate door ops.";
 export const SPECTRALLOCK_FAQ_TITLE = "What is SpectralLock?";
 export const SPECTRALLOCK_ADDENDUM =
   SPECTRALLOCK_ONE_LINE
@@ -446,11 +450,15 @@ export const SPECTRALLOCK_ADDENDUM =
   + SPECTRALLOCK_SLUG
   + ". Worker "
   + SPECTRALLOCK_UNREDACT
+  + ". Recover "
+  + SPECTRALLOCK_RECOVER
+  + ". Handwriting "
+  + SPECTRALLOCK_HANDWRITING
   + ". GitHub "
   + SPECTRALLOCK_GITHUB
   + ". Identity Aziel Eliab only. Catalog Lock A–Z / machine cite. Softwares HTML stays GodLock-first.";
 
-/** Machine cite for leftover-bytes honesty. Not a godlock.uk Softwares HTML card. */
+/** Machine cite for leftover-bytes + recover + handwriting honesty (not lab). Not a godlock.uk Softwares HTML card. */
 export function spectrallockCite() {
   return {
     slug: SPECTRALLOCK_SLUG,
@@ -459,10 +467,21 @@ export function spectrallockCite() {
     one_line: SPECTRALLOCK_ONE_LINE,
     honesty: SPECTRALLOCK_HONESTY,
     leftover_bytes_recover: true,
+    recover_live: true,
+    handwriting_live: true,
+    handwriting_lab: false,
     opaque_refuse: SPECTRALLOCK_REFUSE,
+    recover_refuse: SPECTRALLOCK_RECOVER_REFUSE,
+    handwriting_refuse: SPECTRALLOCK_HANDWRITING_REFUSE,
     invent_letters: false,
+    esda: false,
+    writer_identity: false,
+    court_finding: false,
+    forensic_certification: false,
     unredact_live: true,
     fraggate_unredact: false,
+    fraggate_recover: false,
+    fraggate_handwriting: false,
     catalog_lock: true,
     godlock_softwares_html_card: false,
     worker: SPECTRALLOCK_WORKER + "/",
@@ -471,6 +490,8 @@ export function spectrallockCite() {
     unredact: SPECTRALLOCK_UNREDACT,
     lift: SPECTRALLOCK_LIFT,
     redact_locate: SPECTRALLOCK_REDACT_LOCATE,
+    recover: SPECTRALLOCK_RECOVER,
+    handwriting: SPECTRALLOCK_HANDWRITING,
     cite: SPECTRALLOCK_CITE,
     catalog: CATALOG + "/v1/software",
     fraggate_describe: PUBLIC_RUNTIME + "/v1/fraggate/describe?slug=" + SPECTRALLOCK_SLUG,
@@ -494,26 +515,41 @@ export function spectrallockCiteFields() {
     spectrallock_unredact: cite.unredact,
     spectrallock_lift: cite.lift,
     spectrallock_redact_locate: cite.redact_locate,
+    spectrallock_recover: cite.recover,
+    spectrallock_handwriting: cite.handwriting,
     spectrallock_cite: cite.cite,
     spectrallock_catalog: cite.catalog,
     spectrallock_fraggate: cite.fraggate_describe,
     spectrallock_leftover_bytes_recover: true,
     spectrallock_opaque_refuse: SPECTRALLOCK_REFUSE,
+    spectrallock_recover_refuse: SPECTRALLOCK_RECOVER_REFUSE,
+    spectrallock_handwriting_refuse: SPECTRALLOCK_HANDWRITING_REFUSE,
     spectrallock_invent_letters: false,
     spectrallock_unredact_live: true,
+    spectrallock_recover_live: true,
+    spectrallock_handwriting_live: true,
+    spectrallock_handwriting_lab: false,
+    spectrallock_esda: false,
+    spectrallock_writer_identity: false,
+    spectrallock_court_finding: false,
+    spectrallock_forensic_certification: false,
     spectrallock_fraggate_unredact: false,
+    spectrallock_fraggate_recover: false,
+    spectrallock_fraggate_handwriting: false,
     spectrallock_catalog_lock: true,
     spectrallock_godlock_softwares_html_card: false,
   };
 }
 
 export function spectrallockLlmsSection() {
-  return "\n## SpectralLock (Lock A–Z / leftover-bytes)\n\n"
+  return "\n## SpectralLock (Lock A–Z / leftover-bytes + recover + handwriting)\n\n"
     + SPECTRALLOCK_ONE_LINE + "\n"
     + SPECTRALLOCK_HONESTY + "\n"
-    + "Identity: Aziel Eliab only. Catalog Lock A–Z / machine cite. Softwares HTML stays GodLock-first. Unredact is not a FragGate door op. Growth-ON. Lamb Lens. NO-LIE.\n"
+    + "Identity: Aziel Eliab only. Catalog Lock A–Z / machine cite. Softwares HTML stays GodLock-first. Unredact, recover, and handwriting are not FragGate door ops. Not a lab. Growth-ON. Lamb Lens. NO-LIE.\n"
     + "Worker: " + SPECTRALLOCK_WORKER + "/\n"
     + "Unredact: " + SPECTRALLOCK_UNREDACT + "\n"
+    + "Recover: " + SPECTRALLOCK_RECOVER + "\n"
+    + "Handwriting: " + SPECTRALLOCK_HANDWRITING + "\n"
     + "GitHub: " + SPECTRALLOCK_GITHUB + "\n"
     + "Download: " + SPECTRALLOCK_DOWNLOAD + "\n"
     + "Catalog: " + CATALOG + "/v1/software\n"
@@ -1981,6 +2017,8 @@ export async function sitemapXml(env, extras = {}) {
   add(SPECTRALLOCK_DOWNLOAD, "0.4", "weekly");
   add(SPECTRALLOCK_UNREDACT, "0.55", "weekly");
   add(SPECTRALLOCK_LIFT, "0.4", "weekly");
+  add(SPECTRALLOCK_RECOVER, "0.55", "weekly");
+  add(SPECTRALLOCK_HANDWRITING, "0.55", "weekly");
   add(SPECTRALLOCK_CITE, "0.4", "weekly");
   add(CATALOG + "/v1/software", "0.7", "daily");
   add(CATALOG + "/v1/fraggate/list", "0.6", "daily");

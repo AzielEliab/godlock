@@ -1282,10 +1282,11 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Source on GitHub<\/a>/);
     assert.match(html, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime\/tree\/main\/docs\/2\.0">Documentation\/Architecture<\/a>/);
     assert.doesNotMatch(html, /glama\.ai\/mcp\/servers\/@[A-Za-z0-9_-]+/);
-    assert.match(html, /href="\/runtime\/v1\/pull\/godlock">Invoke via Runtime<\/a>/);
+    assert.match(html, /href="\/">Open Engine<\/a>/);
+    assert.doesNotMatch(html, /href="\/runtime\/v1\/pull\/godlock">Invoke via Runtime<\/a>/);
     assert.match(html, /href="\/runtime\/mcp">MCP<\/a>/);
     assert.match(html, /href="https:\/\/godlock-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
-    assert.match(html, /href="https:\/\/godlock-download-tracker\.vibelock\.workers\.dev\/">Worker<\/a>/);
+    assert.match(pageHtml, /href="\/">Open Engine<\/a>/);
     assert.match(html, /href="https:\/\/fraggate-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);
     assert.match(html, /href="https:\/\/fraggate-download-tracker\.vibelock\.workers\.dev\/">Worker<\/a>/);
     assert.match(html, /href="https:\/\/azbrowser-download-tracker\.vibelock\.workers\.dev\/download">Download<\/a>/);

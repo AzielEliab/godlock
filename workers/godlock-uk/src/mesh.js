@@ -230,7 +230,6 @@ export function meshLawFields() {
     law_binds_when_off: true,
     worker_hardware: false,
     invented_hardware: false,
-    : false,
     azvpn: Object.freeze({
       https_ws: "REAL",
       wireguard: "SLOT",
@@ -778,7 +777,6 @@ export function publicMesh(mesh) {
     anonymity_network: false,
     worker_hardware: false,
     invented_hardware: false,
-    : false,
     author: AUTHOR,
     identity: AUTHOR,
     door: PUBLIC_MESH,

@@ -407,7 +407,7 @@
   "azvpn_openvpn": "SLOT",
   "suite_download": "https://aziel-runtime.vibelock.workers.dev/download",
   "suite_download_v1": "https://aziel-runtime.vibelock.workers.dev/v1/suite/download",
-  "launch_ready_note": "Aziel Runtime 2.0.0-rc1 (main 6a3798a / version_id 105fa1ee / 2.0.0-rc1) launch readiness: human UI + MCP fraggate_call + FragGate sole door + mesh/AZVPN (HTTPS/WS REAL; WireGuard/OpenVPN SLOT) + radios channel cites worker_hardware:false + /download suite pack.  stays false. GodLock is a challenge/score product. Identity is Aziel Eliab. Identity Aziel Eliab only. Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.",
+  "launch_ready_note": "Aziel Runtime 2.0.0-rc1 (main 6a3798a / version_id 105fa1ee / 2.0.0-rc1) launch readiness: human UI + MCP fraggate_call + FragGate sole door + mesh/AZVPN (HTTPS/WS REAL; WireGuard/OpenVPN SLOT) + radios channel cites worker_hardware:false + /download suite pack. GodLock is a challenge/score product. Identity is Aziel Eliab. Identity Aziel Eliab only. Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.",
   "runtime_github": "https://github.com/AzielEliab/aziel-runtime",
   "runtime_glama": "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime",
   "runtime_glama_note": "Verified Glama listing AzielEliab/aziel-runtime. Prefer Try on Glama. Official Runtime Worker is secondary.",

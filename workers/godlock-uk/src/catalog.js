@@ -1,6 +1,7 @@
 /**
  * Aziel Eliab software catalog helpers.
- * GodLock.uk Softwares HTML lists Aziel Runtime only and points at azieleliab.com.
+ * GodLock.uk Softwares HTML is GodLock-first (heading → list): GodLock then Aziel Runtime.
+ * /v1/software JSON stays Aziel Runtime only plus sister_cites (Trades-Runtime is not a card).
  * Live fetch via AZIEL_RUNTIME still feeds Runtime sitemap / describe / pull URLs.
  * Snapshot is a fallback floor, not a 27-only cap — live catalog slugs
  * (peacelock, azmail, azhub, azinterface, azcoherence, …) are included automatically. Do not invent slugs.
@@ -254,6 +255,21 @@ export const RUNTIME_CARD = {
   kernel: FRAGGATE_KERNEL,
   suite: true,
 };
+
+/** This hub's product. First Softwares HTML card. Not a cloned suite catalog. */
+export const GODLOCK_CARD = {
+  slug: "godlock",
+  name: "GodLock",
+  version: "0.1.0",
+  one_line: "Specified Fit / GodLock score. Not a VPN and not an anonymity network.",
+  github: GITHUB,
+  download: DOWNLOAD,
+  invoke: "/",
+};
+
+/** Softwares HTML card slugs only. Trades-Runtime is machine cite, not a card. */
+export const SOFTWARES_HTML_SLUGS = ["godlock", RUNTIME_SLUG];
+const SOFTWARES_HTML_SKIP = new Set(["trades-runtime", "fraggate"]);
 
 /** Own Plain card. Download/Worker point at the live AZNet tracker. Separate from AZBrowser. */
 export const AZNET_CARD = {
@@ -733,7 +749,7 @@ export function softwareSuite(products, extras = {}) {
   return sortSoftwareSuite(out);
 }
 
-/** GodLock.uk Softwares public list: Aziel Runtime only. Suite cards stay off this site. */
+/** GodLock.uk Softwares JSON list: Aziel Runtime only. Suite / sister cites stay off this list. */
 export function publicSoftwaresList(products, extras = {}) {
   const suite = softwareSuite(products, extras);
   const runtime = suite.find((p) => p && p.slug === RUNTIME_SLUG);
@@ -745,6 +761,25 @@ export function publicSoftwaresList(products, extras = {}) {
     suite: true,
     family: suiteFamily(p),
   }));
+}
+
+/**
+ * Softwares HTML cards: GodLock first, Aziel Runtime second (Try on Glama).
+ * Never emit Trades-Runtime, FragGate, or the cloned suite catalog.
+ */
+export function publicSoftwaresHtmlList(products, extras = {}) {
+  const runtime = publicSoftwaresList(products, extras).find((p) => p && p.slug === RUNTIME_SLUG);
+  const godlock = compactProduct({ ...GODLOCK_CARD });
+  const cards = [];
+  if (godlock) {
+    cards.push({
+      ...godlock,
+      invoke: "/",
+      family: suiteFamily(godlock),
+    });
+  }
+  if (runtime) cards.push(runtime);
+  return cards.filter((p) => p && p.slug && SOFTWARES_HTML_SLUGS.includes(p.slug) && !SOFTWARES_HTML_SKIP.has(p.slug));
 }
 
 export function softwareNameList(products) {

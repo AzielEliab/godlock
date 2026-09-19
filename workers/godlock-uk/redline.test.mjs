@@ -150,7 +150,8 @@ describe("REDLINE-2026-09-14 challenge-hub machine cite", () => {
     const software = softwareBody({ products: [] });
     assert.match(software, /<h2 class="soft-heading">Softwares<\/h2>/);
     assert.doesNotMatch(software, /id="foldlock"/);
-    assert.doesNotMatch(software, /id="godlock"/);
+    assert.match(software, /id="godlock"/);
+    assert.doesNotMatch(software, /id="trades-runtime"/);
 
     const home = visibleBody(homeBody({ stats: {}, latest: null, prior: [] }));
     assert.doesNotMatch(home, /1 Chronicles 15:20/);

@@ -39,6 +39,7 @@ import {
 } from "./survival.js";
 import {
   fetchCatalogProducts, softwareSuite, softwareApiDoc, publicSoftwaresList,
+  publicSoftwaresHtmlList,
   SOFTWARE_HTML_CACHE_CONTROL,
 } from "./catalog.js";
 import {
@@ -921,7 +922,7 @@ export default {
 
       if (path === SOFTWARE_PATH) {
         const extras = { version: RUNTIME_VERSION, source: "godlock-uk" };
-        const products = publicSoftwaresList([], extras);
+        const products = publicSoftwaresHtmlList([], extras);
         if (wantsJson(request, url)) {
           return json({
             ...softwareApiDoc([], extras),

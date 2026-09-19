@@ -127,14 +127,14 @@ export const RE_EXPAND_FROM_ARCHIVE_LAW = Object.freeze({
   ai_ingest_is_tarball: false,
   archive: DOWNLOAD,
   source: GITHUB,
-  note: "Bytes survive, not summaries. Re-expand = archive verify then local node. Crawlers don't re-expand. AI ingest ≠ tarball.",
+  note: "Bytes survive as archive bytes. Re-expand = archive verify then local node. Crawlers don't re-expand. AI ingest is the receipt path; the download tarball is the archive path.",
 });
 
 export const INGEST_AS_RECEIPT_NOTE =
   "INGEST-AS-RECEIPT. First-screen SHA-256 + stable IDs + canonical URL. Public verify paste-hash yes/no. Many indexes, one tip. Training is lossy — keep the hash. Cite, don't merge. Challenge receipts stay distinct from ACT-RECEIPT. Growth-ON. Author Aziel Eliab only.";
 
 export const RE_EXPAND_FROM_ARCHIVE_NOTE =
-  "RE-EXPAND-FROM-ARCHIVE. Bytes survive, not summaries. Re-expand = archive verify then local node. Crawlers don't re-expand. AI ingest ≠ tarball.";
+  "RE-EXPAND-FROM-ARCHIVE. Bytes survive as archive bytes. Re-expand = archive verify then local node. Crawlers don't re-expand. AI ingest is the receipt path; the download tarball is the archive path.";
 
 export const CROSS_NETWORK_SURVIVAL_NOTE =
   CROSS_NETWORK_SURVIVAL + ". " + CROSS_NETWORK_SURVIVAL_RULE;
@@ -288,11 +288,11 @@ export function ingestLlmsSection() {
     + "Challenge receipts stay distinct from ACT-RECEIPT.\n"
     + "Growth-ON. Author Aziel Eliab only.\n"
     + "\n## RE-EXPAND-FROM-ARCHIVE\n\n"
-    + "Bytes survive, not summaries.\n"
+    + "Bytes survive as archive bytes.\n"
     + "Re-expand = archive verify then local node.\n"
     + "Crawlers don't re-expand.\n"
-    + "AI ingest ≠ tarball.\n"
-    + "Archive (bytes, not AI ingest): " + DOWNLOAD + "\n"
+    + "AI ingest is the receipt path; the download tarball is the archive path.\n"
+    + "Archive (tarball path): " + DOWNLOAD + "\n"
     + "\n## CROSS-NETWORK-SURVIVAL\n\n"
     + CROSS_NETWORK_SURVIVAL_RULE + "\n"
     + "\n## NO-LIE / NO-REWRITE\n\n"

@@ -236,7 +236,7 @@ export function meshLawFields() {
       wireguard: "SLOT",
       openvpn: "SLOT",
       godlock_is_vpn: false,
-      note: "Runtime public VPN concentrator (HTTPS/WS REAL; WireGuard/OpenVPN SLOT). GodLock is a challenge stress-test product, not a VPN identity.",
+      note: "Runtime public VPN concentrator (HTTPS/WS REAL; WireGuard/OpenVPN SLOT). GodLock is a challenge/score product. Identity is Aziel Eliab.",
     }),
     author: AUTHOR,
     identity: AUTHOR,

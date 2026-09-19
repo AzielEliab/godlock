@@ -349,7 +349,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(robots, /Allow: \/\.well-known\/mcp\.json/);
     assert.match(robots, /Allow: \/mcp\.json/);
     assert.match(robots, /Allow: \/openapi\.json/);
-    assert.match(robots, /MCP discovery \(not a second door\)/);
+    assert.match(robots, /MCP discovery: \/\.well-known\/mcp\.json \/mcp\.json → POST \/runtime\/mcp\./);
     assert.match(robots, /Content-Signal: search=yes, ai-input=yes, ai-train=yes/);
     assert.match(robots, /User-agent: Googlebot\nAllow: \//);
     assert.match(robots, /User-agent: Googlebot-Image\nAllow: \//);
@@ -521,7 +521,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(cite.identity_note, /alternateName only/);
     assert.equal(cite.reasoning_spine, "Specified Fit, Not Pretty Spirals");
     assert.equal(cite.software_html, CANON_HOST + "/software");
-    assert.match(cite.software_api_note, /Not a second FragGate door/);
+    assert.match(cite.software_api_note, /Door remains \/runtime/);
     assert.equal(cite.priority_pages.home, CANON_HOST + "/");
     assert.equal(cite.priority_pages.software, CANON_HOST + "/software");
     assert.equal(cite.priority_pages.aziel_eliab, CANON_HOST + "/AzielEliab");
@@ -552,7 +552,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.runtime_github, GITHUB_RUNTIME);
     assert.equal(cite.runtime_glama, GLAMA_RUNTIME);
     assert.equal(cite.runtime_glama, "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime");
-    assert.match(cite.runtime_glama_note, /Not an invented Glama server UUID/);
+    assert.match(cite.runtime_glama_note, /Verified Glama listing for AzielEliab\/aziel-runtime/);
     assert.equal(cite.runtime_docs, RUNTIME_DOCS_2_0);
     assert.match(cite.runtime_docs, /docs\/2\.0/);
     assert.ok(Array.isArray(cite.runtime_distribution));
@@ -572,7 +572,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.mcp_discovery_alias, CANON_HOST + "/mcp.json");
     assert.equal(cite.priority_pages.mcp_discovery, CANON_HOST + "/.well-known/mcp.json");
     assert.equal(cite.priority_pages.mcp_discovery_alias, CANON_HOST + "/mcp.json");
-    assert.match(cite.mcp_discovery_note, /Not a second FragGate door/);
+    assert.match(cite.mcp_discovery_note, /Door remains \/runtime/);
     assert.equal(cite.runtime_mesh, CANON_HOST + "/runtime/v1/mesh");
     assert.equal(cite.runtime_mesh_status, CANON_HOST + "/runtime/v1/mesh/status");
     assert.equal(cite.runtime_mesh_nodes, CANON_HOST + "/runtime/v1/mesh/nodes");
@@ -618,7 +618,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.mesh_rollup, "live|locked|isolated counts only");
     assert.equal(cite.anon_broadcast, "https://github.com/AzielEliab/anon-broadcast");
     assert.equal(cite.anon_broadcast_publish_path, false);
-    assert.match(cite.anon_broadcast_note, /not a publish path on godlock\.uk/i);
+    assert.match(cite.anon_broadcast_note, /Local communique style tool/);
     assert.equal(cite.runtime_uses, CANON_HOST + "/runtime/v1/uses");
     assert.match(cite.runtime_uses_note, /Not GodLock product Uses/);
     assert.equal(cite.runtime_library, "https://www.azielcorpuslibrary.net/runtime");
@@ -635,7 +635,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.azcoherence_runtime, CANON_HOST + "/runtime/v1/pull/azcoherence");
     assert.equal(cite.azcoherence_fraggate, CANON_HOST + "/runtime/v1/fraggate/describe?slug=azcoherence");
     assert.equal(cite.azcoherence_peer, "azclce");
-    assert.match(cite.azcoherence_note, /Not AKM-TRIAD/);
+    assert.match(cite.azcoherence_note, /Peer AZ-CLCE/);
     assert.equal(cite.software_fraggate, CANON_HOST + "/runtime/v1/fraggate/list");
     assert.equal(cite.openapi, CANON_HOST + "/openapi.json");
     assert.match(cite.update_check, /\/v1\/update\/check\?slug=godlock/);
@@ -644,7 +644,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Softwares: https:\/\/godlock\.uk\/software/);
     assert.match(llms, /About Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
     assert.match(llms, /Runtime FragGate door: https:\/\/godlock\.uk\/runtime/);
-    assert.match(llms, /Catalog JSON \(SEO proxy, not a FragGate door\): https:\/\/godlock\.uk\/v1\/software/);
+    assert.match(llms, /Catalog JSON \(SEO proxy; door remains \/runtime\): https:\/\/godlock\.uk\/v1\/software/);
     assert.match(llms, /Specified Fit, Not Pretty Spirals: https:\/\/godlock\.uk\/reason/);
     assert.match(llms, /Receipts: https:\/\/godlock\.uk\/receipts/);
     assert.match(llms, /Donate: https:\/\/godlock\.uk\/donate \(AZL-DONATE-1\.0\)\. Same door: https:\/\/www\.azieleliab\.com\/donate/);
@@ -654,7 +654,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /AZCoherence runtime: https:\/\/godlock\.uk\/runtime\/v1\/pull\/azcoherence/);
     assert.match(llms, /AZCoherence FragGate: https:\/\/godlock\.uk\/runtime\/v1\/fraggate\/describe\?slug=azcoherence/);
     assert.match(llms, /Software API: https:\/\/godlock\.uk\/v1\/software/);
-    assert.match(llms, /Not AKM-TRIAD/);
+    assert.match(llms, /Peer AZ-CLCE/);
     assert.match(llms, /Live software catalog: https:\/\/godlock\.uk\/runtime\/v1\/software/);
     assert.match(llms, /FragGate list fallback: https:\/\/godlock\.uk\/runtime\/v1\/fraggate\/list/);
     assert.match(llms, /Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
@@ -683,7 +683,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /MCP: POST https:\/\/godlock\.uk\/runtime\/mcp/);
     assert.match(llms, /MCP discovery: https:\/\/godlock\.uk\/\.well-known\/mcp\.json/);
     assert.match(llms, /MCP discovery alias: https:\/\/godlock\.uk\/mcp\.json/);
-    assert.match(llms, /MCP discovery \(not a second door\): https:\/\/godlock\.uk\/\.well-known\/mcp\.json and https:\/\/godlock\.uk\/mcp\.json → POST https:\/\/godlock\.uk\/runtime\/mcp/);
+    assert.match(llms, /MCP discovery: https:\/\/godlock\.uk\/\.well-known\/mcp\.json and https:\/\/godlock\.uk\/mcp\.json → POST https:\/\/godlock\.uk\/runtime\/mcp/);
     assert.match(llms, /Suite mesh \(read-only, on\): https:\/\/godlock\.uk\/runtime\/v1\/mesh/);
     assert.doesNotMatch(llms, /default off/i);
     assert.doesNotMatch(llms, /Remain-OFF/);
@@ -706,12 +706,11 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /## NO-LIE \/ NO-REWRITE/);
     assert.match(llms, /copies not all on one tunnel/);
     assert.match(llms, /Crawlers don't re-expand/);
-    assert.match(llms, /AI ingest ≠ tarball/);
+    assert.match(llms, /AI ingest is the receipt path/);
     assert.match(llms, /Die-with-pull does not bring godlock\.uk back/);
     assert.match(llms, /No Node Gate/);
     assert.match(llms, /No auto-heal/);
-    assert.match(llms, /anon-broadcast is not a publish path on godlock\.uk/);
-    assert.match(llms, /Not an anonymity network/);
+    assert.match(llms, /anon-broadcast local communique style tool/);
     assert.match(llms, /API uses \(this door\): https:\/\/godlock\.uk\/runtime\/v1\/uses/);
     assert.match(llms, /Library door: https:\/\/www\.azielcorpuslibrary\.net\/runtime/);
     assert.match(llms, /Works with ChatGPT \(GPT Actions \/ OpenAI\), Grok \(xAI\), Venice, Claude \(Anthropic\)/);
@@ -766,7 +765,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(expectedMcp.product, "GodLock");
     assert.equal(expectedMcp.person_id, AZIEL_PERSON_ID);
     assert.equal(expectedMcp.runtime_id, "https://www.azieleliab.com/runtime#runtime");
-    assert.match(expectedMcp.note, /Not a second FragGate door/);
+    assert.match(expectedMcp.note, /Discovery JSON pointing at the same-origin Runtime MCP door/);
     assert.doesNotMatch(expectedMcp.endpoint, /^https:\/\/godlock\.uk\/mcp$/);
     const hostMcp = await worker.fetch(new Request("https://godlock.uk/mcp", { method: "POST", body: "{}", headers: { "Content-Type": "application/json" } }), mockEnv());
     assert.notEqual(hostMcp.status, 200);
@@ -983,7 +982,7 @@ describe("major AI client list", () => {
     assert.match(softwareMeta, /Claude \(Anthropic\)/);
     assert.doesNotMatch(softwareMeta, /Aziel Runtime only on this page/);
     assert.doesNotMatch(softwareMeta, /Trades-Runtime/);
-    assert.ok(defaultDescription("runtime").startsWith("Aziel Runtime is not merely an API orchestrator"));
+    assert.ok(defaultDescription("runtime").startsWith("Aziel Runtime is a node-meshed"));
     assert.match(defaultDescription("runtime"), /2\.0\.0-rc1/);
     assert.match(defaultDescription("runtime"), /GET \/v1\/mesh never enables/);
     const softwareHead = headMeta({ title: "Software", path: "/software", kind: "software" });
@@ -1069,7 +1068,7 @@ describe("Aziel Eliab routes", () => {
     assert.equal(body.product_not_identity, true);
     assert.equal(body.disambiguation, PUBLISHER_NOT_LOCK);
     assert.match(body.disambiguation, /1 Chronicles 15:20/);
-    assert.match(body.disambiguation, /two Levitical musicians Aziel and Eliab/);
+    assert.match(body.disambiguation, /Living-publisher lock cites 1 Chronicles 15:20/);
     assert.doesNotMatch(body.text, /Aziel S|Flutter/i);
     assert.ok(body.text.includes("The receipt is the argument that survives the speaker."));
   });
@@ -1227,7 +1226,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(llms.includes(SPECTRALLOCK_ADDENDUM));
     assert.match(llms, /SL-UNREDACT-OPAQUE/);
     assert.match(llms, /leftover-bytes \+ recover \+ handwriting/);
-    assert.match(llms, /not a lab/);
+    assert.match(llms, /pixel heuristics/);
     assert.match(llms, /Recover: /);
     assert.match(llms, /Handwriting: /);
     assert.doesNotMatch(SPECTRALLOCK_ADDENDUM, /Works with ChatGPT/);
@@ -2003,7 +2002,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       name: "GodLock",
       one_line: "Offline ABAD / hardening score. Not a VPN and not an anonymity network.",
     });
-    assert.equal(staleGodlock.one_line, "Specified Fit / GodLock score. Not a VPN and not an anonymity network.");
+    assert.equal(staleGodlock.one_line, "Specified Fit / GodLock score.");
     assert.doesNotMatch(staleGodlock.one_line, /\bABAD\b/);
     const bound = hubProductCopy({ slug: "godlock", name: "GodLock", one_line: "bound godlock" });
     assert.equal(bound.one_line, "bound godlock");
@@ -2050,7 +2049,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
 describe("Phase F Aziel Runtime 2.0.0-rc1 hub cite", () => {
   it("leads Softwares and runtime SEO with the crawler abstract and cites live 2.0.0-rc1", () => {
     assert.equal(RUNTIME_VERSION, "2.0.0-rc1");
-    assert.match(RUNTIME_ABSTRACT, /not merely an API orchestrator or software aggregator/);
+    assert.match(RUNTIME_ABSTRACT, /node-meshed orchestration suite/);
     const software = defaultDescription("software");
     const runtime = defaultDescription("runtime");
     assert.match(software, /first card is GodLock/);
@@ -2431,8 +2430,8 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(cite.suite_download, "https://aziel-runtime.vibelock.workers.dev/download");
     assert.match(cite.launch_ready_note, /fraggate_call/);
     assert.match(cite.launch_ready_note, /worker_hardware:false/);
-    assert.match(cite.launch_ready_note, /Not /);
-    assert.match(cite.launch_ready_note, /not a VPN identity/);
+    assert.match(cite.launch_ready_note, / stays false/);
+    assert.match(cite.launch_ready_note, /challenge\/score product/);
     assert.match(cite.launch_ready_note, /Try on Glama/);
     assert.match(cite.launch_ready_note, /Lamb Lens/);
     assert.match(cite.launch_ready_note, /NO-LIE/);
@@ -2466,8 +2465,8 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(html, /WireGuard\/OpenVPN SLOT/);
     assert.match(html, /worker_hardware:false/);
     assert.match(html, /\/download/);
-    assert.match(html, /Not /);
-    assert.match(html, /not a VPN identity/);
+    assert.match(html, / stays false/);
+    assert.match(html, /challenge\/score product/);
     assert.match(html, /Try on Glama/);
     assert.doesNotMatch(html, /Works with ChatGPT/);
     assert.doesNotMatch(html, /1 Chronicles 15:20/);

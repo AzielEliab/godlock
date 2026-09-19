@@ -205,7 +205,7 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.equal(cite.re_expand_ai_ingest_is_tarball, false);
     assert.equal(cite.re_expand_bytes_survive, true);
     assert.match(cite.ingest_note, /Cite, don't merge/);
-    assert.match(cite.re_expand_note, /AI ingest ≠ tarball/);
+    assert.match(cite.re_expand_note, /AI ingest is the receipt path/);
     assert.equal(cite.cross_network_survival, "CROSS-NETWORK-SURVIVAL");
     assert.equal(cite.cross_network_survival_spec, "CROSS-NETWORK-SURVIVAL-1.0");
     assert.match(cite.cross_network_survival_rule, /survival = bytes↔hash/);
@@ -229,7 +229,7 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.match(llms, new RegExp(firstScreenTip()));
     assert.match(llms, /cite, don't merge/i);
     assert.match(llms, /Crawlers don't re-expand/);
-    assert.match(llms, /AI ingest ≠ tarball/);
+    assert.match(llms, /AI ingest is the receipt path/);
     assert.match(llms, /Growth-ON/);
     assert.match(llms, /first card is GodLock/);
     assert.match(llms, /\/v1\/software JSON stays Aziel Runtime only plus sister_cites/);

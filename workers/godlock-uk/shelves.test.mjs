@@ -206,7 +206,7 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.equal(cite.challenge_only, true);
     assert.equal(cite.no_fan, true);
     assert.equal(cite.doi, null);
-    assert.equal(cite.zenodo_refuse, ZENODO_REFUSE);
+    assert.equal(cite.zenodo_refuse, null);
     assert.equal(cite.plane_b_codeberg_tip_pack, CODEBERG_TIP_PACK);
     assert.equal(cite.plane_b_codeberg_status, "slot");
     assert.deepEqual(cite.plane_b_working_targets, ["codeberg", "archive.org", "framagit"]);
@@ -242,13 +242,13 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.match(llms, /ALL-TARGETS/);
     assert.match(llms, /https:\/\/archive\.org\/details\/aziel-lockset-tip/);
     assert.match(llms, /https:\/\/archive\.org\/details\/aziel-lockset-tip_202609/);
-    assert.match(llms, /not a second independent shelf/);
+    assert.match(llms, /one working_targets kind/);
     assert.match(llms, /Framagit url null/);
     assert.match(llms, /SLOT CNS-NO-FORGE-MIRROR/);
     assert.match(llms, /Plane C: USB airgap SLOT until CNS-OPERATOR-ATTEST\. No LIVE flip/);
-    assert.match(llms, /CNS-GITFLIC-EMAIL/);
-    assert.match(llms, /CNS-GITLAB-CF-LOOP/);
-    assert.match(llms, /CNS-ZENODO-IP-BAN/);
+    assert.doesNotMatch(llms, /CNS-ZENODO-IP-BAN/);
+    assert.doesNotMatch(llms, /blocked from/);
+    assert.doesNotMatch(llms, /Operator IP banned/);
     assert.doesNotMatch(llms, /GitFlic RU unverified/);
     assert.match(llms, /doi null/);
     assert.match(llms, /CNS-OPERATOR-ATTEST/);

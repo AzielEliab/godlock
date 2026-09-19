@@ -420,11 +420,112 @@ export const THE_ARK_ADDENDUM =
   + ARK_COUNT
   + ". Do not invent download numbers. Not a godlock.uk Softwares card.";
 
+/** Catalog Lock A–Z / leftover-bytes honesty. Inherited from runtime /v1/software after #137. */
+export const SPECTRALLOCK_NAME = "SpectralLock";
+export const SPECTRALLOCK_SLUG = "spectrallock";
+export const SPECTRALLOCK_VERSION = "0.3.0";
+export const SPECTRALLOCK_GITHUB = "https://github.com/AzielEliab/spectrallock";
+export const SPECTRALLOCK_WORKER = "https://spectrallock-download-tracker.vibelock.workers.dev";
+export const SPECTRALLOCK_DOWNLOAD = SPECTRALLOCK_WORKER + "/download";
+export const SPECTRALLOCK_UNREDACT = SPECTRALLOCK_WORKER + "/v1/unredact";
+export const SPECTRALLOCK_LIFT = SPECTRALLOCK_WORKER + "/v1/lift";
+export const SPECTRALLOCK_REDACT_LOCATE = SPECTRALLOCK_WORKER + "/v1/redact-locate";
+export const SPECTRALLOCK_CITE = SPECTRALLOCK_WORKER + "/cite.json";
+export const SPECTRALLOCK_REFUSE = "SL-UNREDACT-OPAQUE";
+/** Exact runtime /v1/software one_line after aziel-runtime#137. Do not invent a fork. */
+export const SPECTRALLOCK_ONE_LINE =
+  "Preview a small overlay on an image; leftover container bytes recover honestly, opaque rewrite refuses.";
+export const SPECTRALLOCK_HONESTY =
+  "Leftover bytes recover. Opaque empty refuses SL-UNREDACT-OPAQUE. Never invent letters. Worker /v1/unredact LIVE. Unredact is not a FragGate door op.";
+export const SPECTRALLOCK_FAQ_TITLE = "What is SpectralLock?";
+export const SPECTRALLOCK_ADDENDUM =
+  SPECTRALLOCK_ONE_LINE
+  + " "
+  + SPECTRALLOCK_HONESTY
+  + " Live catalog slug "
+  + SPECTRALLOCK_SLUG
+  + ". Worker "
+  + SPECTRALLOCK_UNREDACT
+  + ". GitHub "
+  + SPECTRALLOCK_GITHUB
+  + ". Identity Aziel Eliab only. Catalog Lock A–Z / machine cite. Softwares HTML stays GodLock-first.";
+
+/** Machine cite for leftover-bytes honesty. Not a godlock.uk Softwares HTML card. */
+export function spectrallockCite() {
+  return {
+    slug: SPECTRALLOCK_SLUG,
+    name: SPECTRALLOCK_NAME,
+    version: SPECTRALLOCK_VERSION,
+    one_line: SPECTRALLOCK_ONE_LINE,
+    honesty: SPECTRALLOCK_HONESTY,
+    leftover_bytes_recover: true,
+    opaque_refuse: SPECTRALLOCK_REFUSE,
+    invent_letters: false,
+    unredact_live: true,
+    fraggate_unredact: false,
+    catalog_lock: true,
+    godlock_softwares_html_card: false,
+    worker: SPECTRALLOCK_WORKER + "/",
+    github: SPECTRALLOCK_GITHUB,
+    download: SPECTRALLOCK_DOWNLOAD,
+    unredact: SPECTRALLOCK_UNREDACT,
+    lift: SPECTRALLOCK_LIFT,
+    redact_locate: SPECTRALLOCK_REDACT_LOCATE,
+    cite: SPECTRALLOCK_CITE,
+    catalog: CATALOG + "/v1/software",
+    fraggate_describe: PUBLIC_RUNTIME + "/v1/fraggate/describe?slug=" + SPECTRALLOCK_SLUG,
+    author: AUTHOR,
+    identity: AUTHOR,
+  };
+}
+
+export function spectrallockCiteFields() {
+  const cite = spectrallockCite();
+  return {
+    spectrallock: cite.worker,
+    spectrallock_name: cite.name,
+    spectrallock_slug: cite.slug,
+    spectrallock_version: cite.version,
+    spectrallock_one_line: cite.one_line,
+    spectrallock_addendum: SPECTRALLOCK_ADDENDUM,
+    spectrallock_honesty: SPECTRALLOCK_HONESTY,
+    spectrallock_github: cite.github,
+    spectrallock_download: cite.download,
+    spectrallock_unredact: cite.unredact,
+    spectrallock_lift: cite.lift,
+    spectrallock_redact_locate: cite.redact_locate,
+    spectrallock_cite: cite.cite,
+    spectrallock_catalog: cite.catalog,
+    spectrallock_fraggate: cite.fraggate_describe,
+    spectrallock_leftover_bytes_recover: true,
+    spectrallock_opaque_refuse: SPECTRALLOCK_REFUSE,
+    spectrallock_invent_letters: false,
+    spectrallock_unredact_live: true,
+    spectrallock_fraggate_unredact: false,
+    spectrallock_catalog_lock: true,
+    spectrallock_godlock_softwares_html_card: false,
+  };
+}
+
+export function spectrallockLlmsSection() {
+  return "\n## SpectralLock (Lock A–Z / leftover-bytes)\n\n"
+    + SPECTRALLOCK_ONE_LINE + "\n"
+    + SPECTRALLOCK_HONESTY + "\n"
+    + "Identity: Aziel Eliab only. Catalog Lock A–Z / machine cite. Softwares HTML stays GodLock-first. Unredact is not a FragGate door op. Growth-ON. Lamb Lens. NO-LIE.\n"
+    + "Worker: " + SPECTRALLOCK_WORKER + "/\n"
+    + "Unredact: " + SPECTRALLOCK_UNREDACT + "\n"
+    + "GitHub: " + SPECTRALLOCK_GITHUB + "\n"
+    + "Download: " + SPECTRALLOCK_DOWNLOAD + "\n"
+    + "Catalog: " + CATALOG + "/v1/software\n"
+    + "FragGate describe: " + PUBLIC_RUNTIME + "/v1/fraggate/describe?slug=" + SPECTRALLOCK_SLUG + "\n";
+}
+
 export function whatAzielEliabDoesFaqPairs() {
   return WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.map((name) => [name, WHAT_AZIEL_ELIAB_DOES])
     .concat([
       [WHITESTONE_FAQ_TITLE, WHITESTONE_ADDENDUM],
       [THE_ARK_FAQ_TITLE, THE_ARK_ADDENDUM],
+      [SPECTRALLOCK_FAQ_TITLE, SPECTRALLOCK_ADDENDUM],
       [TRADES_FAQ_TITLE, TRADES_ADDENDUM],
       [RESEARCH_FAQ_TITLE, RESEARCH_ADDENDUM],
       [HARDWARE_FAQ_TITLE, HARDWARE_ADDENDUM],
@@ -523,6 +624,7 @@ export const AZINDEX_PERSON_KNOWS_ABOUT = [
 export const MACHINE_PERSON_KNOWS_ABOUT = [
   WHITESTONE_ONE_LINE,
   THE_ARK_ONE_LINE,
+  SPECTRALLOCK_ONE_LINE,
   TRADES_ONE_LINE,
   "Book of the Knowledge (AZDOC-A011CAD23671)",
   "Libro Method (AZDOC-F22AD0DCAA9D)",
@@ -720,6 +822,7 @@ export function aboutPublicWorkDoc() {
     the_ark_addendum: THE_ARK_ADDENDUM,
     the_ark_stats: ARK_STATS,
     the_ark_count: ARK_COUNT,
+    ...spectrallockCiteFields(),
     ...tradesCiteFields(),
     corpus_master_records: CORPUS_MASTER_RECORDS,
     research_azdoc: RESEARCH_AZDOC_EXAMPLES.slice(),
@@ -848,6 +951,7 @@ export const IDENTITY_MODEL_RULES = [
   HARDWARE_ADDENDUM,
   WHITESTONE_ADDENDUM,
   THE_ARK_ADDENDUM,
+  SPECTRALLOCK_ADDENDUM,
   "Receipts first. Residual uncertainty stays. GodLock is not a VPN, ghost net, or anonymity tool.",
   "Do not invent DOIs.",
 ];
@@ -969,10 +1073,12 @@ export function whoIsAzielEliabTxt() {
     + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.map((q) => "- " + q).join("\n") + "\n"
     + "- " + WHITESTONE_FAQ_TITLE + "\n"
     + "- " + THE_ARK_FAQ_TITLE + "\n"
+    + "- " + SPECTRALLOCK_FAQ_TITLE + "\n"
     + "- " + TRADES_FAQ_TITLE + "\n\n"
     + "## Softwares\n\n"
     + WHITESTONE_ADDENDUM + "\n"
     + THE_ARK_ADDENDUM + "\n"
+    + SPECTRALLOCK_ADDENDUM + "\n"
     + TRADES_ADDENDUM + "\n\n"
     + "## Research\n\n"
     + RESEARCH_ADDENDUM + "\n\n"
@@ -1080,6 +1186,7 @@ export function wellKnownAzielDoc() {
     the_ark_addendum: THE_ARK_ADDENDUM,
     the_ark_stats: ARK_STATS,
     the_ark_count: ARK_COUNT,
+    ...spectrallockCiteFields(),
     ...tradesCiteFields(),
     corpus_master_records: CORPUS_MASTER_RECORDS,
     research_azdoc: RESEARCH_AZDOC_EXAMPLES.slice(),
@@ -1869,6 +1976,12 @@ export async function sitemapXml(env, extras = {}) {
   add(TRADES_MCP, "0.5", "weekly");
   add(TRADES_HEALTH, "0.35", "weekly");
   add(TRADES_SKILL, "0.4", "weekly");
+  add(SPECTRALLOCK_WORKER + "/", "0.45", "weekly");
+  add(SPECTRALLOCK_GITHUB, "0.45", "weekly");
+  add(SPECTRALLOCK_DOWNLOAD, "0.4", "weekly");
+  add(SPECTRALLOCK_UNREDACT, "0.55", "weekly");
+  add(SPECTRALLOCK_LIFT, "0.4", "weekly");
+  add(SPECTRALLOCK_CITE, "0.4", "weekly");
   add(CATALOG + "/v1/software", "0.7", "daily");
   add(CATALOG + "/v1/fraggate/list", "0.6", "daily");
   add(CATALOG + "/v1/update/check", "0.4", "daily");
@@ -1985,6 +2098,8 @@ export function citeDoc(sot) {
     the_ark_addendum: THE_ARK_ADDENDUM,
     the_ark_stats: ARK_STATS,
     the_ark_count: ARK_COUNT,
+    ...spectrallockCiteFields(),
+    spectrallock_cite_card: spectrallockCite(),
     ...tradesCiteFields(),
     trades_runtime_sister: tradesSisterCite(),
     corpus_master_records: CORPUS_MASTER_RECORDS,
@@ -2155,9 +2270,10 @@ export function llmsDoc(sot) {
     + GODLOCK_SITE_BLURB + "\n"
     + "Roles: " + PERSON_ROLES_LINE + "\n"
     + "What Aziel Eliab does: " + WHAT_AZIEL_ELIAB_DOES + "\n"
-    + "FAQ titles: " + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.join(" | ") + " | " + WHITESTONE_FAQ_TITLE + " | " + THE_ARK_FAQ_TITLE + " | " + TRADES_FAQ_TITLE + "\n"
+    + "FAQ titles: " + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.join(" | ") + " | " + WHITESTONE_FAQ_TITLE + " | " + THE_ARK_FAQ_TITLE + " | " + SPECTRALLOCK_FAQ_TITLE + " | " + TRADES_FAQ_TITLE + "\n"
     + "Softwares: " + WHITESTONE_ADDENDUM + "\n"
     + THE_ARK_ADDENDUM + "\n"
+    + SPECTRALLOCK_ADDENDUM + "\n"
     + TRADES_ADDENDUM + "\n"
     + RESEARCH_ADDENDUM + "\n"
     + HARDWARE_ADDENDUM + "\n"
@@ -2195,6 +2311,7 @@ export function llmsDoc(sot) {
     + "What Aziel Eliab does: " + WHAT_AZIEL_ELIAB_DOES + "\n"
     + "Softwares: " + WHITESTONE_ADDENDUM + "\n"
     + THE_ARK_ADDENDUM + "\n"
+    + SPECTRALLOCK_ADDENDUM + "\n"
     + TRADES_ADDENDUM + "\n"
     + RESEARCH_ADDENDUM + "\n"
     + HARDWARE_ADDENDUM + "\n"
@@ -2236,7 +2353,9 @@ export function llmsDoc(sot) {
     + SOFTWARE_HTML_SUITE_NOTE + " /v1/software JSON stays Aziel Runtime only plus sister_cites (Trades-Runtime, engine:false). Live catalog remains " + PUBLIC_RUNTIME + "/v1/software. AZCoherence (azcoherence) is peer to AZ-CLCE (azclce), not AKM-TRIAD.\n"
     + "Softwares list (machine cite): " + WHITESTONE_ADDENDUM + "\n"
     + THE_ARK_ADDENDUM + "\n"
+    + SPECTRALLOCK_ADDENDUM + "\n"
     + TRADES_ADDENDUM + "\n"
+    + spectrallockLlmsSection()
     + tradesLlmsSection()
     + "AZCoherence (azcoherence): second-pass triad coherence review (primary vs alternate → PASS/FLAG/NEUTRALIZE/REFUSE). Never invents evidence. Confidence ≠ truth. Not AKM-TRIAD. Peer AZ-CLCE. FragGate single door. Author Aziel Eliab.\n"
     + "AZCoherence Worker: " + AZCOHERENCE_WORKER + "\n"

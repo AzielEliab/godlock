@@ -29,6 +29,7 @@ import {
   WHAT_AZIEL_ELIAB_DOES, WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
   RESEARCH_ADDENDUM, HARDWARE_ADDENDUM, WHITESTONE_ADDENDUM, WHITESTONE_URL, WHITESTONE_NAME, WHITESTONE_ONE_LINE,
   THE_ARK_ADDENDUM, THE_ARK_ONE_LINE, ARK_NAME, ARK_SLUG, ARK_GITHUB, ARK_STATS, ARK_COUNT, CORPUS_MASTER_RECORDS,
+  spectrallockCiteFields,
   tradesCiteFields,
 } from "./seo.js";
 import { shelvesDoc } from "./shelves.js";
@@ -900,6 +901,7 @@ export default {
             the_ark_addendum: THE_ARK_ADDENDUM,
             the_ark_stats: ARK_STATS,
             the_ark_count: ARK_COUNT,
+            ...spectrallockCiteFields(),
             ...tradesCiteFields(),
             corpus_master_records: CORPUS_MASTER_RECORDS,
             text: azielEliabText(),

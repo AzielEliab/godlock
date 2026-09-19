@@ -87,6 +87,14 @@ import {
   ARK_SLUG,
   ARK_STATS,
   ARK_COUNT,
+  SPECTRALLOCK_FAQ_TITLE,
+  SPECTRALLOCK_ADDENDUM,
+  SPECTRALLOCK_ONE_LINE,
+  SPECTRALLOCK_NAME,
+  SPECTRALLOCK_SLUG,
+  SPECTRALLOCK_UNREDACT,
+  SPECTRALLOCK_REFUSE,
+  SPECTRALLOCK_HONESTY,
   TRADES_FAQ_TITLE,
   TRADES_ADDENDUM,
   TRADES_ONE_LINE,
@@ -771,6 +779,18 @@ describe("AZindex identity machine", () => {
     assert.ok(THE_ARK_ADDENDUM.includes(ARK_COUNT));
     assert.match(THE_ARK_ADDENDUM, /Do not invent download numbers/);
     assert.doesNotMatch(THE_ARK_ADDENDUM, /\b\d{2,}\b/);
+    assert.equal(SPECTRALLOCK_NAME, "SpectralLock");
+    assert.equal(SPECTRALLOCK_SLUG, "spectrallock");
+    assert.equal(SPECTRALLOCK_ONE_LINE, "Preview a small overlay on an image; leftover container bytes recover honestly, opaque rewrite refuses.");
+    assert.equal(SPECTRALLOCK_FAQ_TITLE, "What is SpectralLock?");
+    assert.equal(SPECTRALLOCK_REFUSE, "SL-UNREDACT-OPAQUE");
+    assert.ok(SPECTRALLOCK_ADDENDUM.includes(SPECTRALLOCK_ONE_LINE));
+    assert.ok(SPECTRALLOCK_ADDENDUM.includes(SPECTRALLOCK_UNREDACT));
+    assert.match(SPECTRALLOCK_ADDENDUM, /SL-UNREDACT-OPAQUE/);
+    assert.match(SPECTRALLOCK_ADDENDUM, /Never invent letters/);
+    assert.match(SPECTRALLOCK_ADDENDUM, /\/v1\/unredact LIVE/);
+    assert.match(SPECTRALLOCK_HONESTY, /not a FragGate door op/);
+    assert.doesNotMatch(SPECTRALLOCK_ADDENDUM, /Works with ChatGPT/);
     assert.ok(RESEARCH_AZDOC_EXAMPLES.length >= 7);
     assert.ok(HARDWARE_AZDOC_EXAMPLES.length >= 8);
 
@@ -780,6 +800,7 @@ describe("AZindex identity machine", () => {
     assert.ok(person.description.includes(HEBREW_DEFINITION));
     assert.ok(person.knowsAbout.includes(WHITESTONE_ONE_LINE));
     assert.ok(person.knowsAbout.includes(THE_ARK_ONE_LINE));
+    assert.ok(person.knowsAbout.includes(SPECTRALLOCK_ONE_LINE));
     assert.ok(person.knowsAbout.includes(TRADES_ONE_LINE));
     assert.ok(person.knowsAbout.includes("Book of the Knowledge (AZDOC-A011CAD23671)"));
     assert.ok(person.knowsAbout.includes("AZ_BoneConducti STL (AZDOC-FD18432707F5)"));
@@ -808,11 +829,13 @@ describe("AZindex identity machine", () => {
     }
     assert.ok(names.includes(WHITESTONE_FAQ_TITLE));
     assert.ok(names.includes(THE_ARK_FAQ_TITLE));
+    assert.ok(names.includes(SPECTRALLOCK_FAQ_TITLE));
     assert.ok(names.includes(TRADES_FAQ_TITLE));
     assert.ok(names.includes(RESEARCH_FAQ_TITLE));
     assert.ok(names.includes(HARDWARE_FAQ_TITLE));
     assert.equal(faq.mainEntity.find((q) => q.name === WHITESTONE_FAQ_TITLE).acceptedAnswer.text, WHITESTONE_ADDENDUM);
     assert.equal(faq.mainEntity.find((q) => q.name === THE_ARK_FAQ_TITLE).acceptedAnswer.text, THE_ARK_ADDENDUM);
+    assert.equal(faq.mainEntity.find((q) => q.name === SPECTRALLOCK_FAQ_TITLE).acceptedAnswer.text, SPECTRALLOCK_ADDENDUM);
     assert.equal(faq.mainEntity.find((q) => q.name === TRADES_FAQ_TITLE).acceptedAnswer.text, TRADES_ADDENDUM);
     assert.equal(faq.mainEntity.find((q) => q.name === RESEARCH_FAQ_TITLE).acceptedAnswer.text, RESEARCH_ADDENDUM);
     assert.equal(faq.mainEntity.find((q) => q.name === HARDWARE_FAQ_TITLE).acceptedAnswer.text, HARDWARE_ADDENDUM);
@@ -821,6 +844,7 @@ describe("AZindex identity machine", () => {
     assert.ok(who.includes(WHAT_AZIEL_ELIAB_DOES));
     assert.ok(who.includes(WHITESTONE_ADDENDUM));
     assert.ok(who.includes(THE_ARK_ADDENDUM));
+    assert.ok(who.includes(SPECTRALLOCK_ADDENDUM));
     assert.ok(who.includes(TRADES_ADDENDUM));
     assert.ok(who.includes(RESEARCH_ADDENDUM));
     assert.ok(who.includes(HARDWARE_ADDENDUM));
@@ -844,6 +868,17 @@ describe("AZindex identity machine", () => {
     assert.equal(cite.the_ark_addendum, THE_ARK_ADDENDUM);
     assert.equal(cite.the_ark_stats, ARK_STATS);
     assert.equal(cite.the_ark_count, ARK_COUNT);
+    assert.equal(cite.spectrallock_name, SPECTRALLOCK_NAME);
+    assert.equal(cite.spectrallock_slug, SPECTRALLOCK_SLUG);
+    assert.equal(cite.spectrallock_one_line, SPECTRALLOCK_ONE_LINE);
+    assert.equal(cite.spectrallock_addendum, SPECTRALLOCK_ADDENDUM);
+    assert.equal(cite.spectrallock_unredact, SPECTRALLOCK_UNREDACT);
+    assert.equal(cite.spectrallock_opaque_refuse, SPECTRALLOCK_REFUSE);
+    assert.equal(cite.spectrallock_leftover_bytes_recover, true);
+    assert.equal(cite.spectrallock_invent_letters, false);
+    assert.equal(cite.spectrallock_unredact_live, true);
+    assert.equal(cite.spectrallock_fraggate_unredact, false);
+    assert.equal(cite.spectrallock_godlock_softwares_html_card, false);
     assert.equal(cite.trades_runtime, TRADES_WORKER + "/");
     assert.equal(cite.trades_runtime_name, TRADES_NAME);
     assert.equal(cite.trades_runtime_slug, TRADES_SLUG);
@@ -863,13 +898,18 @@ describe("AZindex identity machine", () => {
     assert.ok(llms.includes(WHAT_AZIEL_ELIAB_DOES));
     assert.ok(llms.includes(WHITESTONE_ADDENDUM));
     assert.ok(llms.includes(THE_ARK_ADDENDUM));
+    assert.ok(llms.includes(SPECTRALLOCK_ADDENDUM));
     assert.ok(llms.includes(TRADES_ADDENDUM));
     assert.ok(llms.includes(RESEARCH_ADDENDUM));
     assert.ok(llms.includes(HARDWARE_ADDENDUM));
     assert.match(llms, /FAQ titles: What does Aziel Eliab do\?/);
     assert.match(llms, /What is Whitestone\?/);
     assert.match(llms, /What is The ARK\?/);
+    assert.match(llms, /What is SpectralLock\?/);
     assert.match(llms, /What is Trades-Runtime\?/);
+    assert.match(llms, /## SpectralLock \(Lock A–Z \/ leftover-bytes\)/);
+    assert.match(llms, /SL-UNREDACT-OPAQUE/);
+    assert.match(llms, /\/v1\/unredact LIVE/);
     assert.match(llms, /## Trades-Runtime \(sister cite\)/);
     assert.match(llms, /engine:false/);
     assert.ok(llms.includes(TRADES_GITHUB));
@@ -899,6 +939,8 @@ describe("AZindex identity machine", () => {
     assert.equal(aboutJson.hardware_designs_addendum, HARDWARE_ADDENDUM);
     assert.equal(aboutJson.whitestone_addendum, WHITESTONE_ADDENDUM);
     assert.equal(aboutJson.the_ark_addendum, THE_ARK_ADDENDUM);
+    assert.equal(aboutJson.spectrallock_addendum, SPECTRALLOCK_ADDENDUM);
+    assert.equal(aboutJson.spectrallock_opaque_refuse, SPECTRALLOCK_REFUSE);
     assert.equal(aboutJson.trades_runtime_addendum, TRADES_ADDENDUM);
     assert.equal(aboutJson.trades_runtime_engine, false);
     assert.equal(aboutJson.corpus_master_records, 326);

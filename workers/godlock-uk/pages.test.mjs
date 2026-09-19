@@ -119,6 +119,7 @@ import {
   AZHUB_DOWNLOAD, AZHUB_WORKER, AZINTERFACE_DOWNLOAD, AZINTERFACE_WORKER,
   AZCOHERENCE_DOWNLOAD, AZCOHERENCE_WORKER, AZCOHERENCE_GITHUB, AZCOHERENCE_SLUG,
   SPECTRALLOCK_SLUG, SPECTRALLOCK_NAME, SPECTRALLOCK_ONE_LINE, SPECTRALLOCK_UNREDACT,
+  SPECTRALLOCK_RECOVER, SPECTRALLOCK_HANDWRITING,
   SPECTRALLOCK_GITHUB, SPECTRALLOCK_REFUSE, SPECTRALLOCK_ADDENDUM,
 } from "./src/seo.js";
 
@@ -495,6 +496,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(!xml.includes(CANON_HOST + "/software#trades-runtime"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/describe?slug=spectrallock"));
     assert.ok(xml.includes(SPECTRALLOCK_UNREDACT));
+    assert.ok(xml.includes(SPECTRALLOCK_RECOVER));
+    assert.ok(xml.includes(SPECTRALLOCK_HANDWRITING));
     assert.ok(xml.includes(SPECTRALLOCK_GITHUB));
     assert.ok(xml.includes("https://spectrallock-download-tracker.vibelock.workers.dev/"));
     assert.ok(!xml.includes(CANON_HOST + "/software#spectrallock"));
@@ -1186,7 +1189,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(spectral.one_line, /opaque rewrite refuses/);
   });
 
-  it("inherits SpectralLock leftover-bytes honesty from runtime /v1/software", () => {
+  it("inherits SpectralLock leftover-bytes + recover + handwriting honesty after spectrallock#13", () => {
     const fallback = CATALOG_FALLBACK_PRODUCTS.find((p) => p.slug === SPECTRALLOCK_SLUG);
     assert.ok(fallback);
     assert.equal(fallback.one_line, SPECTRALLOCK_ONE_LINE);
@@ -1213,10 +1216,21 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(cite.spectrallock_one_line, SPECTRALLOCK_ONE_LINE);
     assert.equal(cite.spectrallock_opaque_refuse, SPECTRALLOCK_REFUSE);
     assert.equal(cite.spectrallock_unredact, SPECTRALLOCK_UNREDACT);
+    assert.equal(cite.spectrallock_recover, SPECTRALLOCK_RECOVER);
+    assert.equal(cite.spectrallock_handwriting, SPECTRALLOCK_HANDWRITING);
+    assert.equal(cite.spectrallock_leftover_bytes_recover, true);
+    assert.equal(cite.spectrallock_recover_live, true);
+    assert.equal(cite.spectrallock_handwriting_live, true);
+    assert.equal(cite.spectrallock_handwriting_lab, false);
     assert.equal(cite.spectrallock_godlock_softwares_html_card, false);
     const llms = llmsDoc();
     assert.ok(llms.includes(SPECTRALLOCK_ADDENDUM));
     assert.match(llms, /SL-UNREDACT-OPAQUE/);
+    assert.match(llms, /leftover-bytes \+ recover \+ handwriting/);
+    assert.match(llms, /not a lab/);
+    assert.match(llms, /Recover: /);
+    assert.match(llms, /Handwriting: /);
+    assert.doesNotMatch(SPECTRALLOCK_ADDENDUM, /Works with ChatGPT/);
     assert.equal(aiDoc(), llmsDoc());
   });
 

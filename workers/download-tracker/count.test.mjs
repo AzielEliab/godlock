@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import worker from "./src/index.js";
+import { invariantHolds, shapeCountBody } from "./src/stats-shape.js";
 import { checkGodlockUpdate, compareVersions, parseUpdateDoc } from "./src/update.js";
 import { citeDoc, llmsDoc, robotsTxt, sitemapXml } from "./src/discover.js";
 
@@ -66,12 +67,27 @@ describe("GET /count", () => {
     const res = await fetchPath(env, "/count");
     assert.equal(res.status, 200);
     const body = await res.json();
-    assert.deepEqual(body, {
-      project: "godlock",
-      views: 12,
-      downloads: 43,
-      total: 43,
-    });
+    assert.deepEqual(
+      body,
+      shapeCountBody({
+        project: "godlock",
+        views: 12,
+        downloads: 43,
+        total: 43,
+        views_human: 0,
+        downloads_human: 0,
+        botManagementAvailable: false,
+      }),
+    );
+    assert.equal(body.project, "godlock");
+    assert.equal(body.views, 12);
+    assert.equal(body.downloads, 43);
+    assert.equal(body.total, 43);
+    assert.equal(body.views_human, 0);
+    assert.equal(body.views_bot, 12);
+    assert.equal(body.downloads_human, 0);
+    assert.equal(body.downloads_bot, 43);
+    assert.equal(invariantHolds(body), true);
     assert.equal(body.total, body.downloads);
     assert.notEqual(body.total, body.views + body.downloads);
     assert.deepEqual(env.store, before);
@@ -85,7 +101,23 @@ describe("GET /count", () => {
     await fetchPath(env, "/count");
     await fetchPath(env, "/count");
     const again = await (await fetchPath(env, "/count")).json();
-    assert.deepEqual(again, { project: "godlock", views: 7, downloads: 2, total: 2 });
+    assert.deepEqual(
+      again,
+      shapeCountBody({
+        project: "godlock",
+        views: 7,
+        downloads: 2,
+        total: 2,
+        views_human: 0,
+        downloads_human: 0,
+        botManagementAvailable: false,
+      }),
+    );
+    assert.equal(again.project, "godlock");
+    assert.equal(again.views, 7);
+    assert.equal(again.downloads, 2);
+    assert.equal(again.total, 2);
+    assert.equal(invariantHolds(again), true);
     assert.equal(env.store["godlock|__views__"], "7");
     assert.equal(env.store["godlock|AzielEliab|godlock|main|0"], "2");
   });

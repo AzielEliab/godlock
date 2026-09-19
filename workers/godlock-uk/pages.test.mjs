@@ -480,6 +480,15 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(!xml.includes(CANON_HOST + "/AzielCorpusLibrary"));
     assert.ok(xml.includes(LIBRARY_AZIEL));
     assert.ok(xml.includes("https://www.hedidntjump.com/"));
+    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/"));
+    assert.ok(xml.includes("https://github.com/AzielEliab/trades-runtime"));
+    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/download"));
+    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/cite.json"));
+    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/llms.txt"));
+    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/openapi.json"));
+    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/mcp"));
+    assert.ok(!xml.includes("https://trades-runtime-download-tracker.vibelock.workers.dev"));
+    assert.ok(!xml.includes(CANON_HOST + "/software#trades-runtime"));
     const cite = citeDoc();
     assert.equal(cite.specified_fit, CANON_HOST + "/reason");
     assert.equal(cite.reason, CANON_HOST + "/reason");
@@ -1467,6 +1476,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.doesNotMatch(html, /\bABAD\b/);
     assert.doesNotMatch(html, /Whitestone/);
     assert.doesNotMatch(html, /The ARK/);
+    assert.doesNotMatch(html, /id="trades-runtime"/);
+    assert.doesNotMatch(html, /<h2[^>]*>Works with/);
     const jsonRes = await worker.fetch(new Request("https://godlock.uk/software?format=json"), mockEnv());
     const body = await jsonRes.json();
     assert.equal(body.author, "Aziel Eliab");
@@ -1480,6 +1491,9 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(body.product_count, 1);
     assert.equal(body.suite_count, 1);
     assert.ok(body.products.every((p) => p.slug === "aziel-runtime"));
+    assert.ok(!body.products.some((p) => p.slug === "trades-runtime"));
+    assert.equal(body.trades_runtime.engine, false);
+    assert.ok(body.sister_cites.some((p) => p.slug === "trades-runtime" && p.engine === false));
     assert.ok(body.products.some((p) => p.slug === "aziel-runtime" && p.invoke === "/runtime"));
     assert.ok(!body.products.some((p) => p.slug === "godlock"));
     assert.ok(!body.products.some((p) => p.slug === "fraggate"));
@@ -1568,6 +1582,11 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(body.products.every((p) => p.slug === "aziel-runtime"));
     assert.ok(!body.products.some((p) => p.slug === "azcoherence"));
     assert.ok(!body.software.some((p) => p.slug === "azcoherence"));
+    assert.equal(body.trades_runtime.engine, false);
+    assert.equal(body.trades_runtime.slug, "trades-runtime");
+    assert.ok(body.sister_cites.some((p) => p.slug === "trades-runtime" && p.engine === false));
+    assert.ok(body.extra.some((p) => p.slug === "trades-runtime" && p.live_backends === false));
+    assert.ok(!body.products.some((p) => p.slug === "trades-runtime"));
     const suite = softwareSuite(CATALOG_FALLBACK_PRODUCTS);
     assert.ok(suite.some((p) => p.slug === "azcoherence" && p.family === "plain" && p.worker === AZCOHERENCE_WORKER && p.github === AZCOHERENCE_GITHUB && p.download === AZCOHERENCE_DOWNLOAD));
     const names = suite.filter((p) => p.family === "plain").map((p) => p.name);
@@ -2052,6 +2071,7 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
       ["Aziel Runtime on GitHub", "https://github.com/AzielEliab/aziel-runtime", false],
       ["Aziel Runtime", "https://aziel-runtime.vibelock.workers.dev/", true],
       ["Try on Glama", "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime", false],
+      ["Trades-Runtime", "https://trades-runtime.vibelock.workers.dev/", true],
     ]);
     const eco = ecosystemNav();
     assert.match(eco, /Part of the Aziel Eliab ecosystem/);
@@ -2061,6 +2081,7 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.match(eco, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Aziel Runtime on GitHub<\/a>/);
     assert.match(eco, /href="https:\/\/aziel-runtime\.vibelock\.workers\.dev\/" class="secondary">Aziel Runtime<\/a>/);
     assert.match(eco, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
+    assert.match(eco, /href="https:\/\/trades-runtime\.vibelock\.workers\.dev\/" class="secondary">Trades-Runtime<\/a>/);
     const software = softwareBody({ products: [] });
     assert.match(software, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.doesNotMatch(software, /Part of the Aziel Eliab ecosystem/);

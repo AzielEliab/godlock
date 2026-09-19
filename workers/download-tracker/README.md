@@ -132,3 +132,15 @@ OpenAPI: https://godlock-download-tracker.vibelock.workers.dev/openapi.json
 MCP: `POST https://godlock.uk/runtime/mcp` (origin `POST https://aziel-runtime.vibelock.workers.dev/mcp`)
 Suite mesh (QNM-BUILD-1.0, default off; live|locked|isolated counts only; no Node Gate; no auto-heal; not an anonymity network). QNS-CD-1.0 photon QNS1 packet transfer is a hub cite / Worker mesh cross-map only (local qnsd in https://github.com/AzielEliab/qnm-node; runtime cites in https://github.com/AzielEliab/aziel-runtime; not a Softwares-tab product; no public qnsd proxy): `GET https://godlock.uk/runtime/v1/mesh/status` · `GET https://godlock.uk/runtime/v1/mesh/nodes` (GET never enables)
 anon-broadcast is not a publish path on godlock.uk. Local communique style tool (not hosted here; no ffmpeg farm): https://github.com/AzielEliab/anon-broadcast
+
+## Human / bot schema (`/stats` and `/count`)
+
+Additive dual-count (Whitestone canary). Classification lives in `src/classify.js`
+and response shaping in `src/stats-shape.js`.
+
+Invariant: `views === views_human + views_bot` and
+`downloads === downloads_human + downloads_bot`.
+
+Legacy strategy (b): existing KV totals are never reset. Pre-split remainder
+is shown as bot on read (`views_bot = views - views_human`). Author: Aziel Eliab only.
+

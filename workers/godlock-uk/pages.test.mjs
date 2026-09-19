@@ -2418,7 +2418,7 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(cite.runtime_version_id, "105fa1ee");
     assert.equal(cite.runtime_sot, RUNTIME_SOT);
     assert.equal(cite.runtime_sot_live, true);
-    assert.equal(cite., false);
+    assert.equal(cite., undefined);
     assert.equal(cite.worker_hardware, false);
     assert.equal(cite.invented_hardware, false);
     assert.equal(cite.godlock_is_vpn, false);
@@ -2430,7 +2430,7 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(cite.suite_download, "https://aziel-runtime.vibelock.workers.dev/download");
     assert.match(cite.launch_ready_note, /fraggate_call/);
     assert.match(cite.launch_ready_note, /worker_hardware:false/);
-    assert.match(cite.launch_ready_note, / stays false/);
+    assert.doesNotMatch(cite.launch_ready_note, //);
     assert.match(cite.launch_ready_note, /challenge\/score product/);
     assert.match(cite.launch_ready_note, /Try on Glama/);
     assert.match(cite.launch_ready_note, /Lamb Lens/);
@@ -2465,7 +2465,7 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(html, /WireGuard\/OpenVPN SLOT/);
     assert.match(html, /worker_hardware:false/);
     assert.match(html, /\/download/);
-    assert.match(html, / stays false/);
+    assert.doesNotMatch(html, //);
     assert.match(html, /challenge\/score product/);
     assert.match(html, /Try on Glama/);
     assert.doesNotMatch(html, /Works with ChatGPT/);
@@ -2493,10 +2493,57 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(llms, /No LIVE flip/);
     assert.match(llms, /No Works-with assistants subsection/);
     assert.match(llms, /heading → list only/);
-    assert.doesNotMatch(llms, /: true/);
+    assert.doesNotMatch(llms, //);
     const softwareMeta = defaultDescription("software");
     assert.match(softwareMeta, /6a3798a/);
     assert.match(softwareMeta, /105fa1ee/);
     assert.match(defaultDescription("runtime"), /fraggate_call/);
+  });
+});
+
+describe("Tip-only survival cites — no board", () => {
+  const SCOREBOARD = [
+    //i,
+    //i,
+    /durable/i,
+    /hard to kill/i,
+    /survival/i,
+    /unkillable/i,
+    //i,
+    /scoreboard/i,
+    /1000-hard/i,
+    //,
+  ];
+
+  it("keeps operational survival cites on the live tip", () => {
+    const cite = citeDoc();
+    const llms = llmsDoc();
+    const ai = aiDoc();
+    assert.equal(cite.cross_network_survival, "CROSS-NETWORK-SURVIVAL");
+    assert.match(cite.cross_network_survival_rule, /survival = bytes↔hash/);
+    assert.match(cite.cross_network_survival_rule, /cold copies across independent shelves/);
+    assert.equal(cite.ban_survival, "BAN-SURVIVAL-1.0");
+    assert.equal(cite.mesh_cold_copy, "COLD-COPY SURVIVAL");
+    assert.equal(cite.no_lie_no_rewrite, "NO-LIE / NO-REWRITE");
+    assert.match(llms, /CROSS-NETWORK-SURVIVAL/);
+    assert.match(llms, /COLD-COPY SURVIVAL/);
+    assert.match(llms, /BAN-SURVIVAL/);
+    assert.match(llms, /survival = bytes↔hash/);
+    assert.match(ai, /CROSS-NETWORK-SURVIVAL/);
+    assert.match(ai, /BAN-SURVIVAL-1\.0/);
+    assert.match(ai, /survival = bytes↔hash/);
+  });
+
+  it("scrubs scoreboard verbiage from cite / llms / ai tip surfaces", () => {
+    const cite = JSON.stringify(citeDoc());
+    const llms = llmsDoc();
+    const ai = aiDoc();
+    const html = softwareBody({ products: [] });
+    for (const needle of SCOREBOARD) {
+      assert.doesNotMatch(cite, needle, String(needle));
+      assert.doesNotMatch(llms, needle, String(needle));
+      assert.doesNotMatch(ai, needle, String(needle));
+      assert.doesNotMatch(html, needle, String(needle));
+    }
   });
 });

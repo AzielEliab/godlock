@@ -1,7 +1,8 @@
 /**
  * Runtime Softwares launch-readiness cite for godlock.uk.
  * SoT is live aziel-runtime main 6a3798a / version_id 105fa1ee / 2.0.0-rc1.
- * Cite only. Do not invent LIVE shelves, , or a GodLock VPN identity.
+ * Cite only. Do not invent LIVE shelves or a GodLock VPN identity.
+ * Tip surfaces stay operational (launch surfaces + survival cites). No survival / fielded-score scoreboard.
  * Softwares HTML stays GodLock-first (heading → list). This copy sits after the list.
  * Author: Aziel Eliab only.
  */
@@ -50,13 +51,13 @@ export const LAUNCH_SURFACES = Object.freeze([
 export const LAUNCH_READY_NOTE =
   RUNTIME_NAME + " " + RUNTIME_VERSION + " (" + RUNTIME_SOT + ") launch readiness: "
   + LAUNCH_SURFACES.join(" + ")
-  + ".  stays false. GodLock is a challenge/score product. Identity is Aziel Eliab. "
+  + ". GodLock is a challenge/score product. Identity is Aziel Eliab. "
   + "Identity Aziel Eliab only. Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.";
 
 export const LAUNCH_READY_HTML_NOTE =
   RUNTIME_NAME + " " + RUNTIME_VERSION + " launch readiness (SoT " + RUNTIME_SOT
   + "): human UI + MCP fraggate_call + FragGate sole door + mesh/AZVPN (HTTPS/WS REAL; WireGuard/OpenVPN SLOT) "
-  + "+ radios channel cites worker_hardware:false + suite pack /download.  stays false. "
+  + "+ radios channel cites worker_hardware:false + suite pack /download. "
   + "GodLock is a challenge/score product. Identity is Aziel Eliab. Identity Aziel Eliab only. "
   + "Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.";
 
@@ -108,8 +109,7 @@ export function launchReadiness() {
     },
     suite_download: SUITE_DOWNLOAD,
     suite_download_v1: SUITE_DOWNLOAD_V1,
-    suite_download_note: "One-click suite pack JSON (REAL catalog + FoldLock tip + mesh cite). Worker wasm / WireGuard / OpenVPN SLOT. Counted GET /download.  stays false.",
-    : CLAIM_COMPLETE,
+    suite_download_note: "One-click suite pack JSON (REAL catalog + FoldLock tip + mesh cite). Worker wasm / WireGuard / OpenVPN SLOT. Counted GET /download.",
     glama: GLAMA_RUNTIME,
     glama_cta: "Try on Glama",
     lamb_lens: true,
@@ -133,7 +133,6 @@ export function launchCiteFields() {
     runtime_sot: sot.cite,
     runtime_sot_branch: sot.branch,
     runtime_sot_live: sot.live,
-    : ready.,
     worker_hardware: ready.radios.worker_hardware,
     invented_hardware: ready.radios.invented_hardware,
     suite_download: ready.suite_download,
@@ -158,7 +157,7 @@ export function launchLlmsSection() {
     + "Human UI: yes. MCP door: " + FRAGGATE_CALL + ". FragGate is THE single door (" + FRAGGATE_KERNEL + ").\n"
     + "mesh/AZVPN: HTTPS/WS REAL; WireGuard/OpenVPN SLOT. GET /v1/mesh cites the bind and never opens a session.\n"
     + "Radios channel cites worker_hardware:false. Invented hardware: false.\n"
-    + "Suite pack: " + SUITE_DOWNLOAD + " (also " + SUITE_DOWNLOAD_V1 + ").  stays false.\n"
+    + "Suite pack: " + SUITE_DOWNLOAD + " (also " + SUITE_DOWNLOAD_V1 + ").\n"
     + "Try on Glama: " + GLAMA_RUNTIME + "\n"
     + "GodLock Softwares stays heading → list only. No Digital Library chrome. No Works-with assistants subsection.\n"
     + "Plane B Framagit stays SLOT CNS-NO-FORGE-MIRROR. Plane C stays SLOT CNS-OPERATOR-ATTEST. No LIVE flip.\n"

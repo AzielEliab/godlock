@@ -24,7 +24,7 @@ import {
   SPECTRALLOCK_GITHUB, SPECTRALLOCK_DOWNLOAD,
   DOWNLOAD, GITHUB,
 } from "./seo.js";
-import { launchCiteFields, launchReadiness } from "./launchReady.js";
+import { CLAIM_COMPLETE, launchCiteFields, launchReadiness } from "./launchReady.js";
 
 export const SOFTWARE_JSON_PATH = "/v1/software";
 export const FRAGGATE_LIST_PATH = "/v1/fraggate/list";
@@ -815,6 +815,7 @@ export function softwareApiDoc(products, extras = {}) {
     runtime_glama: GLAMA_RUNTIME,
     runtime_docs: RUNTIME_DOCS_2_0,
     ...launchCiteFields(),
+    : CLAIM_COMPLETE,
     launch_ready_note: ready.note,
     via: SOFTWARE_JSON_PATH,
     html: CANON_HOST + SOFTWARE_PATH,

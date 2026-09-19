@@ -135,11 +135,11 @@ One door — discover, route, refuse. FragGate list → describe → call.
 ## Softwares + runtime launch readiness
 
 SoT LIVE: main 6a3798a / version_id 105fa1ee / 2.0.0-rc1.
-Aziel Runtime 2.0.0-rc1 (main 6a3798a / version_id 105fa1ee / 2.0.0-rc1) launch readiness: human UI + MCP fraggate_call + FragGate sole door + mesh/AZVPN (HTTPS/WS REAL; WireGuard/OpenVPN SLOT) + radios channel cites worker_hardware:false + /download suite pack.  stays false. GodLock is a challenge/score product. Identity is Aziel Eliab. Identity Aziel Eliab only. Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.
+Aziel Runtime 2.0.0-rc1 (main 6a3798a / version_id 105fa1ee / 2.0.0-rc1) launch readiness: human UI + MCP fraggate_call + FragGate sole door + mesh/AZVPN (HTTPS/WS REAL; WireGuard/OpenVPN SLOT) + radios channel cites worker_hardware:false + /download suite pack. GodLock is a challenge/score product. Identity is Aziel Eliab. Identity Aziel Eliab only. Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.
 Human UI: yes. MCP door: fraggate_call. FragGate is THE single door (https://github.com/AzielEliab/fraggate).
 mesh/AZVPN: HTTPS/WS REAL; WireGuard/OpenVPN SLOT. GET /v1/mesh cites the bind and never opens a session.
 Radios channel cites worker_hardware:false. Invented hardware: false.
-Suite pack: https://aziel-runtime.vibelock.workers.dev/download (also https://aziel-runtime.vibelock.workers.dev/v1/suite/download). Not .
+Suite pack: https://aziel-runtime.vibelock.workers.dev/download (also https://aziel-runtime.vibelock.workers.dev/v1/suite/download).
 Try on Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
 GodLock Softwares stays heading → list only. No Digital Library chrome. No Works-with assistants subsection.
 Plane B Framagit stays SLOT CNS-NO-FORGE-MIRROR. Plane C stays SLOT CNS-OPERATOR-ATTEST. No LIVE flip.

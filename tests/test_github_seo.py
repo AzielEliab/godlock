@@ -461,6 +461,42 @@ def test_seo_surfaces_drop_definition_by_negation_and_ban_narratives():
     assert "GodLock-first" in LLMS
 
 
+FORBIDDEN_TIP_SCOREBOARD = (
+    "",
+    "",
+    "durable",
+    "hard to kill",
+    "survival",
+    "unkillable",
+    "",
+    "scoreboard",
+    "1000-hard",
+    "",
+)
+
+
+def test_tip_keeps_survival_cites_without_scoreboard_game():
+    cite_blob = json.dumps(CITE)
+    surfaces = (LLMS.lower(), AI.lower(), cite_blob.lower())
+    for phrase in FORBIDDEN_TIP_SCOREBOARD:
+        needle = phrase.lower()
+        for blob in surfaces:
+            assert needle not in blob, phrase
+    assert CITE["cross_network_survival"] == "CROSS-NETWORK-SURVIVAL"
+    assert "survival = bytes↔hash" in CITE["cross_network_survival_rule"]
+    assert "cold copies across independent shelves" in CITE["cross_network_survival_rule"]
+    assert CITE["ban_survival"] == "BAN-SURVIVAL-1.0"
+    assert CITE["no_lie_no_rewrite"] == "NO-LIE / NO-REWRITE"
+    assert "CROSS-NETWORK-SURVIVAL" in LLMS
+    assert "COLD-COPY SURVIVAL" in LLMS or "COLD-MULTI-SHELF" in LLMS
+    assert "BAN-SURVIVAL" in LLMS
+    assert "survival = bytes↔hash" in LLMS
+    assert "CROSS-NETWORK-SURVIVAL" in AI
+    assert "BAN-SURVIVAL-1.0" in AI
+    assert "" not in CITE
+    assert "" not in CITE.get("launch_ready_note", "")
+
+
 def test_human_help_addendum_docs_are_positive():
     help_txt = (ROOT / "docs" / "help.txt").read_text(encoding="utf-8")
     addendum = (ROOT / "docs" / "addendum.txt").read_text(encoding="utf-8")

@@ -231,7 +231,8 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.match(llms, /Crawlers don't re-expand/);
     assert.match(llms, /AI ingest ≠ tarball/);
     assert.match(llms, /Growth-ON/);
-    assert.match(llms, /GodLock\.uk Softwares lists Aziel Runtime only/);
+    assert.match(llms, /first card is GodLock/);
+    assert.match(llms, /\/v1\/software JSON stays Aziel Runtime only plus sister_cites/);
     const citeAt = llms.indexOf("Cite: https://godlock.uk/cite.json");
     const llmsAt = llms.indexOf("LLMs: https://godlock.uk/llms.txt");
     const ingestAt = llms.indexOf("## INGEST-AS-RECEIPT");
@@ -242,7 +243,8 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     const software = softwareBody({ products: [] });
     assert.match(software, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.doesNotMatch(software, /INGEST-AS-RECEIPT/);
-    assert.doesNotMatch(software, /id="godlock"/);
+    assert.match(software, /id="godlock"/);
+    assert.doesNotMatch(software, /id="trades-runtime"/);
     assert.match(INGEST_AS_RECEIPT_NOTE, /Author Aziel Eliab only/);
     assert.match(RE_EXPAND_FROM_ARCHIVE_NOTE, /archive verify then local node/);
     assert.match(ingestLlmsSection(), /Many indexes, one tip/);

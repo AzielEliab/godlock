@@ -21,7 +21,7 @@ import {
 import { meshStatusLine } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import { receiptScoreDelta } from "./engine.js";
-import { publicSoftwaresList, invokeHref, workerHref, stripRuntimeFragGateMash, suiteFamily } from "./catalog.js";
+import { publicSoftwaresHtmlList, invokeHref, workerHref, stripRuntimeFragGateMash, suiteFamily } from "./catalog.js";
 import { launchReadyHtml } from "./launchReady.js";
 import { donateBody as donatePageBody } from "./donate.js";
 import { actReceiptsSection } from "./actReceipts.js";
@@ -333,8 +333,8 @@ ${ecosystemNav()}
 </body></html>`;
 }
 
-/** Featured Softwares slugs on godlock.uk. Aziel Runtime only — not GodLock or FragGate cards. */
-export const FEATURED_SOFTWARES = ["aziel-runtime"];
+/** Featured Softwares slugs on godlock.uk. GodLock leads; Aziel Runtime is secondary. */
+export const FEATURED_SOFTWARES = ["godlock"];
 
 export function featureGodLockFirst(products) {
   const list = Array.isArray(products) ? products.slice() : [];
@@ -356,7 +356,7 @@ export function homeSoftwareLine() {
   const host = AZIEL_OFFICIAL.replace(/\/$/, "");
   return `<section class="home-software" id="software">
   <h2>Softwares</h2>
-  <p class="soft-line"><a class="soft-name" href="${esc(SOFTWARE_PATH + "#aziel-runtime")}">Aziel Runtime</a>. Software is available at <a class="soft-name" href="${esc(AZIEL_OFFICIAL)}">${esc(host)}</a> (<a href="${esc(OFFICIAL_SOFTWARES)}">Softwares / software listing</a>).</p>
+  <p class="soft-line"><a class="soft-name" href="${esc(SOFTWARE_PATH + "#godlock")}">GodLock</a>. <a class="soft-name" href="${esc(SOFTWARE_PATH + "#aziel-runtime")}">Aziel Runtime</a>. Software is available at <a class="soft-name" href="${esc(AZIEL_OFFICIAL)}">${esc(host)}</a> (<a href="${esc(OFFICIAL_SOFTWARES)}">Softwares / software listing</a>).</p>
   <p class="muted"><a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(OFFICIAL_SOFTWARES)}">Official Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a></p>
 </section>`;
 }
@@ -652,7 +652,13 @@ export function softwaresCard(p, { featured = false } = {}) {
       `<a class="button${b.primary ? "" : " ghost"}" href="${esc(b.href)}">${esc(b.label)}</a>`
     )).join(" ")
     : "";
-  const links = slug === "aziel-runtime"
+  const links = slug === "godlock"
+    ? [
+        `<a class="button" href="/">Open Engine</a>`,
+        p.download ? `<a class="button ghost" href="${esc(p.download)}">Download</a>` : "",
+        p.github ? `<a class="button ghost" href="${esc(p.github)}">GitHub</a>` : "",
+      ].filter(Boolean).join(" ")
+    : slug === "aziel-runtime"
     ? [
         dist,
         `<a class="button ghost" href="${esc(RUNTIME_PATH + "/mcp")}">MCP</a>`,
@@ -670,8 +676,9 @@ export function softwaresCard(p, { featured = false } = {}) {
 }
 
 export function softwareBody({ products, extras } = {}) {
-  const list = featureGodLockFirst(publicSoftwaresList(products, extras));
-  const cards = list.map((p) => softwaresCard(p, { featured: true })).join("");
+  const list = featureGodLockFirst(publicSoftwaresHtmlList(products, extras))
+    .filter((p) => p && p.slug && p.slug !== "trades-runtime");
+  const cards = list.map((p) => softwaresCard(p, { featured: p.slug === "godlock" })).join("");
   return `<h2 class="soft-heading">Softwares</h2>
 <div class="soft-grid">${cards}</div>
 ${officialSoftwaresPointer()}

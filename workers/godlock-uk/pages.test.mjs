@@ -118,6 +118,8 @@ import {
   AZNET_DOWNLOAD, AZNET_WORKER,
   AZHUB_DOWNLOAD, AZHUB_WORKER, AZINTERFACE_DOWNLOAD, AZINTERFACE_WORKER,
   AZCOHERENCE_DOWNLOAD, AZCOHERENCE_WORKER, AZCOHERENCE_GITHUB, AZCOHERENCE_SLUG,
+  SPECTRALLOCK_SLUG, SPECTRALLOCK_NAME, SPECTRALLOCK_ONE_LINE, SPECTRALLOCK_UNREDACT,
+  SPECTRALLOCK_GITHUB, SPECTRALLOCK_REFUSE, SPECTRALLOCK_ADDENDUM,
 } from "./src/seo.js";
 
 function mockEnv() {
@@ -491,6 +493,11 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/mcp"));
     assert.ok(!xml.includes("https://trades-runtime-download-tracker.vibelock.workers.dev"));
     assert.ok(!xml.includes(CANON_HOST + "/software#trades-runtime"));
+    assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/describe?slug=spectrallock"));
+    assert.ok(xml.includes(SPECTRALLOCK_UNREDACT));
+    assert.ok(xml.includes(SPECTRALLOCK_GITHUB));
+    assert.ok(xml.includes("https://spectrallock-download-tracker.vibelock.workers.dev/"));
+    assert.ok(!xml.includes(CANON_HOST + "/software#spectrallock"));
     const cite = citeDoc();
     assert.equal(cite.specified_fit, CANON_HOST + "/reason");
     assert.equal(cite.reason, CANON_HOST + "/reason");
@@ -1170,6 +1177,47 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.ok(decision >= 0 && frag >= 0 && firstLock >= 0);
     assert.ok(decision < frag, "Gate A–Z: DecisionGATE before FragGate");
     assert.ok(frag < firstLock, "FragGate sits before the Lock section");
+    const spectral = suite.find((p) => p.slug === SPECTRALLOCK_SLUG);
+    assert.ok(spectral);
+    assert.equal(spectral.name, SPECTRALLOCK_NAME);
+    assert.equal(spectral.family, "lock");
+    assert.equal(spectral.one_line, SPECTRALLOCK_ONE_LINE);
+    assert.match(spectral.one_line, /leftover container bytes recover honestly/);
+    assert.match(spectral.one_line, /opaque rewrite refuses/);
+  });
+
+  it("inherits SpectralLock leftover-bytes honesty from runtime /v1/software", () => {
+    const fallback = CATALOG_FALLBACK_PRODUCTS.find((p) => p.slug === SPECTRALLOCK_SLUG);
+    assert.ok(fallback);
+    assert.equal(fallback.one_line, SPECTRALLOCK_ONE_LINE);
+    assert.doesNotMatch(fallback.one_line, /Overlay preview modes/);
+    const healed = hubProductCopy({
+      slug: SPECTRALLOCK_SLUG,
+      name: "SpectralLock",
+      one_line: "Overlay preview modes. 256px hosted preview, not a spectrometer.",
+    });
+    assert.equal(healed.name, SPECTRALLOCK_NAME);
+    assert.equal(healed.one_line, SPECTRALLOCK_ONE_LINE);
+    const inherited = hubProductCopy({
+      slug: SPECTRALLOCK_SLUG,
+      one_line: SPECTRALLOCK_ONE_LINE,
+    });
+    assert.equal(inherited.one_line, SPECTRALLOCK_ONE_LINE);
+    const html = softwareBody({ products: CATALOG_FALLBACK_PRODUCTS });
+    assert.deepEqual(softCardIds(html), ["godlock", "aziel-runtime"]);
+    assert.doesNotMatch(html, /id="spectrallock"/);
+    assert.doesNotMatch(html, /<h2[^>]*>Works with/);
+    const cards = publicSoftwaresHtmlList(CATALOG_FALLBACK_PRODUCTS);
+    assert.ok(!cards.some((p) => p.slug === SPECTRALLOCK_SLUG));
+    const cite = citeDoc();
+    assert.equal(cite.spectrallock_one_line, SPECTRALLOCK_ONE_LINE);
+    assert.equal(cite.spectrallock_opaque_refuse, SPECTRALLOCK_REFUSE);
+    assert.equal(cite.spectrallock_unredact, SPECTRALLOCK_UNREDACT);
+    assert.equal(cite.spectrallock_godlock_softwares_html_card, false);
+    const llms = llmsDoc();
+    assert.ok(llms.includes(SPECTRALLOCK_ADDENDUM));
+    assert.match(llms, /SL-UNREDACT-OPAQUE/);
+    assert.equal(aiDoc(), llmsDoc());
   });
 
   it("sorts Plain → Gate → Lock and does not treat Clock as Lock", () => {
@@ -1179,6 +1227,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(suiteFamily({ slug: "godlock" }), "lock");
     assert.equal(suiteFamily({ slug: "chronolock" }), "lock");
     assert.equal(suiteFamily({ slug: "peacelock" }), "lock");
+    assert.equal(suiteFamily({ slug: "spectrallock" }), "lock");
     assert.equal(suiteFamily({ slug: "aziel-runtime" }), "extra");
     assert.equal(suiteFamily({ slug: "embryolock" }), "extra");
     assert.equal(suiteFamily({ slug: "fraggate" }), "gate");
@@ -1493,6 +1542,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.doesNotMatch(html, /Whitestone/);
     assert.doesNotMatch(html, /The ARK/);
     assert.doesNotMatch(html, /id="trades-runtime"/);
+    assert.doesNotMatch(html, /id="spectrallock"/);
     assert.doesNotMatch(html, /<h2[^>]*>Works with/);
     const jsonRes = await worker.fetch(new Request("https://godlock.uk/software?format=json"), mockEnv());
     const body = await jsonRes.json();

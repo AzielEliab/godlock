@@ -20,6 +20,8 @@ import {
   AZINTERFACE_DOWNLOAD, AZINTERFACE_WORKER, AZINTERFACE_COUNT, AZINTERFACE_GITHUB,
   AZCOHERENCE_DOWNLOAD, AZCOHERENCE_WORKER, AZCOHERENCE_COUNT, AZCOHERENCE_GITHUB,
   AZCOHERENCE_SLUG, AZCOHERENCE_NAME, AZCOHERENCE_VERSION, AZCOHERENCE_ONE_LINE,
+  SPECTRALLOCK_SLUG, SPECTRALLOCK_NAME, SPECTRALLOCK_VERSION, SPECTRALLOCK_ONE_LINE,
+  SPECTRALLOCK_GITHUB, SPECTRALLOCK_DOWNLOAD,
   DOWNLOAD, GITHUB,
 } from "./seo.js";
 import { launchCiteFields, launchReadiness } from "./launchReady.js";
@@ -191,6 +193,10 @@ export function hubProductCopy(raw) {
   if (slug === AZCOHERENCE_SLUG) {
     return { name: AZCOHERENCE_NAME, one_line: one_line || AZCOHERENCE_ONE_LINE };
   }
+  if (slug === SPECTRALLOCK_SLUG) {
+    const inherited = /leftover/i.test(one_line) ? one_line : SPECTRALLOCK_ONE_LINE;
+    return { name: SPECTRALLOCK_NAME, one_line: inherited };
+  }
   const combined = slug === "azbrowser"
     || /azbrowser\s*\/\s*aznet/i.test(name)
     || /azbrowser\s*\/\s*aznet/i.test(one_line)
@@ -224,7 +230,7 @@ export const CATALOG_FALLBACK_PRODUCTS = [
   { slug: AZCOHERENCE_SLUG, name: AZCOHERENCE_NAME, version: AZCOHERENCE_VERSION, one_line: AZCOHERENCE_ONE_LINE, github: AZCOHERENCE_GITHUB, download: AZCOHERENCE_DOWNLOAD, worker: AZCOHERENCE_WORKER, worker_home: AZCOHERENCE_WORKER, count: AZCOHERENCE_COUNT },
   { slug: "ark", name: "The ARK", version: "0.1.0", one_line: "Mode E heuristics sweep. Not a kernel. Hosted never unlocks or stores vaults.", github: "https://github.com/AzielEliab/ark", download: "https://ark-download-tracker.vibelock.workers.dev/download" },
   { slug: "azai", name: "AZAI", version: "0.3.1", one_line: "Local OpenAI-compatible runtime. Not a new foundation model. Jeeves is not sovereign.", github: "https://github.com/AzielEliab/azai", download: "https://azai-download-tracker.vibelock.workers.dev/download" },
-  { slug: "spectrallock", name: "SpectralLock", version: "0.3.0", one_line: "Overlay preview modes. 256px hosted preview, not a spectrometer.", github: "https://github.com/AzielEliab/spectrallock", download: "https://spectrallock-download-tracker.vibelock.workers.dev/download" },
+  { slug: SPECTRALLOCK_SLUG, name: SPECTRALLOCK_NAME, version: SPECTRALLOCK_VERSION, one_line: SPECTRALLOCK_ONE_LINE, github: SPECTRALLOCK_GITHUB, download: SPECTRALLOCK_DOWNLOAD },
   { slug: "azbot", name: "AZBot", version: "0.2.0", one_line: "Skill, not a foundation model. Hosted /v1/skill returns markdown.", github: "https://github.com/AzielEliab/azbot", download: "https://azbot-download-tracker.vibelock.workers.dev/download" },
   { slug: "employeelock", name: "EmployeeLock", version: "0.1.0", one_line: "Hash-chained accountability workbook. Not a court, not UL, not a truth score.", github: "https://github.com/AzielEliab/employeelock", download: "https://employeelock-download-tracker.vibelock.workers.dev/download" },
   { slug: "foldlock", name: "FoldLock", version: "0.8.0", one_line: "Algorithmic tether-word suppression on UTF-8 text. Not zip.", github: "https://github.com/AzielEliab/foldlock", download: "https://foldlock-download-tracker.vibelock.workers.dev/download" },

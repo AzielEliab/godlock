@@ -16,6 +16,7 @@ import {
   HARDWARE_FAQ_TITLE, HARDWARE_ADDENDUM,
   WHITESTONE_FAQ_TITLE, WHITESTONE_ADDENDUM,
   THE_ARK_FAQ_TITLE, THE_ARK_ADDENDUM,
+  SPECTRALLOCK_FAQ_TITLE, SPECTRALLOCK_ADDENDUM,
   TRADES_FAQ_TITLE, TRADES_ADDENDUM,
 } from "./seo.js";
 import { meshStatusLine } from "./mesh.js";
@@ -577,6 +578,11 @@ export function whoPageHtml() {
         "@type": "Question",
         name: THE_ARK_FAQ_TITLE,
         acceptedAnswer: { "@type": "Answer", text: THE_ARK_ADDENDUM },
+      },
+      {
+        "@type": "Question",
+        name: SPECTRALLOCK_FAQ_TITLE,
+        acceptedAnswer: { "@type": "Answer", text: SPECTRALLOCK_ADDENDUM },
       },
       {
         "@type": "Question",

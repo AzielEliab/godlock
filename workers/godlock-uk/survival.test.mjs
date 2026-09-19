@@ -218,7 +218,8 @@ describe("BAN-SURVIVAL hub pull", () => {
     assert.equal(body.product_not_identity, true);
     assert.match(body.note, /Lamb Lens/);
     assert.match(body.note, /NO-LIE/);
-    assert.match(body.note, /product name/);
+    assert.match(body.note, /GodLock is a challenge\/score product/);
+    assert.match(body.note, /Identity is Aziel Eliab/);
     assert.match(res.headers.get("Cache-Control"), /max-age=60/);
     const alias = await fetchPath("/v1/survival");
     assert.equal(alias.status, 200);
@@ -295,14 +296,15 @@ describe("BAN-SURVIVAL hub pull", () => {
     assert.ok(spec.paths["/survival"]);
     assert.ok(spec.paths["/v1/survival"]);
     assert.match(spec.paths["/survival"].get.summary, /BAN-SURVIVAL/);
-    assert.match(spec.paths["/survival"].get.summary, /Not a second FragGate door/);
+    assert.match(spec.paths["/survival"].get.summary, /hub cite/);
   });
 
   it("keeps the llms section honest about SLOT hosted Cap-7 /mcp", () => {
     const section = survivalLlmsSection();
     assert.match(section, /Hosted Cap-7 \/mcp slot/);
     assert.match(section, /Never invent a live door/);
-    assert.match(section, /GodLock is a product name/);
+    assert.match(section, /GodLock is a challenge\/score product/);
+    assert.match(section, /Identity is Aziel Eliab/);
     const hub = survivalHubDoc();
     assert.equal(hub.cap7_aznet.hosted_endpoints.status, "slot");
     assert.equal(hub.cap7_aznet.worker.status, "live");

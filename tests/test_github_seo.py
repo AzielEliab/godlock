@@ -459,3 +459,19 @@ def test_seo_surfaces_drop_definition_by_negation_and_ban_narratives():
     assert "Growth-ON" in LLMS
     assert "Never invent" in LLMS or "Do not invent" in LLMS
     assert "GodLock-first" in LLMS
+
+
+def test_human_help_addendum_docs_are_positive():
+    help_txt = (ROOT / "docs" / "help.txt").read_text(encoding="utf-8")
+    addendum = (ROOT / "docs" / "addendum.txt").read_text(encoding="utf-8")
+    readme = (ROOT / "docs" / "help" / "README.txt").read_text(encoding="utf-8")
+    assert help_txt == addendum == readme
+    for phrase in FORBIDDEN_SEO_NEGATION:
+        assert phrase not in help_txt, phrase
+    assert "GodLock is a challenge/score product" in help_txt
+    assert "https://www.azieleliab.com/#aziel" in help_txt
+    assert "https://godlock.uk/verify" in help_txt
+    assert "GodLock-first" in help_txt
+    assert "https://godlock.uk/llms.txt" in help_txt
+    assert "https://godlock.uk/cite.json" in help_txt
+    assert "Growth-ON" in help_txt

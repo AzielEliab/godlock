@@ -74,6 +74,11 @@ export const WHO_IS_ALIAS_PATH = "/who-is";
 export const WHO_PATH = "/who";
 export const VERIFY_PATH = "/verify";
 export const COUNT_PATH = "/count";
+export const HELP_PATH = "/help.txt";
+export const HELP_PATH_UPPER = "/HELP.txt";
+export const ADDENDUM_PATH = "/addendum.txt";
+export const HELP_README_PATH = "/help/README.txt";
+export const HELP_SHORT_PATH = "/help";
 
 /**
  * Homepage hash fragments → real same-origin paths.
@@ -1870,6 +1875,11 @@ export const PUBLIC_ALLOW = [
   "/who-is-aziel-eliab.txt",
   "/who-is",
   "/who",
+  "/help.txt",
+  "/HELP.txt",
+  "/addendum.txt",
+  "/help/README.txt",
+  "/help",
   "/.well-known/aziel.json",
   "/.well-known/person.jsonld",
   "/.well-known/mcp.json",
@@ -1960,6 +1970,11 @@ export async function sitemapXml(env, extras = {}) {
   add(CANON_HOST + "/who-is-aziel-eliab.txt", "0.85", "weekly");
   add(CANON_HOST + WHO_PATH, "0.9", "weekly");
   add(CANON_HOST + WHO_IS_ALIAS_PATH, "0.8", "weekly");
+  add(CANON_HOST + "/help.txt", "0.7", "weekly");
+  add(CANON_HOST + "/HELP.txt", "0.65", "weekly");
+  add(CANON_HOST + "/addendum.txt", "0.7", "weekly");
+  add(CANON_HOST + "/help/README.txt", "0.65", "weekly");
+  add(CANON_HOST + "/help", "0.65", "weekly");
   add(CANON_HOST + "/.well-known/aziel.json", "0.8", "weekly");
   add(CANON_HOST + "/.well-known/person.jsonld", "0.85", "weekly");
   add(CANON_HOST + "/.well-known/mcp.json", "0.7", "weekly");
@@ -2546,6 +2561,11 @@ export function siteOpenApi() {
       "/identity.jsonld": { get: { operationId: "godlockUkIdentityJsonLd", summary: "Alias of /person.jsonld — same Person @id", responses: { "200": { description: "OK" } } } },
       "/graph.jsonld": { get: { operationId: "godlockUkGraphJsonLd", summary: "Person + FAQ + WebSite + GodLock SoftwareApplication", responses: { "200": { description: "OK" } } } },
       "/who-is-aziel-eliab.txt": { get: { operationId: "godlockUkWhoIsAziel", summary: "Verbatim identity answer + model rules", responses: { "200": { description: "OK" } } } },
+      "/help.txt": { get: { operationId: "godlockUkHelp", summary: "Plain-language human help — what GodLock is, how to verify, Softwares, Person @id", responses: { "200": { description: "OK" } } } },
+      "/HELP.txt": { get: { operationId: "godlockUkHelpUpper", summary: "Same body as /help.txt", responses: { "200": { description: "OK" } } } },
+      "/addendum.txt": { get: { operationId: "godlockUkAddendum", summary: "Same body as /help.txt — human addendum", responses: { "200": { description: "OK" } } } },
+      "/help/README.txt": { get: { operationId: "godlockUkHelpReadme", summary: "Same body as /help.txt", responses: { "200": { description: "OK" } } } },
+      "/help": { get: { operationId: "godlockUkHelpShort", summary: "Same body as /help.txt", responses: { "200": { description: "OK" } } } },
       "/.well-known/aziel.json": { get: { operationId: "godlockUkWellKnownAziel", summary: "Mission object (receipt-first; residual uncertainty; GodLock is a challenge/score product)", responses: { "200": { description: "OK" } } } },
       "/runtime/openapi.json": { get: { operationId: "godlockUkRuntimeOpenApi", summary: "Same-origin FragGate OpenAPI", responses: { "200": { description: "OK" } } } },
       "/runtime/mcp": { post: { operationId: "godlockUkRuntimeMcp", summary: "Same-origin FragGate MCP door", responses: { "200": { description: "OK" } } } },

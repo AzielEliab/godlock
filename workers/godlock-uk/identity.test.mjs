@@ -354,7 +354,7 @@ describe("AZindex identity machine", () => {
     assert.ok(text.includes(HEBREW_DEFINITION));
     assert.match(text, /עזיאל \/ אל ראי \| אלרועי \/ אליאב/);
     assert.match(text, /Elias Artista/);
-    assert.match(text, /Everblooming Flower is not a pen name/);
+    assert.match(text, /Pen names \/ alternateNames are Aziel Elroi Eliab/);
     assert.match(text, /Never sameAs euaziel, Aziel S/);
     assert.doesNotMatch(text, /\bborn\b|\blives in\b/);
     assert.doesNotMatch(text, /10\.\d{4,}\//);

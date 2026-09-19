@@ -33,6 +33,7 @@ import {
   tradesCiteFields,
 } from "./seo.js";
 import { shelvesDoc } from "./shelves.js";
+import { helpDoc, isHelpPath } from "./help.js";
 import {
   fetchSurvivalSot,
   survivalHubDoc,
@@ -671,6 +672,9 @@ export default {
       }
       if (path === "/who-is-aziel-eliab.txt") {
         return new Response(whoIsAzielEliabTxt(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+      }
+      if (isHelpPath(path)) {
+        return new Response(helpDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === WHO_PATH) {
         return html(whoPageHtml(), { extraHeaders: extraHeadersFor(nodeId) });

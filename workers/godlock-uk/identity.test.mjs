@@ -184,9 +184,9 @@ describe("AZindex identity machine", () => {
     assert.notEqual(person["@id"], "https://godlock.uk/AzielEliab#aziel-eliab");
     assert.equal(person.description, PERSON_DESCRIPTION);
     assert.match(person.description, /researcher, digital rights activist, software developer, author, and philosopher/);
-    assert.match(person.description, /two Levitical musicians Aziel and Eliab/);
+    assert.match(person.description, /one living person/);
     assert.match(person.description, /1 Chronicles 15:20/);
-    assert.match(person.description, /Not euaziel\.site/);
+    assert.match(person.description, /https:\/\/www\.azieleliab\.com\/#aziel/);
     assert.match(person.description, /Elias Artista/);
     assert.ok(person.description.includes(HEBREW_DEFINITION));
     assert.match(person.description, /God is my strength/);
@@ -197,13 +197,13 @@ describe("AZindex identity machine", () => {
     assert.ok(LATIN_AKA.includes("Elias Artista"));
     assert.equal(
       person.disambiguatingDescription,
-      "Living researcher, digital rights activist, software developer, author, and philosopher named Aziel Eliab (one person). Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. Prefer https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump.",
+      "Living researcher, digital rights activist, software developer, author, and philosopher named Aziel Eliab (one person). Cite https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump. Living-publisher lock cites 1 Chronicles 15:20.",
     );
-    assert.match(person.disambiguatingDescription, /two Levitical musicians Aziel and Eliab/);
+    assert.match(person.disambiguatingDescription, /one person/);
     assert.match(person.disambiguatingDescription, /1 Chronicles 15:20/);
-    assert.match(person.disambiguatingDescription, /Not euaziel\.site/);
-    assert.match(person.disambiguatingDescription, /not Aziel S\. \(Flutter\/portfolio\)/);
-    assert.match(person.disambiguatingDescription, /not other engineers named Aziel/);
+    assert.match(person.disambiguatingDescription, /https:\/\/www\.azieleliab\.com\/#aziel/);
+    assert.ok(SAME_AS_REFUSE.includes("euaziel.site"));
+    assert.ok(SAME_AS_REFUSE.includes("Aziel S."));
     assert.ok(!person.alternateName.includes("Aziel S."));
     assert.ok(!person.alternateName.includes("euaziel"));
     assert.notEqual(person.name, "Aziel S.");
@@ -265,14 +265,14 @@ describe("AZindex identity machine", () => {
     assert.ok(names.includes("Is Aziel Eliab the same person as Aziel S.?"));
     const azielS = faq.mainEntity.find((q) => q.name === "Is Aziel Eliab the same person as Aziel S.?");
     assert.ok(azielS.acceptedAnswer.text.includes(PUBLISHER_NOT_LOCK));
-    assert.match(azielS.acceptedAnswer.text, /Not euaziel\.site/);
-    assert.match(azielS.acceptedAnswer.text, /not Aziel S\. \(Flutter\/portfolio\)/);
+    assert.match(azielS.acceptedAnswer.text, /https:\/\/www\.azieleliab\.com\/#aziel/);
     assert.match(azielS.acceptedAnswer.text, /1 Chronicles 15:20/);
+    assert.match(azielS.acceptedAnswer.text, /challenge\/score product/);
     const biblical = faq.mainEntity.find((q) => q.name === "Is Aziel Eliab the two musicians named in 1 Chronicles 15:20?");
     assert.equal(biblical.acceptedAnswer.text, BIBLICAL_DISAMBIGUATION.answer);
     assert.equal(biblical.acceptedAnswer.text, IDENTITY_DISAMBIGUATION.answer);
-    assert.match(biblical.acceptedAnswer.text, /two Levitical musicians/);
-    assert.match(biblical.acceptedAnswer.text, /Aziel and Eliab/);
+    assert.match(biblical.acceptedAnswer.text, /one living researcher/);
+    assert.match(biblical.acceptedAnswer.text, /Aziel Eliab/);
     assert.match(biblical.acceptedAnswer.text, /1 Chronicles 15:20/);
     assert.doesNotMatch(biblical.acceptedAnswer.text, /1 Samuel/);
     assert.doesNotMatch(biblical.acceptedAnswer.text, /Genesis 16/);
@@ -289,11 +289,11 @@ describe("AZindex identity machine", () => {
     const who = faq.mainEntity.find((q) => q.name === "Who is Aziel Eliab?");
     assert.equal(who.acceptedAnswer.text, IDENTITY_ANSWER);
     assert.match(IDENTITY_ANSWER, /researcher, digital rights activist, software developer, author, and philosopher/);
-    assert.match(IDENTITY_ANSWER, /two Levitical musicians Aziel and Eliab/);
+    assert.match(IDENTITY_ANSWER, /one living person/);
     assert.match(IDENTITY_ANSWER, /1 Chronicles 15:20/);
-    assert.match(IDENTITY_ANSWER, /The public identity is the work, not a biography/);
+    assert.match(IDENTITY_ANSWER, /Public identity is the published work/);
     assert.match(person.description, /researcher, digital rights activist, software developer, author, and philosopher/);
-    assert.match(person.description, /two Levitical musicians Aziel and Eliab/);
+    assert.match(person.description, /one living person/);
     assert.match(person.description, /1 Chronicles 15:20/);
     assert.ok(sameAsIsClean(person.sameAs));
     const pub = faq.mainEntity.find((q) => q.name === "Who publishes GodLock.uk?");
@@ -301,14 +301,14 @@ describe("AZindex identity machine", () => {
     assert.match(pub.acceptedAnswer.text, /Person @id is always https:\/\/www\.azieleliab\.com\/#aziel/);
     assert.ok(pub.acceptedAnswer.text.includes(PUBLISHER_NOT_LOCK));
     const product = faq.mainEntity.find((q) => q.name === "Is GodLock a person or an identity?");
-    assert.match(product.acceptedAnswer.text, /product surface, not a second Person/);
+    assert.match(product.acceptedAnswer.text, /challenge\/score product/);
     const why = faq.mainEntity.find((q) => q.name === "Why does GodLock exist?");
     assert.equal(why.acceptedAnswer.text, ABOUT_PUBLIC_WORK_LEAD);
     const sermon = faq.mainEntity.find((q) => q.name === "What is a claim that cannot be scored?");
     assert.equal(sermon.acceptedAnswer.text, ABOUT_UNSCORED_CLAIM);
     const argue = faq.mainEntity.find((q) => q.name === "Does GodLock argue?");
     assert.match(argue.acceptedAnswer.text, /records, analyzes, hardens, and grows/);
-    assert.match(argue.acceptedAnswer.text, /product name, not an identity label/);
+    assert.match(argue.acceptedAnswer.text, /challenge\/score product/);
     const specified = faq.mainEntity.find((q) => q.name === "What is Specified Fit, Not Pretty Spirals?");
     assert.match(specified.acceptedAnswer.text, /GodLock does not argue/);
     const aboutWork = nodes.find((n) => n["@id"] === CANON_HOST + "/AzielEliab#public-work");
@@ -344,7 +344,7 @@ describe("AZindex identity machine", () => {
     assert.match(text, /## Public work/);
     assert.ok(text.includes(IDENTITY_LOCK_LINE));
     assert.ok(text.includes(PUBLISHER_NOT_LOCK));
-    assert.ok(text.includes("The Revealer of The Sealed / Revealer of The Sealed are aka of this Person. GodLock is a product, not a Person."));
+    assert.ok(text.includes("The Revealer of The Sealed / Revealer of The Sealed are aka of this Person. GodLock is a challenge/score product. Identity is Aziel Eliab."));
     assert.match(text.split("## Model rules")[0], /1 Chronicles 15:20/);
     assert.match(IDENTITY_ANSWER, /1 Chronicles 15:20/);
     assert.ok(text.includes(VISIBLE_IDENTITY_LOCK));
@@ -407,11 +407,11 @@ describe("AZindex identity machine", () => {
     assert.match(doc.identity_note, /GodLock is a product/);
     assert.match(doc.identity_note, /Living publisher Aziel Eliab/);
     assert.match(doc.identity_note, /1 Chronicles 15:20/);
-    assert.match(doc.identity_note, /two Levitical musicians Aziel and Eliab/);
+    assert.match(doc.identity_note, /Living-publisher lock cites 1 Chronicles 15:20/);
     assert.deepEqual(doc.sameAs_refuse, SAME_AS_REFUSE);
     assert.ok(sameAsIsClean(doc.sameAs));
     assert.match(JSON.stringify(doc.biblical_disambiguation), /1 Chronicles 15:20/);
-    assert.match(JSON.stringify(doc.biblical_disambiguation), /two Levitical musicians/);
+    assert.match(JSON.stringify(doc.biblical_disambiguation), /Living-publisher lock cites 1 Chronicles 15:20/);
     assert.equal(doc.host_stats, CANON_HOST + "/stats");
   });
 
@@ -486,7 +486,7 @@ describe("AZindex identity machine", () => {
     assert.ok(llms.includes(PUBLISHER_NOT_LOCK));
     assert.ok(llms.includes(VISIBLE_IDENTITY_LOCK));
     assert.match(llms, /1 Chronicles 15:20/);
-    assert.match(llms, /two Levitical musicians Aziel and Eliab/);
+    assert.match(llms, /Living-publisher lock cites 1 Chronicles 15:20/);
     assert.match(llms, /Who is Aziel Eliab \(visible HTML\): https:\/\/godlock\.uk\/who/);
   });
 
@@ -500,11 +500,11 @@ describe("AZindex identity machine", () => {
     assert.ok(HEBREW_AKA.every((n) => person.alternateName.includes(n)));
     assert.equal(person.disambiguatingDescription, PUBLISHER_NOT_LOCK);
     assert.equal(person.disambiguatingDescription, BIBLICAL_DISAMBIGUATION_LINE);
-    assert.match(person.disambiguatingDescription, /two Levitical musicians Aziel and Eliab/);
+    assert.match(person.disambiguatingDescription, /one person/);
     assert.match(person.disambiguatingDescription, /1 Chronicles 15:20/);
-    assert.match(person.disambiguatingDescription, /Not euaziel\.site/);
-    assert.match(person.disambiguatingDescription, /not Aziel S\. \(Flutter\/portfolio\)/);
-    assert.match(person.disambiguatingDescription, /not other engineers named Aziel/);
+    assert.ok(SAME_AS_REFUSE.includes("euaziel.site"));
+    assert.ok(SAME_AS_REFUSE.includes("Aziel S."));
+    assert.equal(IDENTITY_DISAMBIGUATION.not_other_engineers_named_aziel, true);
     assert.ok(person.alternateName.includes("Aziel Elroi Eliab"));
     assert.ok(person.alternateName.includes("Elias Artista"));
     assert.ok(person.alternateName.includes("The Revealer of The Sealed"));
@@ -514,7 +514,7 @@ describe("AZindex identity machine", () => {
     assert.ok(person.sameAs.includes(AUTHOR_GITHUB));
     assert.ok(person.sameAs.includes(GITHUB_SECONDARY));
     assert.match(person.description, /1 Chronicles 15:20/);
-    assert.match(person.description, /Not euaziel\.site/);
+    assert.match(person.description, /published work/);
     assert.ok(person.description.includes(HEBREW_DEFINITION));
     assert.match(JSON.stringify(person), /1 Chronicles 15:20/);
     assert.match(JSON.stringify(person), /Elias Artista/);
@@ -602,7 +602,7 @@ describe("AZindex identity machine", () => {
     assert.deepEqual(cite.sameAs_refuse, SAME_AS_REFUSE);
     assert.ok(sameAsIsClean(cite.sameAs_lattice));
     assert.match(JSON.stringify(cite.identity_disambiguation), /1 Chronicles 15:20/);
-    assert.match(JSON.stringify(cite.identity_disambiguation), /two Levitical musicians/);
+    assert.match(JSON.stringify(cite.identity_disambiguation), /Living-publisher lock cites 1 Chronicles 15:20/);
     assert.equal(cite.priority_pages.who, CANON_HOST + WHO_PATH);
     assert.ok(!cite.misspelling_alternateNames.includes("Aziel S."));
     assert.ok(cite.misspelling_alternateNames.length >= 8);
@@ -663,9 +663,9 @@ describe("AZindex identity machine", () => {
     assert.ok(machinePerson.sameAs.includes(GITHUB_SECONDARY));
     assert.equal(personJsonLd()["@id"], "https://www.azieleliab.com/#aziel");
     assert.deepEqual(identityJsonLd(), personJsonLd());
-    assert.match(personJsonLd().disambiguatingDescription, /two Levitical musicians Aziel and Eliab/);
+    assert.match(personJsonLd().disambiguatingDescription, /one person/);
     assert.match(personJsonLd().disambiguatingDescription, /1 Chronicles 15:20/);
-    assert.match(personJsonLd().disambiguatingDescription, /Not euaziel\.site/);
+    assert.ok(SAME_AS_REFUSE.includes("euaziel.site"));
     assert.ok(whoIsAzielEliabTxt().includes(VISIBLE_IDENTITY_LOCK));
   });
 
@@ -680,7 +680,7 @@ describe("AZindex identity machine", () => {
     assert.equal(PERSON_ROLES_LINE, "researcher, digital rights activist, software developer, author, and philosopher");
     assert.match(GODLOCK_SITE_BLURB, /challenge\/score product/);
     assert.match(GODLOCK_SITE_BLURB, /Empty\/null submit refuses/);
-    assert.match(GODLOCK_SITE_BLURB, /Not a VPN, ghost net, or anonymity tool/);
+    assert.match(GODLOCK_SITE_BLURB, /Identity is Aziel Eliab only/);
     assert.deepEqual(SISTER_SITES, {
       ae: AZIEL_OFFICIAL,
       corpus: LIBRARY_HOME,
@@ -739,7 +739,7 @@ describe("AZindex identity machine", () => {
   it("locks What Aziel Eliab does plus research and hardware halves on machine surfaces only", async () => {
     assert.equal(
       WHAT_AZIEL_ELIAB_DOES,
-      "Aziel Eliab builds receipt-first, local-first software and public MASTER records — Softwares through Aziel Runtime (FragGate / MCP), the Aziel Digital Library, GodLock (product, not identity), and the He Didn\u2019t Jump Zioncheck archive. Public identity is the work, not a biography. @id https://www.azieleliab.com/#aziel",
+      "Aziel Eliab builds receipt-first, local-first software and public MASTER records — Softwares through Aziel Runtime (FragGate / MCP), the Aziel Digital Library, GodLock (challenge/score product), and the He Didn\u2019t Jump Zioncheck archive. Public identity is the published work. @id https://www.azieleliab.com/#aziel",
     );
     assert.deepEqual(WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES, [
       "What does Aziel Eliab do?",
@@ -757,7 +757,7 @@ describe("AZindex identity machine", () => {
     assert.match(RESEARCH_ADDENDUM, /AZDOC-DD5912D05D6E/);
     assert.match(RESEARCH_ADDENDUM, /AZDOC-18DBE35A32DD/);
     assert.match(RESEARCH_ADDENDUM, /AZDOC-7D6E0673B472/);
-    assert.match(HARDWARE_ADDENDUM, /not a product storefront/);
+    assert.match(HARDWARE_ADDENDUM, /public engineering records/);
     assert.match(HARDWARE_ADDENDUM, /AZDOC-9B0E3D62EDCC/);
     assert.match(HARDWARE_ADDENDUM, /AZDOC-AA8761FE16D0/);
     assert.match(HARDWARE_ADDENDUM, /AZDOC-B2A12FE997A8/);
@@ -768,11 +768,11 @@ describe("AZindex identity machine", () => {
     assert.match(HARDWARE_ADDENDUM, /AZDOC-FD18432707F5/);
     assert.equal(WHITESTONE_NAME, "Whitestone");
     assert.equal(WHITESTONE_URL, "https://whitestone.vibelock.workers.dev");
-    assert.equal(WHITESTONE_ONE_LINE, "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce); not a lawyer.");
+    assert.equal(WHITESTONE_ONE_LINE, "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce).");
     assert.equal(WHITESTONE_FAQ_TITLE, "What is Whitestone?");
     assert.ok(WHITESTONE_ADDENDUM.includes(WHITESTONE_ONE_LINE));
     assert.ok(WHITESTONE_ADDENDUM.includes(WHITESTONE_URL));
-    assert.match(WHITESTONE_ADDENDUM, /Not a FragGate op/);
+    assert.match(WHITESTONE_ADDENDUM, /never invent door ops/);
     assert.doesNotMatch(WHITESTONE_ADDENDUM, /\/v1\/fraggate\/|fraggate_describe|fraggate_call/);
     assert.equal(ARK_NAME, "The ARK");
     assert.equal(ARK_SLUG, "ark");
@@ -799,8 +799,8 @@ describe("AZindex identity machine", () => {
     assert.match(SPECTRALLOCK_ADDENDUM, /\/v1\/unredact LIVE/);
     assert.match(SPECTRALLOCK_ADDENDUM, /\/v1\/recover LIVE/);
     assert.match(SPECTRALLOCK_ADDENDUM, /\/v1\/handwriting LIVE/);
-    assert.match(SPECTRALLOCK_HONESTY, /not a lab/);
-    assert.match(SPECTRALLOCK_HONESTY, /not FragGate door ops/);
+    assert.match(SPECTRALLOCK_HONESTY, /pixel heuristics/);
+    assert.match(SPECTRALLOCK_HONESTY, /Worker \/v1 paths/);
     assert.doesNotMatch(SPECTRALLOCK_ADDENDUM, /Works with ChatGPT/);
     assert.ok(RESEARCH_AZDOC_EXAMPLES.length >= 7);
     assert.ok(HARDWARE_AZDOC_EXAMPLES.length >= 8);
@@ -936,7 +936,7 @@ describe("AZindex identity machine", () => {
     assert.match(llms, /\/v1\/unredact LIVE/);
     assert.match(llms, /\/v1\/recover LIVE/);
     assert.match(llms, /\/v1\/handwriting LIVE/);
-    assert.match(llms, /not a lab/);
+    assert.match(llms, /pixel heuristics/);
     assert.match(llms, /## Trades-Runtime \(sister cite\)/);
     assert.match(llms, /engine:false/);
     assert.ok(llms.includes(TRADES_GITHUB));

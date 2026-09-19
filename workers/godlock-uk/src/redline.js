@@ -55,7 +55,7 @@ export const FOLDLOCK = Object.freeze({
   software_tab: false,
   invented: false,
   doi: FOLDLOCK_DOI,
-  note: "Cite the real FoldLock catalog Software only. Not zip. Not encryption. Not a Softwares card on godlock.uk.",
+  note: "Cite the real FoldLock catalog Software only. FoldLock is cite-only on this hub.",
 });
 
 export const TLS = Object.freeze({
@@ -125,11 +125,11 @@ export function redlineDoc() {
     plane_b_framagit_refuse: FRAMAGIT_REFUSE,
     gitflic_refuse: GITFLIC_REFUSE,
     gitlab_refuse: GITLAB_REFUSE,
-    zenodo_refuse: ZENODO_REFUSE,
+    zenodo_refuse: null,
     cns: "CROSS-NETWORK-SURVIVAL-1.0",
     no_lie: "NO-LIE-NO-REWRITE-1.0",
     limitation:
-      "THIS IS: challenge-hub redline — public-door map, header-only operator token if any, Growth-ON Allow, Cloudflare TLS cite, attack-sim refuses, ALL-TARGETS shelves. THIS IS NOT: a Softwares product; a GPTBot Disallow; a client-side crypto claim; a FoldLock cipher; a live AZ-GEN registrar; a Remain-OFF enable. Author: Aziel Eliab only.",
+      "Challenge-hub redline: public-door map, header-only operator token if any, Growth-ON Allow, Cloudflare TLS cite, attack-sim refuses, ALL-TARGETS shelves. Author: Aziel Eliab only.",
   };
 }
 
@@ -240,12 +240,12 @@ export function redlineCiteFields() {
 
 export function redlineLlmsSection() {
   return "\n## REDLINE-2026-09-14\n\n"
-    + "Challenge-hub redline. Not a Softwares product. Author Aziel Eliab only.\n"
+    + "Challenge-hub redline. Author Aziel Eliab only.\n"
     + "Attack-surface map: GET / /cite.json /shelves /v1/shelves /llms.txt /robots.txt /v1/mesh (never enables) /v1/software (no suite expand).\n"
     + "Header-only tokens if any (Authorization or X-Aziel-Runtime-Token). None present on this hub. Never query, never body, never git.\n"
     + "GET /v1/mesh never enables.\n"
     + "Cap-7: design_of + resolves_to_hub:false.\n"
-    + "FoldLock cite-only. Not encryption. Not zip. Not a Softwares card here.\n"
+    + "FoldLock cite-only.\n"
     + "TLS is Cloudflare edge HTTPS. No client-side crypto claim.\n"
     + "Growth-ON. GPTBot stays Allow. No visible 15:20 chrome.\n"
     + "CNS + NO-LIE. Plane B ALL-TARGETS codeberg + archive.org + framagit. Framagit SLOT CNS-NO-FORGE-MIRROR. Plane C SLOT CNS-OPERATOR-ATTEST. No LIVE flip.\n";

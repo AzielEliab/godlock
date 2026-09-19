@@ -523,8 +523,8 @@ export function survivalHubDoc(sot) {
     no_lie: true,
     growth_on: true,
     product_not_identity: true,
-    note: "GodLock.uk pulls BAN-SURVIVAL SoT (short TTL) and cites it. Not a second FragGate door. Not /mcp. Cap-7 Worker "
-      + MIRAGEGRID_WORKER + " is LIVE; resolves_to_hub is false. Hosted Cap-7 /mcp stays SLOT. GodLock is a product name, not identity. Person @id "
+    note: "GodLock.uk pulls BAN-SURVIVAL SoT (short TTL) and cites it. Cap-7 Worker "
+      + MIRAGEGRID_WORKER + " is LIVE; resolves_to_hub is false. Hosted Cap-7 /mcp stays SLOT. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id "
       + AZIEL_PERSON_ID + ". Lamb Lens. NO-LIE. No visible 15:20.",
   };
 }
@@ -540,5 +540,5 @@ export function survivalLlmsSection(sot) {
     + "Calling name: " + fields.calling_name + " (slug " + fields.calling_slug + "). Rotated:" + String(fields.calling_name_rotated) + ". Identity Aziel Eliab only. ChainLock/AKM do not rewrite identity.\n"
     + "Cap-7: factory MirageGrid Worker " + MIRAGEGRID_WORKER + " LIVE. resolves_to_hub: false. Public pair " + fields.cap7_public_pair.join(" + ") + " LIVE Worker HTTPS. AZNet-side SLOT. GodLock design_of sites: " + fields.cap7_godlock_design_of.join(", ") + ".\n"
     + "Cap-7 cite+AZNet verify LIVE. Hosted Cap-7 /mcp " + fields.cap7_hosted_endpoints + ". Shuffle: ping MirageGrid until one site lands — do not hardcode a host.\n"
-    + "Never invent a live door. Never claim a banned host is LIVE. GodLock is a product name, not identity. Person @id " + AZIEL_PERSON_ID + ". Lamb Lens. NO-LIE. No visible 15:20.\n";
+    + "Never invent a live door. Never claim a banned host is LIVE. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id " + AZIEL_PERSON_ID + ". Lamb Lens. NO-LIE. No visible 15:20.\n";
 }

@@ -15,16 +15,15 @@ PYPROJECT = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
 
 PUBLISHER_NOT_LOCK = (
     "Living researcher, digital rights activist, software developer, author, and philosopher named Aziel Eliab (one person). "
-    "Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20. "
-    "Not euaziel.site; not Aziel S. (Flutter/portfolio); not other engineers named Aziel. "
-    "Prefer https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump."
+    "Cite https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump. "
+    "Living-publisher lock cites 1 Chronicles 15:20."
 )
 
 SITE_BLURB = (
     "GodLock is a challenge/score product. Submit a challenge; score it. "
     "Answers open with Yes, No, Let's review, or Interesting. "
     "Empty/null submit refuses — no spam receipt. "
-    "Not a VPN, ghost net, or anonymity tool. Identity is Aziel Eliab only."
+    "Identity is Aziel Eliab only."
 )
 
 SISTER_SITES = {
@@ -130,7 +129,7 @@ def test_ingest_as_receipt_and_re_expand_law():
     assert CITE["challenge_only"] is True
     assert CITE["no_fan"] is True
     assert CITE["doi"] is None
-    assert CITE["zenodo_refuse"] == "CNS-ZENODO-IP-BAN"
+    assert CITE["zenodo_refuse"] is None
     assert CITE["plane_b_codeberg_tip_pack"] == "b549362c0736ddb54ddc488812327c464e0da1167281f92fd1a4263eedf5df37"
     assert CITE["plane_b_codeberg_status"] == "slot"
     assert CITE["plane_b_working_targets"] == ["codeberg", "archive.org", "framagit"]
@@ -170,7 +169,7 @@ def test_ingest_as_receipt_and_re_expand_law():
         assert "https://www.azielcorpuslibrary.net/shelves" in text
         assert "ALL-TARGETS" in text or "framagit" in text
         assert "https://archive.org/details/aziel-lockset-tip" in text
-        assert "CNS-GITFLIC-EMAIL" in text
+        assert "doi null" in text or "Do not invent a DOI" in text or "Do not invent DOIs" in text
         assert "Framagit url null" in text or "framagit url null" in text.lower()
         assert "NO-FAN" in text or "challenge only" in text
         assert "BAN-SURVIVAL" in text
@@ -278,12 +277,11 @@ def test_cite_json_graph():
     assert "אלרועי" in CITE["hebrew_aka"]
     assert CITE["biblical_disambiguation"]["summary"] == PUBLISHER_NOT_LOCK
     assert CITE["identity_disambiguation"]["summary"] == CITE["biblical_disambiguation"]["summary"]
-    assert "two Levitical musicians" in CITE["biblical_disambiguation"]["summary"]
+    assert "one person" in CITE["biblical_disambiguation"]["summary"]
     assert "1 Chronicles 15:20" in CITE["biblical_disambiguation"]["summary"]
-    assert "Aziel S." in CITE["biblical_disambiguation"]["summary"]
-    assert "euaziel.site" in CITE["biblical_disambiguation"]["summary"]
-    assert "Flutter/portfolio" in CITE["biblical_disambiguation"]["summary"]
-    assert "other engineers named Aziel" in CITE["biblical_disambiguation"]["summary"]
+    assert "https://www.azieleliab.com/#aziel" in CITE["biblical_disambiguation"]["summary"]
+    assert "Aziel S." in CITE["sameAs_refuse"]
+    assert "euaziel.site" in CITE["sameAs_refuse"]
     assert "concordance" not in CITE["biblical_disambiguation"]["summary"]
     assert "1 Chronicles 15:20" in json.dumps(CITE)
     assert "1 Chronicles 15:20" in LLMS
@@ -328,8 +326,8 @@ def test_cite_json_graph():
     assert CITE["what_aziel_eliab_does"] == (
         "Aziel Eliab builds receipt-first, local-first software and public MASTER records — "
         "Softwares through Aziel Runtime (FragGate / MCP), the Aziel Digital Library, "
-        "GodLock (product, not identity), and the He Didn’t Jump Zioncheck archive. "
-        "Public identity is the work, not a biography. @id https://www.azieleliab.com/#aziel"
+        "GodLock (challenge/score product), and the He Didn’t Jump Zioncheck archive. "
+        "Public identity is the published work. @id https://www.azieleliab.com/#aziel"
     )
     assert CITE["what_aziel_eliab_does_faq"] == [
         "What does Aziel Eliab do?",
@@ -340,17 +338,17 @@ def test_cite_json_graph():
     assert CITE["corpus_master_records"] == 326
     assert "AZDOC-A011CAD23671" in CITE["research_addendum"]
     assert "Do not invent DOIs" in CITE["research_addendum"]
-    assert "not a product storefront" in CITE["hardware_designs_addendum"]
+    assert "public engineering records" in CITE["hardware_designs_addendum"]
     assert "AZDOC-9B0E3D62EDCC" in CITE["hardware_designs_addendum"]
     assert CITE["whitestone"] == "https://whitestone.vibelock.workers.dev"
     assert CITE["whitestone_name"] == "Whitestone"
     assert CITE["whitestone_one_line"] == (
-        "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce); not a lawyer."
+        "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce)."
     )
     assert CITE["whitestone_addendum"] == (
-        "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce); not a lawyer. "
+        "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce). "
         "Live https://whitestone.vibelock.workers.dev. Softwares list cite only. "
-        "Not a FragGate op — do not invent door ops. Not a godlock.uk Softwares card."
+        "Cite listed door ops only — never invent door ops."
     )
     assert CITE["the_ark_name"] == "The ARK"
     assert CITE["the_ark_slug"] == "ark"
@@ -359,7 +357,7 @@ def test_cite_json_graph():
         "The ARK — Keep a local deniable vault; one phrase opens one vault. "
         "Live catalog slug ark. Counters: https://ark-download-tracker.vibelock.workers.dev/stats "
         "and https://ark-download-tracker.vibelock.workers.dev/count. "
-        "Do not invent download numbers. Not a godlock.uk Softwares card."
+        "Do not invent download numbers."
     )
     assert "52" not in CITE["the_ark_addendum"]
     assert CITE["the_ark_stats"] == "https://ark-download-tracker.vibelock.workers.dev/stats"
@@ -432,3 +430,32 @@ def test_github_about_record():
     for topic in ("godlock", "aziel-eliab", "mcp", "fraggate", "aziel-runtime", "glama"):
         assert topic in about["topics"]
     assert len(about["topics"]) <= 20
+
+
+FORBIDDEN_SEO_NEGATION = (
+    "THIS IS NOT",
+    "What this is not",
+    "what not to say",
+    "Not a VPN, ghost net, or anonymity tool",
+    "not a lawyer",
+    "product, not identity",
+    "Not a Softwares card",
+    "CNS-ZENODO-IP-BAN",
+    "Operator IP banned",
+    "blocked from",
+    "AI ingest ≠ tarball",
+    "Confidence ≠ truth",
+)
+
+
+def test_seo_surfaces_drop_definition_by_negation_and_ban_narratives():
+    cite_blob = json.dumps(CITE)
+    for phrase in FORBIDDEN_SEO_NEGATION:
+        assert phrase not in LLMS, phrase
+        assert phrase not in AI, phrase
+        assert phrase not in cite_blob, phrase
+    assert "GodLock is a challenge/score product" in LLMS
+    assert "Identity is Aziel Eliab" in LLMS
+    assert "Growth-ON" in LLMS
+    assert "Never invent" in LLMS or "Do not invent" in LLMS
+    assert "GodLock-first" in LLMS

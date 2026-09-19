@@ -50,14 +50,14 @@ export const LAUNCH_SURFACES = Object.freeze([
 export const LAUNCH_READY_NOTE =
   RUNTIME_NAME + " " + RUNTIME_VERSION + " (" + RUNTIME_SOT + ") launch readiness: "
   + LAUNCH_SURFACES.join(" + ")
-  + ". Not fielded_100. GodLock is a challenge stress-test product, not a VPN identity. "
+  + ". fielded_100 stays false. GodLock is a challenge/score product. Identity is Aziel Eliab. "
   + "Identity Aziel Eliab only. Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.";
 
 export const LAUNCH_READY_HTML_NOTE =
   RUNTIME_NAME + " " + RUNTIME_VERSION + " launch readiness (SoT " + RUNTIME_SOT
   + "): human UI + MCP fraggate_call + FragGate sole door + mesh/AZVPN (HTTPS/WS REAL; WireGuard/OpenVPN SLOT) "
-  + "+ radios channel cites worker_hardware:false + suite pack /download. Not fielded_100. "
-  + "GodLock is a challenge stress-test product, not a VPN identity. Identity Aziel Eliab only. "
+  + "+ radios channel cites worker_hardware:false + suite pack /download. fielded_100 stays false. "
+  + "GodLock is a challenge/score product. Identity is Aziel Eliab. Identity Aziel Eliab only. "
   + "Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.";
 
 export function runtimeSot() {
@@ -99,7 +99,7 @@ export function launchReadiness() {
       openvpn: AZVPN_OPENVPN,
       cite: AZVPN_CITE,
       godlock_is_vpn: GODLOCK_IS_VPN,
-      note: "Runtime public VPN concentrator. GodLock is a challenge stress-test product, not a VPN identity.",
+      note: "Runtime public VPN concentrator. GodLock is a challenge/score product. Identity is Aziel Eliab.",
     },
     radios: {
       worker_hardware: WORKER_HARDWARE,
@@ -108,7 +108,7 @@ export function launchReadiness() {
     },
     suite_download: SUITE_DOWNLOAD,
     suite_download_v1: SUITE_DOWNLOAD_V1,
-    suite_download_note: "One-click suite pack JSON (REAL catalog + FoldLock tip + mesh cite). Worker wasm / WireGuard / OpenVPN SLOT. Counted GET /download. Not fielded_100.",
+    suite_download_note: "One-click suite pack JSON (REAL catalog + FoldLock tip + mesh cite). Worker wasm / WireGuard / OpenVPN SLOT. Counted GET /download. fielded_100 stays false.",
     fielded_100: FIELDED_100,
     glama: GLAMA_RUNTIME,
     glama_cta: "Try on Glama",
@@ -158,7 +158,7 @@ export function launchLlmsSection() {
     + "Human UI: yes. MCP door: " + FRAGGATE_CALL + ". FragGate is THE single door (" + FRAGGATE_KERNEL + ").\n"
     + "mesh/AZVPN: HTTPS/WS REAL; WireGuard/OpenVPN SLOT. GET /v1/mesh cites the bind and never opens a session.\n"
     + "Radios channel cites worker_hardware:false. Invented hardware: false.\n"
-    + "Suite pack: " + SUITE_DOWNLOAD + " (also " + SUITE_DOWNLOAD_V1 + "). Not fielded_100.\n"
+    + "Suite pack: " + SUITE_DOWNLOAD + " (also " + SUITE_DOWNLOAD_V1 + "). fielded_100 stays false.\n"
     + "Try on Glama: " + GLAMA_RUNTIME + "\n"
     + "GodLock Softwares stays heading → list only. No Digital Library chrome. No Works-with assistants subsection.\n"
     + "Plane B Framagit stays SLOT CNS-NO-FORGE-MIRROR. Plane C stays SLOT CNS-OPERATOR-ATTEST. No LIVE flip.\n"

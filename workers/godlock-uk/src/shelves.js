@@ -68,7 +68,7 @@ export const PLANE_B_REFUSED_IDS = Object.freeze([
   "plane-b-zenodo-tip-pack",
 ]);
 export const PLANE_B_NOTE =
-  "Codeberg + archive.org hash-verify PASS (still SLOT). archive.org has two items (aziel-lockset-tip + aziel-lockset-tip_202609), same blast_radius — not a second independent shelf. Zip wrap on the 202609 item: flat IA sha256 on the zip may be null; inner aziel-tip-pack.tar hash-verifies. Framagit URL null. SLOT CNS-NO-FORGE-MIRROR. No LIVE flip. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS). GitFlic refused CNS-GITFLIC-EMAIL. GitLab refused CNS-GITLAB-CF-LOOP. Zenodo refused CNS-ZENODO-IP-BAN.";
+  "Codeberg + archive.org hash-verify PASS (still SLOT). archive.org has two items (aziel-lockset-tip + aziel-lockset-tip_202609), same blast_radius — one working_targets kind. Zip wrap on the 202609 item: flat IA sha256 on the zip may be null; inner aziel-tip-pack.tar hash-verifies. Framagit URL null. SLOT CNS-NO-FORGE-MIRROR. No LIVE flip. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS). doi null. Do not invent a DOI.";
 export const COLD_MULTI_SHELF_RULE =
   "Planes A/B/C: A=one CF/GitHub tunnel (5 surfaces / 2 family radii, not 5 shelves); B=alt independent forge/archive tip-pack SLOT; C=USB airgap SLOT. Survival = bytes↔hash. LIVE only after hash verify.";
 
@@ -362,7 +362,7 @@ export function shelvesDoc() {
           lockset_doi: false,
           working_targets: PLANE_B_WORKING_TARGETS.slice(),
           refuse: "CNS-NO-FORGE-MIRROR",
-          note: "Not Zenodo. Not GitFlic (CNS-GITFLIC-EMAIL). Not GitLab (CNS-GITLAB-CF-LOOP). Codeberg + archive.org PASS (two IA items, one working_targets kind); Framagit URL null. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS).",
+          note: "Codeberg + archive.org PASS (two IA items, one working_targets kind); Framagit URL null. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS). doi null. Do not invent a DOI.",
         },
         {
           id: "plane-b-codeberg-tip-pack",
@@ -491,7 +491,7 @@ export function shelvesDoc() {
           lockset_shelf: false,
           lockset_doi: false,
           refuse: [ZENODO_REFUSE, "CNS-NO-TIP-DOI"],
-          reason: "Operator IP banned at Zenodo (CNS-ZENODO-IP-BAN). Zenodo is not the Plane B working shelf. No tip-pack DOI (CNS-NO-TIP-DOI). cite.json / lockset doi stay null. Do not invent.",
+          reason: "doi null. Do not invent a DOI. Plane B working shelves are Codeberg + archive.org. No tip-pack DOI (CNS-NO-TIP-DOI).",
         },
         {
           id: "plane-c-usb-airgap",
@@ -553,13 +553,7 @@ export function shelvesDoc() {
       ARCHIVE_ORG_TIP_PACK_202609_URL +
       " (same blast_radius; independent:false on 202609; independent_live_count=1); Framagit url null SLOT " +
       FRAMAGIT_REFUSE +
-      " — no LIVE flip; GitFlic " +
-      GITFLIC_REFUSE +
-      "; GitLab " +
-      GITLAB_REFUSE +
-      "; Zenodo " +
-      ZENODO_REFUSE +
-      " doi null. Plane C attest SLOT " +
+      " — no LIVE flip; doi null. Plane C attest SLOT " +
       PLANE_C_ATTEST +
       " — no LIVE flip. Cap-7 design_of + resolves_to_hub:false. Person @id " +
       AZIEL_PERSON_ID +
@@ -582,7 +576,7 @@ export function locksetCiteDoc() {
     tip: LOCKSET_TIP,
     doi: null,
     zenodo: null,
-    refuse: ZENODO_REFUSE,
+    refuse: null,
     canonical: CANONICAL_LOCKSET,
     shelves: CANONICAL_SHELVES,
     local_shelves: CANON_HOST + "/shelves",
@@ -603,7 +597,7 @@ export function shelvesCiteFields() {
     doi: null,
     zenodo_status: "Do not invent DOIs.",
     zenodo_working_path: false,
-    zenodo_refuse: ZENODO_REFUSE,
+    zenodo_refuse: null,
     cold_multi_shelf: COLD_MULTI_SHELF,
     cold_multi_shelf_rule: COLD_MULTI_SHELF_RULE,
     cold_multi_shelf_corpus: CORPUS_ROLL,
@@ -653,8 +647,8 @@ export function shelvesLlmsSection() {
     + "Lamb Lens: Corpus is the public Lamb Lens shelf. GodLock does not fan Corpus.\n"
     + "Growth-ON.\n"
     + "Plane A: 5 published surfaces / 2 family radii (cloudflare + github). One CF/GitHub tunnel, not five shelves.\n"
-    + "Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg tip-pack " + CODEBERG_TIP_PACK + " SLOT (hash-verify PASS). archive.org " + ARCHIVE_ORG_TIP_PACK_URL + " PASS and " + ARCHIVE_ORG_TIP_PACK_202609_URL + " PASS (same blast_radius archive-org; not a second independent shelf; independent_live_count stays 1). Framagit url null. SLOT " + FRAMAGIT_REFUSE + ". No LIVE flip. GitFlic refused " + GITFLIC_REFUSE + ". GitLab refused " + GITLAB_REFUSE + ". LIVE only when all three pass (" + PLANE_B_ALL_TARGETS + ").\n"
-    + "Zenodo tip-pack refused " + ZENODO_REFUSE + ". doi null. Do not invent a DOI.\n"
+    + "Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg tip-pack " + CODEBERG_TIP_PACK + " SLOT (hash-verify PASS). archive.org " + ARCHIVE_ORG_TIP_PACK_URL + " PASS and " + ARCHIVE_ORG_TIP_PACK_202609_URL + " PASS (same blast_radius archive-org; one working_targets kind; independent_live_count stays 1). Framagit url null. SLOT " + FRAMAGIT_REFUSE + ". No LIVE flip. LIVE only when all three pass (" + PLANE_B_ALL_TARGETS + ").\n"
+    + "doi null. Do not invent a DOI.\n"
     + "Plane C: USB airgap SLOT until " + PLANE_C_ATTEST + ". No LIVE flip.\n"
     + "Cap-7: design_of hubs; resolves_to_hub: false; name_may_change: true; public_icann: false. GodLock design_of " + CANON_HOST + "/.\n"
     + "Lockset cite (GodLock does not write the public ledger): " + CANONICAL_LOCKSET + " tip " + LOCKSET_TIP + "\n"

@@ -80,7 +80,7 @@ describe("REDLINE-2026-09-14 challenge-hub machine cite", () => {
     assert.equal(doc.plane_b_framagit_url, null);
     assert.equal(doc.gitflic_refuse, "CNS-GITFLIC-EMAIL");
     assert.equal(doc.gitlab_refuse, "CNS-GITLAB-CF-LOOP");
-    assert.equal(doc.zenodo_refuse, "CNS-ZENODO-IP-BAN");
+    assert.equal(doc.zenodo_refuse, null);
     assert.equal(doc.cns, "CROSS-NETWORK-SURVIVAL-1.0");
     assert.equal(doc.no_lie, "NO-LIE-NO-REWRITE-1.0");
   });

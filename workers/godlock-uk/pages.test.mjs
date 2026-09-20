@@ -327,7 +327,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(person.sameAs.includes(GITHUB));
     assert.ok(person.sameAs.includes(AZIEL_OFFICIAL));
     assert.ok(person.sameAs.includes(CANON_HOST + "/"));
-    assert.ok(person.sameAs.includes("https://x.com/azieleliab"));
+    assert.ok(person.sameAs.includes("https://x.com/AzielEliab"));
   });
 
   it("lists identity and library pages in robots, sitemap, cite, llms, and ai", async () => {

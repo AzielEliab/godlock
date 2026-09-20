@@ -34,7 +34,6 @@ import {
   SISTER_STATS,
   LIBRARY_HOME,
   X_URL,
-  X_URL_AKA,
   identityAlternateNames,
   aboutPublicWorkDoc,
   ABOUT_PUBLIC_WORK_LEAD,
@@ -220,7 +219,6 @@ describe("AZindex identity machine", () => {
       LIBRARY_HOME,
       CANON_HOST + "/",
       HEDIDNTJUMP,
-      X_URL_AKA,
       X_URL,
     ]);
     assert.deepEqual(IDENTITY_SAME_AS, person.sameAs);

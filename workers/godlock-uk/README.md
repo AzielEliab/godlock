@@ -71,7 +71,7 @@ anon-broadcast is a local communique style tool (text → TTS / desk reel / meta
 
 Parent-only history wipe (D1 `receipts` + `ledger` only — never counter KV): see `docs/d1-receipt-wipe.md`.
 
-**Runtime API uses** (`GET /runtime/v1/uses`) is a separate KV-backed host log for proxied FragGate / MCP / session / pull / v1 traffic on this door. SEO static, `GET /runtime/v1/uses`, and GET health/ready do not increment it. It is not the GodLock product Uses ledger. Proxy requests are stamped `X-Aziel-Runtime-Via: godlock.uk`.
+**Runtime API uses** (`GET /runtime/v1/uses`) is a separate KV-backed host log for proxied FragGate / MCP / session / pull / v1 traffic on this door. SEO static, `GET /runtime/v1/uses`, and GET health/ready do not increment it. It is not the GodLock product Uses ledger. Proxy requests and reverse-proxy responses are stamped `X-Aziel-Runtime-Via: godlock.uk` and `X-Aziel-Runtime-Host` so aziel-runtime `/v1/uses` `by_host` stays distinct.
 
 INTERNAL_CRITERIA / bootstrap-lock jargon stays off public receipts. Specified Fit is the public brief (`/reason`). Operator notes under `internal/` are not a public route.
 

@@ -14,7 +14,7 @@ import {
   shouldCountRuntimeUse,
   USES_KEY_TOTAL,
 } from "./src/runtimeUses.js";
-import { PUBLIC_RUNTIME, LIBRARY_RUNTIME, CATALOG, RUNTIME_PATH } from "./src/seo.js";
+import { CANON_HOST, PUBLIC_RUNTIME, LIBRARY_RUNTIME, CATALOG, RUNTIME_PATH } from "./src/seo.js";
 import { softwareBody, topNav } from "./src/ui.js";
 import worker from "./src/index.js";
 
@@ -169,7 +169,8 @@ describe("runtime proxy", () => {
     assert.match(html, /FragGate/);
     assert.doesNotMatch(html, /engine-runtime 1\.4\.0/);
     assert.match(html, /href="\/runtime"/);
-    assert.equal(door.headers.get("X-Aziel-Runtime-Via"), "service-binding");
+    assert.equal(door.headers.get("X-Aziel-Runtime-Via"), "godlock.uk");
+    assert.equal(door.headers.get("X-Aziel-Runtime-Host"), CANON_HOST);
     assert.equal(door.headers.get("X-Aziel-Runtime-Root"), PUBLIC_RUNTIME);
 
     const list = await worker.fetch(new Request("https://godlock.uk/runtime/v1/fraggate/list"), env);
@@ -204,6 +205,63 @@ describe("runtime proxy", () => {
     const html = await res.text();
     assert.doesNotMatch(html, /Specified Fit|INTERNAL_CRITERIA|bootstrap lock|weighing framework/i);
     assert.match(html, /Author Aziel Eliab|GodLock|FragGate|1\.6\.8/);
+  });
+
+  it("stamps godlock.uk Via/Host on origin-fetch proxy responses", async () => {
+    const prev = globalThis.fetch;
+    const seen = [];
+    globalThis.fetch = async (url, init) => {
+      const req = init ? new Request(String(url), init) : (url instanceof Request ? url : new Request(url));
+      seen.push({
+        via: req.headers.get("X-Aziel-Runtime-Via"),
+        host: req.headers.get("X-Aziel-Runtime-Host"),
+      });
+      return new Response(JSON.stringify({ ok: true, door: "origin" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      });
+    };
+    try {
+      const env = mockDbEnv();
+      const res = await handleRuntimeRoot(
+        new Request("https://godlock.uk/runtime/v1/skill"),
+        new URL("https://godlock.uk/runtime/v1/skill"),
+        env,
+      );
+      assert.equal(res.status, 200);
+      assert.equal(res.headers.get("X-Aziel-Runtime-Via"), "godlock.uk");
+      assert.equal(res.headers.get("X-Aziel-Runtime-Host"), CANON_HOST);
+      assert.equal(seen.length, 1);
+      assert.equal(seen[0].via, "godlock.uk");
+      assert.equal(seen[0].host, CANON_HOST);
+    } finally {
+      globalThis.fetch = prev;
+    }
+  });
+
+  it("overwrites inbound Via/Host so aziel-runtime by_host stays godlock.uk", async () => {
+    const seen = [];
+    const env = runtimeEnv(async (req) => {
+      seen.push({
+        via: req.headers.get("X-Aziel-Runtime-Via"),
+        host: req.headers.get("X-Aziel-Runtime-Host"),
+      });
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      });
+    });
+    const res = await worker.fetch(new Request("https://godlock.uk/runtime/v1/skill", {
+      headers: {
+        "X-Aziel-Runtime-Via": "origin",
+        "X-Aziel-Runtime-Host": "aziel-runtime.vibelock.workers.dev",
+      },
+    }), env);
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get("X-Aziel-Runtime-Via"), "godlock.uk");
+    assert.equal(res.headers.get("X-Aziel-Runtime-Host"), CANON_HOST);
+    assert.equal(seen[0].via, "godlock.uk");
+    assert.equal(seen[0].host, CANON_HOST);
   });
 });
 
@@ -250,6 +308,7 @@ describe("runtime API use tracker", () => {
     const res = await worker.fetch(new Request("https://godlock.uk/runtime/v1/uses"), env);
     assert.equal(res.status, 200);
     assert.equal(res.headers.get("X-Aziel-Runtime-Via"), "godlock.uk");
+    assert.equal(res.headers.get("X-Aziel-Runtime-Host"), CANON_HOST);
     const body = await res.json();
     assert.equal(body.ok, true);
     assert.equal(body.host, "godlock.uk");
@@ -272,7 +331,12 @@ describe("runtime API use tracker", () => {
     const kv = mockKv();
     const seen = [];
     const env = runtimeEnv(async (req) => {
-      seen.push({ method: req.method, path: new URL(req.url).pathname, via: req.headers.get("X-Aziel-Runtime-Via") });
+      seen.push({
+        method: req.method,
+        path: new URL(req.url).pathname,
+        via: req.headers.get("X-Aziel-Runtime-Via"),
+        host: req.headers.get("X-Aziel-Runtime-Host"),
+      });
       return new Response(JSON.stringify({ ok: true }), {
         status: 200,
         headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -281,8 +345,10 @@ describe("runtime API use tracker", () => {
 
     const api = await worker.fetch(new Request("https://godlock.uk/runtime/v1/fraggate/list"), env);
     assert.equal(api.status, 200);
-    assert.equal(api.headers.get("X-Aziel-Runtime-Via"), "service-binding");
+    assert.equal(api.headers.get("X-Aziel-Runtime-Via"), "godlock.uk");
+    assert.equal(api.headers.get("X-Aziel-Runtime-Host"), CANON_HOST);
     assert.equal(seen[0].via, "godlock.uk");
+    assert.equal(seen[0].host, CANON_HOST);
     assert.equal(seen[0].path, "/v1/fraggate/list");
 
     await worker.fetch(new Request("https://godlock.uk/runtime/mcp", { method: "POST", body: "{}", headers: { "Content-Type": "application/json" } }), env);

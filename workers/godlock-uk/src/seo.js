@@ -15,8 +15,8 @@ export const GITHUB = "https://github.com/AzielEliab/godlock";
 export const AUTHOR_GITHUB = "https://github.com/AzielEliab";
 /** Secondary source account. Same person — not a second identity. */
 export const GITHUB_SECONDARY = "https://github.com/azieltherevealerofthesealed-arch";
-export const X_URL = "https://x.com/azieleliab";
-export const X_URL_AKA = "https://x.com/AzielElroiEliab";
+export const X_URL = "https://x.com/AzielEliab";
+export const X_HANDLE = "@AzielEliab";
 export const CATALOG = "https://aziel-runtime.vibelock.workers.dev";
 export const LIBRARY = "https://www.azielcorpuslibrary.net";
 export const LIBRARY_AZIEL = LIBRARY + "/AzielEliab";
@@ -865,7 +865,6 @@ export const IDENTITY_SAME_AS = [
   LIBRARY_HOME,
   CANON_HOST + "/",
   HEDIDNTJUMP,
-  X_URL_AKA,
   X_URL,
 ];
 

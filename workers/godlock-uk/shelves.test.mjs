@@ -95,7 +95,8 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.equal(doc.planes.B.framagit_url, FRAMAGIT_TIP_PACK_URL);
     assert.equal(doc.planes.B.gitflic, GITFLIC_REFUSE);
     assert.equal(doc.planes.B.gitlab, GITLAB_REFUSE);
-    assert.equal(doc.planes.B.refuse, ZENODO_REFUSE);
+    assert.equal(doc.planes.B.refuse, PLANE_B_ALL_TARGETS);
+    assert.equal(doc.planes.B.zenodo_live, false);
     assert.equal(doc.visible_1520, false);
     assert.equal(doc.planes.C.status, "slot");
     assert.ok(doc.planes.C.refuse.includes(PLANE_C_ATTEST));
@@ -165,9 +166,15 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     assert.equal(gitlab.status, "refused");
     assert.equal(gitlab.refuse, GITLAB_REFUSE);
     const zenodo = doc.registry.shelves.find((s) => s.id === "plane-b-zenodo-tip-pack");
-    assert.equal(zenodo.status, "refused");
+    assert.equal(zenodo.status, "slot");
+    assert.equal(zenodo.zenodo_live, false);
     assert.equal(zenodo.doi, null);
     assert.ok(zenodo.refuse.includes(ZENODO_REFUSE));
+    assert.ok(doc.slot.includes("plane-b-zenodo-tip-pack"));
+    assert.ok(!doc.refused.includes("plane-b-zenodo-tip-pack"));
+    assert.match(zenodo.reason, /Zenodo deposit not LIVE/);
+    assert.doesNotMatch(zenodo.reason, /Operator IP banned|CNS-ZENODO-IP-BAN/);
+    assert.doesNotMatch(JSON.stringify(doc), /CNS-ZENODO-IP-BAN|Operator IP banned/);
     assert.doesNotMatch(JSON.stringify(doc.planes), /gitflic-ru unverified/i);
     assert.doesNotMatch(JSON.stringify(doc.planes.B.working_targets), /gitflic/);
     const attest = doc.registry.shelves.find((s) => s.id === "plane-c-usb-airgap");

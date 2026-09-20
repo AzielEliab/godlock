@@ -344,14 +344,16 @@ def test_cite_json_graph():
     assert CITE["whitestone"] == "https://whitestone.vibelock.workers.dev"
     assert CITE["whitestone_name"] == "Whitestone"
     assert CITE["whitestone_one_line"] == (
-        "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce)."
+        "Advise on short Criminal, Civil, and Divorce questions with historical as-of and Case Mode "
+        "(suppression axes, TrajectoryLock-lite, export, confidence labeled up to 75%). "
+        "Session-only web app plus optional zip. https://whitestone.vibelock.workers.dev/"
     )
     assert CITE["whitestone_addendum"] == (
-        "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce). "
-        "Live https://whitestone.vibelock.workers.dev. Suite Softwares list cite only — "
-        "Worker GET https://aziel-runtime.vibelock.workers.dev/v1/software "
-        "(same-origin https://godlock.uk/runtime/v1/software). FragGate list is fallback only. "
-        "Not a FragGate door. Not a GodLock Softwares HTML card. never invent door ops."
+        "Advise on short Criminal, Civil, and Divorce questions with historical as-of and Case Mode "
+        "(suppression axes, TrajectoryLock-lite, export, confidence labeled up to 75%). "
+        "Session-only web app plus optional zip. https://whitestone.vibelock.workers.dev/ "
+        "Suite Softwares list cite — Worker GET https://aziel-runtime.vibelock.workers.dev/v1/software "
+        "(same-origin https://godlock.uk/runtime/v1/software). FragGate list is fallback only."
     )
     assert CITE["software_ssot"] == "https://aziel-runtime.vibelock.workers.dev/v1/software"
     assert CITE["software_hub_local"] is True
@@ -361,12 +363,11 @@ def test_cite_json_graph():
     assert CITE["whitestone_godlock_softwares_html_card"] is False
     assert CITE["the_ark_name"] == "The ARK"
     assert CITE["the_ark_slug"] == "ark"
-    assert CITE["the_ark_one_line"] == "The ARK — Keep a local deniable vault; one phrase opens one vault."
+    assert CITE["the_ark_one_line"] == "Keep a local deniable vault; one phrase opens one vault."
     assert CITE["the_ark_addendum"] == (
-        "The ARK — Keep a local deniable vault; one phrase opens one vault. "
+        "Keep a local deniable vault; one phrase opens one vault. "
         "Live catalog slug ark. Counters: https://ark-download-tracker.vibelock.workers.dev/stats "
-        "and https://ark-download-tracker.vibelock.workers.dev/count. "
-        "Do not invent download numbers."
+        "and https://ark-download-tracker.vibelock.workers.dev/count."
     )
     assert "52" not in CITE["the_ark_addendum"]
     assert CITE["the_ark_stats"] == "https://ark-download-tracker.vibelock.workers.dev/stats"

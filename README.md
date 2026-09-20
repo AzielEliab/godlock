@@ -20,6 +20,9 @@ Part of the **Aziel Eliab** ecosystem (official hub, sister library, sister arch
 - **He Didn't Jump:** https://www.hedidntjump.com/ — An Aziel Eliab Project (sister archive door, not a Softwares card)
 - **GodLock.uk (this engine):** https://godlock.uk
 - **Aziel Eliab on GodLock:** https://godlock.uk/AzielEliab
+- **X @AzielEliab:** https://x.com/AzielEliab
+- **Who (HTML) / who-is (machine):** https://godlock.uk/who · https://godlock.uk/who-is-aziel-eliab.txt
+- **Why (machine):** https://godlock.uk/why-aziel-eliab.txt — official why https://www.azieleliab.com/why
 - **Specified Fit (public reasoning):** https://godlock.uk/reason
 - **Verify:** https://godlock.uk/verify
 - **Donate:** https://godlock.uk/donate — AZL-DONATE-1.0 (same door https://www.azieleliab.com/donate). Payment-URI QRs are solid black-on-white PNGs (`/donate/qr/{rail}.png`). Donate rails live on this tab, not on the Engine homepage.

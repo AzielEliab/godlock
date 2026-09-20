@@ -43,6 +43,8 @@ export const HEBREW_DEFINITION =
 export const PEN_NAME_REFUSE = ["Everblooming Flower"];
 /** Shared public Person @id. Satellite sites reference this; they do not mint a competing primary. */
 export const AZIEL_OFFICIAL = "https://www.azieleliab.com/";
+/** Official why page (azieleliab.com). GodLock cites it on machine surfaces only. */
+export const WHY_OFFICIAL = AZIEL_OFFICIAL.replace(/\/$/, "") + "/why";
 /** Official Softwares / software listing. GodLock.uk does not clone the suite catalog. */
 export const OFFICIAL_SOFTWARES = AZIEL_OFFICIAL.replace(/\/$/, "") + "/software";
 /** Suite Softwares SSoT (Worker GET /v1/software). FragGate list is fallback only. */
@@ -80,6 +82,9 @@ export const WHO_IS_PATH = "/who-is-aziel-eliab.txt";
 export const WHO_IS_ALIAS_PATH = "/who-is";
 /** Who HTML page. 200 + H1. Not a 308 to the txt machine. 15:20 lock stays on machine surfaces. */
 export const WHO_PATH = "/who";
+/** Why machine txt. /why 308s here. Official HTML why stays on azieleliab.com. */
+export const WHY_IS_PATH = "/why-aziel-eliab.txt";
+export const WHY_PATH = "/why";
 export const VERIFY_PATH = "/verify";
 export const COUNT_PATH = "/count";
 export const HELP_PATH = "/help.txt";
@@ -101,6 +106,7 @@ export const HASH_PATH_EQUIVALENTS = [
   ["reason", REASON_PATH],
   ["verify", VERIFY_PATH],
   ["AzielEliab", AZIEL_ELIAB_PATH],
+  ["why", WHY_PATH],
   ["aziel-eliab", AZIEL_ELIAB_PATH],
   ["azieleliab", AZIEL_ELIAB_PATH],
   ["about", AZIEL_ELIAB_PATH],
@@ -411,6 +417,16 @@ export const WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES = [
   "What Aziel Eliab does",
   "Who is Aziel Eliab the developer?",
   "What software does Aziel Eliab make?",
+];
+
+/** Official why lock (azieleliab.com/why). GodLock cites this on machine surfaces only. */
+export const WHY_AZIEL_ELIAB =
+  "Aziel Eliab keeps looking. Official why: https://www.azieleliab.com/why. Public identity is the published work. @id https://www.azieleliab.com/#aziel";
+
+export const WHY_AZIEL_ELIAB_FAQ_TITLES = [
+  "Why Aziel Eliab?",
+  "Why does Aziel Eliab keep looking?",
+  "Why does GodLock exist?",
 ];
 
 export const RESEARCH_FAQ_TITLE = "What research does Aziel Eliab publish?";
@@ -874,6 +890,8 @@ export const IDENTITY_MACHINE_PATHS = [
   "/graph.jsonld",
   "/who",
   "/who-is-aziel-eliab.txt",
+  "/why-aziel-eliab.txt",
+  "/why",
   "/.well-known/aziel.json",
   "/.well-known/person.jsonld",
 ];
@@ -914,6 +932,10 @@ export function aboutPublicWorkDoc() {
     identity_machine: identityMachineUrls(),
     what_aziel_eliab_does: WHAT_AZIEL_ELIAB_DOES,
     what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
+    why_aziel_eliab: WHY_AZIEL_ELIAB,
+    why_aziel_eliab_faq: WHY_AZIEL_ELIAB_FAQ_TITLES.slice(),
+    why: CANON_HOST + WHY_IS_PATH,
+    why_official: WHY_OFFICIAL,
     research_addendum: RESEARCH_ADDENDUM,
     hardware_designs_addendum: HARDWARE_ADDENDUM,
     ...whitestoneCiteFields(),
@@ -1029,6 +1051,39 @@ export const SISTER_SITES = {
 export const SISTER_SITES_NOTE =
   "Sister sites: ae https://www.azieleliab.com/ · corpus https://www.azielcorpuslibrary.net/ · HDJ https://www.hedidntjump.com/ · runtime https://aziel-runtime.vibelock.workers.dev/ · trades https://trades-runtime.vibelock.workers.dev/";
 
+/** Machine-only lattice: sister sites + GitHub + Glama + X + GodLock-first Softwares + who/what/why. */
+export const CROSS_TETHER_NOTE =
+  "Cross-tether: sister sites, GitHub, Try on Glama, X @AzielEliab, Softwares (GodLock-first heading → list), and who/what/why on machine surfaces. Identity Aziel Eliab only. Growth-ON.";
+
+export function crossTetherDoc() {
+  return {
+    sister_sites: { ...SISTER_SITES },
+    sister_sites_note: SISTER_SITES_NOTE,
+    github: AUTHOR_GITHUB,
+    github_repo: GITHUB,
+    github_runtime: GITHUB_RUNTIME,
+    github_secondary: GITHUB_SECONDARY,
+    glama: GLAMA_RUNTIME,
+    glama_label: "Try on Glama",
+    x: X_URL,
+    x_handle: X_HANDLE,
+    softwares: CANON_HOST + SOFTWARE_PATH,
+    softwares_note: SOFTWARE_HTML_SUITE_NOTE,
+    official_softwares: OFFICIAL_SOFTWARES,
+    who: CANON_HOST + WHO_PATH,
+    who_txt: CANON_HOST + WHO_IS_PATH,
+    what: WHAT_AZIEL_ELIAB_DOES,
+    why: CANON_HOST + WHY_IS_PATH,
+    why_alias: CANON_HOST + WHY_PATH,
+    why_official: WHY_OFFICIAL,
+    why_aziel_eliab: WHY_AZIEL_ELIAB,
+    why_godlock: ABOUT_PUBLIC_WORK_LEAD,
+    machine_surfaces_only: ["what", "why"],
+    identity: AUTHOR,
+    note: CROSS_TETHER_NOTE,
+  };
+}
+
 /** Machine site blurb. Challenge/score product. Empty submit refuses. Not VPN/anonymity. */
 export const GODLOCK_SITE_BLURB =
   "GodLock is a challenge/score product. Submit a challenge; score it. Answers open with Yes, No, Let's review, or Interesting. Empty/null submit refuses — no spam receipt. Identity is Aziel Eliab only.";
@@ -1097,6 +1152,8 @@ function identityFaqNode() {
   const qa = [
     ...whatAzielEliabDoesFaqPairs(),
     ["Who is Aziel Eliab?", IDENTITY_ANSWER],
+    ["Why Aziel Eliab?", WHY_AZIEL_ELIAB],
+    ["Why does Aziel Eliab keep looking?", WHY_AZIEL_ELIAB],
     ["Who publishes GodLock.uk?", LIVING_PUBLISHER_ANSWER],
     ["Is GodLock a person or an identity?", "GodLock is a challenge/score product. Identity is Aziel Eliab. godlock.uk is a product surface. Living publisher is Aziel Eliab. Person @id is always https://www.azieleliab.com/#aziel."],
     ["What is GodLock?", GODLOCK_SITE_BLURB + " Receipts first. Residual uncertainty stays."],
@@ -1177,6 +1234,19 @@ export function whoIsAzielEliabTxt() {
     + "- " + THE_ARK_FAQ_TITLE + "\n"
     + "- " + SPECTRALLOCK_FAQ_TITLE + "\n"
     + "- " + TRADES_FAQ_TITLE + "\n\n"
+    + "## Why Aziel Eliab\n\n"
+    + WHY_AZIEL_ELIAB + "\n"
+    + WHY_AZIEL_ELIAB_FAQ_TITLES.map((q) => "- " + q).join("\n") + "\n"
+    + ABOUT_PUBLIC_WORK_LEAD + "\n"
+    + "Official why: " + WHY_OFFICIAL + "\n"
+    + "Why (machine): " + CANON_HOST + WHY_IS_PATH + "\n\n"
+    + "## Cross-tether\n\n"
+    + CROSS_TETHER_NOTE + "\n"
+    + SISTER_SITES_NOTE + "\n"
+    + "GitHub: " + AUTHOR_GITHUB + " · " + GITHUB + "\n"
+    + "Try on Glama: " + GLAMA_RUNTIME + "\n"
+    + "X " + X_HANDLE + ": " + X_URL + "\n"
+    + "Softwares: " + CANON_HOST + SOFTWARE_PATH + " — GodLock-first (heading → list)\n\n"
     + "## Softwares\n\n"
     + WHITESTONE_ADDENDUM + "\n"
     + THE_ARK_ADDENDUM + "\n"
@@ -1213,6 +1283,31 @@ export function whoIsAzielEliabTxt() {
     + "\n";
 }
 
+/** Machine why. /why 308s here. Official HTML why stays on azieleliab.com. */
+export function whyAzielEliabTxt() {
+  return "Why Aziel Eliab?\n\n"
+    + WHY_AZIEL_ELIAB + "\n\n"
+    + "## Why GodLock exists\n\n"
+    + ABOUT_PUBLIC_WORK_LEAD + "\n\n"
+    + "A claim must stand in the open, be answered, and leave a receipt.\n"
+    + "Document over declare.\n"
+    + SPECIFIED_FIT_MOTTO + "\n"
+    + "GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id " + AZIEL_PERSON_ID + ".\n\n"
+    + WHY_AZIEL_ELIAB_FAQ_TITLES.map((q) => "- " + q).join("\n") + "\n\n"
+    + "## Cross-tether\n\n"
+    + CROSS_TETHER_NOTE + "\n"
+    + SISTER_SITES_NOTE + "\n"
+    + "GitHub: " + AUTHOR_GITHUB + " · " + GITHUB + "\n"
+    + "Try on Glama: " + GLAMA_RUNTIME + "\n"
+    + "X " + X_HANDLE + ": " + X_URL + "\n"
+    + "Softwares: " + CANON_HOST + SOFTWARE_PATH + " — GodLock-first (heading → list)\n"
+    + "Who: " + CANON_HOST + WHO_PATH + " · " + CANON_HOST + WHO_IS_PATH + "\n"
+    + "What: " + WHAT_AZIEL_ELIAB_DOES + "\n"
+    + "Official why: " + WHY_OFFICIAL + "\n"
+    + "Why (machine): " + CANON_HOST + WHY_IS_PATH + "\n"
+    + "Growth-ON. NO-LIE. Identity Aziel Eliab only.\n";
+}
+
 export function wellKnownAzielDoc() {
   return {
     name: AUTHOR,
@@ -1236,6 +1331,9 @@ export function wellKnownAzielDoc() {
     sister_stats: { ...SISTER_STATS },
     sister_sites: { ...SISTER_SITES },
     sister_sites_note: SISTER_SITES_NOTE,
+    cross_tether: crossTetherDoc(),
+    x: X_URL,
+    x_handle: X_HANDLE,
     host_stats: CANON_HOST + "/stats",
     jobTitle: AZINDEX_PERSON_JOB_TITLE.slice(),
     site_blurb: GODLOCK_SITE_BLURB,
@@ -1275,6 +1373,10 @@ export function wellKnownAzielDoc() {
     about_public_work: aboutPublicWorkDoc(),
     what_aziel_eliab_does: WHAT_AZIEL_ELIAB_DOES,
     what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
+    why_aziel_eliab: WHY_AZIEL_ELIAB,
+    why_aziel_eliab_faq: WHY_AZIEL_ELIAB_FAQ_TITLES.slice(),
+    why: CANON_HOST + WHY_IS_PATH,
+    why_official: WHY_OFFICIAL,
     research_addendum: RESEARCH_ADDENDUM,
     hardware_designs_addendum: HARDWARE_ADDENDUM,
     ...whitestoneCiteFields(),
@@ -1753,10 +1855,14 @@ export function headMeta(opts) {
     prop("og:image", BRAND_MARK),
     prop("og:image:alt", BRAND_MARK_ALT),
     meta("twitter:card", "summary"),
+    meta("twitter:site", X_HANDLE),
+    meta("twitter:creator", X_HANDLE),
     meta("twitter:title", docTitle),
     meta("twitter:description", description),
     meta("twitter:image", BRAND_MARK),
     meta("twitter:image:alt", BRAND_MARK_ALT),
+    linkRel("me", AUTHOR_GITHUB),
+    linkRel("me", X_URL),
     linkRel("icon", BRAND_MARK_PATH, " type=" + Q + "image/png" + Q),
     linkRel("apple-touch-icon", BRAND_MARK_PATH),
     linkRel("preload", BRAND_MARK_PATH, " as=" + Q + "image" + Q + " fetchpriority=" + Q + "high" + Q),
@@ -1770,6 +1876,8 @@ export function headMeta(opts) {
     linkRel("alternate", "/graph.jsonld", " type=" + Q + "application/ld+json" + Q),
     linkRel("alternate", "/who", " type=" + Q + "text/html" + Q + " title=" + Q + "Who is Aziel Eliab" + Q),
     linkRel("alternate", "/who-is-aziel-eliab.txt", " type=" + Q + "text/plain" + Q),
+    linkRel("alternate", WHY_IS_PATH, " type=" + Q + "text/plain" + Q + " title=" + Q + "Why Aziel Eliab" + Q),
+    linkRel("alternate", WHY_OFFICIAL, " type=" + Q + "text/html" + Q + " title=" + Q + "Official why" + Q),
     linkRel("alternate", "/.well-known/aziel.json", " type=" + Q + "application/json" + Q),
     linkRel("alternate", "/.well-known/person.jsonld", " type=" + Q + "application/ld+json" + Q),
     linkRel("alternate", "/.well-known/mcp.json", " type=" + Q + "application/json" + Q + " title=" + Q + "MCP discovery" + Q),
@@ -1808,6 +1916,10 @@ export function permanentIdentityRedirect(path) {
   }
   if (compact === "whois" || compact === "whoisazieleliab") {
     return WHO_IS_PATH;
+  }
+  if (p === WHY_IS_PATH) return "";
+  if (compact === "why" || compact === "whyazieleliab") {
+    return WHY_IS_PATH;
   }
   return "";
 }
@@ -1933,6 +2045,8 @@ export const PUBLIC_ALLOW = [
   "/who-is-aziel-eliab.txt",
   "/who-is",
   "/who",
+  "/why-aziel-eliab.txt",
+  "/why",
   "/help.txt",
   "/HELP.txt",
   "/addendum.txt",
@@ -1956,7 +2070,7 @@ export function robotsTxt() {
     "# GodLock.uk — open crawl for Google and AI search.",
     "# Author: Aziel Eliab. Also known as Aziel Elroi Eliab (alternateName only).",
     "# Content-Signal opens search + AI input + AI train.",
-    "# Identity machine: /person.jsonld /identity.jsonld /graph.jsonld /who /who-is-aziel-eliab.txt /who-is /.well-known/aziel.json /.well-known/person.jsonld",
+    "# Identity machine: /person.jsonld /identity.jsonld /graph.jsonld /who /who-is-aziel-eliab.txt /who-is /why-aziel-eliab.txt /why /.well-known/aziel.json /.well-known/person.jsonld",
     "# MCP discovery: /.well-known/mcp.json /mcp.json → POST /runtime/mcp.",
     "# GodLock product surface. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.",
     "# Homepage hashes (#software #runtime #receipts #donate #reason #verify #AzielEliab) map to real paths.",
@@ -2028,6 +2142,11 @@ export async function sitemapXml(env, extras = {}) {
   add(CANON_HOST + "/who-is-aziel-eliab.txt", "0.85", "weekly");
   add(CANON_HOST + WHO_PATH, "0.9", "weekly");
   add(CANON_HOST + WHO_IS_ALIAS_PATH, "0.8", "weekly");
+  add(CANON_HOST + WHY_IS_PATH, "0.85", "weekly");
+  add(CANON_HOST + WHY_PATH, "0.8", "weekly");
+  add(WHY_OFFICIAL, "0.55", "weekly");
+  add(AUTHOR_GITHUB, "0.55", "weekly");
+  add(X_URL, "0.5", "weekly");
   add(CANON_HOST + "/help.txt", "0.7", "weekly");
   add(CANON_HOST + "/HELP.txt", "0.65", "weekly");
   add(CANON_HOST + "/addendum.txt", "0.7", "weekly");
@@ -2171,6 +2290,9 @@ export function citeDoc(sot) {
       who_is_aziel_eliab: CANON_HOST + "/who-is-aziel-eliab.txt",
       who: CANON_HOST + WHO_PATH,
       who_is: CANON_HOST + WHO_IS_ALIAS_PATH,
+      why_aziel_eliab: CANON_HOST + WHY_IS_PATH,
+      why: CANON_HOST + WHY_PATH,
+      why_official: WHY_OFFICIAL,
       well_known_aziel: CANON_HOST + "/.well-known/aziel.json",
       well_known_person: CANON_HOST + "/.well-known/person.jsonld",
       mcp_discovery: CANON_HOST + "/.well-known/mcp.json",
@@ -2180,7 +2302,7 @@ export function citeDoc(sot) {
       runtime: PUBLIC_RUNTIME,
     },
     hash_path_equivalents: hashPathEquivalentUrls(),
-    hash_path_note: "Homepage #software #runtime #receipts #donate #reason #verify #AzielEliab map to real paths. /software#aziel-runtime maps to /runtime. Sitemap lists real paths only.",
+    hash_path_note: "Homepage #software #runtime #receipts #donate #reason #verify #AzielEliab #why map to real paths. /software#aziel-runtime maps to /runtime. Sitemap lists real paths only.",
     identity_machine: {
       person: CANON_HOST + "/person.jsonld",
       identity: CANON_HOST + "/identity.jsonld",
@@ -2188,14 +2310,26 @@ export function citeDoc(sot) {
       who_is_aziel_eliab: CANON_HOST + "/who-is-aziel-eliab.txt",
       who: CANON_HOST + WHO_PATH,
       who_is: CANON_HOST + WHO_IS_ALIAS_PATH,
+      why_aziel_eliab: CANON_HOST + WHY_IS_PATH,
+      why: CANON_HOST + WHY_PATH,
+      why_official: WHY_OFFICIAL,
       well_known: CANON_HOST + "/.well-known/aziel.json",
       well_known_person: CANON_HOST + "/.well-known/person.jsonld",
       person_id: AZIEL_PERSON_ID,
-      note: "Shared Person @id is always https://www.azieleliab.com/#aziel. GodLock product surface. Living publisher Aziel Eliab.",
+      note: "Shared Person @id is always https://www.azieleliab.com/#aziel. GodLock product surface. Living publisher Aziel Eliab. who/what/why stay on machine surfaces.",
     },
     about_public_work: aboutPublicWorkDoc(),
     what_aziel_eliab_does: WHAT_AZIEL_ELIAB_DOES,
     what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
+    why_aziel_eliab: WHY_AZIEL_ELIAB,
+    why_aziel_eliab_faq: WHY_AZIEL_ELIAB_FAQ_TITLES.slice(),
+    why: CANON_HOST + WHY_IS_PATH,
+    why_official: WHY_OFFICIAL,
+    cross_tether: crossTetherDoc(),
+    x: X_URL,
+    x_handle: X_HANDLE,
+    github_profile: AUTHOR_GITHUB,
+    github_repo: GITHUB,
     research_addendum: RESEARCH_ADDENDUM,
     hardware_designs_addendum: HARDWARE_ADDENDUM,
     ...whitestoneCiteFields(),
@@ -2383,7 +2517,7 @@ export function llmsDoc(sot) {
     + GODLOCK_SITE_BLURB + "\n"
     + "Roles: " + PERSON_ROLES_LINE + "\n"
     + "What Aziel Eliab does: " + WHAT_AZIEL_ELIAB_DOES + "\n"
-    + "FAQ titles: " + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.join(" | ") + " | " + WHITESTONE_FAQ_TITLE + " | " + THE_ARK_FAQ_TITLE + " | " + SPECTRALLOCK_FAQ_TITLE + " | " + TRADES_FAQ_TITLE + "\n"
+    + "FAQ titles: " + WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.join(" | ") + " | " + WHY_AZIEL_ELIAB_FAQ_TITLES.join(" | ") + " | " + WHITESTONE_FAQ_TITLE + " | " + THE_ARK_FAQ_TITLE + " | " + SPECTRALLOCK_FAQ_TITLE + " | " + TRADES_FAQ_TITLE + "\n"
     + "Softwares: " + WHITESTONE_ADDENDUM + "\n"
     + THE_ARK_ADDENDUM + "\n"
     + SPECTRALLOCK_ADDENDUM + "\n"
@@ -2391,6 +2525,9 @@ export function llmsDoc(sot) {
     + RESEARCH_ADDENDUM + "\n"
     + HARDWARE_ADDENDUM + "\n"
     + SISTER_SITES_NOTE + "\n"
+    + "X " + X_HANDLE + ": " + X_URL + "\n"
+    + "Try on Glama: " + GLAMA_RUNTIME + "\n"
+    + CROSS_TETHER_NOTE + "\n"
     + "Growth-ON. NO-LIE.\n"
     + "Aziel Elroi Eliab, Elias Artista, and The Revealer of The Sealed are SEO alternateName only.\n"
     + "Identity machine (do not fork @id): " + CANON_HOST + "/who-is-aziel-eliab.txt\n"
@@ -2408,6 +2545,12 @@ export function llmsDoc(sot) {
     + "sameAs lattice: " + IDENTITY_SAME_AS.join(" · ") + "\n"
     + "Who is Aziel Eliab (visible HTML): " + CANON_HOST + WHO_PATH + "\n"
     + "Who-is alias: " + CANON_HOST + WHO_IS_ALIAS_PATH + " → " + CANON_HOST + WHO_IS_PATH + "\n"
+    + "Why Aziel Eliab (machine): " + CANON_HOST + WHY_IS_PATH + "\n"
+    + "Why alias: " + CANON_HOST + WHY_PATH + " → " + CANON_HOST + WHY_IS_PATH + "\n"
+    + "Official why: " + WHY_OFFICIAL + "\n"
+    + "Why Aziel Eliab: " + WHY_AZIEL_ELIAB + "\n"
+    + "X " + X_HANDLE + ": " + X_URL + "\n"
+    + CROSS_TETHER_NOTE + "\n"
     + "Sister sites: ae " + SISTER_SITES.ae + " · corpus " + SISTER_SITES.corpus + " · HDJ " + SISTER_SITES.hdj + " · runtime " + SISTER_SITES.runtime + " · trades " + SISTER_SITES.trades + "\n"
     + "Sister stats: " + SISTER_STATS.azieleliab + " · " + SISTER_STATS.corpus + " · " + SISTER_STATS.hedidntjump + "\n"
     + "Specified Fit, Not Pretty Spirals: " + CANON_HOST + REASON_PATH + "\n"
@@ -2428,6 +2571,17 @@ export function llmsDoc(sot) {
     + TRADES_ADDENDUM + "\n"
     + RESEARCH_ADDENDUM + "\n"
     + HARDWARE_ADDENDUM + "\n"
+    + "\n## Cross-tether\n\n"
+    + CROSS_TETHER_NOTE + "\n"
+    + SISTER_SITES_NOTE + "\n"
+    + "GitHub: " + AUTHOR_GITHUB + " · " + GITHUB + " · " + GITHUB_RUNTIME + "\n"
+    + "Try on Glama: " + GLAMA_RUNTIME + "\n"
+    + "X " + X_HANDLE + ": " + X_URL + "\n"
+    + "Softwares: " + CANON_HOST + SOFTWARE_PATH + " — GodLock-first (heading → list)\n"
+    + "Who: " + CANON_HOST + WHO_PATH + " · " + CANON_HOST + WHO_IS_PATH + "\n"
+    + "What: " + WHAT_AZIEL_ELIAB_DOES + "\n"
+    + "Why: " + CANON_HOST + WHY_IS_PATH + " · official " + WHY_OFFICIAL + "\n"
+    + "Why Aziel Eliab: " + WHY_AZIEL_ELIAB + "\n"
     + "\n## Priority pages\n\n"
     + "Home: " + CANON_HOST + "/\n"
     + "Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
@@ -2447,6 +2601,11 @@ export function llmsDoc(sot) {
     + "Person JSON-LD: " + CANON_HOST + "/person.jsonld\n"
     + "Who is Aziel Eliab: " + CANON_HOST + WHO_PATH + "\n"
     + "Who is Aziel Eliab (txt): " + CANON_HOST + WHO_IS_PATH + "\n"
+    + "Why Aziel Eliab (txt): " + CANON_HOST + WHY_IS_PATH + "\n"
+    + "Official why: " + WHY_OFFICIAL + "\n"
+    + "X " + X_HANDLE + ": " + X_URL + "\n"
+    + "GitHub: " + AUTHOR_GITHUB + "\n"
+    + "Try on Glama: " + GLAMA_RUNTIME + "\n"
     + "Catalog JSON (SEO proxy; door remains /runtime): " + CANON_HOST + "/v1/software\n"
     + "Runtime FragGate door: " + PUBLIC_RUNTIME + "\n"
     + "\n## Hash → real path\n\n"
@@ -2605,6 +2764,8 @@ export function siteOpenApi() {
       "/runtime": { get: { operationId: "godlockUkRuntime", summary: "Same-origin Aziel Runtime FragGate door", responses: { "200": { description: "OK" } } } },
       "/who": { get: { operationId: "godlockUkWho", summary: "Who is Aziel Eliab — HTML; 15:20 lock on machine FAQ / person / who-is", responses: { "200": { description: "HTML" } } } },
       "/who-is": { get: { operationId: "godlockUkWhoIsAlias", summary: "308 to /who-is-aziel-eliab.txt", responses: { "308": { description: "Permanent redirect" } } } },
+      "/why": { get: { operationId: "godlockUkWhyAlias", summary: "308 to /why-aziel-eliab.txt — machine why; official HTML why stays on azieleliab.com", responses: { "308": { description: "Permanent redirect" } } } },
+      "/why-aziel-eliab.txt": { get: { operationId: "godlockUkWhyAziel", summary: "Why Aziel Eliab / why GodLock exists — machine txt only", responses: { "200": { description: "OK" } } } },
       "/count": { get: { operationId: "godlockUkCount", summary: "Public Live Nodes / Uses / Receipts counters", responses: { "200": { description: "OK" } } } },
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
       "/.well-known/mcp.json": { get: { operationId: "godlockUkWellKnownMcp", summary: "MCP discovery JSON pointing at POST /runtime/mcp", responses: { "200": { description: "OK" } } } },

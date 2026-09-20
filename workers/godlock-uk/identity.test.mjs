@@ -34,6 +34,15 @@ import {
   SISTER_STATS,
   LIBRARY_HOME,
   X_URL,
+  X_HANDLE,
+  WHY_PATH,
+  WHY_IS_PATH,
+  WHY_OFFICIAL,
+  WHY_AZIEL_ELIAB,
+  WHY_AZIEL_ELIAB_FAQ_TITLES,
+  CROSS_TETHER_NOTE,
+  crossTetherDoc,
+  whyAzielEliabTxt,
   identityAlternateNames,
   aboutPublicWorkDoc,
   ABOUT_PUBLIC_WORK_LEAD,
@@ -422,6 +431,8 @@ describe("AZindex identity machine", () => {
       "/who-is-aziel-eliab.txt",
       "/who-is",
       "/who",
+      "/why-aziel-eliab.txt",
+      "/why",
       "/.well-known/aziel.json",
       "/.well-known/person.jsonld",
     ]) {
@@ -434,6 +445,10 @@ describe("AZindex identity machine", () => {
     assert.ok(xml.includes(CANON_HOST + "/who-is-aziel-eliab.txt"));
     assert.ok(xml.includes("<loc>" + CANON_HOST + "/who</loc>"));
     assert.ok(xml.includes("<loc>" + CANON_HOST + "/who-is</loc>"));
+    assert.ok(xml.includes(CANON_HOST + "/why-aziel-eliab.txt"));
+    assert.ok(xml.includes("<loc>" + CANON_HOST + "/why</loc>"));
+    assert.ok(xml.includes("https://x.com/AzielEliab"));
+    assert.ok(xml.includes("https://www.azieleliab.com/why"));
     assert.ok(xml.includes(CANON_HOST + "/.well-known/aziel.json"));
     assert.ok(xml.includes(CANON_HOST + "/.well-known/person.jsonld"));
     for (const path of [
@@ -583,6 +598,7 @@ describe("AZindex identity machine", () => {
     assert.equal(hashPathEquivalent("#reason"), "/reason");
     assert.equal(hashPathEquivalent("#verify"), "/verify");
     assert.equal(hashPathEquivalent("#AzielEliab"), "/AzielEliab");
+    assert.equal(hashPathEquivalent("#why"), "/why");
     assert.equal(hashPathEquivalent("#prior"), "/receipts");
     assert.equal(SOFTWARE_HASH_REAL_PATHS["aziel-runtime"], "/runtime");
     const urls = hashPathEquivalentUrls();
@@ -987,5 +1003,89 @@ describe("AZindex identity machine", () => {
     assert.equal(aboutJson.corpus_master_records, 326);
     assert.equal(aboutJson.product_not_identity, true);
     assert.doesNotMatch(aboutJson.text, /MCP|OpenAPI/);
+  });
+
+  it("cross-tethers sister sites, GitHub, Glama, X, Softwares, and who/what/why on machine surfaces", async () => {
+    const tether = crossTetherDoc();
+    assert.deepEqual(tether.sister_sites, SISTER_SITES);
+    assert.equal(tether.github, AUTHOR_GITHUB);
+    assert.equal(tether.glama, GLAMA_RUNTIME);
+    assert.equal(tether.glama_label, "Try on Glama");
+    assert.equal(tether.x, X_URL);
+    assert.equal(tether.x_handle, X_HANDLE);
+    assert.equal(tether.softwares, CANON_HOST + "/software");
+    assert.match(tether.softwares_note, /GodLock-first/);
+    assert.match(tether.softwares_note, /heading → list/);
+    assert.equal(tether.who, CANON_HOST + WHO_PATH);
+    assert.equal(tether.what, WHAT_AZIEL_ELIAB_DOES);
+    assert.equal(tether.why, CANON_HOST + WHY_IS_PATH);
+    assert.equal(tether.why_official, WHY_OFFICIAL);
+    assert.equal(tether.why_aziel_eliab, WHY_AZIEL_ELIAB);
+    assert.deepEqual(tether.machine_surfaces_only, ["what", "why"]);
+    assert.equal(tether.note, CROSS_TETHER_NOTE);
+
+    const cite = citeDoc();
+    assert.deepEqual(cite.cross_tether, tether);
+    assert.equal(cite.x, X_URL);
+    assert.equal(cite.x_handle, X_HANDLE);
+    assert.equal(cite.why, CANON_HOST + WHY_IS_PATH);
+    assert.equal(cite.why_official, WHY_OFFICIAL);
+    assert.equal(cite.why_aziel_eliab, WHY_AZIEL_ELIAB);
+    assert.deepEqual(cite.why_aziel_eliab_faq, WHY_AZIEL_ELIAB_FAQ_TITLES);
+    assert.equal(cite.priority_pages.why_aziel_eliab, CANON_HOST + WHY_IS_PATH);
+    assert.equal(cite.identity_machine.why_aziel_eliab, CANON_HOST + WHY_IS_PATH);
+    assert.equal(cite.about_public_work.why_official, WHY_OFFICIAL);
+    assert.ok(cite.sameAs_lattice.includes(X_URL));
+    assert.ok(!cite.sameAs_lattice.includes("https://x.com/azieleliab"));
+    assert.ok(!cite.sameAs_lattice.includes("https://x.com/AzielElroiEliab"));
+
+    const why = whyAzielEliabTxt();
+    assert.match(why, /^Why Aziel Eliab\?/);
+    assert.ok(why.includes(WHY_AZIEL_ELIAB));
+    assert.ok(why.includes(ABOUT_PUBLIC_WORK_LEAD));
+    assert.ok(why.includes(CROSS_TETHER_NOTE));
+    assert.ok(why.includes(X_HANDLE));
+    assert.ok(why.includes(X_URL));
+    assert.ok(why.includes(GLAMA_RUNTIME));
+    assert.ok(why.includes(AUTHOR_GITHUB));
+    assert.ok(why.includes(CANON_HOST + "/software"));
+    assert.ok(why.includes("GodLock-first (heading → list)"));
+    assert.doesNotMatch(why, /Works-with assistants subsection/);
+    assert.doesNotMatch(why, /1 Chronicles 15:20/);
+
+    const whyRes = await fetchPath(WHY_IS_PATH);
+    assert.equal(whyRes.status, 200);
+    assert.match(whyRes.headers.get("Content-Type") || "", /text\/plain/);
+    assert.equal(await whyRes.text(), why);
+
+    const alias = await fetchPath(WHY_PATH);
+    assert.equal(alias.status, 308);
+    assert.equal(alias.headers.get("Location"), WHY_IS_PATH);
+
+    const who = whoIsAzielEliabTxt();
+    assert.ok(who.includes(WHY_AZIEL_ELIAB));
+    assert.ok(who.includes(CROSS_TETHER_NOTE));
+    assert.ok(who.includes("X " + X_HANDLE));
+
+    const llms = llmsDoc();
+    assert.match(llms, /## Cross-tether/);
+    assert.ok(llms.includes(CROSS_TETHER_NOTE));
+    assert.ok(llms.includes(WHY_AZIEL_ELIAB));
+    assert.ok(llms.includes(CANON_HOST + WHY_IS_PATH));
+    assert.ok(llms.includes(WHY_OFFICIAL));
+    assert.ok(llms.includes("X " + X_HANDLE + ": " + X_URL));
+    assert.ok(llms.includes("Try on Glama: " + GLAMA_RUNTIME));
+    assert.match(llms, /No Works-with assistants subsection/);
+
+    const mission = wellKnownAzielDoc();
+    assert.deepEqual(mission.cross_tether, tether);
+    assert.equal(mission.x, X_URL);
+    assert.equal(mission.x_handle, X_HANDLE);
+
+    const graph = graphJsonLd();
+    const faq = graph["@graph"].find((n) => n["@type"] === "FAQPage");
+    const names = faq.mainEntity.map((q) => q.name);
+    assert.ok(names.includes("Why Aziel Eliab?"));
+    assert.ok(names.includes("Why does Aziel Eliab keep looking?"));
   });
 });

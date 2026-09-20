@@ -30,6 +30,11 @@ FragGate list fallback only: https://aziel-runtime.vibelock.workers.dev/v1/fragg
 
 Public identity is Aziel Eliab only. Person @id is always https://www.azieleliab.com/#aziel.
 Who page: https://godlock.uk/who
+Why (machine): https://godlock.uk/why-aziel-eliab.txt
+Official why: https://www.azieleliab.com/why
+X @AzielEliab: https://x.com/AzielEliab
+GitHub: https://github.com/AzielEliab
+Try on Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
 About: https://godlock.uk/AzielEliab
 Specified Fit, Not Pretty Spirals: https://godlock.uk/reason
 
@@ -40,6 +45,7 @@ ai.txt: https://godlock.uk/ai.txt
 cite.json: https://godlock.uk/cite.json
 robots.txt: https://godlock.uk/robots.txt
 who-is: https://godlock.uk/who-is-aziel-eliab.txt
+why-is: https://godlock.uk/why-aziel-eliab.txt
 Runtime door: https://godlock.uk/runtime
 OpenAPI: https://godlock.uk/openapi.json
 MCP discovery: https://godlock.uk/.well-known/mcp.json

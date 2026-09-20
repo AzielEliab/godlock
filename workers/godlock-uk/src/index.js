@@ -24,8 +24,8 @@ import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, mcpDiscoveryDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR,
   PUBLIC_RUNTIME, RUNTIME_PATH, RUNTIME_VERSION, OFFICIAL_SOFTWARES, permanentIdentityRedirect, citeRuntimeVersion,
   BRAND_MARK_PATH,
-  personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, wellKnownAzielDoc,
-  AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE, WHO_PATH,
+  personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, whyAzielEliabTxt, wellKnownAzielDoc,
+  AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE, WHO_PATH, WHY_IS_PATH,
   WHAT_AZIEL_ELIAB_DOES, WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
   RESEARCH_ADDENDUM, HARDWARE_ADDENDUM, WHITESTONE_ADDENDUM, WHITESTONE_URL, WHITESTONE_NAME, WHITESTONE_ONE_LINE,
   THE_ARK_ADDENDUM, THE_ARK_ONE_LINE, ARK_NAME, ARK_SLUG, ARK_GITHUB, ARK_STATS, ARK_COUNT, CORPUS_MASTER_RECORDS,
@@ -672,6 +672,9 @@ export default {
       }
       if (path === "/who-is-aziel-eliab.txt") {
         return new Response(whoIsAzielEliabTxt(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+      }
+      if (path === WHY_IS_PATH) {
+        return new Response(whyAzielEliabTxt(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (isHelpPath(path)) {
         return new Response(helpDoc(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });

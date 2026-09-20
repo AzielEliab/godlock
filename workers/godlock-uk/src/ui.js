@@ -5,6 +5,7 @@
 import {
   headMeta, documentTitle, BANNER, DOWNLOAD, GITHUB, CANON_HOST, LIBRARY_AZIEL,
   HEDIDNTJUMP, HEDIDNTJUMP_LABEL, BRAND_MARK_PATH, AZIEL_OFFICIAL, OFFICIAL_SOFTWARES,
+  SOFTWARE_SSOT, SOFTWARE_SSOT_FALLBACK,
   AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
   DONATE_PATH, RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE,
   runtimeDistribution, ecosystemLinks,
@@ -353,6 +354,11 @@ export function officialSoftwaresPointer() {
   return `<p class="soft-line">Software is available at <a class="soft-name" href="${esc(AZIEL_OFFICIAL)}">${esc(host)}</a> (<a href="${esc(OFFICIAL_SOFTWARES)}">Softwares / software listing</a>).</p>`;
 }
 
+/** Suite catalog pointer. Worker SSoT first; FragGate list fallback only. No suite cards here. */
+export function suiteSoftwaresSsotPointer() {
+  return `<p class="soft-line">Suite Softwares catalog (Worker SSoT): <a href="${esc(SOFTWARE_SSOT)}">${esc(SOFTWARE_SSOT)}</a>. Same-origin <a href="${esc(RUNTIME_PATH + "/v1/software")}">${esc(RUNTIME_PATH + "/v1/software")}</a>. FragGate list is fallback only (<a href="${esc(SOFTWARE_SSOT_FALLBACK)}">${esc(SOFTWARE_SSOT_FALLBACK)}</a>).</p>`;
+}
+
 export function homeSoftwareLine() {
   const host = AZIEL_OFFICIAL.replace(/\/$/, "");
   return `<section class="home-software" id="software">
@@ -688,6 +694,7 @@ export function softwareBody({ products, extras } = {}) {
   return `<h2 class="soft-heading">Softwares</h2>
 <div class="soft-grid">${cards}</div>
 ${officialSoftwaresPointer()}
+${suiteSoftwaresSsotPointer()}
 ${launchReadyHtml()}`;
 }
 

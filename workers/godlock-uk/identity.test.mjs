@@ -772,6 +772,11 @@ describe("AZindex identity machine", () => {
     assert.equal(WHITESTONE_FAQ_TITLE, "What is Whitestone?");
     assert.ok(WHITESTONE_ADDENDUM.includes(WHITESTONE_ONE_LINE));
     assert.ok(WHITESTONE_ADDENDUM.includes(WHITESTONE_URL));
+    assert.ok(WHITESTONE_ADDENDUM.includes("https://aziel-runtime.vibelock.workers.dev/v1/software"));
+    assert.ok(WHITESTONE_ADDENDUM.includes("https://godlock.uk/runtime/v1/software"));
+    assert.match(WHITESTONE_ADDENDUM, /FragGate list is fallback only/);
+    assert.match(WHITESTONE_ADDENDUM, /Not a FragGate door/);
+    assert.match(WHITESTONE_ADDENDUM, /Not a GodLock Softwares HTML card/);
     assert.match(WHITESTONE_ADDENDUM, /never invent door ops/);
     assert.doesNotMatch(WHITESTONE_ADDENDUM, /\/v1\/fraggate\/|fraggate_describe|fraggate_call/);
     assert.equal(ARK_NAME, "The ARK");
@@ -873,6 +878,14 @@ describe("AZindex identity machine", () => {
     assert.equal(cite.whitestone_name, WHITESTONE_NAME);
     assert.equal(cite.whitestone_one_line, WHITESTONE_ONE_LINE);
     assert.equal(cite.whitestone_addendum, WHITESTONE_ADDENDUM);
+    assert.equal(cite.whitestone_catalog, "https://aziel-runtime.vibelock.workers.dev/v1/software");
+    assert.equal(cite.whitestone_catalog_same_origin, "https://godlock.uk/runtime/v1/software");
+    assert.equal(cite.whitestone_engine, false);
+    assert.equal(cite.whitestone_fraggate, false);
+    assert.equal(cite.whitestone_godlock_softwares_html_card, false);
+    assert.equal(cite.software_hub_local, true);
+    assert.equal(cite.software_ssot, "https://aziel-runtime.vibelock.workers.dev/v1/software");
+    assert.equal(cite.software_fraggate_fallback_only, true);
     assert.equal(cite.the_ark_name, ARK_NAME);
     assert.equal(cite.the_ark_slug, ARK_SLUG);
     assert.equal(cite.the_ark_one_line, THE_ARK_ONE_LINE);

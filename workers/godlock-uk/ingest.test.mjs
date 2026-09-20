@@ -232,7 +232,7 @@ describe("INGEST-AS-RECEIPT + RE-EXPAND-FROM-ARCHIVE", () => {
     assert.match(llms, /AI ingest is the receipt path/);
     assert.match(llms, /Growth-ON/);
     assert.match(llms, /first card is GodLock/);
-    assert.match(llms, /\/v1\/software JSON stays Aziel Runtime only plus sister_cites/);
+    assert.match(llms, /\/v1\/software JSON is hub-local/);
     const citeAt = llms.indexOf("Cite: https://godlock.uk/cite.json");
     const llmsAt = llms.indexOf("LLMs: https://godlock.uk/llms.txt");
     const ingestAt = llms.indexOf("## INGEST-AS-RECEIPT");

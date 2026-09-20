@@ -791,6 +791,9 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(permanentIdentityRedirect("/who-is-aziel-eliab.txt"), "");
     assert.equal(permanentIdentityRedirect("/who"), "");
     assert.equal(WHO_PATH, "/who");
+    assert.equal(permanentIdentityRedirect("/why"), "/why-aziel-eliab.txt");
+    assert.equal(permanentIdentityRedirect("/why-aziel-eliab"), "/why-aziel-eliab.txt");
+    assert.equal(permanentIdentityRedirect("/why-aziel-eliab.txt"), "");
   });
 });
 
@@ -803,8 +806,14 @@ describe("priority page SEO", () => {
     assert.equal(documentTitle("Receipts", "receipts"), "Receipts — GodLock");
     const homeHead = headMeta({ title: "GodLock", path: "/", kind: "home" });
     assert.match(homeHead, /og:title" content="GodLock by Aziel Eliab — Specified Fit, Not Pretty Spirals"/);
+    assert.match(homeHead, /name="twitter:site" content="@AzielEliab"/);
+    assert.match(homeHead, /name="twitter:creator" content="@AzielEliab"/);
+    assert.match(homeHead, /rel="me" href="https:\/\/github.com\/AzielEliab"/);
+    assert.match(homeHead, /rel="me" href="https:\/\/x.com\/AzielEliab"/);
+    assert.match(homeHead, /href="\/why-aziel-eliab.txt"/);
     assert.match(homeHead, /if\(location.pathname!=='\/'\)return;/);
     assert.match(homeHead, /"software":"\/software"/);
+    assert.match(homeHead, /"why":"\/why"/);
     assert.match(homeHead, /"receipts":"\/receipts"/);
     assert.match(headMeta({ title: "Softwares", path: "/software", kind: "software" }), /og:title" content="GodLock Softwares"/);
     assert.doesNotMatch(headMeta({ title: "GodLock", path: "/", kind: "home" }), /GodLock — GodLock/);

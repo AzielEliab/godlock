@@ -31,6 +31,7 @@ SISTER_SITES = {
     "corpus": "https://www.azielcorpuslibrary.net/",
     "hdj": "https://www.hedidntjump.com/",
     "runtime": "https://aziel-runtime.vibelock.workers.dev/",
+    "trades": "https://trades-runtime.vibelock.workers.dev/",
 }
 
 HEBREW_DEFINITION = (
@@ -390,6 +391,21 @@ def test_cite_json_graph():
     assert "Roles: researcher, digital rights activist, software developer, author, and philosopher" in AI
     assert "Sister sites: ae https://www.azieleliab.com/" in LLMS
     assert "Sister sites: ae https://www.azieleliab.com/" in AI
+    assert "https://x.com/AzielEliab" in LLMS
+    assert "https://x.com/AzielEliab" in AI
+    assert "@AzielEliab" in LLMS
+    assert "Cross-tether:" in LLMS
+    assert "https://godlock.uk/why-aziel-eliab.txt" in LLMS
+    assert "https://www.azieleliab.com/why" in LLMS
+    assert "Aziel Eliab keeps looking" in LLMS
+    assert CITE["x"] == "https://x.com/AzielEliab"
+    assert CITE["x_handle"] == "@AzielEliab"
+    assert CITE["why"] == "https://godlock.uk/why-aziel-eliab.txt"
+    assert CITE["why_official"] == "https://www.azieleliab.com/why"
+    assert "GodLock-first heading → list" in CITE["cross_tether"]["note"]
+    assert CITE["cross_tether"]["x"] == "https://x.com/AzielEliab"
+    assert CITE["cross_tether"]["glama"] == "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime"
+    assert CITE["cross_tether"]["softwares"] == "https://godlock.uk/software"
     assert "Empty/null submit refuses" in LLMS
     assert "Empty/null submit refuses" in AI
     assert "Growth-ON" in LLMS
@@ -482,4 +498,6 @@ def test_human_help_addendum_docs_are_positive():
     assert "GodLock-first" in help_txt
     assert "https://godlock.uk/llms.txt" in help_txt
     assert "https://godlock.uk/cite.json" in help_txt
+    assert "https://godlock.uk/why-aziel-eliab.txt" in help_txt
+    assert "https://x.com/AzielEliab" in help_txt
     assert "Growth-ON" in help_txt

@@ -70,12 +70,12 @@ describe("GodLock Softwares Whitestone via Worker SSoT", () => {
     assert.equal(api.whitestone.door, "none");
     assert.doesNotMatch(JSON.stringify(api.whitestone), /fraggate_describe|fraggate_call|\/v1\/fraggate\/describe/);
     assert.doesNotMatch(WHITESTONE_ADDENDUM, /\/v1\/fraggate\/|fraggate_describe|fraggate_call/);
-    assert.match(WHITESTONE_ADDENDUM, /never invent door ops/);
+    assert.doesNotMatch(WHITESTONE_ADDENDUM, /never invent door ops/);
     assert.ok(WHITESTONE_ADDENDUM.includes(WHITESTONE_URL));
     assert.ok(WHITESTONE_ADDENDUM.includes(SOFTWARE_SSOT));
     assert.ok(WHITESTONE_ADDENDUM.includes("https://godlock.uk/runtime/v1/software"));
     assert.match(WHITESTONE_ADDENDUM, /FragGate list is fallback only/);
-    assert.match(WHITESTONE_ADDENDUM, /Not a FragGate door/);
+    assert.doesNotMatch(WHITESTONE_ADDENDUM, /Not a FragGate door/);
     assert.equal(publicSoftwaresList([]).every((p) => p.slug === "aziel-runtime"), true);
     assert.deepEqual(publicSoftwaresHtmlList([]).map((p) => p.slug), ["godlock", "aziel-runtime"]);
   });
@@ -106,5 +106,8 @@ describe("GodLock Softwares Whitestone via Worker SSoT", () => {
     assert.match(llms, /\/v1\/software JSON is hub-local/);
     assert.ok(llms.includes(SOFTWARE_SSOT));
     assert.ok(llms.includes(WHITESTONE_ADDENDUM));
+    assert.match(llms, /Score text for offline hardening and receive an ephemeral receipt|Advise on short Criminal, Civil, and Divorce questions/);
+    assert.doesNotMatch(WHITESTONE_ADDENDUM, /never invent|this is not|needs verified|unverified/i);
+    assert.doesNotMatch(html, /never invent|this is not|needs verified|unverified/i);
   });
 });

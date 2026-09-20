@@ -27,6 +27,7 @@ import {
   AZCOHERENCE_DOWNLOAD, AZCOHERENCE_WORKER, AZCOHERENCE_COUNT, AZCOHERENCE_GITHUB,
   AZCOHERENCE_SLUG, AZCOHERENCE_NAME, AZCOHERENCE_VERSION, AZCOHERENCE_ONE_LINE,
   SPECTRALLOCK_SLUG, SPECTRALLOCK_NAME, SPECTRALLOCK_VERSION, SPECTRALLOCK_ONE_LINE,
+  GODLOCK_PURPOSE_ONE_LINE, RUNTIME_PURPOSE_ONE_LINE,
   SPECTRALLOCK_GITHUB, SPECTRALLOCK_DOWNLOAD,
   DOWNLOAD, GITHUB,
 } from "./seo.js";
@@ -179,13 +180,18 @@ export function hubProductCopy(raw) {
   let name = String((raw && raw.name) || slug);
   let one_line = hideInternalDetermination(String((raw && (raw.one_line || raw.banner)) || ""));
   if (slug === "godlock") {
-    if (/\bABAD\b/i.test(one_line)) {
-      one_line = "Specified Fit / GodLock score.";
-    }
+    const stale = /\bABAD\b/i.test(one_line)
+      || /not a VPN/i.test(one_line)
+      || /Specified Fit \/ GodLock score/i.test(one_line);
+    if (stale || !one_line) one_line = GODLOCK_PURPOSE_ONE_LINE;
     return { name: name || "GodLock", one_line };
   }
   if (slug === RUNTIME_SLUG || slug === "aziel-runtime") {
-    return { name: RUNTIME_NAME, one_line: stripRuntimeFragGateMash(one_line) };
+    const mashed = stripRuntimeFragGateMash(one_line);
+    const stale = !mashed
+      || /One door — discover, route, refuse/i.test(mashed)
+      || /Hosts the FragGate kernel/i.test(mashed);
+    return { name: RUNTIME_NAME, one_line: stale ? RUNTIME_PURPOSE_ONE_LINE : mashed };
   }
   if (slug === "aznet") {
     return { name: "AZNet", one_line: collapseAznetCopy(one_line) };
@@ -200,7 +206,7 @@ export function hubProductCopy(raw) {
     return { name: AZCOHERENCE_NAME, one_line: one_line || AZCOHERENCE_ONE_LINE };
   }
   if (slug === SPECTRALLOCK_SLUG) {
-    const inherited = /leftover/i.test(one_line) ? one_line : SPECTRALLOCK_ONE_LINE;
+    const inherited = /Preview a small overlay/i.test(one_line) ? one_line : SPECTRALLOCK_ONE_LINE;
     return { name: SPECTRALLOCK_NAME, one_line: inherited };
   }
   const combined = slug === "azbrowser"
@@ -217,40 +223,40 @@ export function hubProductCopy(raw) {
 }
 
 export const CATALOG_FALLBACK_PRODUCTS = [
-  { slug: "vibelock", name: "VibeLock", version: "0.3.0", one_line: "Physical-consistency evaluation of speech audio. Risk assessment, not a liveness proof.", github: "https://github.com/AzielEliab/vibelock", download: "https://vibelock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "veillock", name: "VeilLock", version: "0.2.0", one_line: "Local camera/screen steps for YOUR device only. Not a call interceptor.", github: "https://github.com/AzielEliab/veillock", download: "https://veillock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "codelock", name: "CodeLock", version: "0.1.0", one_line: "Canonical or Rosetta HTML view of source. Alters perception, not meaning.", github: "https://github.com/AzielEliab/codelock", download: "https://codelock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "godlock", name: "GodLock", version: "0.1.0", one_line: "Specified Fit / GodLock score.", github: GITHUB, download: DOWNLOAD },
-  { slug: "shadowlock", name: "ShadowLock", version: "0.2.0", one_line: "Zero-retention observation of a job list you already have. No OS hook.", github: "https://github.com/AzielEliab/shadowlock", download: "https://shadowlock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "temporallock", name: "TemporalLock", version: "0.2.0", one_line: "Hash-chained receipts anyone can verify. Explicit genesis, append, verify.", github: "https://github.com/AzielEliab/temporallock", download: "https://temporallock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "forgereceipts", name: "ForgeReceipts", version: "0.3.0", one_line: "ForgeReceipts 0.3.0: Local receipt / checklist helper with jurisdiction-aware state picker (all 50 states + federal baseline) customizing UI/legal framing. Not legal advice. Does not contact courts. Author Aziel Eliab.", github: "https://github.com/AzielEliab/forgereceipts", download: "https://forgereceipts-download-tracker.vibelock.workers.dev/download" },
-  { slug: "decisiongate", name: "DecisionGATE", version: "0.1.0", one_line: "Five sequential gates on a proposal. Freedom without clarity is chaos.", github: "https://github.com/AzielEliab/decisiongate", download: "https://decisiongate-download-tracker.vibelock.workers.dev/download" },
-  { slug: "zsolver", name: "ZionPattern Solver", version: "0.2.0", one_line: "Nine ontology nodes (Zioncheck seed). Hard 75% cap. Does not solve cases.", github: "https://github.com/AzielEliab/zion-pattern-solver", download: "https://zsolver-download-tracker.vibelock.workers.dev/download" },
-  { slug: "azos", name: "AZ-OS", version: "0.3.0", one_line: "Read-only status / principles. Does not grant remote shell.", github: "https://github.com/AzielEliab/azos", download: "https://azos-download-tracker.vibelock.workers.dev/download" },
-  { slug: "glossafilter", name: "Glossa Filter", version: "0.1.0", one_line: "Render an intent across bundled peer ids. Human opinion remains human.", github: "https://github.com/AzielEliab/glossafilter", download: "https://glossafilter-download-tracker.vibelock.workers.dev/download" },
-  { slug: "miragegrid", name: "MirageGrid", version: "0.2.0", one_line: "Ephemeral session node assignment. Not a VPN and not an anonymity network.", github: "https://github.com/AzielEliab/miragegrid", download: "https://miragegrid-download-tracker.vibelock.workers.dev/download" },
-  { slug: "staticclock", name: "StaticClock", version: "0.2.0", one_line: "Five advisory fields for a geo. Not a scheduler.", github: "https://github.com/AzielEliab/staticclock", download: "https://staticclock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "chronolock", name: "ChronoLock", version: "0.1.0", one_line: "Advisory temporal window 08:30–10:30 local. Distinct from TemporalLock.", github: "https://github.com/AzielEliab/chronolock", download: "https://chronolock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "postking", name: "Post-King Chess", version: "0.1.0", one_line: "Continuity chess. The goal is not to win. The goal is to remain.", github: "https://github.com/AzielEliab/postking-chess", download: "https://postking-download-tracker.vibelock.workers.dev/download" },
-  { slug: "azclce", name: "AZ-CLCE", version: "0.3.0", one_line: "Jaccard triple / pairwise / CLCE+. Detects inconsistency, not intent.", github: "https://github.com/AzielEliab/az-clce", download: "https://azclce-download-tracker.vibelock.workers.dev/download" },
+  { slug: "vibelock", name: "VibeLock", version: "0.3.0", one_line: "Score speech audio you already have for physical consistency risk.", github: "https://github.com/AzielEliab/vibelock", download: "https://vibelock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "veillock", name: "VeilLock", version: "0.2.0", one_line: "Follow local camera and screen steps for apps on your own device.", github: "https://github.com/AzielEliab/veillock", download: "https://veillock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "codelock", name: "CodeLock", version: "0.1.0", one_line: "View source as Canonical or Rosetta HTML while keeping the same meaning.", github: "https://github.com/AzielEliab/codelock", download: "https://codelock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "godlock", name: "GodLock", version: "0.1.0", one_line: GODLOCK_PURPOSE_ONE_LINE, github: GITHUB, download: DOWNLOAD },
+  { slug: "shadowlock", name: "ShadowLock", version: "0.2.0", one_line: "Observe a job list you already have, then discard the observation.", github: "https://github.com/AzielEliab/shadowlock", download: "https://shadowlock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "temporallock", name: "TemporalLock", version: "0.2.0", one_line: "Build and check hashes on a receipt timeline you keep on the client.", github: "https://github.com/AzielEliab/temporallock", download: "https://temporallock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "forgereceipts", name: "ForgeReceipts", version: "0.3.0", one_line: "Mint, check hashes, and import or export receipts you keep on the client.", github: "https://github.com/AzielEliab/forgereceipts", download: "https://forgereceipts-download-tracker.vibelock.workers.dev/download" },
+  { slug: "decisiongate", name: "DecisionGATE", version: "0.1.0", one_line: "Run a proposal through five sequential gates and get PASS, REVISE, or BLOCK.", github: "https://github.com/AzielEliab/decisiongate", download: "https://decisiongate-download-tracker.vibelock.workers.dev/download" },
+  { slug: "zsolver", name: "ZionPattern Solver", version: "0.2.0", one_line: "Score answers against nine ontology nodes, with scores labeled up to 75%.", github: "https://github.com/AzielEliab/zion-pattern-solver", download: "https://zsolver-download-tracker.vibelock.workers.dev/download" },
+  { slug: "azos", name: "AZ-OS", version: "0.3.0", one_line: "Read ethics status and open a prefab isolate session folder.", github: "https://github.com/AzielEliab/azos", download: "https://azos-download-tracker.vibelock.workers.dev/download" },
+  { slug: "glossafilter", name: "Glossa Filter", version: "0.1.0", one_line: "Render one intent across the bundled peer phrasings.", github: "https://github.com/AzielEliab/glossafilter", download: "https://glossafilter-download-tracker.vibelock.workers.dev/download" },
+  { slug: "miragegrid", name: "MirageGrid", version: "0.2.0", one_line: "Assign a short-lived session node and cite mesh-name metadata.", github: "https://github.com/AzielEliab/miragegrid", download: "https://miragegrid-download-tracker.vibelock.workers.dev/download" },
+  { slug: "staticclock", name: "StaticClock", version: "0.2.0", one_line: "Record a forward-only gear-click timeline and read companion advice.", github: "https://github.com/AzielEliab/staticclock", download: "https://staticclock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "chronolock", name: "ChronoLock", version: "0.1.0", one_line: "Check whether a place sits in the 08:30–10:30 local advisory window.", github: "https://github.com/AzielEliab/chronolock", download: "https://chronolock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "postking", name: "Post-King Chess", version: "0.1.0", one_line: "Play continuity chess where the aim is to remain.", github: "https://github.com/AzielEliab/postking-chess", download: "https://postking-download-tracker.vibelock.workers.dev/download" },
+  { slug: "azclce", name: "AZ-CLCE", version: "0.3.0", one_line: "Score how consistently three written layers agree with each other.", github: "https://github.com/AzielEliab/az-clce", download: "https://azclce-download-tracker.vibelock.workers.dev/download" },
   { slug: AZCOHERENCE_SLUG, name: AZCOHERENCE_NAME, version: AZCOHERENCE_VERSION, one_line: AZCOHERENCE_ONE_LINE, github: AZCOHERENCE_GITHUB, download: AZCOHERENCE_DOWNLOAD, worker: AZCOHERENCE_WORKER, worker_home: AZCOHERENCE_WORKER, count: AZCOHERENCE_COUNT },
-  { slug: "ark", name: "The ARK", version: "0.1.0", one_line: "Mode E heuristics sweep. Not a kernel. Hosted never unlocks or stores vaults.", github: "https://github.com/AzielEliab/ark", download: "https://ark-download-tracker.vibelock.workers.dev/download" },
-  { slug: "azai", name: "AZAI", version: "0.3.1", one_line: "Local OpenAI-compatible runtime. Not a new foundation model. Jeeves is not sovereign.", github: "https://github.com/AzielEliab/azai", download: "https://azai-download-tracker.vibelock.workers.dev/download" },
+  { slug: "ark", name: "The ARK", version: "0.1.0", one_line: "Keep a local deniable vault; one phrase opens one vault.", github: "https://github.com/AzielEliab/ark", download: "https://ark-download-tracker.vibelock.workers.dev/download" },
+  { slug: "azai", name: "AZAI", version: "0.3.1", one_line: "Run a local OpenAI-compatible stack or a hosted Lamb ethics check.", github: "https://github.com/AzielEliab/azai", download: "https://azai-download-tracker.vibelock.workers.dev/download" },
   { slug: SPECTRALLOCK_SLUG, name: SPECTRALLOCK_NAME, version: SPECTRALLOCK_VERSION, one_line: SPECTRALLOCK_ONE_LINE, github: SPECTRALLOCK_GITHUB, download: SPECTRALLOCK_DOWNLOAD },
-  { slug: "azbot", name: "AZBot", version: "0.2.0", one_line: "Skill, not a foundation model. Hosted /v1/skill returns markdown.", github: "https://github.com/AzielEliab/azbot", download: "https://azbot-download-tracker.vibelock.workers.dev/download" },
-  { slug: "employeelock", name: "EmployeeLock", version: "0.1.0", one_line: "Hash-chained accountability workbook. Not a court, not UL, not a truth score.", github: "https://github.com/AzielEliab/employeelock", download: "https://employeelock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "foldlock", name: "FoldLock", version: "0.8.0", one_line: "Algorithmic tether-word suppression on UTF-8 text. Not zip.", github: "https://github.com/AzielEliab/foldlock", download: "https://foldlock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "whistlelock", name: "WhistleLock", version: "0.1.0", one_line: "Local drop ledger + dead-man copy. Not a mailer.", github: "https://github.com/AzielEliab/whistlelock", download: "https://whistlelock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "trajectorylock", name: "TrajectoryLock", version: "0.1.0", one_line: "Auditable geometric test. Research prototype, not a certified forensic instrument.", github: "https://github.com/AzielEliab/trajectorylock", download: "https://trajectorylock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "mialock", name: "M.I.A.Lock", version: "0.1.1", one_line: "M.I.A.Lock 0.1.1: event map + Doe matching + uncertainty ellipses + coverage heat. Doe leads ≠ ID. Heat ≠ presence. Author Aziel Eliab.", github: "https://github.com/AzielEliab/mialock", download: "https://mialock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "azieltether", name: "AzielTether", version: "0.1.0", one_line: "AzielTether 0.1.0: central × decentral survival mesh for downloaded Aziel software. Prefer-central; peer sync when down; public HTTPS stays mesh-free. Not a VPN. Author Aziel Eliab.", github: "https://github.com/AzielEliab/azieltether", download: "https://azieltether-download-tracker.vibelock.workers.dev/download" },
-  { slug: "peacelock", name: "PeaceLock", version: "0.1.0", one_line: "Chosen silence / chosen inaction as a first-class receipt (PL-WP-0.1).", github: "https://github.com/AzielEliab/peacelock", download: "https://peacelock-download-tracker.vibelock.workers.dev/download" },
-  { slug: "azmail", name: "AZMail", version: "0.1.0", one_line: "AZMail (APP 1.0): anonymous MCP mesh + advisory airlock. Not a full internet MTA. Mesh default off. FragGate only.", github: "https://github.com/AzielEliab/azmail", download: "https://azmail-download-tracker.vibelock.workers.dev/download" },
-  { slug: "azbrowser", name: "AZBrowser", version: "0.1.0", one_line: "AZBrowser (AZB-1.0): Lamb Lens ethical research browser. Cite; refuse harvest; no invented visits. FragGate only. AZNet is a separate software (order/token pairing only).", github: "https://github.com/AzielEliab/azbrowser", download: AZBROWSER_DOWNLOAD, worker: AZBROWSER_WORKER, worker_home: AZBROWSER_WORKER, count: AZBROWSER_COUNT },
-  { slug: "aznet", name: "AZNet", version: "0.1.0", one_line: "AZNet (AZN-WP-0.1): silent verification side-net. Hash continuity without hosting. Separate software; functional-order pair with AZBrowser.", github: AZNET_GITHUB, download: AZNET_DOWNLOAD, worker: AZNET_WORKER, worker_home: AZNET_WORKER, count: AZNET_COUNT },
-  { slug: "azhub", name: "AZHub", version: "0.1.0", one_line: "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate software.", github: AZHUB_GITHUB, download: AZHUB_DOWNLOAD, worker: AZHUB_WORKER, worker_home: AZHUB_WORKER, count: AZHUB_COUNT },
-  { slug: "azinterface", name: "AZInterface", version: "0.1.0", one_line: "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate software.", github: AZINTERFACE_GITHUB, download: AZINTERFACE_DOWNLOAD, worker: AZINTERFACE_WORKER, worker_home: AZINTERFACE_WORKER, count: AZINTERFACE_COUNT },
-  { slug: "aziel-corpus", name: "Aziel Digital Library", version: "2.6.2", one_line: "Self-contained immutable digital library. Public MASTER. Not a 26-card index.", github: "https://github.com/AzielEliab/aziel-corpus", download: "https://www.azielcorpuslibrary.net/download" },
+  { slug: "azbot", name: "AZBot", version: "0.2.0", one_line: "Route a request onto the matching catalog product and operation.", github: "https://github.com/AzielEliab/azbot", download: "https://azbot-download-tracker.vibelock.workers.dev/download" },
+  { slug: "employeelock", name: "EmployeeLock", version: "0.1.0", one_line: "Hash a proposed accountability log row on the client.", github: "https://github.com/AzielEliab/employeelock", download: "https://employeelock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "foldlock", name: "FoldLock", version: "0.8.0", one_line: "Fold UTF-8 text by suppressing tether words, then check the restore.", github: "https://github.com/AzielEliab/foldlock", download: "https://foldlock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "whistlelock", name: "WhistleLock", version: "0.1.0", one_line: "Hash a local drop and keep a dead-man copy on the client.", github: "https://github.com/AzielEliab/whistlelock", download: "https://whistlelock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "trajectorylock", name: "TrajectoryLock", version: "0.1.0", one_line: "Test whether observations fit a declared geometric line.", github: "https://github.com/AzielEliab/trajectorylock", download: "https://trajectorylock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "mialock", name: "M.I.A.Lock", version: "0.1.1", one_line: "Map missing-person events and rank Doe notices as compatibility leads.", github: "https://github.com/AzielEliab/mialock", download: "https://mialock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "azieltether", name: "AzielTether", version: "0.1.0", one_line: "Keep downloaded Aziel software in sync when the central Worker is up or down.", github: "https://github.com/AzielEliab/azieltether", download: "https://azieltether-download-tracker.vibelock.workers.dev/download" },
+  { slug: "peacelock", name: "PeaceLock", version: "0.1.0", one_line: "Record chosen silence or chosen inaction as a hash-chained receipt.", github: "https://github.com/AzielEliab/peacelock", download: "https://peacelock-download-tracker.vibelock.workers.dev/download" },
+  { slug: "azmail", name: "AZMail", version: "0.1.0", one_line: "Classify mail text, keep a local mailbox, and optionally use an anonymous ring.", github: "https://github.com/AzielEliab/azmail", download: "https://azmail-download-tracker.vibelock.workers.dev/download" },
+  { slug: "azbrowser", name: "AZBrowser", version: "0.1.0", one_line: "Browse and search with citations for ethical research.", github: "https://github.com/AzielEliab/azbrowser", download: AZBROWSER_DOWNLOAD, worker: AZBROWSER_WORKER, worker_home: AZBROWSER_WORKER, count: AZBROWSER_COUNT },
+  { slug: "aznet", name: "AZNet", version: "0.1.0", one_line: "Check hash continuity on a silent side-net.", github: AZNET_GITHUB, download: AZNET_DOWNLOAD, worker: AZNET_WORKER, worker_home: AZNET_WORKER, count: AZNET_COUNT },
+  { slug: "azhub", name: "AZHub", version: "0.1.0", one_line: "Place and tether modules in a blank spatial container.", github: AZHUB_GITHUB, download: AZHUB_DOWNLOAD, worker: AZHUB_WORKER, worker_home: AZHUB_WORKER, count: AZHUB_COUNT },
+  { slug: "azinterface", name: "AZInterface", version: "0.1.0", one_line: "Advance pre-locked page cycles in a custodial operating environment.", github: AZINTERFACE_GITHUB, download: AZINTERFACE_DOWNLOAD, worker: AZINTERFACE_WORKER, worker_home: AZINTERFACE_WORKER, count: AZINTERFACE_COUNT },
+  { slug: "aziel-corpus", name: "Aziel Digital Library", version: "2.6.2", one_line: "Search the public library and download azcorpus + azlibrary designs.", github: "https://github.com/AzielEliab/aziel-corpus", download: "https://www.azielcorpuslibrary.net/download" },
 ];
 
 export const CATALOG_SLUGS = CATALOG_FALLBACK_PRODUCTS.map((p) => p.slug);
@@ -260,7 +266,7 @@ export const RUNTIME_CARD = {
   slug: RUNTIME_SLUG,
   name: RUNTIME_NAME,
   version: RUNTIME_VERSION,
-  one_line: "One door — discover, route, refuse. Hosts the FragGate kernel (FG-0.1) and every catalog engine. Author Aziel Eliab.",
+  one_line: RUNTIME_PURPOSE_ONE_LINE,
   github: GITHUB_RUNTIME,
   download: "",
   invoke: RUNTIME_PATH,
@@ -273,7 +279,7 @@ export const GODLOCK_CARD = {
   slug: "godlock",
   name: "GodLock",
   version: "0.1.0",
-  one_line: "Specified Fit / GodLock score.",
+  one_line: GODLOCK_PURPOSE_ONE_LINE,
   github: GITHUB,
   download: DOWNLOAD,
   invoke: "/",
@@ -288,7 +294,7 @@ export const AZNET_CARD = {
   slug: "aznet",
   name: "AZNet",
   version: "0.1.0",
-  one_line: "AZNet (AZN-WP-0.1): silent verification side-net. Hash continuity without hosting. Separate software; functional-order pair with AZBrowser.",
+  one_line: "Check hash continuity on a silent side-net.",
   github: AZNET_GITHUB,
   download: AZNET_DOWNLOAD,
   worker: AZNET_WORKER,
@@ -301,7 +307,7 @@ export const AZHUB_CARD = {
   slug: "azhub",
   name: "AZHub",
   version: "0.1.0",
-  one_line: "AZHub (AIH-WP-1.0): Blank Key / neutral spatial container. Does not interpret. FragGate only. AZInterface is a separate software.",
+  one_line: "Place and tether modules in a blank spatial container.",
   github: AZHUB_GITHUB,
   download: AZHUB_DOWNLOAD,
   worker: AZHUB_WORKER,
@@ -327,7 +333,7 @@ export const AZINTERFACE_CARD = {
   slug: "azinterface",
   name: "AZInterface",
   version: "0.1.0",
-  one_line: "AZInterface (AIH-WP-1.0): custodial operating environment. Pre-locked page cycles OFF/integrity/ON/FULL SHUTDOWN/MEMORIAL. FragGate only. AZHub is a separate software.",
+  one_line: "Advance pre-locked page cycles in a custodial operating environment.",
   github: AZINTERFACE_GITHUB,
   download: AZINTERFACE_DOWNLOAD,
   worker: AZINTERFACE_WORKER,
@@ -340,7 +346,7 @@ export const FRAGGATE_CARD = {
   slug: "fraggate",
   name: "FragGate",
   version: "0.1.0",
-  one_line: "FragGate is Aziel Eliab software: FG-0.1 kernel against tool fragmentation and model hallucination. Dual surface — Worker UI and MCP/OpenAPI share List / Describe / Call / Verify. Author Aziel Eliab.",
+  one_line: "Discover, describe, and call catalog Softwares through one public door.",
   github: FRAGGATE_KERNEL,
   download: FRAGGATE_DOWNLOAD,
   worker: FRAGGATE_WORKER,

@@ -157,9 +157,15 @@ export const RUNTIME_SLUG = "aziel-runtime";
 /** Live origin GET /v1/health + /v1/runtime.json. SoT main 6a3798a / version_id 105fa1ee. Changelog stays below the abstract. */
 export const RUNTIME_VERSION = "2.0.0-rc1";
 export { RUNTIME_GIT_SHA, RUNTIME_GIT_SHA_SHORT, RUNTIME_VERSION_ID, RUNTIME_SOT } from "./launchReady.js";
-/** Crawler lead copy (1.7.11+). Do not bury this under version history. */
+/** Crawler lead copy after aziel-runtime #146+#148. Designed-purpose only. */
 export const RUNTIME_ABSTRACT =
-  "Aziel Runtime is a node-meshed orchestration suite of MCP-connected software designed to coordinate specialized tools through a shared, security-gated runtime while preserving provenance, chain-of-custody, temporal integrity, and auditable execution. It functions as a digital forensic, investigative, verification, research, intelligence-support, and systems-auditing environment in which individual engines can analyze evidence, validate records, inspect trajectories and patterns, track lineage, enforce capability boundaries, generate receipts, and exchange structured results without collapsing into one opaque model or unrestricted control plane. Its architecture emphasizes compartmentalization, deterministic routing, explicit refusal states, append-only evidence handling, and machine-readable metadata, making it suitable for distributed analysis workflows where trust, reproducibility, attribution, and post-hoc auditability matter as much as the result itself.";
+  "Aziel Runtime is a node-meshed orchestration suite of MCP-connected software designed to route catalog Softwares through the FragGate door, mint receipts, and coordinate mesh presence. Use it to list, describe, and call product operations over MCP or OpenAPI, then keep the returned receipt. It exists so each Softwares product stays a separate engine behind one door.";
+/** Softwares HTML Runtime card — designed action. Hubs refresh from Worker GET /v1/software. */
+export const RUNTIME_PURPOSE_ONE_LINE =
+  "Route catalog Softwares through the FragGate door, mint receipts, and coordinate mesh presence.";
+/** Softwares HTML GodLock card — exact runtime /v1/software one_line after #146. */
+export const GODLOCK_PURPOSE_ONE_LINE =
+  "Score text for offline hardening and receive an ephemeral receipt.";
 /** Verified Glama listing (HTTP 200). GitHub-path id AzielEliab/aziel-runtime — not an invented UUID. */
 export const GLAMA_RUNTIME = "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime";
 export const RUNTIME_DOCS_2_0 = GITHUB_RUNTIME + "/tree/main/docs/2.0";
@@ -190,7 +196,7 @@ export const AZCOHERENCE_SLUG = "azcoherence";
 export const AZCOHERENCE_NAME = "AZCoherence";
 export const AZCOHERENCE_VERSION = "0.1.0";
 export const AZCOHERENCE_PEER = "azclce";
-export const AZCOHERENCE_ONE_LINE = "AZCoherence: second-pass triad coherence review (primary vs alternate → PASS/FLAG/NEUTRALIZE/REFUSE). Never invents evidence. Confidence is a review score. Peer AZ-CLCE.";
+export const AZCOHERENCE_ONE_LINE = "Review whether a primary score and an alternate hold together.";
 export const ARK_NAME = "The ARK";
 export const ARK_SLUG = "ark";
 export const ARK_GITHUB = "https://github.com/AzielEliab/ark";
@@ -213,7 +219,7 @@ export const TRADES_HEALTH = TRADES_WORKER + "/v1/health";
 export const TRADES_STATS = TRADES_WORKER + "/v1/stats";
 export const TRADES_SKILL = TRADES_WORKER + "/v1/skill";
 export const TRADES_ONE_LINE =
-  "Trades-Runtime — local-first BYO field-trades runtime (HVAC, plumbing, electrical, sewer, and cross-trades). live_backends false. Sister machine cite; engine:false.";
+  "Run local-first field-trades work (HVAC, plumbing, electrical, sewer, and cross-trades) with backends you bring.";
 export const TRADES_HONESTY =
   "Local-first BYO runtime. People bring their own ServiceTitan and ProBooks. No tenant data on this Worker. No ST/ProBooks write-back. live_backends false.";
 export const TRADES_FAQ_TITLE = "What is Trades-Runtime?";
@@ -481,20 +487,18 @@ export const WHITESTONE_GITHUB = "https://github.com/AzielEliab/Whitestone";
 export const WHITESTONE_DOWNLOAD = "https://whitestone-download-tracker.vibelock.workers.dev/download";
 export const WHITESTONE_TRACKER = "https://whitestone-download-tracker.vibelock.workers.dev/";
 export const WHITESTONE_ONE_LINE =
-  "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce).";
+  "Advise on short Criminal, Civil, and Divorce questions with historical as-of and Case Mode (suppression axes, TrajectoryLock-lite, export, confidence labeled up to 75%). Session-only web app plus optional zip. https://whitestone.vibelock.workers.dev/";
 export const WHITESTONE_FAQ_TITLE = "What is Whitestone?";
 export const WHITESTONE_ADDENDUM =
   WHITESTONE_ONE_LINE
-  + " Live "
-  + WHITESTONE_URL
-  + ". Suite Softwares list cite only — Worker GET "
+  + " Suite Softwares list cite — Worker GET "
   + SOFTWARE_SSOT
   + " (same-origin "
   + PUBLIC_RUNTIME
-  + "/v1/software). FragGate list is fallback only. Not a FragGate door. Not a GodLock Softwares HTML card. never invent door ops.";
+  + "/v1/software). FragGate list is fallback only.";
 
 export const THE_ARK_ONE_LINE =
-  "The ARK — Keep a local deniable vault; one phrase opens one vault.";
+  "Keep a local deniable vault; one phrase opens one vault.";
 export const THE_ARK_FAQ_TITLE = "What is The ARK?";
 export const THE_ARK_ADDENDUM =
   THE_ARK_ONE_LINE
@@ -504,7 +508,7 @@ export const THE_ARK_ADDENDUM =
   + ARK_STATS
   + " and "
   + ARK_COUNT
-  + ". Do not invent download numbers.";
+  + ".";
 
 /** Catalog Lock A–Z leftover-bytes + recover + handwriting honesty after spectrallock#13. one_line inherits runtime /v1/software after #137. */
 export const SPECTRALLOCK_NAME = "SpectralLock";
@@ -522,16 +526,14 @@ export const SPECTRALLOCK_CITE = SPECTRALLOCK_WORKER + "/cite.json";
 export const SPECTRALLOCK_REFUSE = "SL-UNREDACT-OPAQUE";
 export const SPECTRALLOCK_RECOVER_REFUSE = "SL-RECOVER-NO-BYTES";
 export const SPECTRALLOCK_HANDWRITING_REFUSE = "SL-HANDWRITING-NO-INK";
-/** Exact runtime /v1/software one_line after aziel-runtime#137. Do not invent a fork. */
+/** Exact runtime /v1/software one_line after aziel-runtime#146. Designed-purpose only. */
 export const SPECTRALLOCK_ONE_LINE =
-  "Preview a small overlay on an image; leftover container bytes recover honestly, opaque rewrite refuses.";
+  "Preview a small overlay on an image and recover leftover container bytes.";
 export const SPECTRALLOCK_HONESTY =
-  "Leftover bytes recover. Opaque empty refuses SL-UNREDACT-OPAQUE. Never invent letters. Worker /v1/unredact LIVE. Recover /v1/recover LIVE (present bytes only). Handwriting /v1/handwriting LIVE is pixel heuristics. Unredact, recover, and handwriting are Worker /v1 paths.";
+  "Leftover bytes recover. Opaque empty refuses SL-UNREDACT-OPAQUE. Worker /v1/unredact LIVE. Recover /v1/recover LIVE (present bytes only). Handwriting /v1/handwriting LIVE is pixel heuristics. Unredact, recover, and handwriting are Worker /v1 paths.";
 export const SPECTRALLOCK_FAQ_TITLE = "What is SpectralLock?";
 export const SPECTRALLOCK_ADDENDUM =
   SPECTRALLOCK_ONE_LINE
-  + " "
-  + SPECTRALLOCK_HONESTY
   + " Live catalog slug "
   + SPECTRALLOCK_SLUG
   + ". Worker "
@@ -542,7 +544,11 @@ export const SPECTRALLOCK_ADDENDUM =
   + SPECTRALLOCK_HANDWRITING
   + ". GitHub "
   + SPECTRALLOCK_GITHUB
-  + ". Identity Aziel Eliab only. Catalog Lock A–Z / machine cite. Softwares HTML stays GodLock-first.";
+  + ". Identity Aziel Eliab only. Catalog Lock A–Z / machine cite. Softwares HTML stays GodLock-first. Suite Softwares SSoT is Worker GET "
+  + SOFTWARE_SSOT
+  + " (same-origin "
+  + PUBLIC_RUNTIME
+  + "/v1/software).";
 
 /** Machine cite for leftover-bytes + recover + handwriting honesty (not lab). Not a godlock.uk Softwares HTML card. */
 export function spectrallockCite() {
@@ -631,7 +637,7 @@ export function spectrallockLlmsSection() {
   return "\n## SpectralLock (Lock A–Z / leftover-bytes + recover + handwriting)\n\n"
     + SPECTRALLOCK_ONE_LINE + "\n"
     + SPECTRALLOCK_HONESTY + "\n"
-    + "Identity: Aziel Eliab only. Catalog Lock A–Z / machine cite. Softwares HTML stays GodLock-first. Unredact, recover, and handwriting are Worker /v1 paths. Growth-ON. Lamb Lens. NO-LIE.\n"
+    + "Identity: Aziel Eliab only. Catalog Lock A–Z / machine cite. Softwares HTML stays GodLock-first. Unredact, recover, and handwriting are Worker /v1 paths.\n"
     + "Worker: " + SPECTRALLOCK_WORKER + "/\n"
     + "Unredact: " + SPECTRALLOCK_UNREDACT + "\n"
     + "Recover: " + SPECTRALLOCK_RECOVER + "\n"
@@ -1278,8 +1284,8 @@ export function whoIsAzielEliabTxt() {
     + "## Hebrew aka\n\n"
     + HEBREW_DEFINITION + "\n"
     + "עזיאל / אל ראי | אלרועי / אליאב\n\n"
-    + "## Model rules\n\n"
-    + IDENTITY_MODEL_RULES.map((rule, i) => (i + 1) + ". " + rule).join("\n")
+    + "## Identity (machine data)\n\n"
+    + IDENTITY_MODEL_RULES.join("\n")
     + "\n";
 }
 
@@ -2391,7 +2397,7 @@ export function citeDoc(sot) {
     azcoherence_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/describe?slug=" + AZCOHERENCE_SLUG,
     azcoherence_catalog: CATALOG + "/p/" + AZCOHERENCE_SLUG + "/",
     azcoherence_peer: AZCOHERENCE_PEER,
-    azcoherence_note: "Second-pass triad coherence review. Peer AZ-CLCE (azclce). FragGate single door. Author Aziel Eliab.",
+    azcoherence_note: AZCOHERENCE_ONE_LINE + " Peer AZ-CLCE (azclce). FragGate single door. Author Aziel Eliab.",
     openapi: CANON_HOST + "/openapi.json",
     mcp_discovery: CANON_HOST + "/.well-known/mcp.json",
     mcp_discovery_alias: CANON_HOST + "/mcp.json",
@@ -2405,6 +2411,8 @@ export function citeDoc(sot) {
     runtime_entity_sameAs: runtimeEntitySameAs(),
     runtime_abstract: RUNTIME_ABSTRACT,
     seo_abstract_leads: true,
+    primary_host: GLAMA_RUNTIME,
+    primary_host_alias: "https://glama.ai/mcp/servers/@AzielEliab/aziel-runtime",
     runtime_official: PUBLIC_RUNTIME,
     runtime_github: GITHUB_RUNTIME,
     runtime_glama: GLAMA_RUNTIME,
@@ -2629,7 +2637,7 @@ export function llmsDoc(sot) {
     + TRADES_ADDENDUM + "\n"
     + spectrallockLlmsSection()
     + tradesLlmsSection()
-    + "AZCoherence (azcoherence): second-pass triad coherence review (primary vs alternate → PASS/FLAG/NEUTRALIZE/REFUSE). Never invents evidence. Confidence is a review score. Peer AZ-CLCE. FragGate single door. Author Aziel Eliab.\n"
+    + "AZCoherence (azcoherence): " + AZCOHERENCE_ONE_LINE + " Peer AZ-CLCE. FragGate single door. Author Aziel Eliab.\n"
     + "AZCoherence Worker: " + AZCOHERENCE_WORKER + "\n"
     + "AZCoherence GitHub: " + AZCOHERENCE_GITHUB + "\n"
     + "AZCoherence download: " + AZCOHERENCE_DOWNLOAD + "\n"

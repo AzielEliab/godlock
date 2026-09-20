@@ -1193,8 +1193,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(spectral.name, SPECTRALLOCK_NAME);
     assert.equal(spectral.family, "lock");
     assert.equal(spectral.one_line, SPECTRALLOCK_ONE_LINE);
-    assert.match(spectral.one_line, /leftover container bytes recover honestly/);
-    assert.match(spectral.one_line, /opaque rewrite refuses/);
+    assert.match(spectral.one_line, /Preview a small overlay on an image/);
+    assert.match(spectral.one_line, /recover leftover container bytes/);
   });
 
   it("inherits SpectralLock leftover-bytes + recover + handwriting honesty after spectrallock#13", () => {
@@ -1380,7 +1380,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.doesNotMatch(html, /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
     assert.doesNotMatch(html, /href="https:\/\/github\.com\/AzielEliab\/anon-broadcast"/);
     assert.match(topNav("/software"), /href="\/runtime">Runtime<\/a>/);
-    assert.match(html, /Specified Fit \/ GodLock score/);
+    assert.match(html, /Score text for offline hardening and receive an ephemeral receipt/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock/i);
     assert.doesNotMatch(html, /\bABAD\b/);
     assert.doesNotMatch(html, /Whitestone/);
@@ -1417,7 +1417,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       entries: [{ slug: "godlock", name: "GodLock", description: "Specified Fit / GodLock score. Not a VPN and not an anonymity network." }],
     });
     assert.equal(fromEntries[0].slug, "godlock");
-    assert.match(fromEntries[0].one_line, /Specified Fit \/ GodLock score/);
+    assert.match(fromEntries[0].one_line, /Score text for offline hardening and receive an ephemeral receipt/);
   });
 
   it("prefers the AZIEL_RUNTIME service binding over HTTPS", async () => {
@@ -2013,8 +2013,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     const LIVE_AZNET_BANNER = "AZNet (AZN-WP-0.1): silent verification side-net. Hash continuity without hosting. Custodian garden of hash refs + memorial ledger. Integrity refuse/isolate. Separate engine from AZBrowser (functional-order pair: token AND flag required; own Worker / own UI). FragGate LIVE only. Never hosts payloads. Author Aziel Eliab.";
     const snap = CATALOG_FALLBACK_PRODUCTS.find((p) => p.slug === "aznet");
     assert.ok(snap);
-    assert.equal(snap.one_line, HEALED_AZNET_ONE_LINE);
-    assert.equal(AZNET_CARD.one_line, HEALED_AZNET_ONE_LINE);
+    assert.equal(snap.one_line, "Check hash continuity on a silent side-net.");
+    assert.equal(AZNET_CARD.one_line, "Check hash continuity on a silent side-net.");
     assert.doesNotMatch(AZNET_CARD.one_line, /Separate engine/);
 
     const healed = hubProductCopy({ slug: "aznet", name: "AZNet", one_line: LIVE_AZNET_ONE_LINE });
@@ -2033,7 +2033,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       name: "GodLock",
       one_line: "Offline ABAD / hardening score. Not a VPN and not an anonymity network.",
     });
-    assert.equal(staleGodlock.one_line, "Specified Fit / GodLock score.");
+    assert.equal(staleGodlock.one_line, "Score text for offline hardening and receive an ephemeral receipt.");
     assert.doesNotMatch(staleGodlock.one_line, /\bABAD\b/);
     const bound = hubProductCopy({ slug: "godlock", name: "GodLock", one_line: "bound godlock" });
     assert.equal(bound.one_line, "bound godlock");
@@ -2057,7 +2057,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
       one_line: "Aziel Eliab Runtime 1.6.15 FragGate door. One door — discover, route, refuse.",
     });
     assert.equal(mashed.name, "Aziel Runtime");
-    assert.equal(mashed.one_line, "Aziel Runtime. One door — discover, route, refuse.");
+    assert.equal(mashed.one_line, "Route catalog Softwares through the FragGate door, mint receipts, and coordinate mesh presence.");
     assert.doesNotMatch(mashed.one_line, /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
     const html = softwareBody({
       products: [{ slug: "aziel-runtime", name: "Aziel Eliab Runtime", one_line: "runtime 1.6.15 FragGate mash" }],

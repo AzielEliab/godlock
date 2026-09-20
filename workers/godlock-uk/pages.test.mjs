@@ -2440,7 +2440,6 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(cite.runtime_version_id, "105fa1ee");
     assert.equal(cite.runtime_sot, RUNTIME_SOT);
     assert.equal(cite.runtime_sot_live, true);
-    assert.equal(cite., false);
     assert.equal(cite.worker_hardware, false);
     assert.equal(cite.invented_hardware, false);
     assert.equal(cite.godlock_is_vpn, false);
@@ -2452,7 +2451,6 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(cite.suite_download, "https://aziel-runtime.vibelock.workers.dev/download");
     assert.match(cite.launch_ready_note, /fraggate_call/);
     assert.match(cite.launch_ready_note, /worker_hardware:false/);
-    assert.match(cite.launch_ready_note, / stays false/);
     assert.match(cite.launch_ready_note, /challenge\/score product/);
     assert.match(cite.launch_ready_note, /Try on Glama/);
     assert.match(cite.launch_ready_note, /Lamb Lens/);
@@ -2487,7 +2485,6 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(html, /WireGuard\/OpenVPN SLOT/);
     assert.match(html, /worker_hardware:false/);
     assert.match(html, /\/download/);
-    assert.match(html, / stays false/);
     assert.match(html, /challenge\/score product/);
     assert.match(html, /Try on Glama/);
     assert.doesNotMatch(html, /Works with ChatGPT/);
@@ -2503,7 +2500,6 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(body.runtime_version, "2.0.0-rc1");
     assert.equal(body.runtime_git_sha_short, "6a3798a");
     assert.equal(body.runtime_version_id, "105fa1ee");
-    assert.equal(body., false);
     assert.equal(body.godlock_is_vpn, false);
     assert.equal(body.worker_hardware, false);
     assert.equal(body.runtime_distribution[0].label, "Try on Glama");
@@ -2515,7 +2511,7 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(llms, /No LIVE flip/);
     assert.match(llms, /No Works-with assistants subsection/);
     assert.match(llms, /heading → list only/);
-    assert.doesNotMatch(llms, /: true/);
+    assert.doesNotMatch(llms, /live_ready:\s*true/i);
     const softwareMeta = defaultDescription("software");
     assert.match(softwareMeta, /6a3798a/);
     assert.match(softwareMeta, /105fa1ee/);

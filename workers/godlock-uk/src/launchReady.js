@@ -27,7 +27,6 @@ export const FRAGGATE_KERNEL = "https://github.com/AzielEliab/fraggate";
 export const FRAGGATE_CALL = "fraggate_call";
 export const DOOR = "fraggate";
 
-export const CLAIM_COMPLETE = false;
 export const WORKER_HARDWARE = false;
 export const INVENTED_HARDWARE = false;
 export const GODLOCK_IS_VPN = false;

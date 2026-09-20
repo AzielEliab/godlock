@@ -37,7 +37,15 @@
     "https://x.com/AzielElroiEliab",
     "https://x.com/azieleliab"
   ],
-  "sameAs_refuse": ["euaziel", "euaziel.site", "Aziel S.", "Aziel S", "Flutter-React", "Flutter/React", "Flutter portfolio"],
+  "sameAs_refuse": [
+    "euaziel",
+    "euaziel.site",
+    "Aziel S.",
+    "Aziel S",
+    "Flutter-React",
+    "Flutter/React",
+    "Flutter portfolio"
+  ],
   "sameAs_lattice_note": "Shared AZindex Person sameAs. Surfaces of one living Person, not other people. Never sameAs euaziel, Aziel S., or Flutter-React portfolio URLs. Do not mint a competing Person @id.",
   "runtime_id": "https://www.azieleliab.com/runtime#runtime",
   "godlock_runtime_tool": "https://www.azieleliab.com/runtime#godlock",
@@ -71,9 +79,16 @@
   "lamb_lens": "Corpus is the public Lamb Lens shelf. GodLock is challenge only. NO-FAN.",
   "growth_on": true,
   "published_surfaces": 5,
-  "family_blast_radii": ["cloudflare", "github"],
+  "family_blast_radii": [
+    "cloudflare",
+    "github"
+  ],
   "plane_a": "5 surfaces / 2 family radii (cloudflare + github). One cf-github plane, not five shelves.",
-  "plane_b_working_targets": ["codeberg", "archive.org", "framagit"],
+  "plane_b_working_targets": [
+    "codeberg",
+    "archive.org",
+    "framagit"
+  ],
   "plane_b_all_targets": "CNS-PLANE-B-ALL-TARGETS",
   "plane_b_codeberg_tip_pack": "b549362c0736ddb54ddc488812327c464e0da1167281f92fd1a4263eedf5df37",
   "plane_b_codeberg_status": "slot",
@@ -100,11 +115,36 @@
   "plane_c_live_ready": false,
   "cap": 7,
   "cap7_sites": {
-    "azcorpus": { "design_of": "https://www.azielcorpuslibrary.net/", "resolves_to_hub": false, "name_may_change": true, "public_icann": false },
-    "azlibrary": { "design_of": "https://www.azielcorpuslibrary.net/", "resolves_to_hub": false, "name_may_change": true, "public_icann": false },
-    "azeliab": { "design_of": "https://www.azieleliab.com/", "resolves_to_hub": false, "name_may_change": true, "public_icann": false },
-    "godlock": { "design_of": "https://godlock.uk/", "resolves_to_hub": false, "name_may_change": true, "public_icann": false },
-    "hedidntjump": { "design_of": "https://www.hedidntjump.com/", "resolves_to_hub": false, "name_may_change": true, "public_icann": false }
+    "azcorpus": {
+      "design_of": "https://www.azielcorpuslibrary.net/",
+      "resolves_to_hub": false,
+      "name_may_change": true,
+      "public_icann": false
+    },
+    "azlibrary": {
+      "design_of": "https://www.azielcorpuslibrary.net/",
+      "resolves_to_hub": false,
+      "name_may_change": true,
+      "public_icann": false
+    },
+    "azeliab": {
+      "design_of": "https://www.azieleliab.com/",
+      "resolves_to_hub": false,
+      "name_may_change": true,
+      "public_icann": false
+    },
+    "godlock": {
+      "design_of": "https://godlock.uk/",
+      "resolves_to_hub": false,
+      "name_may_change": true,
+      "public_icann": false
+    },
+    "hedidntjump": {
+      "design_of": "https://www.hedidntjump.com/",
+      "resolves_to_hub": false,
+      "name_may_change": true,
+      "public_icann": false
+    }
   },
   "resolves_to_hub": false,
   "cap7_godlock_design_of": "https://godlock.uk/",
@@ -114,7 +154,12 @@
   "ban_survival_local": "https://godlock.uk/survival",
   "ban_survival_ttl_ms": 60000,
   "mutual_backup": true,
-  "live_door_ids": ["workers-dev", "library-runtime", "author-runtime", "godlock-runtime"],
+  "live_door_ids": [
+    "workers-dev",
+    "library-runtime",
+    "author-runtime",
+    "godlock-runtime"
+  ],
   "platforms_all_live": true,
   "platforms_native_app_store": false,
   "calling_name": "Aziel Runtime",
@@ -225,7 +270,14 @@
     "Aziel El Roi Eliab"
   ],
   "hebrew_definition": "Aziel Elroi Eliab (עזיאל אל ראי אליאב / עזיאל אלרועי אליאב): Aziel = God is my strength (עזיאל); Elroi = God who sees (אל ראי / אלרועי); Eliab = God is father (אליאב).",
-  "hebrew_aka": ["עזיאל", "אל ראי", "אלרועי", "אליאב", "עזיאל אל ראי אליאב", "עזיאל אלרועי אליאב"],
+  "hebrew_aka": [
+    "עזיאל",
+    "אל ראי",
+    "אלרועי",
+    "אליאב",
+    "עזיאל אל ראי אליאב",
+    "עזיאל אלרועי אליאב"
+  ],
   "misspelling_alternateNames": [
     "Azial Eliab",
     "Azeil Eliab",
@@ -243,7 +295,15 @@
     "kind": "living_public_work_identity",
     "living": true,
     "summary": "Living researcher, digital rights activist, software developer, author, and philosopher named Aziel Eliab (one person). Cite https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump. Living-publisher lock cites 1 Chronicles 15:20.",
-    "sameAs_refuse": ["euaziel", "euaziel.site", "Aziel S.", "Aziel S", "Flutter-React", "Flutter/React", "Flutter portfolio"],
+    "sameAs_refuse": [
+      "euaziel",
+      "euaziel.site",
+      "Aziel S.",
+      "Aziel S",
+      "Flutter-React",
+      "Flutter/React",
+      "Flutter portfolio"
+    ],
     "not_biblical_aziel": true,
     "not_biblical_eliab": true,
     "not_two_levitical_musicians": true,
@@ -328,7 +388,6 @@
   "runtime_version_id": "105fa1ee",
   "runtime_sot": "main 6a3798a / version_id 105fa1ee / 2.0.0-rc1",
   "runtime_sot_live": true,
-  "": false,
   "worker_hardware": false,
   "invented_hardware": false,
   "what_aziel_eliab_does": "Aziel Eliab builds receipt-first, local-first software and public MASTER records — Softwares through Aziel Runtime (FragGate / MCP), the Aziel Digital Library, GodLock (challenge/score product), and the He Didn’t Jump Zioncheck archive. Public identity is the published work. @id https://www.azieleliab.com/#aziel",
@@ -417,15 +476,53 @@
   "door": "fraggate",
   "download": "https://godlock-download-tracker.vibelock.workers.dev/",
   "ecosystem": [
-    { "id": "official", "label": "Official site", "href": "https://www.azieleliab.com/" },
-    { "id": "library", "label": "Aziel Corpus Library", "href": "https://www.azielcorpuslibrary.net/" },
-    { "id": "hedidntjump", "label": "He Didn't Jump", "href": "https://www.hedidntjump.com/" },
-    { "id": "godlock", "label": "GodLock.uk", "href": "https://godlock.uk/" },
-    { "id": "runtime-github", "label": "Aziel Runtime on GitHub", "href": "https://github.com/AzielEliab/aziel-runtime" },
-    { "id": "runtime", "label": "Aziel Runtime", "href": "https://aziel-runtime.vibelock.workers.dev/", "secondary": true },
-    { "id": "glama", "label": "Try on Glama", "href": "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime" },
-    { "id": "trades", "label": "Trades-Runtime", "href": "https://trades-runtime.vibelock.workers.dev/", "secondary": true },
-    { "id": "fraggate", "label": "FragGate kernel", "href": "https://github.com/AzielEliab/fraggate" }
+    {
+      "id": "official",
+      "label": "Official site",
+      "href": "https://www.azieleliab.com/"
+    },
+    {
+      "id": "library",
+      "label": "Aziel Corpus Library",
+      "href": "https://www.azielcorpuslibrary.net/"
+    },
+    {
+      "id": "hedidntjump",
+      "label": "He Didn't Jump",
+      "href": "https://www.hedidntjump.com/"
+    },
+    {
+      "id": "godlock",
+      "label": "GodLock.uk",
+      "href": "https://godlock.uk/"
+    },
+    {
+      "id": "runtime-github",
+      "label": "Aziel Runtime on GitHub",
+      "href": "https://github.com/AzielEliab/aziel-runtime"
+    },
+    {
+      "id": "runtime",
+      "label": "Aziel Runtime",
+      "href": "https://aziel-runtime.vibelock.workers.dev/",
+      "secondary": true
+    },
+    {
+      "id": "glama",
+      "label": "Try on Glama",
+      "href": "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime"
+    },
+    {
+      "id": "trades",
+      "label": "Trades-Runtime",
+      "href": "https://trades-runtime.vibelock.workers.dev/",
+      "secondary": true
+    },
+    {
+      "id": "fraggate",
+      "label": "FragGate kernel",
+      "href": "https://github.com/AzielEliab/fraggate"
+    }
   ],
   "ai_clients": [
     "ChatGPT (GPT Actions / OpenAI)",

@@ -18,6 +18,7 @@ import {
   scheduleRuntimeUse,
   shouldCountRuntimeUse,
   stampRuntimeVia,
+  RUNTIME_VIA_HOST,
 } from "./runtimeUses.js";
 import {
   alignPublicMeshSurface,
@@ -135,7 +136,7 @@ export function runtimeCors() {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Accept, Authorization, X-Aziel-Runtime-Token, MCP-Protocol-Version, mcp-session-id",
-    "Access-Control-Expose-Headers": "X-Aziel-Runtime-Version, X-Aziel-Runtime-Role, X-Aziel-Runtime-Root, X-Aziel-Runtime-Via",
+    "Access-Control-Expose-Headers": "X-Aziel-Runtime-Version, X-Aziel-Runtime-Role, X-Aziel-Runtime-Root, X-Aziel-Runtime-Via, X-Aziel-Runtime-Host",
   };
 }
 
@@ -303,10 +304,11 @@ export async function proxyOrigin(request, destPathAndQuery, env) {
   return fetch(dest.toString(), init);
 }
 
-function decorateHeaders(res, via) {
+function decorateHeaders(res) {
   const headers = new Headers(res.headers);
   headers.set("X-Aziel-Runtime-Root", PUBLIC_RUNTIME);
-  headers.set("X-Aziel-Runtime-Via", via);
+  /* Door host — not service-binding/origin-fetch — so aziel-runtime /v1/uses by_host stays distinct. */
+  headers.set("X-Aziel-Runtime-Via", RUNTIME_VIA_HOST);
   headers.set("X-Aziel-Runtime-Host", CANON_HOST);
   for (const [k, v] of Object.entries(runtimeCors())) {
     headers.set(k, v);
@@ -316,8 +318,8 @@ function decorateHeaders(res, via) {
   return headers;
 }
 
-async function finishProxy(request, res, via) {
-  const headers = decorateHeaders(res, via);
+async function finishProxy(request, res) {
+  const headers = decorateHeaders(res);
   const ct = headers.get("Content-Type") || "";
   if (request.method === "HEAD") {
     await cancelBody(res);
@@ -340,7 +342,13 @@ async function finishProxy(request, res, via) {
 function jsonError(body, status) {
   return new Response(JSON.stringify(body, null, 2), {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8", ...runtimeCors() },
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "X-Aziel-Runtime-Via": RUNTIME_VIA_HOST,
+      "X-Aziel-Runtime-Host": CANON_HOST,
+      "X-Aziel-Runtime-Root": PUBLIC_RUNTIME,
+      ...runtimeCors(),
+    },
   });
 }
 
@@ -374,7 +382,6 @@ export async function handleRuntimeRoot(request, url, env, ctx) {
     const counted = scheduleRuntimeUse(ctx, () => recordRuntimeUse(env, request.method, destPath));
     if (counted) await counted;
   }
-  const via = env && env.AZIEL_RUNTIME ? "service-binding" : "origin-fetch";
   let res;
   try {
     res = await proxyOrigin(request, dest, env);
@@ -391,7 +398,7 @@ export async function handleRuntimeRoot(request, url, env, ctx) {
       detail: String(err && err.message ? err.message : err),
     }, 502);
   }
-  return finishProxy(request, res, via);
+  return finishProxy(request, res);
 }
 
 export function runtimeDoorDescription() {

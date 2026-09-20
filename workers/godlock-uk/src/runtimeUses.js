@@ -13,7 +13,7 @@ function usesCors() {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Accept, Authorization, X-Aziel-Runtime-Token, MCP-Protocol-Version, mcp-session-id",
-    "Access-Control-Expose-Headers": "X-Aziel-Runtime-Version, X-Aziel-Runtime-Role, X-Aziel-Runtime-Root, X-Aziel-Runtime-Via",
+    "Access-Control-Expose-Headers": "X-Aziel-Runtime-Version, X-Aziel-Runtime-Role, X-Aziel-Runtime-Root, X-Aziel-Runtime-Via, X-Aziel-Runtime-Host",
   };
 }
 
@@ -81,6 +81,7 @@ export function kvForRuntimeUses(env) {
 export function stampRuntimeVia(headers) {
   const out = headers instanceof Headers ? headers : new Headers(headers || {});
   out.set("X-Aziel-Runtime-Via", RUNTIME_VIA_HOST);
+  out.set("X-Aziel-Runtime-Host", CANON_HOST);
   return out;
 }
 

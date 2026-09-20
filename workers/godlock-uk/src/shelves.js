@@ -45,7 +45,7 @@ export const FRAMAGIT_TIP_PACK_URL = null;
 export const FRAMAGIT_REFUSE = "CNS-NO-FORGE-MIRROR";
 export const PLANE_B_WORKING_TARGETS = Object.freeze(["codeberg", "archive.org", "framagit"]);
 export const PLANE_B_ALL_TARGETS = "CNS-PLANE-B-ALL-TARGETS";
-export const ZENODO_REFUSE = "CNS-ZENODO-IP-BAN";
+export const ZENODO_REFUSE = "CNS-ZENODO-NOT-LIVE";
 export const GITFLIC_REFUSE = "CNS-GITFLIC-EMAIL";
 export const GITLAB_REFUSE = "CNS-GITLAB-CF-LOOP";
 export const PLANE_C_ATTEST = "CNS-OPERATOR-ATTEST";
@@ -61,14 +61,14 @@ export const PLANE_B_SLOT_IDS = Object.freeze([
   "plane-b-archive-org-tip-pack",
   "plane-b-archive-org-tip-pack-202609",
   "plane-b-framagit-tip-pack",
+  "plane-b-zenodo-tip-pack",
 ]);
 export const PLANE_B_REFUSED_IDS = Object.freeze([
   "plane-b-gitflic-ru-tip-pack",
   "plane-b-gitlab-tip-pack",
-  "plane-b-zenodo-tip-pack",
 ]);
 export const PLANE_B_NOTE =
-  "Codeberg + archive.org hash-verify PASS (still SLOT). archive.org has two items (aziel-lockset-tip + aziel-lockset-tip_202609), same blast_radius — one working_targets kind. Zip wrap on the 202609 item: flat IA sha256 on the zip may be null; inner aziel-tip-pack.tar hash-verifies. Framagit URL null. SLOT CNS-NO-FORGE-MIRROR. No LIVE flip. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS). doi null. Do not invent a DOI.";
+  "Codeberg + archive.org hash-verify PASS (still SLOT). archive.org has two items (aziel-lockset-tip + aziel-lockset-tip_202609), same blast_radius — one working_targets kind. Zip wrap on the 202609 item: flat IA sha256 on the zip may be null; inner aziel-tip-pack.tar hash-verifies. Framagit URL null. SLOT CNS-NO-FORGE-MIRROR. No LIVE flip. LIVE only when all three pass (CNS-PLANE-B-ALL-TARGETS). Zenodo tip-pack stays SLOT (zenodo_live:false; doi null; CNS-ZENODO-NOT-LIVE). doi null. Do not invent a DOI.";
 export const COLD_MULTI_SHELF_RULE =
   "Planes A/B/C: A=one CF/GitHub tunnel (5 surfaces / 2 family radii, not 5 shelves); B=alt independent forge/archive tip-pack SLOT; C=USB airgap SLOT. Survival = bytes↔hash. LIVE only after hash verify.";
 
@@ -131,7 +131,8 @@ export const PLANES = Object.freeze({
     working_targets: PLANE_B_WORKING_TARGETS.slice(),
     zenodo_working_path: false,
     live_ready: false,
-    refuse: ZENODO_REFUSE,
+    refuse: PLANE_B_ALL_TARGETS,
+    zenodo_live: false,
     codeberg_tip_pack: CODEBERG_TIP_PACK,
     codeberg_url: CODEBERG_TIP_PACK_URL,
     archive_org_url: ARCHIVE_ORG_TIP_PACK_URL,
@@ -483,7 +484,8 @@ export function shelvesDoc() {
           id: "plane-b-zenodo-tip-pack",
           plane: "B",
           kind: "zenodo_doi",
-          status: "refused",
+          status: "slot",
+          zenodo_live: false,
           doi: null,
           url: null,
           blast_radius: "zenodo-cern",
@@ -491,7 +493,7 @@ export function shelvesDoc() {
           lockset_shelf: false,
           lockset_doi: false,
           refuse: [ZENODO_REFUSE, "CNS-NO-TIP-DOI"],
-          reason: "doi null. Do not invent a DOI. Plane B working shelves are Codeberg + archive.org. No tip-pack DOI (CNS-NO-TIP-DOI).",
+          reason: "Plane B alternate forge/archive tip-pack — Zenodo deposit not LIVE (zenodo_live:false; doi null; CNS-ZENODO-NOT-LIVE / CNS-NO-TIP-DOI). Working path is Codeberg + archive.org + Framagit. cite.json / lockset doi stay null. Do not invent. Paper deposits are not this slot.",
         },
         {
           id: "plane-c-usb-airgap",

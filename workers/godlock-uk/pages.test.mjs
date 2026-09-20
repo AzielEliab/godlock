@@ -1380,7 +1380,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.doesNotMatch(html, /runtime\s+\d+\.\d+(?:\.\d+)?\s+FragGate/i);
     assert.doesNotMatch(html, /href="https:\/\/github\.com\/AzielEliab\/anon-broadcast"/);
     assert.match(topNav("/software"), /href="\/runtime">Runtime<\/a>/);
-    assert.match(html, /Specified Fit \/ GodLock score/);
+    assert.match(html, /Score text for offline hardening and receive an ephemeral receipt/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock/i);
     assert.doesNotMatch(html, /\bABAD\b/);
     assert.doesNotMatch(html, /Whitestone/);
@@ -2013,8 +2013,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     const LIVE_AZNET_BANNER = "AZNet (AZN-WP-0.1): silent verification side-net. Hash continuity without hosting. Custodian garden of hash refs + memorial ledger. Integrity refuse/isolate. Separate engine from AZBrowser (functional-order pair: token AND flag required; own Worker / own UI). FragGate LIVE only. Never hosts payloads. Author Aziel Eliab.";
     const snap = CATALOG_FALLBACK_PRODUCTS.find((p) => p.slug === "aznet");
     assert.ok(snap);
-    assert.equal(snap.one_line, HEALED_AZNET_ONE_LINE);
-    assert.equal(AZNET_CARD.one_line, HEALED_AZNET_ONE_LINE);
+    assert.equal(snap.one_line, "Check hash continuity on a silent side-net.");
+    assert.equal(AZNET_CARD.one_line, "Check hash continuity on a silent side-net.");
     assert.doesNotMatch(AZNET_CARD.one_line, /Separate engine/);
 
     const healed = hubProductCopy({ slug: "aznet", name: "AZNet", one_line: LIVE_AZNET_ONE_LINE });

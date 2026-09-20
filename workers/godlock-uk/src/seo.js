@@ -45,11 +45,19 @@ export const PEN_NAME_REFUSE = ["Everblooming Flower"];
 export const AZIEL_OFFICIAL = "https://www.azieleliab.com/";
 /** Official Softwares / software listing. GodLock.uk does not clone the suite catalog. */
 export const OFFICIAL_SOFTWARES = AZIEL_OFFICIAL.replace(/\/$/, "") + "/software";
+/** Suite Softwares SSoT (Worker GET /v1/software). FragGate list is fallback only. */
+export const SOFTWARE_SSOT = CATALOG + "/v1/software";
+export const SOFTWARE_SSOT_FALLBACK = CATALOG + "/v1/fraggate/list";
 /** Visible Softwares HTML lock. GodLock leads; Aziel Runtime is secondary. Trades stays off the card list. */
 export const SOFTWARE_HTML_SUITE_NOTE =
   "GodLock Softwares is GodLock-first (heading → list): first card is GodLock, this hub's product. Aziel Runtime is a secondary cite (Try on Glama). Software listing: "
   + OFFICIAL_SOFTWARES
   + ". FragGate is the Runtime kernel (FG-0.1).";
+/** Hub-local /v1/software is not the ae/corpus suite catalog proxy. */
+export const SOFTWARE_HUB_LOCAL_NOTE =
+  " /v1/software JSON is hub-local (Aziel Runtime only plus sister_cites; Trades-Runtime, engine:false) — not the suite catalog. Suite Softwares SSoT is Worker GET "
+  + SOFTWARE_SSOT
+  + ". FragGate list is fallback only.";
 export const AZIEL_PERSON_ID = "https://www.azieleliab.com/#aziel";
 export const LOCAL_PERSON_STUB_ID = CANON_HOST + "/AzielEliab#aziel-eliab";
 /** Hub parent Runtime product. Satellites reference this; they do not mint a competing Runtime @id. */
@@ -273,6 +281,55 @@ export function tradesCiteFields() {
   };
 }
 
+/** Suite Softwares cite via Worker SSoT. Not a FragGate door. Not a GodLock Softwares HTML card. */
+export function whitestoneSuiteCite() {
+  return {
+    slug: WHITESTONE_SLUG,
+    name: WHITESTONE_NAME,
+    engine: false,
+    fraggate: false,
+    door: "none",
+    worker_only: true,
+    one_line: WHITESTONE_ONE_LINE,
+    addendum: WHITESTONE_ADDENDUM,
+    worker: WHITESTONE_URL,
+    web_app: WHITESTONE_URL + "/",
+    github: WHITESTONE_GITHUB,
+    download: WHITESTONE_DOWNLOAD,
+    tracker: WHITESTONE_TRACKER,
+    catalog: SOFTWARE_SSOT,
+    catalog_same_origin: PUBLIC_RUNTIME + "/v1/software",
+    catalog_fallback: SOFTWARE_SSOT_FALLBACK,
+    author: AUTHOR,
+    identity: AUTHOR,
+    not_a_godlock_softwares_card: true,
+    not_a_fraggate_door: true,
+    invent_door_ops: false,
+  };
+}
+
+export function whitestoneCiteFields() {
+  const cite = whitestoneSuiteCite();
+  return {
+    whitestone: cite.worker,
+    whitestone_name: cite.name,
+    whitestone_slug: cite.slug,
+    whitestone_one_line: cite.one_line,
+    whitestone_addendum: cite.addendum,
+    whitestone_github: cite.github,
+    whitestone_download: cite.download,
+    whitestone_tracker: cite.tracker,
+    whitestone_web_app: cite.web_app,
+    whitestone_catalog: cite.catalog,
+    whitestone_catalog_same_origin: cite.catalog_same_origin,
+    whitestone_catalog_fallback: cite.catalog_fallback,
+    whitestone_engine: false,
+    whitestone_fraggate: false,
+    whitestone_godlock_softwares_html_card: false,
+    whitestone_invent_door_ops: false,
+  };
+}
+
 export function tradesLlmsSection() {
   return "\n## Trades-Runtime (sister cite)\n\n"
     + TRADES_ONE_LINE + "\n"
@@ -400,9 +457,13 @@ export const HARDWARE_ADDENDUM =
   + azdocCiteLine(HARDWARE_AZDOC_EXAMPLES)
   + ". Cite corpus records at https://www.azielcorpuslibrary.net/record/{id}.";
 
-/** Live Softwares cite. Not in FragGate LIVE_OPS — do not invent door ops. */
+/** Live Softwares cite on Worker SSoT. Not in FragGate LIVE_OPS — do not invent door ops. */
 export const WHITESTONE_NAME = "Whitestone";
+export const WHITESTONE_SLUG = "whitestone";
 export const WHITESTONE_URL = "https://whitestone.vibelock.workers.dev";
+export const WHITESTONE_GITHUB = "https://github.com/AzielEliab/Whitestone";
+export const WHITESTONE_DOWNLOAD = "https://whitestone-download-tracker.vibelock.workers.dev/download";
+export const WHITESTONE_TRACKER = "https://whitestone-download-tracker.vibelock.workers.dev/";
 export const WHITESTONE_ONE_LINE =
   "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce).";
 export const WHITESTONE_FAQ_TITLE = "What is Whitestone?";
@@ -410,7 +471,11 @@ export const WHITESTONE_ADDENDUM =
   WHITESTONE_ONE_LINE
   + " Live "
   + WHITESTONE_URL
-  + ". Softwares list cite only. Cite listed door ops only — never invent door ops.";
+  + ". Suite Softwares list cite only — Worker GET "
+  + SOFTWARE_SSOT
+  + " (same-origin "
+  + PUBLIC_RUNTIME
+  + "/v1/software). FragGate list is fallback only. Not a FragGate door. Not a GodLock Softwares HTML card. never invent door ops.";
 
 export const THE_ARK_ONE_LINE =
   "The ARK — Keep a local deniable vault; one phrase opens one vault.";
@@ -852,10 +917,7 @@ export function aboutPublicWorkDoc() {
     what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
     research_addendum: RESEARCH_ADDENDUM,
     hardware_designs_addendum: HARDWARE_ADDENDUM,
-    whitestone: WHITESTONE_URL,
-    whitestone_name: WHITESTONE_NAME,
-    whitestone_one_line: WHITESTONE_ONE_LINE,
-    whitestone_addendum: WHITESTONE_ADDENDUM,
+    ...whitestoneCiteFields(),
     the_ark: ARK_GITHUB,
     the_ark_name: ARK_NAME,
     the_ark_slug: ARK_SLUG,
@@ -1216,10 +1278,7 @@ export function wellKnownAzielDoc() {
     what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
     research_addendum: RESEARCH_ADDENDUM,
     hardware_designs_addendum: HARDWARE_ADDENDUM,
-    whitestone: WHITESTONE_URL,
-    whitestone_name: WHITESTONE_NAME,
-    whitestone_one_line: WHITESTONE_ONE_LINE,
-    whitestone_addendum: WHITESTONE_ADDENDUM,
+    ...whitestoneCiteFields(),
     the_ark: ARK_GITHUB,
     the_ark_name: ARK_NAME,
     the_ark_slug: ARK_SLUG,
@@ -2140,10 +2199,7 @@ export function citeDoc(sot) {
     what_aziel_eliab_does_faq: WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES.slice(),
     research_addendum: RESEARCH_ADDENDUM,
     hardware_designs_addendum: HARDWARE_ADDENDUM,
-    whitestone: WHITESTONE_URL,
-    whitestone_name: WHITESTONE_NAME,
-    whitestone_one_line: WHITESTONE_ONE_LINE,
-    whitestone_addendum: WHITESTONE_ADDENDUM,
+    ...whitestoneCiteFields(),
     the_ark: ARK_GITHUB,
     the_ark_name: ARK_NAME,
     the_ark_slug: ARK_SLUG,
@@ -2168,7 +2224,7 @@ export function citeDoc(sot) {
     sister_stats: { ...SISTER_STATS },
     host_stats: CANON_HOST + "/stats",
     software_html: CANON_HOST + SOFTWARE_PATH,
-    software_api_note: "Thin Softwares JSON on /v1/software: Aziel Runtime only plus official listing at https://www.azieleliab.com/software. Trades-Runtime is a sister / extra machine cite (engine:false). Door remains /runtime.",
+    software_api_note: "Thin hub-local Softwares JSON on /v1/software: Aziel Runtime only plus official listing at https://www.azieleliab.com/software. Not the suite catalog (not an ae/corpus-style proxy). Suite Softwares SSoT is Worker GET " + SOFTWARE_SSOT + " (same-origin " + PUBLIC_RUNTIME + "/v1/software). FragGate list is fallback only. Whitestone is a Worker SSoT Softwares cite (engine:false, not a FragGate door). Trades-Runtime is a sister / extra machine cite (engine:false). Door remains /runtime.",
     github: GITHUB,
     download: DOWNLOAD,
     verify: CANON_HOST + "/verify",
@@ -2178,11 +2234,16 @@ export function citeDoc(sot) {
     donate_spec: "AZL-DONATE-1.0",
     software: CANON_HOST + SOFTWARE_PATH,
     software_catalog: PUBLIC_RUNTIME + "/v1/software",
-    software_catalog_origin: CATALOG + "/v1/software",
+    software_catalog_origin: SOFTWARE_SSOT,
+    software_ssot: SOFTWARE_SSOT,
+    software_ssot_same_origin: PUBLIC_RUNTIME + "/v1/software",
     software_fraggate: PUBLIC_RUNTIME + "/v1/fraggate/list",
-    software_fraggate_origin: CATALOG + "/v1/fraggate/list",
+    software_fraggate_origin: SOFTWARE_SSOT_FALLBACK,
+    software_fraggate_fallback_only: true,
+    software_hub_local: true,
+    software_cloned_suite: false,
     software_catalog_json: PUBLIC_RUNTIME + "/v1/catalog.json",
-    software_suite: SOFTWARE_HTML_SUITE_NOTE + " /v1/software JSON stays Aziel Runtime only plus sister_cites (Trades-Runtime, engine:false).",
+    software_suite: SOFTWARE_HTML_SUITE_NOTE + SOFTWARE_HUB_LOCAL_NOTE,
     software_api: CANON_HOST + "/v1/software",
     software_product_count: null,
     azcoherence: OFFICIAL_SOFTWARES + "#" + AZCOHERENCE_SLUG,
@@ -2403,7 +2464,7 @@ export function llmsDoc(sot) {
     + "He Didn't Jump: " + HEDIDNTJUMP + "\n"
     + "GodLock Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
     + "Donate: " + CANON_HOST + DONATE_PATH + " (AZL-DONATE-1.0). Same door: " + DONATE_CANONICAL + "\n"
-    + SOFTWARE_HTML_SUITE_NOTE + " /v1/software JSON stays Aziel Runtime only plus sister_cites (Trades-Runtime, engine:false). Live catalog remains " + PUBLIC_RUNTIME + "/v1/software. AZCoherence (azcoherence) is peer to AZ-CLCE (azclce).\n"
+    + SOFTWARE_HTML_SUITE_NOTE + SOFTWARE_HUB_LOCAL_NOTE + " Same-origin live catalog: " + PUBLIC_RUNTIME + "/v1/software. AZCoherence (azcoherence) is peer to AZ-CLCE (azclce).\n"
     + "Softwares list (machine cite): " + WHITESTONE_ADDENDUM + "\n"
     + THE_ARK_ADDENDUM + "\n"
     + SPECTRALLOCK_ADDENDUM + "\n"
@@ -2515,7 +2576,7 @@ export function siteOpenApi() {
       version: "0.1.0",
       summary: "Public HTTPS stress-test engine by Aziel Eliab.",
       description: hideInternalDetermination(
-        "GodLock.uk public routes plus same-origin FragGate / MCP door. Softwares HTML is GodLock-first (GodLock then Aziel Runtime) and points at " + OFFICIAL_SOFTWARES + ". /v1/software JSON stays Aziel Runtime only plus sister_cites. Live catalog remains " + PUBLIC_RUNTIME + "/v1/software. Suite mesh (QNM-BUILD-1.0, read-only, on; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse): GET " + CANON_HOST + "/v1/mesh and GET " + CANON_HOST + "/v1/mesh/status (same-origin proxies; GET never enables) plus GET " + PUBLIC_RUNTIME + "/v1/mesh. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health. This Worker has no mesh-off function. Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
+        "GodLock.uk public routes plus same-origin FragGate / MCP door. Softwares HTML is GodLock-first (GodLock then Aziel Runtime) and points at " + OFFICIAL_SOFTWARES + ". /v1/software JSON is hub-local (Aziel Runtime only plus sister_cites), not the suite catalog. Suite Softwares SSoT is Worker GET " + SOFTWARE_SSOT + " (same-origin " + PUBLIC_RUNTIME + "/v1/software). FragGate list is fallback only. Suite mesh (QNM-BUILD-1.0, read-only, on; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse): GET " + CANON_HOST + "/v1/mesh and GET " + CANON_HOST + "/v1/mesh/status (same-origin proxies; GET never enables) plus GET " + PUBLIC_RUNTIME + "/v1/mesh. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health. This Worker has no mesh-off function. Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
       ),
       contact: { name: AUTHOR, url: CANON_HOST + AZIEL_ELIAB_PATH },
       license: { name: "Apache-2.0", url: "https://www.apache.org/licenses/LICENSE-2.0" },

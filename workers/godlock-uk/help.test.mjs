@@ -62,6 +62,10 @@ describe("human help / addendum text", () => {
     assert.match(text, /GodLock-first/);
     assert.match(text, /https:\/\/godlock\.uk\/software/);
     assert.match(text, /https:\/\/www\.azieleliab\.com\/software/);
+    assert.match(text, /https:\/\/aziel-runtime\.vibelock\.workers\.dev\/v1\/software/);
+    assert.match(text, /https:\/\/godlock\.uk\/runtime\/v1\/software/);
+    assert.match(text, /hub-local/);
+    assert.match(text, /FragGate list fallback only/);
     assert.match(text, /https:\/\/godlock\.uk\/llms\.txt/);
     assert.match(text, /https:\/\/godlock\.uk\/ai\.txt/);
     assert.match(text, /https:\/\/godlock\.uk\/cite\.json/);

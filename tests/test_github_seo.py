@@ -347,9 +347,17 @@ def test_cite_json_graph():
     )
     assert CITE["whitestone_addendum"] == (
         "Whitestone — ephemeral pro se advisor (Criminal/Civil/Divorce). "
-        "Live https://whitestone.vibelock.workers.dev. Softwares list cite only. "
-        "Cite listed door ops only — never invent door ops."
+        "Live https://whitestone.vibelock.workers.dev. Suite Softwares list cite only — "
+        "Worker GET https://aziel-runtime.vibelock.workers.dev/v1/software "
+        "(same-origin https://godlock.uk/runtime/v1/software). FragGate list is fallback only. "
+        "Not a FragGate door. Not a GodLock Softwares HTML card. never invent door ops."
     )
+    assert CITE["software_ssot"] == "https://aziel-runtime.vibelock.workers.dev/v1/software"
+    assert CITE["software_hub_local"] is True
+    assert CITE["software_fraggate_fallback_only"] is True
+    assert CITE["whitestone_catalog"] == "https://aziel-runtime.vibelock.workers.dev/v1/software"
+    assert CITE["whitestone_fraggate"] is False
+    assert CITE["whitestone_godlock_softwares_html_card"] is False
     assert CITE["the_ark_name"] == "The ARK"
     assert CITE["the_ark_slug"] == "ark"
     assert CITE["the_ark_one_line"] == "The ARK — Keep a local deniable vault; one phrase opens one vault."

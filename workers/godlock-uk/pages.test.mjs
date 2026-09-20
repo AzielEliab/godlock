@@ -662,7 +662,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /He Didn't Jump: https:\/\/www\.hedidntjump\.com\//);
     assert.doesNotMatch(llms, /Aziel Corpus Library: https:\/\/godlock\.uk\/AzielCorpusLibrary/);
     assert.match(llms, /first card is GodLock/);
-    assert.match(llms, /\/v1\/software JSON stays Aziel Runtime only plus sister_cites/);
+    assert.match(llms, /\/v1\/software JSON is hub-local/);
     assert.match(llms, /Software listing: https:\/\/www\.azieleliab\.com\/software/);
     assert.doesNotMatch(llms, /Suite doors available from GodLock/);
     assert.doesNotMatch(llms, /Digital Library identity/);
@@ -1538,6 +1538,10 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.match(res.headers.get("Cache-Control") || "", /s-maxage=300/);
     assert.match(html, /https:\/\/www\.azieleliab\.com\/software/);
+    assert.match(html, /Suite Softwares catalog \(Worker SSoT\)/);
+    assert.match(html, /href="https:\/\/aziel-runtime\.vibelock\.workers\.dev\/v1\/software"/);
+    assert.match(html, /href="\/runtime\/v1\/software"/);
+    assert.match(html, /FragGate list is fallback only/);
     assert.match(html, /href="\/runtime\/mcp">MCP<\/a>/);
     assert.doesNotMatch(html, /class="banner"/);
     assert.doesNotMatch(html, /Public HTTPS engine\. QNM-BUILD-1\.0/);
@@ -1567,6 +1571,19 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(body.catalog_fraggate, "https://godlock.uk/runtime/v1/fraggate/list");
     assert.equal(body.official_softwares, OFFICIAL_SOFTWARES);
     assert.equal(body.cloned_suite, false);
+    assert.equal(body.hub_local, true);
+    assert.equal(body.prefer_worker_ssot, true);
+    assert.equal(body.fraggate_list_fallback_only, true);
+    assert.equal(body.catalog_ssot, "https://aziel-runtime.vibelock.workers.dev/v1/software");
+    assert.equal(body.whitestone.slug, "whitestone");
+    assert.equal(body.whitestone.engine, false);
+    assert.equal(body.whitestone.fraggate, false);
+    assert.equal(body.whitestone.door, "none");
+    assert.equal(body.whitestone.catalog, "https://aziel-runtime.vibelock.workers.dev/v1/software");
+    assert.equal(body.whitestone.catalog_same_origin, "https://godlock.uk/runtime/v1/software");
+    assert.equal(body.whitestone.not_a_godlock_softwares_card, true);
+    assert.equal(body.whitestone.not_a_fraggate_door, true);
+    assert.ok(!body.products.some((p) => p.slug === "whitestone"));
     assert.equal(body.product_count, 1);
     assert.equal(body.suite_count, 1);
     assert.ok(body.products.every((p) => p.slug === "aziel-runtime"));
@@ -1582,7 +1599,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(cite.official_softwares, OFFICIAL_SOFTWARES);
     const llms = llmsDoc();
     assert.match(llms, /first card is GodLock/);
-    assert.match(llms, /\/v1\/software JSON stays Aziel Runtime only plus sister_cites/);
+    assert.match(llms, /\/v1\/software JSON is hub-local/);
     assert.match(llms, /Software listing: https:\/\/www\.azieleliab\.com\/software/);
     assert.doesNotMatch(llms, /Suite doors available from GodLock/);
     assert.doesNotMatch(llms, /same completeness|matching Digital Library Software completeness/);
@@ -1664,6 +1681,11 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.equal(body.sort, "plain-gate-lock");
     assert.equal(body.official_softwares, OFFICIAL_SOFTWARES);
     assert.equal(body.cloned_suite, false);
+    assert.equal(body.hub_local, true);
+    assert.equal(body.prefer_worker_ssot, true);
+    assert.equal(body.whitestone.slug, "whitestone");
+    assert.equal(body.whitestone.catalog, "https://aziel-runtime.vibelock.workers.dev/v1/software");
+    assert.ok(!body.products.some((p) => p.slug === "whitestone"));
     assert.ok(body.products.every((p) => p.slug === "aziel-runtime"));
     assert.ok(!body.products.some((p) => p.slug === "azcoherence"));
     assert.ok(!body.software.some((p) => p.slug === "azcoherence"));
@@ -2418,7 +2440,6 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(cite.runtime_version_id, "105fa1ee");
     assert.equal(cite.runtime_sot, RUNTIME_SOT);
     assert.equal(cite.runtime_sot_live, true);
-    assert.equal(cite., false);
     assert.equal(cite.worker_hardware, false);
     assert.equal(cite.invented_hardware, false);
     assert.equal(cite.godlock_is_vpn, false);
@@ -2430,7 +2451,6 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(cite.suite_download, "https://aziel-runtime.vibelock.workers.dev/download");
     assert.match(cite.launch_ready_note, /fraggate_call/);
     assert.match(cite.launch_ready_note, /worker_hardware:false/);
-    assert.match(cite.launch_ready_note, / stays false/);
     assert.match(cite.launch_ready_note, /challenge\/score product/);
     assert.match(cite.launch_ready_note, /Try on Glama/);
     assert.match(cite.launch_ready_note, /Lamb Lens/);
@@ -2465,7 +2485,6 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(html, /WireGuard\/OpenVPN SLOT/);
     assert.match(html, /worker_hardware:false/);
     assert.match(html, /\/download/);
-    assert.match(html, / stays false/);
     assert.match(html, /challenge\/score product/);
     assert.match(html, /Try on Glama/);
     assert.doesNotMatch(html, /Works with ChatGPT/);
@@ -2481,7 +2500,6 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(body.runtime_version, "2.0.0-rc1");
     assert.equal(body.runtime_git_sha_short, "6a3798a");
     assert.equal(body.runtime_version_id, "105fa1ee");
-    assert.equal(body., false);
     assert.equal(body.godlock_is_vpn, false);
     assert.equal(body.worker_hardware, false);
     assert.equal(body.runtime_distribution[0].label, "Try on Glama");
@@ -2493,7 +2511,7 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(llms, /No LIVE flip/);
     assert.match(llms, /No Works-with assistants subsection/);
     assert.match(llms, /heading → list only/);
-    assert.doesNotMatch(llms, /: true/);
+    assert.doesNotMatch(llms, /live_ready:\s*true/i);
     const softwareMeta = defaultDescription("software");
     assert.match(softwareMeta, /6a3798a/);
     assert.match(softwareMeta, /105fa1ee/);

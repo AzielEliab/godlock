@@ -1,7 +1,9 @@
 /**
  * Aziel Eliab software catalog helpers.
  * GodLock.uk Softwares HTML is GodLock-first (heading → list): GodLock then Aziel Runtime.
- * /v1/software JSON stays Aziel Runtime only plus sister_cites (Trades-Runtime is not a card).
+ * /v1/software JSON is hub-local (Aziel Runtime only plus sister_cites; Trades-Runtime is not a card).
+ * Not an ae/corpus suite-catalog proxy. Suite Softwares SSoT is Worker GET /v1/software.
+ * Whitestone is a Worker SSoT machine cite (not a FragGate door; not a Softwares HTML card).
  * Live fetch via AZIEL_RUNTIME still feeds Runtime sitemap / describe / pull URLs.
  * Snapshot is a fallback floor, not a 27-only cap — live catalog slugs
  * (peacelock, azmail, azhub, azinterface, azcoherence, …) are included automatically. Do not invent slugs.
@@ -13,6 +15,10 @@ import {
   AZIEL_OFFICIAL, OFFICIAL_SOFTWARES,
   citeRuntimeVersion, runtimeDistribution, GLAMA_RUNTIME, RUNTIME_DOCS_2_0,
   tradesSisterCite,
+  whitestoneSuiteCite,
+  SOFTWARE_SSOT,
+  SOFTWARE_SSOT_FALLBACK,
+  SOFTWARE_HUB_LOCAL_NOTE,
   FRAGGATE_KERNEL, FRAGGATE_DOWNLOAD, FRAGGATE_WORKER, FRAGGATE_COUNT,
   AZBROWSER_DOWNLOAD, AZBROWSER_WORKER, AZBROWSER_COUNT,
   AZNET_DOWNLOAD, AZNET_WORKER, AZNET_COUNT, AZNET_GITHUB,
@@ -755,7 +761,7 @@ export function softwareSuite(products, extras = {}) {
   return sortSoftwareSuite(out);
 }
 
-/** GodLock.uk Softwares JSON list: Aziel Runtime only. Suite / sister cites stay off this list. */
+/** GodLock.uk Softwares JSON list: Aziel Runtime only. Suite / sister cites stay off this list. Not the Worker SSoT suite catalog. */
 export function publicSoftwaresList(products, extras = {}) {
   const suite = softwareSuite(products, extras);
   const runtime = suite.find((p) => p && p.slug === RUNTIME_SLUG);
@@ -822,14 +828,20 @@ export function softwareApiDoc(products, extras = {}) {
     official_site: AZIEL_OFFICIAL,
     official_softwares: OFFICIAL_SOFTWARES,
     cloned_suite: false,
+    hub_local: true,
+    prefer_worker_ssot: true,
+    fraggate_list_fallback_only: true,
     door: "fraggate",
     seo_proxy: true,
     not_a_second_fraggate_door: true,
     catalog: PUBLIC_RUNTIME + SOFTWARE_JSON_PATH,
-    catalog_origin: SOFTWARE_ORIGIN_URL,
-    catalog_fallback: FRAGGATE_LIST_ORIGIN_URL,
+    catalog_origin: SOFTWARE_SSOT,
+    catalog_ssot: SOFTWARE_SSOT,
+    catalog_fallback: SOFTWARE_SSOT_FALLBACK,
     catalog_fraggate: PUBLIC_RUNTIME + FRAGGATE_LIST_PATH,
     catalog_json: PUBLIC_RUNTIME + CATALOG_JSON_PATH,
+    software_note: SOFTWARE_HUB_LOCAL_NOTE.trim(),
+    whitestone: whitestoneSuiteCite(),
     sort: "plain-gate-lock",
     clock_is_not_lock: true,
     product_count: list.length,

@@ -3,7 +3,7 @@
  * One input. Locked protocol. Append-only hash-chained receipts.
  * Not a forum, not a tunnel. Suite mesh is QNM-BUILD-1.0 (read-only, on):
  * Nodes = human mesh users + cited human uses from /v1/mesh.
- * Live Nodes = mesh presence + current website viewers (never uses-as-live, never software_nodes).
+ * Live Nodes = runtime GET /v1/mesh live_nodes fleet total (never uses-as-live, never software_nodes).
  * Presence live|locked|isolated counts only.
  * Softwares catalog stays separate. No Node Gate. No auto-heal.
  * SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL bind refuse/status even when mesh
@@ -63,6 +63,7 @@ import { hideInternalDetermination, publicSafeFields } from "./publicCopy.js";
 import { scheduleSitePresence } from "./sitePresence.js";
 import {
   fetchMeshSnapshot,
+  meshProbeDeps,
   alignLiveNodes,
   alignNodes,
   liveNodesAlignMode,
@@ -101,12 +102,9 @@ function ledgerChallengePreview(text) {
   return s.length <= LEDGER_CHALLENGE_PREVIEW ? s : s.slice(0, LEDGER_CHALLENGE_PREVIEW);
 }
 
-/** Production probes LIVE origin /v1/mesh/status. Tests set MESH_PROBE_ORIGIN=false. */
+/** Production probes LIVE origin GET /v1/mesh (fleet SSoT). Tests set MESH_PROBE_ORIGIN=false. */
 function meshSnapshotDeps(env) {
-  if (env && (env.MESH_PROBE_ORIGIN === false || env.MESH_PROBE_ORIGIN === "0")) {
-    return { probeOrigin: false };
-  }
-  return { fetch: globalThis.fetch, probeOrigin: true };
+  return meshProbeDeps(env);
 }
 
 async function ensureSchema(env) {

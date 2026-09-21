@@ -640,10 +640,12 @@ export function meshIncludesSiteViewers(mesh) {
   const plane = String(m.live_nodes_plane || "");
   if (/site[-_ ]?(viewers?|live)/i.test(plane)) return true;
   const siteIn = firstNum(
+    c.site_live_viewers,
     c.site_live_nodes,
     c.site_viewers,
     c.website_viewers,
     c.godlock_site_live_nodes,
+    m.site_live_viewers,
   );
   if (siteIn == null) return false;
   const meshLive = parsePublicLivePresence(m);

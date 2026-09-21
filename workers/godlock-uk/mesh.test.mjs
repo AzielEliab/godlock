@@ -510,6 +510,23 @@ describe("Nodes / Live Nodes dual pills (aziel-runtime#151)", () => {
     };
     assert.equal(meshIncludesSiteViewers(byComponent), true);
     assert.equal(alignLiveNodes({ siteLiveNodes: 9, mesh: byComponent }), 3);
+    const runtime154 = {
+      enabled: true,
+      nodes: 27206,
+      live_nodes: 4,
+      human_mesh_users: 1,
+      human_uses: 27205,
+      site_live_viewers: 3,
+      live_nodes_plane: "human-mesh-users-site-viewers",
+      live_nodes_components: {
+        human_mesh_users: 1,
+        site_live_viewers: 3,
+        human_uses_excluded: true,
+      },
+    };
+    assert.equal(meshIncludesSiteViewers(runtime154), true);
+    assert.equal(alignLiveNodes({ siteLiveNodes: 3, mesh: runtime154 }), 4);
+    assert.equal(liveNodesAlignMode({ mesh: runtime154 }), "mesh");
   });
 
   it("prefers post-break numeric nodes + presence live_nodes", () => {

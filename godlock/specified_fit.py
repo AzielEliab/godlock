@@ -9,6 +9,11 @@ Pretty spirals and φ are not a design proof. The steel claim lives in
 ``docs/Specified_Fit_Not_Pretty_Spirals.md``. Family bonuses are
 engagement heuristics only.
 
+Public godlock.uk Steer shares (intelligent design / multi-simulation /
+standard cosmology / undecided) are not these weights. They are an
+aggregate of scored public receipts in ``workers/godlock-uk/src/steer.js``.
+A φ hit here does not cast a Steer vote by itself.
+
 Family bonuses (applied once per family that hits):
 
     specified_fit    3.0   Specified Fit, specified complexity; leftover A-B-A-D tokens

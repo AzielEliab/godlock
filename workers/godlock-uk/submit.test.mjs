@@ -9,7 +9,7 @@ import {
 } from "./src/challengeText.js";
 import { checkSubmitGuard, SUBMIT_RATE_MAX, submitFingerprint } from "./src/submitGuard.js";
 import { sha256hex } from "./src/ledger.js";
-import { FLOOR, CEILING, LABELS } from "./src/engine.js";
+import { FLOOR, CEILING, LABELS, hashReceipt } from "./src/engine.js";
 import { homeBody } from "./src/ui.js";
 import { siteOpenApi } from "./src/seo.js";
 
@@ -74,6 +74,13 @@ function submitEnv() {
         return null;
       },
       async all() {
+        if (/steer-aggregate/.test(q)) {
+          return {
+            results: receipts
+              .filter((r) => !Number(r.isolated))
+              .map((r) => ({ label: r.label, challenge_text: r.challenge_text, isolated: r.isolated })),
+          };
+        }
         if (/FROM receipts WHERE isolated=0/.test(q)) {
           const limit = Number(bound[0]) || 5;
           const offset = Number(bound[1]) || 0;
@@ -286,7 +293,24 @@ describe("POST /submit still scores one valid challenge", () => {
     assert.equal(rec.receipts.length, 1);
     assert.ok(rec.ledger.some((e) => e.action === "SUBMIT"));
     assert.equal(publicPayload(rec.receipts[0]).challenge_text, VALID);
-    const visible = homeBody({ stats: { current_score: j.score_after, residual: j.residual }, latest: rec.receipts[0], prior: [] });
+    assert.equal(j.classification.primary, "intelligent_design");
+    assert.equal(j.classification.text_retained, true);
+    assert.equal(j.classification.weights.intelligent_design, 1);
+    assert.equal(j.weighing, undefined);
+    assert.equal(j.stats.steer_leader, "intelligent_design");
+    assert.equal(j.stats.scales.intelligent_design, 100);
+    assert.equal(j.stats.scales.undecided, 0);
+    assert.equal(j.stats.current_score, j.score_after);
+    assert.equal(j.stats.residual, j.residual);
+    assert.equal(j.content_sha256, hashReceipt(rec.receipts[0]));
+    assert.doesNotMatch(JSON.stringify(j), /INTERNAL_CRITERIA|weighing|bootstrap lock/i);
+    const submitEntry = rec.ledger.find((e) => e.action === "SUBMIT");
+    const payload = JSON.parse(submitEntry.payload_json);
+    assert.equal(payload.classification, undefined);
+    assert.equal(payload.steer, undefined);
+    const visible = homeBody({ stats: { current_score: j.score_after, residual: j.residual, steer: j.stats.steer }, latest: rec.receipts[0], prior: [] });
+    assert.match(visible, /id="steer"/);
+    assert.match(visible, /Steering toward: Intelligent design/);
     assert.match(visible, /Score floor 33\.3 · ceiling 99\.7/);
     assert.match(visible, /Yes, No, Let's review, or Interesting/);
     assert.doesNotMatch(visible, /1 Chronicles 15:20/);

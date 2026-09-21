@@ -41,6 +41,8 @@ Local / preview D1: drop `--remote` or point at the preview database. Confirm th
 
 After wipe, `/verify` walks an empty ledger (valid empty chain). Home prior-receipts and `/receipts` are empty. The public **Receipts** counter is the live `isolated=0` count (same source as Prior), so it goes to 0 after a wipe. **Views, Uses floor, current_score, downloads cache, Nodes / Live Nodes, and download KV are unchanged** if you followed the “do not touch” list below.
 
+**Steer** is not a metadata counter. It is recomputed from public (`isolated=0`) receipt text. A receipt wipe returns Steer to 100% undecided. Do not invent steer keys to wipe; there are none. `current_score` stays.
+
 ## What you must not wipe
 
 Do **not** run DELETE/UPDATE that resets these. Do **not** put such SQL in application code.

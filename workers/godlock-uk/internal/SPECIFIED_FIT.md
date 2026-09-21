@@ -31,7 +31,12 @@ Ceiling 99.7. Floor 33.3.
 - **D GodLock as method, not evidence:** the ledger is not biological proof
 
 FAMILY_PATTERNS (φ, √2, Flower of Life, corkscrew, leftover A-B-A-D
-tokens) are engagement heuristics only.
+tokens) are engagement heuristics only. They do not cast a public Steer vote.
+
+Public Steer (`workers/godlock-uk/src/steer.js`) is a read-time share of
+scored public receipts: Layer B intelligent design, simulation hypothesis,
+Layer C cosmology, undecided. Ledgers stay separate. It is not
+`current_score`. It is not written into the hash chain.
 
 Parent may wipe D1 `receipts` and `ledger` only. Never wipe counter KV
 or `metadata.views` / `metadata.uses`. See `docs/d1-receipt-wipe.md`.

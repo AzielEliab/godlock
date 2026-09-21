@@ -27,6 +27,13 @@ import {
 } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import { receiptScoreDelta } from "./engine.js";
+import {
+  STEER_FRAME_IDS,
+  STEER_LABELS,
+  STEER_NOTE_PUBLIC,
+  classifyChallenge,
+  formatSteerPercent,
+} from "./steer.js";
 import { publicSoftwaresHtmlList, invokeHref, workerHref, stripRuntimeFragGateMash, suiteFamily } from "./catalog.js";
 import { launchReadyHtml } from "./launchReady.js";
 import { donateBody as donatePageBody } from "./donate.js";
@@ -82,6 +89,16 @@ footer .ecosystem{margin:16px 0 0}
 .scorebox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 16px;display:flex;flex-wrap:wrap;gap:18px}
 .scorebox .n{font-size:32px;font-weight:800;letter-spacing:-.03em}
 .scorebox .k{color:var(--muted);font-size:13px}
+.steer{background:var(--paper);border:1px solid var(--gold);border-radius:14px;padding:16px;margin:0 0 16px}
+.steer h2{margin:0 0 6px;font-size:18px}
+.steer-leader{margin:0 0 12px;font-size:18px;font-weight:800;letter-spacing:-.02em}
+.steer-list{list-style:none;padding:0;margin:0 0 10px}
+.steer-list li{margin:0 0 10px}
+.steer-row{display:flex;justify-content:space-between;gap:12px;font-size:14px;align-items:baseline}
+.steer-track{height:12px;background:#2a241c;border-radius:999px;overflow:hidden;margin-top:4px}
+.steer-bar{height:100%;background:#8a7340;border-radius:999px;min-width:0}
+.steer-list li.is-leader .steer-row span:first-child{font-weight:800}
+.steer-list li.is-leader .steer-bar{background:var(--gold)}
 form.challenge{margin:0 0 18px}
 textarea{width:100%;min-height:140px;background:#16130f;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:14px;font:inherit;resize:vertical}
 button,.button{background:var(--gold);color:#14110a;border:0;padding:12px 18px;border-radius:12px;font:inherit;font-size:16px;font-weight:750;cursor:pointer;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
@@ -356,6 +373,55 @@ ${ecosystemNav()}
           ?"Suite mesh: on · rollup unavailable"
           :"Suite mesh: on");
     }
+    applySteer(j);
+  }
+  function steerPct(n){
+    var x=Math.round(Number(n)*10)/10;
+    if(!isFinite(x))return "0";
+    return Math.abs(x-Math.round(x))<1e-9?String(Math.round(x)):x.toFixed(1);
+  }
+  function applySteer(j){
+    if(!j)return;
+    var st=j.steer&&typeof j.steer==="object"?j.steer:null;
+    var scales=j.scales||(st&&st.scales);
+    var toward=st&&st.steering_toward;
+    var leadEl=document.getElementById("steer-leader");
+    if(leadEl&&toward)leadEl.textContent="Steering toward: "+toward;
+    var inputsEl=document.getElementById("steer-inputs");
+    if(inputsEl&&st&&st.inputs!=null)inputsEl.textContent=String(st.inputs);
+    var cEl=document.getElementById("steer-current-score");
+    var rEl=document.getElementById("steer-residual");
+    if(cEl&&j.current_score!=null)cEl.textContent=String(j.current_score)+"%";
+    if(rEl&&j.residual!=null)rEl.textContent=String(j.residual)+"%";
+    if(!scales)return;
+    var ids=["intelligent_design","multi_simulation","standard_cosmology","undecided"];
+    var leaders={};
+    var list=st&&st.leaders;
+    if(list&&list.length){for(var i=0;i<list.length;i++)leaders[list[i]]=true;}
+    else if(st&&st.leader&&st.leader!=="tie")leaders[st.leader]=true;
+    ids.forEach(function(id){
+      var pct=scales[id];
+      var num=document.getElementById("steer-pct-"+id);
+      var bar=document.getElementById("steer-bar-"+id);
+      if(num&&pct!=null)num.textContent=steerPct(pct)+"%";
+      if(bar&&pct!=null)bar.style.width=steerPct(pct)+"%";
+      var li=document.querySelector('#steer-list li[data-frame="'+id+'"]');
+      if(li){
+        if(leaders[id])li.classList.add("is-leader");
+        else li.classList.remove("is-leader");
+      }
+    });
+    var ol=document.getElementById("steer-list");
+    if(ol){
+      var items=[].slice.call(ol.children);
+      items.sort(function(a,b){
+        var pa=Number(scales[a.getAttribute("data-frame")]||0);
+        var pb=Number(scales[b.getAttribute("data-frame")]||0);
+        if(pb!==pa)return pb-pa;
+        return Number(a.getAttribute("data-order"))-Number(b.getAttribute("data-order"));
+      });
+      items.forEach(function(el){ol.appendChild(el);});
+    }
   }
   function beat(){
     if(typeof fetch!=="function")return;
@@ -455,6 +521,54 @@ export function statsGrid(stats, { receiptsFallback } = {}) {
 </div>`;
 }
 
+export function steerPanel(steer, stats) {
+  const s = stats || {};
+  const score = s.current_score != null ? s.current_score : 50;
+  const residual = s.residual != null ? s.residual : 50;
+  const confidence = `<p class="muted">Current confidence <span id="steer-current-score">${esc(score)}%</span> · Residual uncertainty <span id="steer-residual">${esc(residual)}%</span> · floor 33.3 · ceiling 99.7.</p>`;
+  if (!steer || steer.available === false || !steer.scales) {
+    const note = steer && steer.note
+      ? steer.note
+      : "Steer is the share of scored public challenges. No share is shown on this view.";
+    return `<section class="steer" id="steer" aria-label="Steer"><h2>Steer</h2><p class="muted">${esc(note)}</p>${confidence}<p class="muted">${esc(STEER_NOTE_PUBLIC)}</p></section>`;
+  }
+  const leaders = new Set(steer.leaders || []);
+  const ranked = STEER_FRAME_IDS
+    .map((id, order) => ({ id, order, pct: Number(steer.scales[id]) || 0 }))
+    .sort((a, b) => b.pct - a.pct || a.order - b.order);
+  const rows = ranked.map((row) => {
+    const pct = formatSteerPercent(row.pct);
+    const leader = leaders.has(row.id);
+    return `<li data-frame="${esc(row.id)}" data-order="${row.order}"${leader ? ' class="is-leader"' : ""}>
+      <div class="steer-row"><span>${esc(STEER_LABELS[row.id])}</span><span id="steer-pct-${esc(row.id)}">${esc(pct)}%</span></div>
+      <div class="steer-track" role="presentation"><div class="steer-bar" id="steer-bar-${esc(row.id)}" style="width:${esc(pct)}%"></div></div>
+    </li>`;
+  }).join("");
+  const countLine = steer.inputs
+    ? `<p class="muted"><span id="steer-inputs">${esc(steer.inputs)}</span> scored public challenges. Shares sum to 100 at one decimal. An equal vote stays a tie when rounding prints 0.1 apart. Steer is the mix of those challenges. Current confidence is the running score.</p>`
+    : `<p class="muted" id="steer-inputs">No scored public challenges yet. The scale stays undecided until a receipt is classified.</p>`;
+  return `<section class="steer" id="steer" aria-label="Steer">
+  <h2>Steer</h2>
+  <p class="steer-leader" id="steer-leader">Steering toward: ${esc(steer.steering_toward || "")}</p>
+  <ol class="steer-list" id="steer-list">${rows}</ol>
+  ${countLine}
+  ${confidence}
+  <p class="muted">${esc(STEER_NOTE_PUBLIC)}</p>
+</section>`;
+}
+
+function frameBlock(row) {
+  if (!row || Number(row.isolated)) return "";
+  if (retainedChallengeText(row) == null) {
+    return `<div class="block"><div class="k">Frame</div><p>Challenge text was not retained, so this receipt counts as undecided.</p></div>`;
+  }
+  const c = classifyChallenge(row.challenge_text);
+  const parts = (c.hits || []).map((id) => {
+    return STEER_LABELS[id] + " (" + formatSteerPercent((c.weights[id] || 0) * 100) + "% of this receipt)";
+  });
+  return `<div class="block"><div class="k">Frame</div><p>${esc(parts.join(" · "))}</p><p class="muted">One scored input. A split keeps the ledgers separate. Pretty spirals and φ do not add a design share.</p></div>`;
+}
+
 export function homeBody({ stats, latest, prior, error, products, extras }) {
   const s = stats || {};
   const score = s.current_score != null ? s.current_score : 50;
@@ -473,6 +587,7 @@ ${statsGrid(s)}
   <div><div class="n" id="stat-current-score">${esc(score)}%</div><div class="k">Current confidence</div></div>
   <div><div class="n" id="stat-residual">${esc(residual)}%</div><div class="k">Residual uncertainty</div></div>
 </div>
+${steerPanel(s.steer, s)}
 <div class="card">
   <h2>${esc(SPECIFIED_FIT_TITLE)}</h2>
   <p>${esc(SPECIFIED_FIT_STEEL)}</p>
@@ -527,6 +642,7 @@ export function receiptsBody({ rows, total, page, pageSize, stats }) {
   const pages = Math.max(1, Math.ceil((Number(total) || 0) / size));
   return `
 ${statsGrid(s, { receiptsFallback: total })}
+${steerPanel(s.steer, s)}
 <h1 class="soft-heading">Receipts</h1>
 <p>Public questions and the hash-chained receipt list. Newest first. GodLock is a stress-test engine — Yes / No / Let's review / Interesting — not a forum.</p>
 <p class="muted">${esc(SPECIFIED_FIT_TITLE)}. ${esc(SPECIFIED_FIT_MOTTO)} <a href="${esc(REASON_PATH)}">Read the brief</a>.</p>
@@ -551,6 +667,7 @@ export function answerCard(row, latest) {
     <div class="block"><div class="k">2. Explanation</div><p>${esc(publicText(row.explanation))}</p></div>
     <div class="block"><div class="k">3. Score change</div><p>${esc(row.score_before)}% → ${esc(row.score_after)}% (${sign}${esc(delta)})</p></div>
     <div class="block"><div class="k">4. Residual uncertainty</div><p>${esc(row.residual)}%</p></div>
+    ${frameBlock(row)}
     <p class="hash muted">${esc(row.content_sha256 || "")} · <a href="/receipt/${esc(row.id)}">receipt</a></p>
   </article>`;
 }
@@ -588,8 +705,9 @@ export function specifiedFitPublicHtml() {
 </section>`;
 }
 
-export function reasonBody() {
-  return `<section class="about-aziel" id="specified-fit-brief"><div class="card about-prose">
+export function reasonBody({ stats } = {}) {
+  const s = stats || {};
+  return `${steerPanel(s.steer, s)}<section class="about-aziel" id="specified-fit-brief"><div class="card about-prose">
 ${specifiedFitPublicHtml()}
 <p><a href="${esc(AZIEL_ELIAB_PATH)}">Aziel Eliab</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a></p>
 </div></section>`;
@@ -756,12 +874,13 @@ export function donateBody() {
   return donatePageBody();
 }
 
-export function receiptBody({ id, row, entries }) {
+export function receiptBody({ id, row, entries, stats }) {
   if (!row || row.isolated) {
     return `<div class="card"><h2>Not found</h2><p>No public receipt for ${esc(id)}.</p><p><a class="button" href="/">Back</a></p></div>`;
   }
   const chain = (entries || []).map((e) => {
     return `<article class="card"><p class="muted">#${esc(e.sequence)} · ${esc(e.action)} · ${esc(when(e.timestamp_utc))}</p><p class="hash">entry ${esc(e.entry_hash)}</p><p class="hash muted">prev ${esc(e.previous_hash)}</p><pre class="verify">${esc(JSON.stringify(e.payload, null, 2))}</pre></article>`;
   }).join("");
-  return `${answerCard(row, false)}${chain || ""}<p class="actions"><a class="button" href="/">Back</a></p>`;
+  const s = stats || {};
+  return `${answerCard(row, false)}${steerPanel(s.steer, s)}${chain || ""}<p class="actions"><a class="button" href="/">Back</a></p>`;
 }

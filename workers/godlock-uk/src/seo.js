@@ -2797,7 +2797,7 @@ export function siteOpenApi() {
       "/who-is": { get: { operationId: "godlockUkWhoIsAlias", summary: "308 to /who-is-aziel-eliab.txt", responses: { "308": { description: "Permanent redirect" } } } },
       "/why": { get: { operationId: "godlockUkWhyAlias", summary: "308 to /why-aziel-eliab.txt — machine why; official HTML why stays on azieleliab.com", responses: { "308": { description: "Permanent redirect" } } } },
       "/why-aziel-eliab.txt": { get: { operationId: "godlockUkWhyAziel", summary: "Why Aziel Eliab / why GodLock exists — machine txt only", responses: { "200": { description: "OK" } } } },
-      "/count": { get: { operationId: "godlockUkCount", summary: "Public Nodes (human mesh users+uses) / Live Nodes (mesh presence + current website viewers) / Uses / Receipts counters", responses: { "200": { description: "OK" } } } },
+      "/count": { get: { operationId: "godlockUkCount", summary: "Public Nodes / Live Nodes / Uses / Receipts plus current_score, residual, and steer scales (share of scored public challenges)", responses: { "200": { description: "OK" } } } },
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
       "/.well-known/mcp.json": { get: { operationId: "godlockUkWellKnownMcp", summary: "MCP discovery JSON pointing at POST /runtime/mcp", responses: { "200": { description: "OK" } } } },
       "/mcp.json": { get: { operationId: "godlockUkMcpDiscovery", summary: "Same body as /.well-known/mcp.json — discovery only", responses: { "200": { description: "OK" } } } },

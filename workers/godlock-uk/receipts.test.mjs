@@ -69,6 +69,13 @@ function recordingEnv() {
         return null;
       },
       async all() {
+        if (/steer-aggregate/.test(q)) {
+          return {
+            results: receipts
+              .filter((r) => !Number(r.isolated))
+              .map((r) => ({ label: r.label, challenge_text: r.challenge_text, isolated: r.isolated })),
+          };
+        }
         if (/FROM receipts WHERE isolated=0/.test(q)) {
           const limit = Number(bound[0]) || 5;
           const offset = Number(bound[1]) || 0;

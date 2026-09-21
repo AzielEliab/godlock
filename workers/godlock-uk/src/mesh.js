@@ -160,6 +160,9 @@ export const QNS_CD = Object.freeze({
 });
 
 export const LIVE_NODES_PLANE = "human-mesh-users-uses";
+/** aziel-runtime#151 LIVE isolate. Public live_nodes = human users+uses, not Softwares. */
+export const LIVE_NODES_WORKER_VERSION_ID = "d7b63ac1";
+export const LIVE_NODES_SOT = "aziel-runtime#151 LIVE Worker " + LIVE_NODES_WORKER_VERSION_ID;
 export const LIVE_NODES_NOTE =
   "Public Live Nodes (live_nodes / rollup.mesh) count human mesh users (join/heartbeat/presence with human bearers) plus the cited human uses signal (USES / human_uses) from Worker /v1/mesh. Isolated humans stay on isolated_nodes. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. Softwares catalog stays separate. Uses are interaction counters, not unique people. Live Nodes does not invent users. Zero is honest when no humans are present and uses are 0/unbound.";
 export const SOFTWARE_NODES_NOTE =
@@ -775,6 +778,8 @@ export function emptyMesh(extra = {}) {
     mesh_readonly: true,
     live_nodes: 0,
     live_nodes_plane: LIVE_NODES_PLANE,
+    live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
+    live_nodes_sot: LIVE_NODES_SOT,
     live_nodes_note: LIVE_NODES_NOTE,
     software_nodes: 0,
     software_nodes_note: SOFTWARE_NODES_NOTE,
@@ -850,6 +855,8 @@ export function parseMeshDoc(body) {
     mesh_readonly: true,
     live_nodes: live,
     live_nodes_plane: inner.live_nodes_plane || LIVE_NODES_PLANE,
+    live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
+    live_nodes_sot: LIVE_NODES_SOT,
     live_nodes_note: typeof inner.live_nodes_note === "string" && inner.live_nodes_note.trim()
       ? inner.live_nodes_note
       : LIVE_NODES_NOTE,
@@ -885,6 +892,8 @@ export function publicMesh(mesh) {
     mesh_readonly: true,
     live_nodes: live,
     live_nodes_plane: m.live_nodes_plane || LIVE_NODES_PLANE,
+    live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
+    live_nodes_sot: LIVE_NODES_SOT,
     live_nodes_note: typeof m.live_nodes_note === "string" && m.live_nodes_note.trim()
       ? m.live_nodes_note
       : LIVE_NODES_NOTE,
@@ -1100,6 +1109,8 @@ export function hubMeshStatusDoc(stats, path) {
     status: enabled ? "on" : "unavailable",
     live_nodes: enabled ? (firstNum(mesh.live_nodes) ?? rollup.live) : 0,
     live_nodes_plane: LIVE_NODES_PLANE,
+    live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
+    live_nodes_sot: LIVE_NODES_SOT,
     live_nodes_note: LIVE_NODES_NOTE,
     software_nodes: enabled ? (firstNum(mesh.software_nodes) ?? 0) : 0,
     software_nodes_note: SOFTWARE_NODES_NOTE,
@@ -1148,6 +1159,8 @@ export function meshOpsDoc() {
     ops: MESH_OPS.slice(),
     rollup_shape: "live_nodes = human mesh users + cited human uses; presence live|locked|isolated; software_nodes separate",
     live_nodes_plane: LIVE_NODES_PLANE,
+    live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
+    live_nodes_sot: LIVE_NODES_SOT,
     live_nodes_note: LIVE_NODES_NOTE,
     software_nodes_note: SOFTWARE_NODES_NOTE,
     default_off: false,

@@ -2,8 +2,9 @@
  * GodLock.uk public HTTPS stress-test engine (Cloudflare Worker).
  * One input. Locked protocol. Append-only hash-chained receipts.
  * Not a forum, not a tunnel. Suite mesh is QNM-BUILD-1.0 (read-only, on):
- * Live Nodes = human mesh users + cited human uses from /v1/mesh
- * (never software_nodes). Presence live|locked|isolated counts only.
+ * Nodes = human mesh users + cited human uses from /v1/mesh.
+ * Live Nodes = presence only (never uses-as-live, never software_nodes).
+ * Presence live|locked|isolated counts only.
  * Softwares catalog stays separate. No Node Gate. No auto-heal.
  * SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL bind refuse/status even when mesh
  * is unavailable. Phoenix is local only — die-with-pull does not bring .uk back.
@@ -60,6 +61,7 @@ import { hideInternalDetermination, publicSafeFields } from "./publicCopy.js";
 import {
   fetchMeshSnapshot,
   alignLiveNodes,
+  alignNodes,
   publicMesh,
   meshOpsDoc,
   isOriginMeshReadPath,
@@ -368,12 +370,19 @@ async function gatherStats(env, { wrote, visiting } = {}) {
     fetchMeshSnapshot(env, meshSnapshotDeps(env)),
   ]);
   const mesh = publicMesh(meshSnap);
+  const isVisiting = !!(wrote || visiting);
   const live = alignLiveNodes({
     siteLiveNodes: siteNodes,
     mesh,
-    visiting: !!(wrote || visiting),
+    visiting: isVisiting,
+  });
+  const nodes = alignNodes({
+    siteLiveNodes: siteNodes,
+    mesh,
+    visiting: isVisiting,
   });
   return {
+    nodes,
     live_nodes: live,
     site_live_nodes: siteNodes,
     mesh,
@@ -718,9 +727,11 @@ export default {
         const stats = await gatherStats(env, { wrote });
         return json({
           ok: true,
+          nodes: stats.nodes,
           live_nodes: stats.live_nodes,
           site_live_nodes: stats.site_live_nodes,
           mesh_enabled: !!(stats.mesh && stats.mesh.enabled),
+          mesh_nodes: stats.mesh && stats.mesh.enabled ? (stats.mesh.nodes || 0) : 0,
           mesh_live_nodes: stats.mesh && stats.mesh.enabled ? stats.mesh.live_nodes : 0,
           mesh_locked: stats.mesh && stats.mesh.enabled && stats.mesh.rollup ? stats.mesh.rollup.locked : 0,
           mesh_isolated: stats.mesh && stats.mesh.enabled && stats.mesh.rollup ? stats.mesh.rollup.isolated : 0,
@@ -778,6 +789,7 @@ export default {
           mesh_readonly: true,
           node_gate: false,
           auto_heal: false,
+          nodes: stats.nodes,
           live_nodes: stats.live_nodes,
           rollup: stats.mesh && stats.mesh.rollup ? stats.mesh.rollup : { live: 0, locked: 0, isolated: 0 },
           site_live_nodes: stats.site_live_nodes,

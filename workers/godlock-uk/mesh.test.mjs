@@ -28,9 +28,13 @@ import {
   publicMesh,
   meshStatusLine,
   alignLiveNodes,
+  alignNodes,
   alignPublicMeshSurface,
   compactMeshNode,
   parsePublicLiveNodes,
+  parsePublicNodes,
+  parsePublicLivePresence,
+  formatNodesLive,
   LIVE_NODES_PLANE,
   LIVE_NODES_WORKER_VERSION_ID,
   LIVE_NODES_SOT,
@@ -182,13 +186,15 @@ describe("mesh contract", () => {
     assert.equal(ops.azvpn.godlock_is_vpn, false);
     assert.equal(ops.node_gate, false);
     assert.equal(ops.auto_heal, false);
-    assert.match(ops.rollup_shape, /human mesh users \+ cited human uses/);
+    assert.match(ops.rollup_shape, /nodes = human mesh users \+ cited human uses/);
+    assert.match(ops.rollup_shape, /live_nodes = presence only/);
     assert.match(ops.rollup_shape, /software_nodes separate/);
     assert.equal(ops.live_nodes_plane, "human-mesh-users-uses");
     assert.equal(ops.live_nodes_worker, "d7b63ac1");
     assert.equal(ops.live_nodes_sot, "aziel-runtime#151 LIVE Worker d7b63ac1");
-    assert.match(ops.live_nodes_note, /human mesh users/);
-    assert.match(ops.software_nodes_note, /never feed public Live Nodes/);
+    assert.match(ops.live_nodes_note, /presence only/);
+    assert.match(ops.live_nodes_note, /human_mesh_users/);
+    assert.match(ops.software_nodes_note, /never feed public Nodes or Live Nodes/);
     assert.equal(ops.anon_broadcast_publish_path, false);
     assert.equal(ops.author, AUTHOR);
     assert.equal(ops.identity, AUTHOR);
@@ -206,6 +212,7 @@ describe("parseMeshDoc", () => {
     assert.equal(empty.qns_cd.spec, "QNS-CD-1.0");
     assert.equal(empty.qns_cd.public_proxy, false);
     assert.match(empty.note, /QNS-CD-1\.0/);
+    assert.equal(empty.nodes, 0);
     assert.equal(empty.live_nodes, 0);
     assert.equal(empty.live_nodes_plane, "human-mesh-users-uses");
     assert.equal(empty.software_nodes, 0);
@@ -229,7 +236,8 @@ describe("parseMeshDoc", () => {
     });
     assert.equal(listed.enabled, true);
     assert.equal(listed.status, "on");
-    assert.equal(listed.live_nodes, 4);
+    assert.equal(listed.nodes, 4);
+    assert.equal(listed.live_nodes, 0);
     assert.deepEqual(listed.rollup, { live: 4, locked: 0, isolated: 0 });
     assert.equal(listed.anonymity_network, false);
     assert.equal(listed.node_gate, false);
@@ -238,19 +246,22 @@ describe("parseMeshDoc", () => {
       mesh: { enabled: true, count: 3, list: ["a", "b", "c"] },
     });
     assert.equal(nested.enabled, true);
-    assert.equal(nested.live_nodes, 3);
+    assert.equal(nested.nodes, 3);
+    assert.equal(nested.live_nodes, 0);
     assert.deepEqual(nested.rollup, { live: 3, locked: 0, isolated: 0 });
     assert.equal(compactMeshNode("a").id, "a");
 
     const statusOn = parseMeshDoc({ status: "on", peers: [{ session_id: "s1", last_utc: "2026-09-06T00:00:00Z" }] });
     assert.equal(statusOn.enabled, true);
-    assert.equal(statusOn.live_nodes, 1);
+    assert.equal(statusOn.nodes, 1);
+    assert.equal(statusOn.live_nodes, 0);
     assert.equal(compactMeshNode({ session_id: "s1" }).id, "s1");
   });
 
   it("keeps disabled docs at zero even if a stale count is present", () => {
     const off = parseMeshDoc({ enabled: false, live_nodes: 9, nodes: [{ id: "stale" }] });
     assert.equal(off.enabled, false);
+    assert.equal(off.nodes, 0);
     assert.equal(off.live_nodes, 0);
     assert.deepEqual(off.rollup, { live: 0, locked: 0, isolated: 0 });
     assert.equal(off.status, "unavailable");
@@ -268,7 +279,8 @@ describe("parseMeshDoc", () => {
       products: ["godlock", "azhub", "azinterface"],
     });
     assert.equal(liveOk.enabled, true);
-    assert.equal(liveOk.live_nodes, 37);
+    assert.equal(liveOk.nodes, 37);
+    assert.equal(liveOk.live_nodes, 0);
     assert.deepEqual(liveOk.rollup, { live: 37, locked: 0, isolated: 0 });
 
     const qnm = parseMeshDoc({
@@ -278,7 +290,8 @@ describe("parseMeshDoc", () => {
       nodes: [{ id: "peer-a" }, { id: "peer-b" }, { id: "peer-c" }],
     });
     assert.deepEqual(qnm.rollup, { live: 2, locked: 1, isolated: 3 });
-    assert.equal(qnm.live_nodes, 2);
+    assert.equal(qnm.nodes, 2);
+    assert.equal(qnm.live_nodes, 0);
     assert.equal(qnm.node_gate, false);
     assert.equal(qnm.auto_heal, false);
     const pub = publicMesh(qnm);
@@ -286,7 +299,7 @@ describe("parseMeshDoc", () => {
     assert.equal(pub.qns_cd.spec, "QNS-CD-1.0");
     assert.equal(pub.qns_cd.kind, "hub-cite");
     assert.deepEqual(pub.rollup, { live: 2, locked: 1, isolated: 3 });
-    assert.equal(pub.nodes, undefined);
+    assert.equal(pub.nodes, 2);
     assert.equal(pub.node_gate, false);
     assert.equal(pub.auto_heal, false);
   });
@@ -298,18 +311,24 @@ describe("alignLiveNodes", () => {
     assert.equal(alignLiveNodes({ siteLiveNodes: 0, mesh: { enabled: false, live_nodes: 9 }, visiting: true }), 0);
   });
 
-  it("shows Worker live_nodes (human users+uses) when mesh is enabled and never auto-heals a visiting floor", () => {
-    assert.equal(alignLiveNodes({ siteLiveNodes: 1, mesh: { enabled: true, live_nodes: 6 }, visiting: false }), 6);
+  it("shows Worker Nodes (users+uses) and Live Nodes (presence) when mesh is enabled and never auto-heals a visiting floor", () => {
+    assert.equal(alignNodes({ siteLiveNodes: 1, mesh: { enabled: true, live_nodes: 6 }, visiting: false }), 6);
+    assert.equal(alignLiveNodes({ siteLiveNodes: 1, mesh: { enabled: true, live_nodes: 6 }, visiting: false }), 0);
     assert.equal(alignLiveNodes({ siteLiveNodes: 0, mesh: { enabled: true, live_nodes: 0 }, visiting: true }), 0);
-    assert.equal(alignLiveNodes({
+    assert.equal(alignNodes({
       siteLiveNodes: 9,
       mesh: { enabled: true, rollup: { live: 2, locked: 4, isolated: 1 } },
       visiting: true,
     }), 2);
+    assert.equal(alignLiveNodes({
+      siteLiveNodes: 9,
+      mesh: { enabled: true, rollup: { live: 2, locked: 4, isolated: 1 } },
+      visiting: true,
+    }), 0);
   });
 
-  it("never treats software_nodes or all-planes rollup.live as Live Nodes", () => {
-    assert.equal(alignLiveNodes({
+  it("never treats software_nodes or all-planes rollup.live as Nodes or Live Nodes", () => {
+    assert.equal(alignNodes({
       siteLiveNodes: 9,
       mesh: {
         enabled: true,
@@ -326,26 +345,48 @@ describe("alignLiveNodes", () => {
         },
       },
     }), 3);
+    assert.equal(alignLiveNodes({
+      siteLiveNodes: 9,
+      mesh: {
+        enabled: true,
+        live_nodes: 3,
+        software_nodes: 41,
+        human_mesh_users: 1,
+        human_uses: 2,
+        rollup: {
+          live: 41,
+          locked: 0,
+          isolated: 0,
+          mesh: 3,
+          software: { live: 41, locked: 0, isolated: 0 },
+        },
+      },
+    }), 1);
     assert.equal(parsePublicLiveNodes({
       software_nodes: 41,
       rollup: { live: 41, locked: 0, isolated: 0, software: { live: 41 } },
     }), 0);
-    assert.equal(parsePublicLiveNodes({
+    assert.equal(parsePublicNodes({
       human_mesh_users: 1,
       human_uses: 4,
       software_nodes: 41,
     }), 5);
+    assert.equal(parsePublicLivePresence({
+      human_mesh_users: 1,
+      human_uses: 4,
+      software_nodes: 41,
+    }), 1);
   });
 });
 
-describe("Live Nodes human users+uses (aziel-runtime#151)", () => {
-  it("reads Worker live_nodes / rollup.mesh and keeps Softwares on software_nodes", () => {
+describe("Nodes / Live Nodes dual pills (aziel-runtime#151)", () => {
+  it("reads Worker nodes + presence live_nodes and keeps Softwares on software_nodes", () => {
     assert.equal(LIVE_NODES_PLANE, "human-mesh-users-uses");
     assert.equal(LIVE_NODES_WORKER_VERSION_ID, "d7b63ac1");
     assert.equal(LIVE_NODES_SOT, "aziel-runtime#151 LIVE Worker d7b63ac1");
-    assert.match(LIVE_NODES_NOTE, /human mesh users/);
+    assert.match(LIVE_NODES_NOTE, /presence only/);
     assert.match(LIVE_NODES_NOTE, /Not software_nodes/);
-    assert.match(SOFTWARE_NODES_NOTE, /never feed public Live Nodes/);
+    assert.match(SOFTWARE_NODES_NOTE, /never feed public Nodes or Live Nodes/);
     assert.equal(isSoftwareWorkerNodeId("godlock-worker"), true);
     assert.equal(isSoftwareWorkerNodeId("mesh_1_abc"), false);
     assert.equal(countsTowardListedLive({ id: "godlock-worker" }), false);
@@ -359,7 +400,7 @@ describe("Live Nodes human users+uses (aziel-runtime#151)", () => {
       enabled: true,
       live_nodes: 3,
       live_nodes_plane: "human-mesh-users-uses",
-      live_nodes_note: "human mesh users plus cited human uses",
+      live_nodes_note: "presence only; human mesh users, not uses",
       human_mesh_users: 1,
       human_uses: 2,
       human_uses_complete: true,
@@ -378,7 +419,8 @@ describe("Live Nodes human users+uses (aziel-runtime#151)", () => {
         { id: "mesh_1_human", kind: "human", bearer: "human" },
       ],
     });
-    assert.equal(doc.live_nodes, 3);
+    assert.equal(doc.nodes, 3);
+    assert.equal(doc.live_nodes, 1);
     assert.equal(doc.software_nodes, 41);
     assert.equal(doc.human_mesh_users, 1);
     assert.equal(doc.human_uses, 2);
@@ -386,15 +428,18 @@ describe("Live Nodes human users+uses (aziel-runtime#151)", () => {
     assert.deepEqual(doc.rollup, { live: 41, locked: 0, isolated: 0 });
 
     const pub = publicMesh(doc);
-    assert.equal(pub.live_nodes, 3);
+    assert.equal(pub.nodes, 3);
+    assert.equal(pub.live_nodes, 1);
     assert.equal(pub.software_nodes, 41);
     assert.equal(pub.live_nodes_plane, LIVE_NODES_PLANE);
-    assert.match(pub.live_nodes_note, /human mesh users/);
-    assert.equal(meshStatusLine(pub), "Suite mesh: on · live 3 · locked 0 · isolated 0");
-    assert.equal(alignLiveNodes({ siteLiveNodes: 8, mesh: pub }), 3);
+    assert.match(pub.live_nodes_note, /presence only/);
+    assert.equal(meshStatusLine(pub), "Suite mesh: on · live 1 · locked 0 · isolated 0");
+    assert.doesNotMatch(meshStatusLine(pub), /live 3/);
+    assert.equal(alignNodes({ siteLiveNodes: 8, mesh: pub }), 3);
+    assert.equal(alignLiveNodes({ siteLiveNodes: 8, mesh: pub }), 1);
   });
 
-  it("reads LIVE Worker d7b63ac1: live_nodes is human users+uses, not software_nodes 41", () => {
+  it("reads LIVE Worker d7b63ac1: nodes is human users+uses; live_nodes is presence 0, not software_nodes 41", () => {
     const live = parseMeshDoc({
       ok: true,
       code: "MESH-OK",
@@ -426,15 +471,26 @@ describe("Live Nodes human users+uses (aziel-runtime#151)", () => {
         instances: { live: 0, locked: 0, isolated: 0 },
       },
     });
-    assert.equal(live.live_nodes, 27206);
+    assert.equal(live.nodes, 27206);
+    assert.equal(live.live_nodes, 0);
     assert.equal(live.human_mesh_users, 0);
     assert.equal(live.human_uses, 27206);
     assert.equal(live.software_nodes, 41);
     assert.equal(live.live_nodes_worker, "d7b63ac1");
     assert.deepEqual(live.rollup, { live: 41, locked: 0, isolated: 0 });
-    assert.equal(alignLiveNodes({ siteLiveNodes: 2, mesh: live }), 27206);
-    assert.equal(meshStatusLine(publicMesh(live)), "Suite mesh: on · live 27206 · locked 0 · isolated 0");
-    assert.notEqual(live.live_nodes, live.software_nodes);
+    assert.equal(alignNodes({ siteLiveNodes: 2, mesh: live }), 27206);
+    assert.equal(alignLiveNodes({ siteLiveNodes: 2, mesh: live }), 0);
+    assert.equal(meshStatusLine(publicMesh(live)), "Suite mesh: on · live 0 · locked 0 · isolated 0");
+    assert.equal(formatNodesLive(live.nodes, live.live_nodes), "27206/0");
+    assert.notEqual(live.nodes, live.software_nodes);
+  });
+
+  it("prefers post-break numeric nodes + presence live_nodes", () => {
+    assert.equal(parsePublicNodes({ nodes: 28017, live_nodes: 0, human_mesh_users: 0, human_uses: 28017 }), 28017);
+    assert.equal(parsePublicLivePresence({ nodes: 28017, live_nodes: 0, human_mesh_users: 0, human_uses: 28017 }), 0);
+    assert.equal(parsePublicNodes({ human_mesh_users: 2, human_uses: 9 }), 11);
+    assert.equal(parsePublicLivePresence({ human_mesh_users: 2, human_uses: 9, live_nodes: 11 }), 2);
+    assert.equal(formatNodesLive(28017, 0), "28017/0");
   });
 });
 
@@ -442,9 +498,9 @@ describe("publicMesh and status line", () => {
   it("stamps identity and MCP doors", () => {
     const pub = publicMesh(parseMeshDoc({ enabled: true, live_nodes: 2, nodes: [{ id: "n1" }] }));
     assert.equal(pub.enabled, true);
-    assert.equal(pub.live_nodes, 2);
+    assert.equal(pub.nodes, 2);
+    assert.equal(pub.live_nodes, 0);
     assert.deepEqual(pub.rollup, { live: 2, locked: 0, isolated: 0 });
-    assert.equal(pub.nodes, undefined);
     assert.equal(pub.spec, "QNM-BUILD-1.0");
     assert.equal(pub.qns_cd.spec, "QNS-CD-1.0");
     assert.equal(pub.qns_cd.qnsd, "https://github.com/AzielEliab/qnm-node");
@@ -456,7 +512,7 @@ describe("publicMesh and status line", () => {
     assert.equal(pub.status_url, "https://godlock.uk/runtime/v1/mesh/status");
     assert.equal(pub.list, "https://godlock.uk/runtime/v1/mesh/nodes");
     assert.equal(pub.leave, "https://godlock.uk/runtime/v1/mesh/leave");
-    assert.equal(meshStatusLine(pub), "Suite mesh: on · live 2 · locked 0 · isolated 0");
+    assert.equal(meshStatusLine(pub), "Suite mesh: on · live 0 · locked 0 · isolated 0");
     assert.doesNotMatch(meshStatusLine(pub), /SPLIT THE WIRES|COLD-COPY SURVIVAL|REHEAL|anonymity network/);
     assert.equal(meshStatusLine(emptyMesh()), "Suite mesh: on · rollup unavailable");
     assert.equal(meshStatusLine({ enabled: false, status: "on" }), "Suite mesh: on");
@@ -510,7 +566,8 @@ describe("fetchMeshSnapshot", () => {
       },
     });
     assert.equal(snap.enabled, true);
-    assert.equal(snap.live_nodes, 5);
+    assert.equal(snap.nodes, 5);
+    assert.equal(snap.live_nodes, 0);
     assert.equal(snap.source, "service-binding");
     assert.ok(urls[0].includes("/v1/mesh/status"));
     assert.ok(urls.every((u) => !/\/v1\/mesh\/(enable|disable|join|heartbeat|leave|broadcast)/.test(u)));
@@ -545,7 +602,8 @@ describe("fetchMeshSnapshot", () => {
       },
     });
     assert.equal(snap.enabled, true);
-    assert.equal(snap.live_nodes, 37);
+    assert.equal(snap.nodes, 37);
+    assert.equal(snap.live_nodes, 0);
     assert.deepEqual(snap.rollup, { live: 37, locked: 0, isolated: 0 });
     assert.equal(snap.source, "origin");
     assert.ok(originUrls[0].includes("/v1/mesh/status"));
@@ -587,7 +645,8 @@ describe("fetchMeshSnapshot", () => {
       },
     });
     assert.equal(snap.enabled, true);
-    assert.equal(snap.live_nodes, 40);
+    assert.equal(snap.nodes, 40);
+    assert.equal(snap.live_nodes, 0);
     assert.ok(urls.some((u) => u.includes("/v1/mesh/status")));
     assert.ok(!urls.some((u) => u.includes("/enable")));
   });
@@ -603,7 +662,8 @@ describe("fetchMeshSnapshot", () => {
       },
     });
     assert.equal(snap.enabled, true);
-    assert.equal(snap.live_nodes, 2);
+    assert.equal(snap.nodes, 2);
+    assert.equal(snap.live_nodes, 0);
     assert.equal(snap.source, "origin");
     assert.ok(urls[0].includes("/v1/mesh"));
   });
@@ -680,10 +740,12 @@ describe("GodLock.uk mesh routes", () => {
     assert.equal(mesh.node_gate, false);
     assert.equal(mesh.auto_heal, false);
     assert.equal(mesh.mesh.enabled, true);
-    assert.equal(mesh.live_nodes, 7);
+    assert.equal(mesh.nodes, 7);
+    assert.equal(mesh.live_nodes, 0);
     assert.deepEqual(mesh.rollup, { live: 7, locked: 0, isolated: 0 });
     assert.deepEqual(mesh.mesh.rollup, { live: 7, locked: 0, isolated: 0 });
-    assert.equal(mesh.mesh.nodes, undefined);
+    assert.equal(mesh.mesh.nodes, 7);
+    assert.equal(mesh.mesh.live_nodes, 0);
     assert.equal(mesh.door, "https://godlock.uk/runtime/v1/mesh");
     assert.equal(mesh.anon_broadcast, "https://github.com/AzielEliab/anon-broadcast");
     assert.equal(mesh.anon_broadcast_publish_path, false);
@@ -691,20 +753,24 @@ describe("GodLock.uk mesh routes", () => {
     assert.match(mesh.anon_broadcast_note, /not a publish path on godlock\.uk/i);
 
     const stats = await (await worker.fetch(new Request("https://godlock.uk/stats"), env)).json();
-    assert.equal(stats.live_nodes, 7);
+    assert.equal(stats.nodes, 7);
+    assert.equal(stats.live_nodes, 0);
     assert.equal(stats.mesh.enabled, true);
-    assert.equal(stats.mesh.live_nodes, 7);
+    assert.equal(stats.mesh.nodes, 7);
+    assert.equal(stats.mesh.live_nodes, 0);
     assert.deepEqual(stats.mesh.rollup, { live: 7, locked: 0, isolated: 0 });
 
     const count = await (await worker.fetch(new Request("https://godlock.uk/count"), env)).json();
-    assert.equal(count.live_nodes, 7);
+    assert.equal(count.nodes, 7);
+    assert.equal(count.live_nodes, 0);
     assert.equal(count.mesh_enabled, true);
-    assert.equal(count.mesh_live_nodes, 7);
+    assert.equal(count.mesh_nodes, 7);
+    assert.equal(count.mesh_live_nodes, 0);
     assert.equal(count.mesh_locked, 0);
     assert.equal(count.mesh_isolated, 0);
   });
 
-  it("aligns homepage Live Nodes to human users+uses and keeps Softwares off that pill", async () => {
+  it("aligns homepage Nodes/Live Nodes dual pills and keeps Softwares off those pills", async () => {
     const env = mockDbEnv({
       AZIEL_RUNTIME: {
         async fetch(req) {
@@ -714,7 +780,7 @@ describe("GodLock.uk mesh routes", () => {
               enabled: true,
               live_nodes: 3,
               live_nodes_plane: "human-mesh-users-uses",
-              live_nodes_note: "human mesh users plus cited human uses",
+              live_nodes_note: "presence only; human mesh users, not uses",
               human_mesh_users: 1,
               human_uses: 2,
               software_nodes: 41,
@@ -733,17 +799,24 @@ describe("GodLock.uk mesh routes", () => {
       },
     });
     const html = await (await worker.fetch(new Request("https://godlock.uk/"), env)).text();
-    assert.match(html, /id="stat-live-nodes">3</);
-    assert.match(html, /title="Human mesh users \+ cited human uses from Worker \/v1\/mesh\. Not Softwares\."/);
-    assert.match(html, /Suite mesh: on · live 3 · locked 0 · isolated 0/);
-    assert.doesNotMatch(html, /id="stat-live-nodes">41</);
+    assert.match(html, /id="stat-nodes-live">3\/1</);
+    assert.match(html, /Nodes \/ Live Nodes/);
+    assert.match(html, /id="stat-uses"/);
+    assert.match(html, /title="Nodes = human mesh users \+ cited human uses\. Live Nodes = presence only\. Not Softwares\."/);
+    assert.match(html, /Suite mesh: on · live 1 · locked 0 · isolated 0/);
+    assert.doesNotMatch(html, /Suite mesh: on · live 3 /);
+    assert.doesNotMatch(html, /id="stat-nodes-live">41/);
     const stats = await (await worker.fetch(new Request("https://godlock.uk/stats"), env)).json();
-    assert.equal(stats.live_nodes, 3);
-    assert.equal(stats.mesh.live_nodes, 3);
+    assert.equal(stats.nodes, 3);
+    assert.equal(stats.live_nodes, 1);
+    assert.equal(stats.mesh.nodes, 3);
+    assert.equal(stats.mesh.live_nodes, 1);
     assert.equal(stats.mesh.software_nodes, 41);
     const count = await (await worker.fetch(new Request("https://godlock.uk/count"), env)).json();
-    assert.equal(count.live_nodes, 3);
-    assert.equal(count.mesh_live_nodes, 3);
+    assert.equal(count.nodes, 3);
+    assert.equal(count.live_nodes, 1);
+    assert.equal(count.mesh_nodes, 3);
+    assert.equal(count.mesh_live_nodes, 1);
     assert.equal(count.software_nodes, 41);
   });
 
@@ -764,7 +837,7 @@ describe("GodLock.uk mesh routes", () => {
     });
     const stats = await (await worker.fetch(new Request("https://godlock.uk/"), env));
     const html = await stats.text();
-    assert.match(html, /id="stat-live-nodes">0</);
+    assert.match(html, /id="stat-nodes-live">0\/0</);
     assert.match(html, /Suite mesh: on · live 0 · locked 2 · isolated 1/);
     const visibleMesh = html.replace(/<script[\s\S]*?<\/script>/gi, "");
     assert.doesNotMatch(visibleMesh, /SPLIT THE WIRES|COLD-COPY SURVIVAL|REHEAL refuse|Public HTTPS engine/);
@@ -922,6 +995,7 @@ describe("GodLock.uk origin /v1/mesh proxies", () => {
     const fallback = hubMeshStatusDoc({ mesh: emptyMesh(), site_live_nodes: 2 }, "/v1/mesh/status");
     assert.equal(fallback.enabled, false);
     assert.equal(fallback.get_never_enables, true);
+    assert.equal(fallback.nodes, 0);
     assert.equal(fallback.live_nodes, 0);
     assert.equal(fallback.law, SPLIT_THE_WIRES);
     assert.equal(fallback.cold_copy_survival, COLD_COPY_SURVIVAL);

@@ -39,7 +39,7 @@ npx wrangler d1 execute godlock-uk --remote --command "DELETE FROM ledger"
 
 Local / preview D1: drop `--remote` or point at the preview database. Confirm the database name before execute.
 
-After wipe, `/verify` walks an empty ledger (valid empty chain). Home prior-receipts and `/receipts` are empty. The public **Receipts** counter is the live `isolated=0` count (same source as Prior), so it goes to 0 after a wipe. **Views, Uses floor, current_score, downloads cache, Live Nodes, and download KV are unchanged** if you followed the “do not touch” list below.
+After wipe, `/verify` walks an empty ledger (valid empty chain). Home prior-receipts and `/receipts` are empty. The public **Receipts** counter is the live `isolated=0` count (same source as Prior), so it goes to 0 after a wipe. **Views, Uses floor, current_score, downloads cache, Nodes / Live Nodes, and download KV are unchanged** if you followed the “do not touch” list below.
 
 ## What you must not wipe
 
@@ -51,7 +51,7 @@ Do **not** run DELETE/UPDATE that resets these. Do **not** put such SQL in appli
 | Uses floor | D1 `metadata` | `key = 'uses'` | Durable Uses after a ledger wipe |
 | Current confidence | D1 `metadata` | `key = 'current_score'` | Running score (floor 33.3 · ceiling 99.7) |
 | Downloads cache | D1 `metadata` | `key = 'downloads_cache'` | Last good download-tracker read |
-| Live Nodes | D1 `heartbeats` | all rows | 5-minute presence; expires on its own |
+| Nodes / Live Nodes | D1 `heartbeats` | all rows | site fallback only; suite mesh Nodes/Live Nodes come from `/v1/mesh` |
 | Downloads | KV `DOWNLOADS` on `godlock-download-tracker` | `project\|owner\|repo\|branch\|fork` | Counted gzip downloads |
 | Runtime API uses | KV `RUNTIME_USES` on `godlock-uk` | `runtime_uses\|…` | FragGate / MCP / session log — not product Uses |
 | Submit throttle | D1 `submit_guard` | `kind` + `key` | IP / identical-text window. Not a receipt. Not Uses. App may DELETE expired rows. |

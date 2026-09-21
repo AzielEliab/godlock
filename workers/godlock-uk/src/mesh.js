@@ -1,6 +1,7 @@
 /**
  * Suite mesh client aligned to QNM-BUILD-1.0 + SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL.
- * Public Live Nodes = human mesh users + cited human uses from Worker /v1/mesh.
+ * Public Nodes = human mesh users + cited human uses from Worker /v1/mesh.
+ * Public Live Nodes = presence only (human mesh users). Uses are not live presence.
  * Never software_nodes. Softwares catalog stays separate.
  * Presence rollup is live|locked|isolated counts only. No Node Gate. No auto-heal.
  * Read-only suite presence ON. This Worker has no mesh-off function.
@@ -160,16 +161,18 @@ export const QNS_CD = Object.freeze({
 });
 
 export const LIVE_NODES_PLANE = "human-mesh-users-uses";
-/** aziel-runtime#151 LIVE isolate. Public live_nodes = human users+uses, not Softwares. */
+/** aziel-runtime#151 LIVE isolate. Dual pills: Nodes = users+uses; Live Nodes = presence. */
 export const LIVE_NODES_WORKER_VERSION_ID = "d7b63ac1";
 export const LIVE_NODES_SOT = "aziel-runtime#151 LIVE Worker " + LIVE_NODES_WORKER_VERSION_ID;
+export const NODES_NOTE =
+  "Public Nodes (nodes) count human mesh users (join/heartbeat/presence with human bearers) plus the cited human uses signal (USES / human_uses) from Worker /v1/mesh. Prefer numeric nodes; else human_mesh_users+human_uses; else the legacy combined live_nodes sum when nodes is missing. Isolated humans stay on isolated_nodes. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. Softwares catalog stays separate. Uses are interaction counters, not unique people. Nodes does not invent users.";
 export const LIVE_NODES_NOTE =
-  "Public Live Nodes (live_nodes / rollup.mesh) count human mesh users (join/heartbeat/presence with human bearers) plus the cited human uses signal (USES / human_uses) from Worker /v1/mesh. Isolated humans stay on isolated_nodes. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. Softwares catalog stays separate. Uses are interaction counters, not unique people. Live Nodes does not invent users. Zero is honest when no humans are present and uses are 0/unbound.";
+  "Public Live Nodes are presence only (join/heartbeat/presence with human bearers). Prefer post-break live_nodes only when a numeric nodes count is also present; otherwise human_mesh_users. Cited human uses are not live presence and must not be labeled live. Often 0. Isolated humans stay on isolated_nodes. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. Softwares catalog stays separate. Live Nodes does not invent users. Zero is honest when no humans are present.";
 export const SOFTWARE_NODES_NOTE =
-  "software_nodes / rollup.software count Softwares product Workers ({slug}-worker) from suite-presence fan-out. Softwares catalog stays separate. They must never feed public Live Nodes.";
+  "software_nodes / rollup.software count Softwares product Workers ({slug}-worker) from suite-presence fan-out. Softwares catalog stays separate. They must never feed public Nodes or Live Nodes.";
 
 export const MESH_NOTE =
-  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in qnm-node; no public proxy). Suite mesh is on (read-only suite presence). Public Live Nodes are human mesh users + cited human uses from Worker /v1/mesh — not Softwares, not mesh-size software_nodes. Presence stay live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. "
+  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in qnm-node; no public proxy). Suite mesh is on (read-only suite presence). Public Nodes are human mesh users + cited human uses from Worker /v1/mesh. Public Live Nodes are presence only — uses are not live. Not Softwares, not mesh-size software_nodes. Presence stay live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. "
   + MESH_LAW_NOTE;
 export const MESH_NOTE_ON = MESH_NOTE;
 
@@ -607,10 +610,16 @@ const UA = { "User-Agent": "Mozilla/5.0", Accept: "application/json" };
 function firstNum(...vals) {
   for (const raw of vals) {
     if (raw == null || raw === "") continue;
+    if (Array.isArray(raw) || (typeof raw === "object" && raw !== null)) continue;
     const n = typeof raw === "number" ? raw : Number(String(raw).replace(/,/g, ""));
     if (Number.isFinite(n) && n >= 0) return Math.floor(n);
   }
   return null;
+}
+
+/** Post-break Nodes count. Arrays/objects are the roster, not the dual-pill number. */
+export function numericNodesCount(value) {
+  return firstNum(value);
 }
 
 function asList(value) {
@@ -686,8 +695,8 @@ function humanUsersUsesOf(inner) {
 }
 
 /**
- * Public Live Nodes from Worker /v1/mesh: human mesh users + cited human uses.
- * Never software_nodes / Softwares catalog length.
+ * Legacy combined Live Nodes from Worker /v1/mesh: human mesh users + cited
+ * human uses. Used when a numeric `nodes` count is missing. Never software_nodes.
  */
 export function parsePublicLiveNodes(inner, listedLive) {
   const src = inner && typeof inner === "object" && !Array.isArray(inner) ? inner : {};
@@ -712,6 +721,40 @@ export function parsePublicLiveNodes(inner, listedLive) {
     return listedLive != null ? listedLive : 0;
   }
   return firstNum(presenceLive, listedLive) ?? 0;
+}
+
+/**
+ * Public Nodes: human mesh users + cited human uses.
+ * Prefer numeric `nodes`; else users+uses; else legacy combined `live_nodes`.
+ */
+export function parsePublicNodes(inner, listedLive) {
+  const src = inner && typeof inner === "object" && !Array.isArray(inner) ? inner : {};
+  const named = numericNodesCount(src.nodes);
+  if (named != null) return named;
+  const users = firstNum(src.human_mesh_users);
+  const uses = firstNum(src.human_uses);
+  if (users != null || uses != null) return (users || 0) + (uses || 0);
+  return parsePublicLiveNodes(src, listedLive);
+}
+
+/**
+ * Public Live Nodes: presence only. Prefer post-break `live_nodes` only when a
+ * numeric `nodes` count is also present; otherwise `human_mesh_users`. Often 0.
+ */
+export function parsePublicLivePresence(inner) {
+  const src = inner && typeof inner === "object" && !Array.isArray(inner) ? inner : {};
+  const named = numericNodesCount(src.nodes);
+  if (named != null) {
+    const post = firstNum(src.live_nodes);
+    if (post != null) return post;
+  }
+  return firstNum(src.human_mesh_users) ?? 0;
+}
+
+export function formatNodesLive(nodes, live) {
+  const n = firstNum(nodes) ?? 0;
+  const l = firstNum(live) ?? 0;
+  return n + "/" + l;
 }
 
 /** Presence buckets (all planes). Not the public Live Nodes pill after aziel-runtime#151. */
@@ -776,6 +819,7 @@ export function emptyMesh(extra = {}) {
     mesh_default: MESH_DEFAULT,
     readonly: true,
     mesh_readonly: true,
+    nodes: 0,
     live_nodes: 0,
     live_nodes_plane: LIVE_NODES_PLANE,
     live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
@@ -828,13 +872,17 @@ export function parseMeshDoc(body) {
   const inner = body.mesh && typeof body.mesh === "object" && !Array.isArray(body.mesh)
     ? { ...body, ...body.mesh }
     : body;
-  const listed = asList(inner.nodes || inner.list || inner.peers || inner.live_nodes_list)
+  const roster = Array.isArray(inner.nodes)
+    ? inner.nodes
+    : (inner.list || inner.peers || inner.live_nodes_list);
+  const listed = asList(roster)
     .map(compactMeshNode)
     .filter(Boolean);
   const listedLive = listed.filter(countsTowardListedLive).length;
   const listedLiveOrNull = listedLive ? listedLive : null;
   const presence = parseRollup(inner, listedLiveOrNull);
-  const liveNodes = parsePublicLiveNodes(inner, listedLiveOrNull);
+  const nodesCount = parsePublicNodes(inner, listedLiveOrNull);
+  const livePresence = parsePublicLivePresence(inner);
   const enabled = truthyEnabled(inner.enabled)
     || truthyEnabled(inner.mesh_enabled)
     || String(inner.status || "").toLowerCase() === "on";
@@ -842,7 +890,8 @@ export function parseMeshDoc(body) {
     && !enabled
     && (inner.error || inner.status === "unavailable" || inner.status === "not_found");
   const status = enabled ? "on" : "unavailable";
-  const live = enabled ? liveNodes : 0;
+  const nodes = enabled ? nodesCount : 0;
+  const live = enabled ? livePresence : 0;
   const locked = enabled ? presence.locked : 0;
   const isolated = enabled ? presence.isolated : 0;
   const software = softwareNodesOf(inner);
@@ -853,6 +902,7 @@ export function parseMeshDoc(body) {
     mesh_default: MESH_DEFAULT,
     readonly: true,
     mesh_readonly: true,
+    nodes,
     live_nodes: live,
     live_nodes_plane: inner.live_nodes_plane || LIVE_NODES_PLANE,
     live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
@@ -881,7 +931,8 @@ export function publicMesh(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   const enabled = !!m.enabled;
   const rollup = enabled ? meshRollup(m) : emptyRollup();
-  const live = enabled ? parsePublicLiveNodes(m) : 0;
+  const nodes = enabled ? parsePublicNodes(m) : 0;
+  const live = enabled ? parsePublicLivePresence(m) : 0;
   const software = softwareNodesOf(m);
   return stampMeshLaw({
     spec: QNM_SPEC,
@@ -890,6 +941,7 @@ export function publicMesh(mesh) {
     mesh_default: MESH_DEFAULT,
     readonly: true,
     mesh_readonly: true,
+    nodes,
     live_nodes: live,
     live_nodes_plane: m.live_nodes_plane || LIVE_NODES_PLANE,
     live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
@@ -931,7 +983,7 @@ export function meshStatusLine(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   if (m.enabled) {
     const r = meshRollup(m);
-    const live = firstNum(m.live_nodes, m.rollup && m.rollup.mesh) ?? r.live;
+    const live = parsePublicLivePresence(m);
     return "Suite mesh: on · live " + live + " · locked " + r.locked + " · isolated " + r.isolated;
   }
   if (m.status === "unavailable") {
@@ -941,15 +993,27 @@ export function meshStatusLine(mesh) {
 }
 
 /**
- * Public Live Nodes: Worker /v1/mesh live_nodes (human mesh users + cited
- * human uses) when mesh is enabled (no visiting floor, never software_nodes).
- * Otherwise GodLock.uk site heartbeats.
+ * Public Nodes: Worker /v1/mesh human mesh users + cited human uses when mesh
+ * is enabled (prefer numeric nodes). Otherwise GodLock.uk site heartbeats.
+ */
+export function alignNodes({ siteLiveNodes, mesh } = {}) {
+  const site = Number(siteLiveNodes);
+  const siteN = Number.isFinite(site) && site >= 0 ? site : 0;
+  if (mesh && mesh.enabled) {
+    return parsePublicNodes(mesh);
+  }
+  return siteN;
+}
+
+/**
+ * Public Live Nodes: presence only when mesh is enabled (no visiting floor,
+ * never software_nodes, never uses-as-live). Otherwise site heartbeats.
  */
 export function alignLiveNodes({ siteLiveNodes, mesh } = {}) {
   const site = Number(siteLiveNodes);
   const siteN = Number.isFinite(site) && site >= 0 ? site : 0;
   if (mesh && mesh.enabled) {
-    return parsePublicLiveNodes(mesh);
+    return parsePublicLivePresence(mesh);
   }
   return siteN;
 }
@@ -1107,7 +1171,8 @@ export function hubMeshStatusDoc(stats, path) {
     enabled,
     mesh: "on",
     status: enabled ? "on" : "unavailable",
-    live_nodes: enabled ? (firstNum(mesh.live_nodes) ?? rollup.live) : 0,
+    nodes: enabled ? (firstNum(mesh.nodes) ?? parsePublicNodes(mesh)) : 0,
+    live_nodes: enabled ? parsePublicLivePresence(mesh) : 0,
     live_nodes_plane: LIVE_NODES_PLANE,
     live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
     live_nodes_sot: LIVE_NODES_SOT,
@@ -1157,7 +1222,7 @@ export function meshOpsDoc() {
     mcp: PUBLIC_RUNTIME + "/mcp",
     fraggate: PUBLIC_RUNTIME + "/v1/fraggate/call",
     ops: MESH_OPS.slice(),
-    rollup_shape: "live_nodes = human mesh users + cited human uses; presence live|locked|isolated; software_nodes separate",
+    rollup_shape: "nodes = human mesh users + cited human uses; live_nodes = presence only; presence live|locked|isolated; software_nodes separate",
     live_nodes_plane: LIVE_NODES_PLANE,
     live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
     live_nodes_sot: LIVE_NODES_SOT,

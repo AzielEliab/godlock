@@ -309,7 +309,7 @@ ${ecosystemNav()}
     if(meshEl&&j.mesh){
       var on=!!j.mesh.enabled;
       var r=j.mesh.rollup||{};
-      var live=r.live!=null?r.live:(j.mesh.live_nodes!=null?j.mesh.live_nodes:0);
+      var live=j.mesh.live_nodes!=null?j.mesh.live_nodes:(r.mesh!=null?r.mesh:(j.live_nodes!=null?j.live_nodes:(r.live!=null?r.live:0)));
       var locked=r.locked!=null?r.locked:0;
       var isolated=r.isolated!=null?r.isolated:0;
       meshEl.textContent=on
@@ -398,7 +398,7 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
   const list = priorReceiptItems(shown) || `<p class="muted">No public receipts yet. Submit a challenge.</p>`;
   return `
 <div class="stats">
-  <div class="stat"><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
+  <div class="stat" title="Human mesh users + cited human uses from Worker /v1/mesh. Not Softwares."><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
   <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
   <div class="stat"><b id="stat-uses">${esc(uses)}</b><span>Uses</span></div>
   <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>
@@ -467,7 +467,7 @@ export function receiptsBody({ rows, total, page, pageSize, stats }) {
   const pages = Math.max(1, Math.ceil((Number(total) || 0) / size));
   return `
 <div class="stats">
-  <div class="stat"><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
+  <div class="stat" title="Human mesh users + cited human uses from Worker /v1/mesh. Not Softwares."><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
   <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
   <div class="stat"><b id="stat-uses">${esc(uses)}</b><span>Uses</span></div>
   <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>

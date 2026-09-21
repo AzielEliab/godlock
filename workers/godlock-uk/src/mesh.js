@@ -1,6 +1,8 @@
 /**
  * Suite mesh client aligned to QNM-BUILD-1.0 + SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL.
- * Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal.
+ * Public Live Nodes = human mesh users + cited human uses from Worker /v1/mesh.
+ * Never software_nodes. Softwares catalog stays separate.
+ * Presence rollup is live|locked|isolated counts only. No Node Gate. No auto-heal.
  * Read-only suite presence ON. This Worker has no mesh-off function.
  * Mesh may be unavailable on public GodLock — refuse/status still bind the law.
  * Not an anonymity network.
@@ -157,8 +159,14 @@ export const QNS_CD = Object.freeze({
   note: "QNS-CD-1.0 photon QNS1 packet transfer. Hub cite / Worker mesh cross-map only. Not a Softwares-tab product. Local qnsd is coded in qnm-node. Runtime cites + catalog field live in aziel-runtime. AZInterface holds pair custody. This Worker does not implement qnsd and does not expose a public qnsd proxy.",
 });
 
+export const LIVE_NODES_PLANE = "human-mesh-users-uses";
+export const LIVE_NODES_NOTE =
+  "Public Live Nodes (live_nodes / rollup.mesh) count human mesh users (join/heartbeat/presence with human bearers) plus the cited human uses signal (USES / human_uses) from Worker /v1/mesh. Isolated humans stay on isolated_nodes. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. Softwares catalog stays separate. Uses are interaction counters, not unique people. Live Nodes does not invent users. Zero is honest when no humans are present and uses are 0/unbound.";
+export const SOFTWARE_NODES_NOTE =
+  "software_nodes / rollup.software count Softwares product Workers ({slug}-worker) from suite-presence fan-out. Softwares catalog stays separate. They must never feed public Live Nodes.";
+
 export const MESH_NOTE =
-  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in qnm-node; no public proxy). Suite mesh is on (read-only suite presence). Live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. "
+  "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in qnm-node; no public proxy). Suite mesh is on (read-only suite presence). Public Live Nodes are human mesh users + cited human uses from Worker /v1/mesh — not Softwares, not mesh-size software_nodes. Presence stay live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. "
   + MESH_LAW_NOTE;
 export const MESH_NOTE_ON = MESH_NOTE;
 
@@ -619,11 +627,96 @@ export function emptyRollup() {
   return { live: 0, locked: 0, isolated: 0 };
 }
 
+export function isSoftwareWorkerNodeId(nodeId) {
+  const id = String(nodeId || "");
+  return id.endsWith("-worker") && !/^mesh_/.test(id);
+}
+
+/** Listed nodes that may back a legacy Live Nodes fallback. Never Softwares workers or instances. */
+export function countsTowardListedLive(raw) {
+  if (raw == null) return false;
+  const n = typeof raw === "string" ? { id: raw } : raw;
+  if (typeof n !== "object") return false;
+  const id = String(n.id || n.node_id || n.session_id || n.peer || n.name || "").trim();
+  if (isSoftwareWorkerNodeId(id)) return false;
+  const kind = String(n.kind || n.plane || "").trim().toLowerCase();
+  if (kind === "software" || kind === "instance") return false;
+  return !!(id || n.product || n.last_utc);
+}
+
+function rollupObject(mesh) {
+  const m = mesh && typeof mesh === "object" ? mesh : {};
+  return m.rollup && typeof m.rollup === "object" && !Array.isArray(m.rollup) ? m.rollup : {};
+}
+
+function softwareNodesOf(inner) {
+  const r = rollupObject(inner);
+  const sw = r.software && typeof r.software === "object" && !Array.isArray(r.software) ? r.software : {};
+  const parts = firstNum(inner.software_live_nodes) != null
+    || firstNum(inner.software_locked_nodes) != null
+    || firstNum(inner.software_isolated_nodes) != null
+    ? (firstNum(inner.software_live_nodes) || 0)
+      + (firstNum(inner.software_locked_nodes) || 0)
+      + (firstNum(inner.software_isolated_nodes) || 0)
+    : null;
+  const nested = firstNum(sw.live) != null || firstNum(sw.locked) != null || firstNum(sw.isolated) != null
+    ? (firstNum(sw.live) || 0) + (firstNum(sw.locked) || 0) + (firstNum(sw.isolated) || 0)
+    : null;
+  return firstNum(inner.software_nodes, parts, nested);
+}
+
+function humanUsersUsesOf(inner) {
+  const r = rollupObject(inner);
+  const h = r.human && typeof r.human === "object" && !Array.isArray(r.human) ? r.human : {};
+  const users = firstNum(
+    inner.human_mesh_users,
+    firstNum(inner.human_live_nodes) != null || firstNum(inner.human_locked_nodes) != null
+      ? (firstNum(inner.human_live_nodes) || 0) + (firstNum(inner.human_locked_nodes) || 0)
+      : null,
+    firstNum(h.live) != null || firstNum(h.locked) != null
+      ? (firstNum(h.live) || 0) + (firstNum(h.locked) || 0)
+      : null,
+  );
+  const uses = firstNum(inner.human_uses);
+  if (users == null && uses == null) return null;
+  return (users || 0) + (uses || 0);
+}
+
+/**
+ * Public Live Nodes from Worker /v1/mesh: human mesh users + cited human uses.
+ * Never software_nodes / Softwares catalog length.
+ */
+export function parsePublicLiveNodes(inner, listedLive) {
+  const src = inner && typeof inner === "object" && !Array.isArray(inner) ? inner : {};
+  const r = rollupObject(src);
+  const sot = firstNum(src.live_nodes, r.mesh);
+  if (sot != null) return sot;
+  const human = humanUsersUsesOf(src);
+  if (human != null) return human;
+  const software = softwareNodesOf(src);
+  const presenceLive = firstNum(
+    r.live,
+    r.live_nodes,
+    r.live_count,
+    src.live,
+    src.mesh_live_nodes,
+    src.live_count,
+    src.count,
+    src.n,
+    src.node_count,
+  );
+  if (software != null && (presenceLive == null || software === presenceLive)) {
+    return listedLive != null ? listedLive : 0;
+  }
+  return firstNum(presenceLive, listedLive) ?? 0;
+}
+
+/** Presence buckets (all planes). Not the public Live Nodes pill after aziel-runtime#151. */
 export function meshRollup(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : {};
-  const r = m.rollup && typeof m.rollup === "object" && !Array.isArray(m.rollup) ? m.rollup : {};
+  const r = rollupObject(m);
   return {
-    live: firstNum(r.live, m.live_nodes, m.live) ?? 0,
+    live: firstNum(r.live, m.live, r.live_nodes) ?? 0,
     locked: firstNum(r.locked, m.locked_nodes, m.locked) ?? 0,
     isolated: firstNum(r.isolated, m.isolated_nodes, m.isolated) ?? 0,
   };
@@ -635,7 +728,6 @@ function parseRollup(inner, listedLive) {
     : {};
   const live = firstNum(
     r.live,
-    r.live_nodes,
     r.live_count,
     inner.live,
     inner.live_nodes,
@@ -682,6 +774,10 @@ export function emptyMesh(extra = {}) {
     readonly: true,
     mesh_readonly: true,
     live_nodes: 0,
+    live_nodes_plane: LIVE_NODES_PLANE,
+    live_nodes_note: LIVE_NODES_NOTE,
+    software_nodes: 0,
+    software_nodes_note: SOFTWARE_NODES_NOTE,
     status: extra.status || "unavailable",
     source: extra.source || "fallback",
     node_gate: false,
@@ -730,7 +826,10 @@ export function parseMeshDoc(body) {
   const listed = asList(inner.nodes || inner.list || inner.peers || inner.live_nodes_list)
     .map(compactMeshNode)
     .filter(Boolean);
-  const rollup = parseRollup(inner, listed.length ? listed.length : null);
+  const listedLive = listed.filter(countsTowardListedLive).length;
+  const listedLiveOrNull = listedLive ? listedLive : null;
+  const presence = parseRollup(inner, listedLiveOrNull);
+  const liveNodes = parsePublicLiveNodes(inner, listedLiveOrNull);
   const enabled = truthyEnabled(inner.enabled)
     || truthyEnabled(inner.mesh_enabled)
     || String(inner.status || "").toLowerCase() === "on";
@@ -738,9 +837,10 @@ export function parseMeshDoc(body) {
     && !enabled
     && (inner.error || inner.status === "unavailable" || inner.status === "not_found");
   const status = enabled ? "on" : "unavailable";
-  const live = enabled ? rollup.live : 0;
-  const locked = enabled ? rollup.locked : 0;
-  const isolated = enabled ? rollup.isolated : 0;
+  const live = enabled ? liveNodes : 0;
+  const locked = enabled ? presence.locked : 0;
+  const isolated = enabled ? presence.isolated : 0;
+  const software = softwareNodesOf(inner);
   return emptyMesh({
     ok: inner.ok !== false,
     enabled,
@@ -749,7 +849,20 @@ export function parseMeshDoc(body) {
     readonly: true,
     mesh_readonly: true,
     live_nodes: live,
-    rollup: { live, locked, isolated },
+    live_nodes_plane: inner.live_nodes_plane || LIVE_NODES_PLANE,
+    live_nodes_note: typeof inner.live_nodes_note === "string" && inner.live_nodes_note.trim()
+      ? inner.live_nodes_note
+      : LIVE_NODES_NOTE,
+    human_mesh_users: firstNum(inner.human_mesh_users),
+    human_uses: firstNum(inner.human_uses),
+    human_uses_complete: inner.human_uses_complete === true,
+    software_nodes: enabled && software != null ? software : 0,
+    software_nodes_note: SOFTWARE_NODES_NOTE,
+    rollup: {
+      live: enabled ? presence.live : 0,
+      locked,
+      isolated,
+    },
     status,
     source: inner.source || "parsed",
     door: inner.door || PUBLIC_MESH,
@@ -761,6 +874,8 @@ export function publicMesh(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   const enabled = !!m.enabled;
   const rollup = enabled ? meshRollup(m) : emptyRollup();
+  const live = enabled ? parsePublicLiveNodes(m) : 0;
+  const software = softwareNodesOf(m);
   return stampMeshLaw({
     spec: QNM_SPEC,
     enabled,
@@ -768,7 +883,16 @@ export function publicMesh(mesh) {
     mesh_default: MESH_DEFAULT,
     readonly: true,
     mesh_readonly: true,
-    live_nodes: enabled ? rollup.live : 0,
+    live_nodes: live,
+    live_nodes_plane: m.live_nodes_plane || LIVE_NODES_PLANE,
+    live_nodes_note: typeof m.live_nodes_note === "string" && m.live_nodes_note.trim()
+      ? m.live_nodes_note
+      : LIVE_NODES_NOTE,
+    human_mesh_users: firstNum(m.human_mesh_users),
+    human_uses: firstNum(m.human_uses),
+    human_uses_complete: m.human_uses_complete === true,
+    software_nodes: enabled && software != null ? software : 0,
+    software_nodes_note: SOFTWARE_NODES_NOTE,
     rollup,
     status: enabled ? "on" : "unavailable",
     source: m.source || "fallback",
@@ -798,7 +922,8 @@ export function meshStatusLine(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   if (m.enabled) {
     const r = meshRollup(m);
-    return "Suite mesh: on · live " + r.live + " · locked " + r.locked + " · isolated " + r.isolated;
+    const live = firstNum(m.live_nodes, m.rollup && m.rollup.mesh) ?? r.live;
+    return "Suite mesh: on · live " + live + " · locked " + r.locked + " · isolated " + r.isolated;
   }
   if (m.status === "unavailable") {
     return "Suite mesh: on · rollup unavailable";
@@ -807,14 +932,15 @@ export function meshStatusLine(mesh) {
 }
 
 /**
- * Public Live Nodes: QNM rollup.live when mesh is enabled (no visiting floor),
- * otherwise GodLock.uk site heartbeats.
+ * Public Live Nodes: Worker /v1/mesh live_nodes (human mesh users + cited
+ * human uses) when mesh is enabled (no visiting floor, never software_nodes).
+ * Otherwise GodLock.uk site heartbeats.
  */
 export function alignLiveNodes({ siteLiveNodes, mesh } = {}) {
   const site = Number(siteLiveNodes);
   const siteN = Number.isFinite(site) && site >= 0 ? site : 0;
   if (mesh && mesh.enabled) {
-    return meshRollup(mesh).live;
+    return parsePublicLiveNodes(mesh);
   }
   return siteN;
 }
@@ -859,6 +985,10 @@ function looksLikeMeshDoc(body) {
   return body.enabled != null
     || body.mesh_enabled != null
     || body.live_nodes != null
+    || body.human_mesh_users != null
+    || body.human_uses != null
+    || body.software_nodes != null
+    || body.live_nodes_plane != null
     || body.rollup != null
     || body.locked != null
     || body.isolated != null
@@ -968,7 +1098,11 @@ export function hubMeshStatusDoc(stats, path) {
     enabled,
     mesh: "on",
     status: enabled ? "on" : "unavailable",
-    live_nodes: enabled ? rollup.live : 0,
+    live_nodes: enabled ? (firstNum(mesh.live_nodes) ?? rollup.live) : 0,
+    live_nodes_plane: LIVE_NODES_PLANE,
+    live_nodes_note: LIVE_NODES_NOTE,
+    software_nodes: enabled ? (firstNum(mesh.software_nodes) ?? 0) : 0,
+    software_nodes_note: SOFTWARE_NODES_NOTE,
     locked_nodes: enabled ? rollup.locked : 0,
     isolated_nodes: enabled ? rollup.isolated : 0,
     rollup,
@@ -1012,7 +1146,10 @@ export function meshOpsDoc() {
     mcp: PUBLIC_RUNTIME + "/mcp",
     fraggate: PUBLIC_RUNTIME + "/v1/fraggate/call",
     ops: MESH_OPS.slice(),
-    rollup_shape: "live|locked|isolated counts only",
+    rollup_shape: "live_nodes = human mesh users + cited human uses; presence live|locked|isolated; software_nodes separate",
+    live_nodes_plane: LIVE_NODES_PLANE,
+    live_nodes_note: LIVE_NODES_NOTE,
+    software_nodes_note: SOFTWARE_NODES_NOTE,
     default_off: false,
     mesh_default: MESH_DEFAULT,
     readonly: true,

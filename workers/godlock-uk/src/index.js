@@ -51,6 +51,7 @@ import {
   START, shouldIsolate, answerChallenge, clampScore, residualOf, hashReceipt,
   receiptScoreDelta,
 } from "./engine.js";
+import { aggregateSteer, classifyChallenge, unavailableSteer } from "./steer.js";
 import {
   PRESENCE_TTL_MS,
   liveNodeCountFromDb,
@@ -361,15 +362,28 @@ async function getReceipt(env, id) {
   return env.DB.prepare("SELECT * FROM receipts WHERE id=?").bind(id).first();
 }
 
+/** Read-time Steer. Does not write receipts, ledger, or metadata. */
+async function publicSteer(env) {
+  try {
+    const res = await env.DB.prepare(
+      "SELECT label, challenge_text, isolated FROM receipts WHERE isolated=0 /* steer-aggregate */"
+    ).all();
+    return aggregateSteer(res && res.results ? res.results : []);
+  } catch {
+    return unavailableSteer();
+  }
+}
+
 async function gatherStats(env, { wrote, visiting, ctx } = {}) {
   const score = await currentScore(env);
   const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
-  const [siteNodes, downloads, uses, receipts, meshSnap] = await Promise.all([
+  const [siteNodes, downloads, uses, receipts, meshSnap, steer] = await Promise.all([
     liveNodes(env, { wrote, visiting }),
     fetchDownloads(env),
     usesCount(env),
     receiptsCount(env),
     fetchMeshSnapshot(env, meshSnapshotDeps(env)),
+    publicSteer(env),
   ]);
   const mesh = publicMesh(meshSnap);
   // Best-effort runtime SSoT. Do not await — page render must not wait on this POST.
@@ -397,6 +411,9 @@ async function gatherStats(env, { wrote, visiting, ctx } = {}) {
     receipts,
     current_score: score,
     residual: residualOf(score),
+    steer,
+    steer_leader: steer.leader,
+    scales: steer.scales,
     presence_ttl_ms: PRESENCE_TTL_MS,
   };
 }
@@ -440,7 +457,15 @@ export function publicPayload(row) {
     isolated,
   };
   if (!isolated) {
-    payload.challenge_text = safe.challenge_text != null ? String(safe.challenge_text) : null;
+    const retained = safe.challenge_text != null;
+    payload.challenge_text = retained ? String(safe.challenge_text) : null;
+    const classification = classifyChallenge(retained ? payload.challenge_text : "");
+    payload.classification = {
+      hits: classification.hits,
+      weights: classification.weights,
+      primary: classification.primary,
+      text_retained: retained,
+    };
   }
   return payload;
 }
@@ -756,6 +781,11 @@ export default {
           downloads: stats.downloads,
           receipts: stats.receipts,
           views: stats.views,
+          current_score: stats.current_score,
+          residual: stats.residual,
+          steer: stats.steer,
+          steer_leader: stats.steer_leader,
+          scales: stats.scales,
         }, 200, extraHeadersFor(nodeId));
       }
 
@@ -892,6 +922,7 @@ export default {
       }
 
       if (path === REASON_PATH) {
+        const stats = await gatherStats(env, { wrote, ctx });
         if (wantsJson(request, url)) {
           return json({
             ok: true,
@@ -902,9 +933,14 @@ export default {
             path: REASON_PATH,
             identity: AUTHOR,
             text: reasonText(),
+            current_score: stats.current_score,
+            residual: stats.residual,
+            steer: stats.steer,
+            steer_leader: stats.steer_leader,
+            scales: stats.scales,
           }, 200, extraHeadersFor(nodeId));
         }
-        return html(page("Specified Fit, Not Pretty Spirals", reasonBody(), { path: REASON_PATH, kind: "reason" }), {
+        return html(page("Specified Fit, Not Pretty Spirals", reasonBody({ stats }), { path: REASON_PATH, kind: "reason" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }
@@ -983,8 +1019,20 @@ export default {
           return html(page("Receipt", receiptBody({ id, row: null, entries: [] }), { path: "/receipt/" + id, kind: "receipt", indexable: false }), { status: 404 });
         }
         const entries = await ledgerEntriesForId(env, id);
-        if (wantsJson(request, url)) return json({ ok: true, receipt: publicPayload(row), ledger: entries });
-        return html(page("Receipt", receiptBody({ id, row, entries }), { path: "/receipt/" + id, kind: "receipt" }));
+        const stats = await gatherStats(env, { wrote, ctx });
+        if (wantsJson(request, url)) {
+          return json({
+            ok: true,
+            receipt: publicPayload(row),
+            ledger: entries,
+            current_score: stats.current_score,
+            residual: stats.residual,
+            steer: stats.steer,
+            steer_leader: stats.steer_leader,
+            scales: stats.scales,
+          });
+        }
+        return html(page("Receipt", receiptBody({ id, row, entries, stats }), { path: "/receipt/" + id, kind: "receipt" }));
       }
 
       if (isSubmitPost) {

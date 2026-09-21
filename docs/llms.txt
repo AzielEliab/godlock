@@ -245,7 +245,9 @@ Platforms: BAN-PLATFORMS-1.0 all_live:true native_app_store:false (windows, mac,
 Calling name: Aziel Runtime. Identity Aziel Eliab only. ChainLock/AKM do not rewrite identity.
 Cap-7: factory MirageGrid Worker https://miragegrid.vibelock.workers.dev LIVE. resolves_to_hub: false. Public pair azgrid + azbooth LIVE Worker HTTPS. AZNet-side SLOT. GodLock design_of sites: azcloak, azstandby.
 Cap-7 cite+AZNet verify LIVE. Hosted Cap-7 /mcp slot. Shuffle: ping MirageGrid until one site lands — do not hardcode a host.
-Never invent a live door. Never claim a banned host is LIVE. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id https://www.azieleliab.com/#aziel. Lamb Lens. NO-LIE. No visible 15:20.
+SPORE-1.0 (last-resort failsafe, layer 3): pause / preserve / wait / physical-wipe-only. Does not replace live fronts or cold-shelf mutual backup. SoT: aziel-runtime#152 LIVE Worker a8f7fdc9. Paper: https://github.com/AzielEliab/aziel-runtime/blob/main/docs/designs/SPORE-1.0.md.
+RE-COLD-STORE is an honest hook (no invented destinations). active:false destinations:[].
+Never invent a live door. Never claim a banned host is LIVE. Softwares blurbs untouched. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id https://www.azieleliab.com/#aziel. Lamb Lens. NO-LIE. No visible 15:20.
 
 ## REDLINE-2026-09-14
 

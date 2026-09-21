@@ -1,10 +1,13 @@
 /**
  * BAN-SURVIVAL-1.0 hub pull for godlock.uk.
  * SoT is GET /v1/survival on Aziel Runtime (short TTL). Cite only.
- * Not a second FragGate door. Not /mcp. Never invent a live door.
- * GodLock is a product name, not identity. Person @id
- * https://www.azieleliab.com/#aziel. Lamb Lens. NO-LIE. No visible 15:20.
- * Author: Aziel Eliab only.
+ * SPORE-1.0 is the last-resort failsafe (layer 3) after live fronts and
+ * cold-shelf mutual backup. RE-COLD-STORE is an honest hook (no invented
+ * destinations). Softwares blurbs stay untouched. Not a Softwares-tab
+ * product. Not a FragGate slug. Not a second FragGate door. Not /mcp.
+ * Never invent a live door. GodLock is a product name, not identity.
+ * Person @id https://www.azieleliab.com/#aziel. Lamb Lens. NO-LIE.
+ * No visible 15:20. Author: Aziel Eliab only.
  */
 const AUTHOR = "Aziel Eliab";
 const AZIEL_PERSON_ID = "https://www.azieleliab.com/#aziel";
@@ -16,6 +19,14 @@ export const BAN_SURVIVAL = "BAN-SURVIVAL-1.0";
 export const BAN_PLATFORMS = "BAN-PLATFORMS-1.0";
 export const BAN_CALLING_NAME = "BAN-CALLING-NAME-1.0";
 export const CAP7_SHUFFLE = "CAP7-SHUFFLE-1.0";
+export const COLD_MULTI_SHELF = "COLD-MULTI-SHELF-1.0";
+export const SPORE = "SPORE-1.0";
+export const RE_COLD_STORE = "RE-COLD-STORE";
+/** aziel-runtime#152 LIVE isolate. SPORE failsafe + RE-COLD-STORE on /v1/survival. */
+export const SPORE_WORKER_VERSION_ID = "a8f7fdc9";
+export const SPORE_SOT = "aziel-runtime#152 LIVE Worker " + SPORE_WORKER_VERSION_ID;
+export const SPORE_PAPER = "https://github.com/AzielEliab/aziel-runtime/blob/main/docs/designs/SPORE-1.0.md";
+export const SPORE_FACES = Object.freeze(["pause", "preserve", "wait", "physical-wipe-only"]);
 export const SURVIVAL_TTL_MS = 60 * 1000;
 export const SURVIVAL_CACHE_CONTROL = "public, max-age=60, s-maxage=60, stale-while-revalidate=120";
 export const SURVIVAL_ORIGIN = CATALOG + "/v1/survival";
@@ -153,6 +164,70 @@ export const FALLBACK_CAP7_AZNET = Object.freeze({
   worker: MIRAGEGRID_CAP7_CITE,
 });
 
+export const FALLBACK_SURVIVAL_STACK = Object.freeze([
+  Object.freeze({
+    layer: 1,
+    id: "live-fronts",
+    spec: BAN_SURVIVAL,
+    role: "failover",
+    includes: Object.freeze(["cap-7", "calling-name", "live-node-api"]),
+  }),
+  Object.freeze({
+    layer: 2,
+    id: "cold-shelves",
+    spec: COLD_MULTI_SHELF,
+    role: "mutual-backup",
+    mutual_backup_with: BAN_SURVIVAL,
+    plane_b: "slot",
+    plane_c: "slot",
+    replaced: false,
+    failed: false,
+  }),
+  Object.freeze({
+    layer: 3,
+    id: "spore",
+    spec: SPORE,
+    role: "failsafe",
+    last_resort: true,
+    replaces_cold_shelves: false,
+    replaces_ban_survival: false,
+  }),
+]);
+
+export const FALLBACK_RE_COLD_STORE = Object.freeze({
+  hook: RE_COLD_STORE,
+  allowed: true,
+  trigger: "cold-shelves-wiped-or-failed",
+  active: false,
+  shelves_failed: false,
+  shelves_intact: true,
+  invent_live: false,
+  invent_hash: false,
+  invent_receipt: false,
+  invent_destination: false,
+  public_inventory_required: false,
+  destinations: Object.freeze([]),
+  opaque_placement: true,
+  note: "When cold stores are wiped or fail, the mesh may re-cold-store DNA wherever available. Never invent LIVE stores, hashes, receipts, or destinations. No required public inventory. Does not claim a wipe is happening now.",
+});
+
+export const FALLBACK_SPORE = Object.freeze({
+  spec: SPORE,
+  role: "failsafe",
+  failsafe: true,
+  last_resort: true,
+  replaces_cold_shelves: false,
+  replaces_ban_survival: false,
+  software_tab: false,
+  fraggate_slug: false,
+  faces: SPORE_FACES,
+  paper: SPORE_PAPER,
+  worker: SPORE_WORKER_VERSION_ID,
+  sot: SPORE_SOT,
+  re_cold_store: FALLBACK_RE_COLD_STORE,
+  note: "SPORE-1.0 last-resort failsafe after live fronts and cold-shelf mutual backup: pause / preserve / wait / physical-wipe-only. Does not replace BAN-SURVIVAL or COLD-MULTI-SHELF. Not a Softwares-tab product. Plane B/C stay SLOT. RE-COLD-STORE is an honest hook (no invented destinations).",
+});
+
 export const SURVIVAL_FALLBACK = Object.freeze({
   spec: BAN_SURVIVAL,
   mode: "LIVE",
@@ -161,6 +236,13 @@ export const SURVIVAL_FALLBACK = Object.freeze({
   person_id: AZIEL_PERSON_ID,
   umbrella: "CROSS-NETWORK-SURVIVAL-1.0",
   no_lie_spec: "NO-LIE-NO-REWRITE-1.0",
+  cold_multi_shelf: COLD_MULTI_SHELF,
+  spore_spec: SPORE,
+  spore_role: "failsafe",
+  spore_replaces_cold_shelves: false,
+  survival_stack: FALLBACK_SURVIVAL_STACK,
+  re_cold_store: FALLBACK_RE_COLD_STORE,
+  spore: FALLBACK_SPORE,
   mutual_backup: true,
   shelves_are_not_a_live_door: true,
   shelves_backup_for: "death-by-ban",
@@ -177,7 +259,7 @@ export const SURVIVAL_FALLBACK = Object.freeze({
   cap7_aznet: FALLBACK_CAP7_AZNET,
   source: "fallback",
   pulled: false,
-  note: "Fallback BAN-SURVIVAL cite when the live /survival pull is unavailable. Never invent a live door. Never claim a banned host is LIVE.",
+  note: "Fallback BAN-SURVIVAL cite when the live /survival pull is unavailable. SPORE-1.0 remains the last-resort failsafe. RE-COLD-STORE destinations stay empty. Never invent a live door. Never claim a banned host is LIVE.",
 });
 
 let survivalMemory = { at: 0, doc: null };
@@ -296,6 +378,99 @@ export function compactCap7(raw) {
   };
 }
 
+export function compactSurvivalStack(raw) {
+  const rows = asList(raw);
+  const byId = new Map();
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    const id = String(row.id || "").trim();
+    if (!id) continue;
+    byId.set(id, row);
+  }
+  const live = byId.get("live-fronts") || FALLBACK_SURVIVAL_STACK[0];
+  const shelves = byId.get("cold-shelves") || FALLBACK_SURVIVAL_STACK[1];
+  const spore = byId.get("spore") || FALLBACK_SURVIVAL_STACK[2];
+  const includes = asList(live.includes).map(String).filter(Boolean);
+  return [
+    {
+      layer: 1,
+      id: "live-fronts",
+      spec: String(live.spec || BAN_SURVIVAL),
+      role: "failover",
+      includes: includes.length ? includes : FALLBACK_SURVIVAL_STACK[0].includes.slice(),
+    },
+    {
+      layer: 2,
+      id: "cold-shelves",
+      spec: String(shelves.spec || COLD_MULTI_SHELF),
+      role: "mutual-backup",
+      mutual_backup_with: String(shelves.mutual_backup_with || BAN_SURVIVAL),
+      plane_b: String(shelves.plane_b || "slot").toLowerCase() === "live" ? "live" : "slot",
+      plane_c: String(shelves.plane_c || "slot").toLowerCase() === "live" ? "live" : "slot",
+      replaced: false,
+      failed: shelves.failed === true,
+    },
+    {
+      layer: 3,
+      id: "spore",
+      spec: SPORE,
+      role: "failsafe",
+      last_resort: true,
+      replaces_cold_shelves: false,
+      replaces_ban_survival: false,
+    },
+  ];
+}
+
+export function compactReColdStore(raw) {
+  const src = raw && typeof raw === "object" ? raw : {};
+  const dests = src.invent_destination === true
+    ? []
+    : asList(src.destinations)
+      .map((d) => String(d || "").trim())
+      .filter((d) => /^https:\/\//i.test(d));
+  const shelvesFailed = src.shelves_failed === true;
+  return {
+    hook: RE_COLD_STORE,
+    allowed: src.allowed !== false,
+    trigger: String(src.trigger || FALLBACK_RE_COLD_STORE.trigger),
+    active: src.active === true && shelvesFailed,
+    shelves_failed: shelvesFailed,
+    shelves_intact: !shelvesFailed && src.shelves_intact !== false,
+    invent_live: false,
+    invent_hash: false,
+    invent_receipt: false,
+    invent_destination: false,
+    public_inventory_required: false,
+    destinations: dests,
+    opaque_placement: src.opaque_placement !== false,
+    note: src.note ? String(src.note) : FALLBACK_RE_COLD_STORE.note,
+  };
+}
+
+export function compactSpore(raw, reCold) {
+  const src = raw && typeof raw === "object" ? raw : {};
+  const faces = asList(src.faces).map(String).filter(Boolean);
+  return {
+    spec: SPORE,
+    role: "failsafe",
+    failsafe: true,
+    last_resort: true,
+    replaces_cold_shelves: false,
+    replaces_ban_survival: false,
+    software_tab: false,
+    fraggate_slug: false,
+    faces: faces.length ? faces : SPORE_FACES.slice(),
+    paper: String(src.paper || "").includes("SPORE-1.0")
+      ? (String(src.paper).startsWith("https://") ? String(src.paper) : SPORE_PAPER)
+      : SPORE_PAPER,
+    worker: SPORE_WORKER_VERSION_ID,
+    sot: SPORE_SOT,
+    re_cold_store: reCold || compactReColdStore(src.re_cold_store),
+    note: src.note ? String(src.note) : FALLBACK_SPORE.note,
+  };
+}
+
 export function looksLikeSurvivalDoc(body) {
   if (!body || typeof body !== "object") return false;
   const spec = String(body.spec || "");
@@ -313,6 +488,9 @@ export function compactSurvivalSot(raw, meta = {}) {
   const calling = compactCallingName(src.calling_name);
   const platforms = compactPlatforms(src.platforms);
   const cap7 = compactCap7(src.cap7_aznet);
+  const stack = compactSurvivalStack(src.survival_stack || (src.spore && src.spore.stack));
+  const reCold = compactReColdStore(src.re_cold_store || (src.spore && src.spore.re_cold_store));
+  const spore = compactSpore(src.spore, reCold);
   return {
     spec: String(src.spec || BAN_SURVIVAL),
     mode: String(src.mode || "LIVE"),
@@ -321,6 +499,13 @@ export function compactSurvivalSot(raw, meta = {}) {
     person_id: AZIEL_PERSON_ID,
     umbrella: String(src.umbrella || "CROSS-NETWORK-SURVIVAL-1.0"),
     no_lie_spec: String(src.no_lie_spec || "NO-LIE-NO-REWRITE-1.0"),
+    cold_multi_shelf: String(src.cold_multi_shelf || COLD_MULTI_SHELF),
+    spore_spec: SPORE,
+    spore_role: "failsafe",
+    spore_replaces_cold_shelves: false,
+    survival_stack: stack,
+    re_cold_store: reCold,
+    spore,
     mutual_backup: src.mutual_backup !== false,
     shelves_are_not_a_live_door: src.shelves_are_not_a_live_door !== false,
     shelves_backup_for: String(src.shelves_backup_for || "death-by-ban"),
@@ -479,6 +664,25 @@ export function survivalCiteFields(sot) {
       ...cap7,
       worker: { ...MIRAGEGRID_CAP7_CITE },
     },
+    spore: SPORE,
+    spore_spec: SPORE,
+    spore_role: "failsafe",
+    spore_failsafe: true,
+    spore_last_resort: true,
+    spore_replaces_cold_shelves: false,
+    spore_replaces_ban_survival: false,
+    spore_software_tab: false,
+    spore_fraggate_slug: false,
+    spore_faces: ((doc.spore && doc.spore.faces) || SPORE_FACES).slice(),
+    spore_paper: SPORE_PAPER,
+    spore_worker: SPORE_WORKER_VERSION_ID,
+    spore_sot: SPORE_SOT,
+    survival_stack: (doc.survival_stack || FALLBACK_SURVIVAL_STACK).map((row) => ({ ...row })),
+    re_cold_store: { ...(doc.re_cold_store || FALLBACK_RE_COLD_STORE), destinations: ((doc.re_cold_store && doc.re_cold_store.destinations) || []).slice() },
+    re_cold_store_hook: RE_COLD_STORE,
+    re_cold_store_active: !!(doc.re_cold_store && doc.re_cold_store.active),
+    re_cold_store_invent_destination: false,
+    re_cold_store_destinations: ((doc.re_cold_store && doc.re_cold_store.destinations) || []).slice(),
     lie_to_survive: false,
     visible_1520: false,
     product_not_identity: true,
@@ -517,14 +721,29 @@ export function survivalHubDoc(sot) {
     cap7_aznet: fields.cap7_aznet,
     cap7_factory_worker: MIRAGEGRID_WORKER,
     resolves_to_hub: false,
+    spore: doc.spore || FALLBACK_SPORE,
+    spore_spec: SPORE,
+    spore_role: "failsafe",
+    spore_failsafe: true,
+    spore_last_resort: true,
+    spore_replaces_cold_shelves: false,
+    spore_software_tab: false,
+    spore_worker: SPORE_WORKER_VERSION_ID,
+    spore_sot: SPORE_SOT,
+    survival_stack: fields.survival_stack,
+    re_cold_store: fields.re_cold_store,
+    re_cold_store_hook: RE_COLD_STORE,
+    re_cold_store_active: fields.re_cold_store_active,
+    re_cold_store_invent_destination: false,
     lie_to_survive: false,
     visible_1520: false,
     lamb_lens: true,
     no_lie: true,
     growth_on: true,
     product_not_identity: true,
-    note: "GodLock.uk pulls BAN-SURVIVAL SoT (short TTL) and cites it. Cap-7 Worker "
-      + MIRAGEGRID_WORKER + " is LIVE; resolves_to_hub is false. Hosted Cap-7 /mcp stays SLOT. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id "
+    note: "GodLock.uk pulls BAN-SURVIVAL SoT (short TTL) and cites it. SPORE-1.0 is the last-resort failsafe (layer 3) after live fronts and cold-shelf mutual backup: pause / preserve / wait / physical-wipe-only. Does not replace cold shelves. RE-COLD-STORE is an honest hook (no invented destinations). Worker "
+      + SPORE_WORKER_VERSION_ID + " LIVE. Cap-7 Worker "
+      + MIRAGEGRID_WORKER + " is LIVE; resolves_to_hub is false. Hosted Cap-7 /mcp stays SLOT. Softwares blurbs untouched. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id "
       + AZIEL_PERSON_ID + ". Lamb Lens. NO-LIE. No visible 15:20.",
   };
 }
@@ -540,5 +759,7 @@ export function survivalLlmsSection(sot) {
     + "Calling name: " + fields.calling_name + " (slug " + fields.calling_slug + "). Rotated:" + String(fields.calling_name_rotated) + ". Identity Aziel Eliab only. ChainLock/AKM do not rewrite identity.\n"
     + "Cap-7: factory MirageGrid Worker " + MIRAGEGRID_WORKER + " LIVE. resolves_to_hub: false. Public pair " + fields.cap7_public_pair.join(" + ") + " LIVE Worker HTTPS. AZNet-side SLOT. GodLock design_of sites: " + fields.cap7_godlock_design_of.join(", ") + ".\n"
     + "Cap-7 cite+AZNet verify LIVE. Hosted Cap-7 /mcp " + fields.cap7_hosted_endpoints + ". Shuffle: ping MirageGrid until one site lands — do not hardcode a host.\n"
-    + "Never invent a live door. Never claim a banned host is LIVE. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id " + AZIEL_PERSON_ID + ". Lamb Lens. NO-LIE. No visible 15:20.\n";
+    + "SPORE-1.0 (last-resort failsafe, layer 3): pause / preserve / wait / physical-wipe-only. Does not replace live fronts or cold-shelf mutual backup. SoT: " + SPORE_SOT + ". Paper: " + SPORE_PAPER + ".\n"
+    + "RE-COLD-STORE is an honest hook (no invented destinations). active:" + String(fields.re_cold_store_active) + " destinations:" + (fields.re_cold_store_destinations.length ? fields.re_cold_store_destinations.join(", ") : "[]") + ".\n"
+    + "Never invent a live door. Never claim a banned host is LIVE. Softwares blurbs untouched. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id " + AZIEL_PERSON_ID + ". Lamb Lens. NO-LIE. No visible 15:20.\n";
 }

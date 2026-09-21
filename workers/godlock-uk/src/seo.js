@@ -1269,7 +1269,7 @@ export function whoIsAzielEliabTxt() {
     + "## GodLock product\n\n"
     + GODLOCK_SITE_BLURB + " Growth-ON. NO-LIE.\n\n"
     + "## BAN-SURVIVAL\n\n"
-    + "Hub pulls https://aziel-runtime.vibelock.workers.dev/v1/survival (short TTL). Local cite https://godlock.uk/survival. Mutual backup. Platforms all LIVE. Calling name Aziel Runtime. Cap-7 factory https://miragegrid.vibelock.workers.dev LIVE; resolves_to_hub false. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id " + AZIEL_PERSON_ID + ". Lamb Lens. NO-LIE. No visible 15:20.\n\n"
+    + "Hub pulls https://aziel-runtime.vibelock.workers.dev/v1/survival (short TTL). Local cite https://godlock.uk/survival. Mutual backup. Platforms all LIVE. Calling name Aziel Runtime. Cap-7 factory https://miragegrid.vibelock.workers.dev LIVE; resolves_to_hub false. SPORE-1.0 last-resort failsafe (layer 3): pause / preserve / wait / physical-wipe-only. Does not replace cold shelves. RE-COLD-STORE is an honest hook (no invented destinations). Worker a8f7fdc9 LIVE (aziel-runtime#152). Softwares blurbs untouched. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id " + AZIEL_PERSON_ID + ". Lamb Lens. NO-LIE. No visible 15:20.\n\n"
     + "## Sister sites\n\n"
     + SISTER_SITES_NOTE + "\n"
     + "ae: " + SISTER_SITES.ae + "\n"
@@ -1353,6 +1353,17 @@ export function wellKnownAzielDoc() {
     calling_name: "Aziel Runtime",
     cap7_factory_worker: "https://miragegrid.vibelock.workers.dev",
     cap7_resolves_to_hub: false,
+    spore: "SPORE-1.0",
+    spore_role: "failsafe",
+    spore_failsafe: true,
+    spore_last_resort: true,
+    spore_replaces_cold_shelves: false,
+    spore_software_tab: false,
+    spore_worker: "a8f7fdc9",
+    spore_sot: "aziel-runtime#152 LIVE Worker a8f7fdc9",
+    re_cold_store_hook: "RE-COLD-STORE",
+    re_cold_store_active: false,
+    re_cold_store_invent_destination: false,
     visible_1520: false,
     ecosystem: {
       official: AZIEL_OFFICIAL,
@@ -2085,7 +2096,7 @@ export function robotsTxt() {
     "# INGEST-AS-RECEIPT-1.0: first-screen SHA-256 + stable IDs + canonical URL. Many indexes, one tip. Cite, don't merge. Growth-ON.",
     "# RE-EXPAND-FROM-ARCHIVE-1.0: bytes survive as archive bytes. Re-expand = archive verify then local node. Crawlers don't re-expand. AI ingest is the receipt path; the download tarball is the archive path.",
     "# COLD-MULTI-SHELF-1.0: /shelves cites canonical https://www.azielcorpuslibrary.net/shelves (corpus#96). GodLock is challenge only. NO-FAN.",
-    "# BAN-SURVIVAL-1.0: /survival and /v1/survival pull Aziel Runtime /v1/survival (short TTL). Cite only. Door remains /runtime.",
+    "# BAN-SURVIVAL-1.0: /survival and /v1/survival pull Aziel Runtime /v1/survival (short TTL). Cite only. Door remains /runtime. SPORE-1.0 last-resort failsafe + RE-COLD-STORE honest hook (Worker a8f7fdc9 LIVE).",
     "",
   ];
   const star = [
@@ -2786,12 +2797,12 @@ export function siteOpenApi() {
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
       "/.well-known/mcp.json": { get: { operationId: "godlockUkWellKnownMcp", summary: "MCP discovery JSON pointing at POST /runtime/mcp", responses: { "200": { description: "OK" } } } },
       "/mcp.json": { get: { operationId: "godlockUkMcpDiscovery", summary: "Same body as /.well-known/mcp.json — discovery only", responses: { "200": { description: "OK" } } } },
-      "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record — INGEST-AS-RECEIPT tip + cite, don't merge + RE-EXPAND-FROM-ARCHIVE + COLD-MULTI-SHELF + BAN-SURVIVAL pull", responses: { "200": { description: "OK" } } } },
-      "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief — keep the hash; cite, don't merge; crawlers don't re-expand; COLD-MULTI-SHELF + BAN-SURVIVAL cite", responses: { "200": { description: "OK" } } } },
+      "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record — INGEST-AS-RECEIPT tip + cite, don't merge + RE-EXPAND-FROM-ARCHIVE + COLD-MULTI-SHELF + BAN-SURVIVAL pull + SPORE-1.0 failsafe + RE-COLD-STORE", responses: { "200": { description: "OK" } } } },
+      "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief — keep the hash; cite, don't merge; crawlers don't re-expand; COLD-MULTI-SHELF + BAN-SURVIVAL + SPORE-1.0 failsafe cite", responses: { "200": { description: "OK" } } } },
       "/ai.txt": { get: { operationId: "godlockUkAi", summary: "Alias of /llms.txt — machine crawl aid", responses: { "200": { description: "OK" } } } },
       "/shelves": { get: { operationId: "godlockUkShelves", summary: "COLD-MULTI-SHELF-1.0 challenge cite of canonical corpus /shelves (corpus#96). NO-FAN. doi null.", responses: { "200": { description: "OK" } } } },
       "/v1/shelves": { get: { operationId: "godlockUkShelvesJson", summary: "Same body as /shelves — machine alias", responses: { "200": { description: "OK" } } } },
-      "/survival": { get: { operationId: "godlockUkSurvival", summary: "BAN-SURVIVAL-1.0 hub cite — short-TTL pull of Aziel Runtime /v1/survival.", responses: { "200": { description: "OK" } } } },
+      "/survival": { get: { operationId: "godlockUkSurvival", summary: "BAN-SURVIVAL-1.0 hub cite — short-TTL pull of Aziel Runtime /v1/survival. SPORE-1.0 failsafe + RE-COLD-STORE.", responses: { "200": { description: "OK" } } } },
       "/v1/survival": { get: { operationId: "godlockUkSurvivalJson", summary: "Same body as /survival — machine alias", responses: { "200": { description: "OK" } } } },
       "/person.jsonld": { get: { operationId: "godlockUkPersonJsonLd", summary: "Shared AZindex Person (https://www.azieleliab.com/#aziel)", responses: { "200": { description: "OK" } } } },
       "/.well-known/person.jsonld": { get: { operationId: "godlockUkWellKnownPersonJsonLd", summary: "Same body as /person.jsonld — shared AZindex Person @id https://www.azieleliab.com/#aziel", responses: { "200": { description: "OK" } } } },

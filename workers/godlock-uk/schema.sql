@@ -39,10 +39,12 @@ CREATE TABLE IF NOT EXISTS metadata (
   value TEXT NOT NULL
 );
 
--- Site presence fallback: COUNT(heartbeats) with last_ms inside 5 minutes.
+-- Site presence: COUNT(heartbeats) with last_ms inside 5 minutes.
+-- Human viewers only — bots do not invent rows.
 -- Public Nodes, when suite mesh is on, are Worker /v1/mesh human
--- mesh users + cited human uses. Public Live Nodes are presence only.
--- Not this table, not Softwares.
+-- mesh users + cited human uses. Public Live Nodes are mesh presence
+-- plus these site viewers until runtime aggregates them.
+-- Not Softwares.
 -- last_ms is the source of truth; last_utc is kept for humans / fallback.
 CREATE TABLE IF NOT EXISTS heartbeats (
   session_id TEXT PRIMARY KEY,

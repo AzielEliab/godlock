@@ -617,7 +617,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.mesh_auto_heal, false);
     assert.equal(cite.mesh_rollup, "live|locked|isolated counts only");
     assert.equal(cite.nodes, "human mesh users + cited human uses");
-    assert.equal(cite.live_nodes, "presence only (human mesh users; uses are not live)");
+    assert.equal(cite.live_nodes, "presence only (human mesh users + current website viewers; uses are not live)");
     assert.equal(cite.live_nodes_plane, "human-mesh-users-uses");
     assert.equal(cite.live_nodes_source, CANON_HOST + "/v1/mesh");
     assert.equal(cite.live_nodes_worker, "d7b63ac1");
@@ -701,7 +701,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Mesh status: https:\/\/godlock\.uk\/runtime\/v1\/mesh\/status/);
     assert.match(llms, /Mesh nodes: https:\/\/godlock\.uk\/runtime\/v1\/mesh\/nodes/);
     assert.match(llms, /Nodes: human mesh users \+ cited human uses from Worker \/v1\/mesh\. Not Softwares\./);
-    assert.match(llms, /Live Nodes: presence only \(human mesh users\)\. Uses are not live presence\./);
+    assert.match(llms, /Live Nodes: presence only \(human mesh users \+ current website viewers\)\. Uses are not live presence\./);
     assert.match(llms, /Live Nodes SoT: aziel-runtime#151 LIVE Worker d7b63ac1/);
     assert.match(llms, /QNM-BUILD-1\.0 presence: live\|locked\|isolated counts only/);
     assert.match(llms, /SPLIT THE WIRES/);
@@ -2320,7 +2320,8 @@ describe("receipts UI and public payload", () => {
     assert.match(home, /id="stat-residual">50\.5%/);
     assert.match(home, /id="stat-uses">3</);
     assert.match(home, /id="stat-receipts">2</);
-    assert.match(home, /id="stat-nodes-live">0\/0</);
+    assert.match(home, /id="Nodes">0</);
+    assert.match(home, /id="LiveNodes">0</);
     assert.match(home, /Nodes \/ Live Nodes/);
     assert.match(home, /href="\/receipts">Full receipts chain</);
   });

@@ -6,6 +6,9 @@ import {
   liveNodeCountFromDb,
   usesCountFromLedger,
   presenceCutoff,
+  isHumanSiteViewer,
+  isSitePresencePath,
+  isMachinePresencePath,
 } from "./src/presence.js";
 import { hideInternalDetermination } from "./src/publicCopy.js";
 
@@ -55,6 +58,35 @@ describe("presenceCutoff", () => {
     assert.equal(c.sinceMs, now - PRESENCE_TTL_MS);
     assert.equal(c.cleanupMs, now - PRESENCE_CLEANUP_MS);
     assert.equal(c.sinceIso, "2026-09-04T12:55:00.000Z");
+  });
+});
+
+describe("human site viewers", () => {
+  it("counts browser UAs and refuses bots, empty UA, and CLI libraries", () => {
+    assert.equal(isHumanSiteViewer(new Request("https://godlock.uk/", {
+      headers: { "User-Agent": "Mozilla/5.0 (Macintosh) Chrome/120" },
+    })), true);
+    assert.equal(isHumanSiteViewer(new Request("https://godlock.uk/")), false);
+    assert.equal(isHumanSiteViewer(new Request("https://godlock.uk/", {
+      headers: { "User-Agent": "Googlebot/2.1" },
+    })), false);
+    assert.equal(isHumanSiteViewer(new Request("https://godlock.uk/", {
+      headers: { "User-Agent": "curl/8.4.0" },
+    })), false);
+    assert.equal(isHumanSiteViewer({
+      headers: { get: () => "Mozilla/5.0" },
+      cf: { botManagement: { score: 12, verifiedBot: false } },
+    }), false);
+  });
+
+  it("counts POST /heartbeat and human HTML GETs, not /count or JSON GET /", () => {
+    assert.equal(isSitePresencePath("/heartbeat", "POST", { jsonGet: true }), true);
+    assert.equal(isSitePresencePath("/", "GET"), true);
+    assert.equal(isSitePresencePath("/", "GET", { jsonGet: true }), false);
+    assert.equal(isSitePresencePath("/count", "GET"), false);
+    assert.equal(isSitePresencePath("/stats", "GET"), false);
+    assert.equal(isSitePresencePath("/v1/mesh", "GET"), false);
+    assert.equal(isMachinePresencePath("/runtime/v1/mesh"), true);
   });
 });
 

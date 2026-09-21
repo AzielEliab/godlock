@@ -2481,7 +2481,7 @@ export function citeDoc(sot) {
     mesh_auto_heal: false,
     mesh_rollup: "live|locked|isolated counts only",
     nodes: "human mesh users + cited human uses",
-    live_nodes: "presence only (human mesh users; uses are not live)",
+    live_nodes: "presence only (human mesh users + current website viewers; uses are not live)",
     live_nodes_plane: "human-mesh-users-uses",
     live_nodes_source: CANON_HOST + "/v1/mesh",
     live_nodes_worker: "d7b63ac1",
@@ -2688,7 +2688,7 @@ export function llmsDoc(sot) {
     + "MCP discovery: " + CANON_HOST + "/.well-known/mcp.json\n"
     + "Suite mesh (read-only, on): " + PUBLIC_RUNTIME + "/v1/mesh\n"
     + "Nodes: human mesh users + cited human uses from Worker /v1/mesh. Not Softwares.\n"
-    + "Live Nodes: presence only (human mesh users). Uses are not live presence.\n"
+    + "Live Nodes: presence only (human mesh users + current website viewers). Uses are not live presence.\n"
     + "Live Nodes SoT: aziel-runtime#151 LIVE Worker d7b63ac1.\n"
     + "QNM-BUILD-1.0 presence: live|locked|isolated counts only. software_nodes stay on the Softwares catalog. No Node Gate. No auto-heal.\n"
     + "SPLIT THE WIRES. Tip-only 0.5–1s tick. Pull-only payload. 1s and 777s never share a socket.\n"
@@ -2795,7 +2795,7 @@ export function siteOpenApi() {
       "/who-is": { get: { operationId: "godlockUkWhoIsAlias", summary: "308 to /who-is-aziel-eliab.txt", responses: { "308": { description: "Permanent redirect" } } } },
       "/why": { get: { operationId: "godlockUkWhyAlias", summary: "308 to /why-aziel-eliab.txt — machine why; official HTML why stays on azieleliab.com", responses: { "308": { description: "Permanent redirect" } } } },
       "/why-aziel-eliab.txt": { get: { operationId: "godlockUkWhyAziel", summary: "Why Aziel Eliab / why GodLock exists — machine txt only", responses: { "200": { description: "OK" } } } },
-      "/count": { get: { operationId: "godlockUkCount", summary: "Public Nodes (human mesh users+uses) / Live Nodes (presence) / Uses / Receipts counters", responses: { "200": { description: "OK" } } } },
+      "/count": { get: { operationId: "godlockUkCount", summary: "Public Nodes (human mesh users+uses) / Live Nodes (mesh presence + current website viewers) / Uses / Receipts counters", responses: { "200": { description: "OK" } } } },
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
       "/.well-known/mcp.json": { get: { operationId: "godlockUkWellKnownMcp", summary: "MCP discovery JSON pointing at POST /runtime/mcp", responses: { "200": { description: "OK" } } } },
       "/mcp.json": { get: { operationId: "godlockUkMcpDiscovery", summary: "Same body as /.well-known/mcp.json — discovery only", responses: { "200": { description: "OK" } } } },

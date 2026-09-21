@@ -1,7 +1,7 @@
 /**
  * Suite mesh client aligned to QNM-BUILD-1.0 + SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL.
  * Public Nodes = human mesh users + cited human uses from Worker /v1/mesh.
- * Public Live Nodes = presence only (human mesh users). Uses are not live presence.
+ * Public Live Nodes = mesh presence + current website viewers. Uses are not live presence.
  * Never software_nodes. Softwares catalog stays separate.
  * Presence rollup is live|locked|isolated counts only. No Node Gate. No auto-heal.
  * Read-only suite presence ON. This Worker has no mesh-off function.
@@ -167,7 +167,7 @@ export const LIVE_NODES_SOT = "aziel-runtime#151 LIVE Worker " + LIVE_NODES_WORK
 export const NODES_NOTE =
   "Public Nodes (nodes) count human mesh users (join/heartbeat/presence with human bearers) plus the cited human uses signal (USES / human_uses) from Worker /v1/mesh. Prefer numeric nodes; else human_mesh_users+human_uses; else the legacy combined live_nodes sum when nodes is missing. Isolated humans stay on isolated_nodes. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. Softwares catalog stays separate. Uses are interaction counters, not unique people. Nodes does not invent users.";
 export const LIVE_NODES_NOTE =
-  "Public Live Nodes are presence only (join/heartbeat/presence with human bearers). Prefer post-break live_nodes only when a numeric nodes count is also present; otherwise human_mesh_users. Cited human uses are not live presence and must not be labeled live. Often 0. Isolated humans stay on isolated_nodes. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. Softwares catalog stays separate. Live Nodes does not invent users. Zero is honest when no humans are present.";
+  "Public Live Nodes are presence only (join/heartbeat/presence with human bearers) plus current website viewers. Prefer post-break live_nodes only when a numeric nodes count is also present; otherwise human_mesh_users — then add site_live_nodes until Worker /v1/mesh already includes site viewers (single SSoT). Do not add site_live_nodes again after includes_site_viewers / live_nodes_components.site_* ships. Cited human uses are not live presence and must not be labeled live. Isolated humans stay on isolated_nodes. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. Softwares catalog stays separate. Live Nodes does not invent users or bots. Zero is honest when no humans are present.";
 export const SOFTWARE_NODES_NOTE =
   "software_nodes / rollup.software count Softwares product Workers ({slug}-worker) from suite-presence fan-out. Softwares catalog stays separate. They must never feed public Nodes or Live Nodes.";
 
@@ -622,6 +622,42 @@ export function numericNodesCount(value) {
   return firstNum(value);
 }
 
+function meshComponents(mesh) {
+  const m = mesh && typeof mesh === "object" && !Array.isArray(mesh) ? mesh : {};
+  const c = m.live_nodes_components;
+  return c && typeof c === "object" && !Array.isArray(c) ? c : {};
+}
+
+/**
+ * True when Worker /v1/mesh live_nodes already includes site viewers.
+ * Operator lock 2026-09-21: display that SSoT and do not add site_live_nodes again.
+ */
+export function meshIncludesSiteViewers(mesh) {
+  const m = mesh && typeof mesh === "object" && !Array.isArray(mesh) ? mesh : {};
+  const c = meshComponents(m);
+  if (m.includes_site_viewers === true || m.includes_site_live_nodes === true) return true;
+  if (c.includes_site_viewers === true || c.includes_site_live_nodes === true) return true;
+  const plane = String(m.live_nodes_plane || "");
+  if (/site[-_ ]?(viewers?|live)/i.test(plane)) return true;
+  const siteIn = firstNum(
+    c.site_live_nodes,
+    c.site_viewers,
+    c.website_viewers,
+    c.godlock_site_live_nodes,
+  );
+  if (siteIn == null) return false;
+  const meshLive = parsePublicLivePresence(m);
+  const users = firstNum(m.human_mesh_users, c.human_mesh_users) || 0;
+  return meshLive >= siteIn && meshLive >= users + siteIn;
+}
+
+export function liveNodesAlignMode({ mesh } = {}) {
+  if (mesh && mesh.enabled) {
+    return meshIncludesSiteViewers(mesh) ? "mesh" : "mesh+site";
+  }
+  return "site";
+}
+
 function asList(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value;
@@ -910,6 +946,8 @@ export function parseMeshDoc(body) {
     live_nodes_note: typeof inner.live_nodes_note === "string" && inner.live_nodes_note.trim()
       ? inner.live_nodes_note
       : LIVE_NODES_NOTE,
+    live_nodes_components: meshComponents(inner),
+    includes_site_viewers: inner.includes_site_viewers === true || inner.includes_site_live_nodes === true,
     human_mesh_users: firstNum(inner.human_mesh_users),
     human_uses: firstNum(inner.human_uses),
     human_uses_complete: inner.human_uses_complete === true,
@@ -949,6 +987,9 @@ export function publicMesh(mesh) {
     live_nodes_note: typeof m.live_nodes_note === "string" && m.live_nodes_note.trim()
       ? m.live_nodes_note
       : LIVE_NODES_NOTE,
+    live_nodes_components: meshComponents(m),
+    includes_site_viewers: m.includes_site_viewers === true || m.includes_site_live_nodes === true
+      || meshIncludesSiteViewers(m),
     human_mesh_users: firstNum(m.human_mesh_users),
     human_uses: firstNum(m.human_uses),
     human_uses_complete: m.human_uses_complete === true,
@@ -979,11 +1020,12 @@ export function publicMesh(mesh) {
   });
 }
 
-export function meshStatusLine(mesh) {
+export function meshStatusLine(mesh, opts) {
   const m = mesh && typeof mesh === "object" ? mesh : emptyMesh();
   if (m.enabled) {
     const r = meshRollup(m);
-    const live = parsePublicLivePresence(m);
+    const aligned = opts && firstNum(opts.live_nodes);
+    const live = aligned != null ? aligned : parsePublicLivePresence(m);
     return "Suite mesh: on · live " + live + " · locked " + r.locked + " · isolated " + r.isolated;
   }
   if (m.status === "unavailable") {
@@ -1006,14 +1048,25 @@ export function alignNodes({ siteLiveNodes, mesh } = {}) {
 }
 
 /**
- * Public Live Nodes: presence only when mesh is enabled (no visiting floor,
- * never software_nodes, never uses-as-live). Otherwise site heartbeats.
+ * Public Live Nodes (LiveNodes#): mesh presence + current website viewers.
+ *
+ * SSoT: if Worker /v1/mesh live_nodes already includes site viewers, display that.
+ * TEMPORARY until runtime aggregates (operator lock 2026-09-21):
+ *   live = mesh_live + site_live_nodes
+ * Site heartbeats are a disjoint plane from QNM human mesh users today
+ * (website session ≠ mesh join), so sum — not max. Max would hide extra
+ * viewers when mesh_live > 0. After includes_site_viewers /
+ * live_nodes_components.site_* ships, meshIncludesSiteViewers() wins and
+ * we must not add site_live_nodes again. Never software_nodes. Never uses-as-live.
+ * Otherwise site heartbeats only.
  */
 export function alignLiveNodes({ siteLiveNodes, mesh } = {}) {
   const site = Number(siteLiveNodes);
   const siteN = Number.isFinite(site) && site >= 0 ? site : 0;
   if (mesh && mesh.enabled) {
-    return parsePublicLivePresence(mesh);
+    const meshLive = parsePublicLivePresence(mesh);
+    if (meshIncludesSiteViewers(mesh)) return meshLive;
+    return meshLive + siteN;
   }
   return siteN;
 }

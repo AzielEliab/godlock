@@ -1,7 +1,10 @@
 /**
  * Suite mesh client aligned to QNM-BUILD-1.0 + SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL.
  * Public Nodes = human mesh users + cited human uses from Worker /v1/mesh.
- * Public Live Nodes = mesh presence + current website viewers. Uses are not live presence.
+ * Public Live Nodes = one fleet total: runtime GET /v1/mesh live_nodes
+ * (human mesh users + site viewers on godlock.uk, azieleliab.com,
+ * azielcorpuslibrary.net). Not He Didn't Jump. Not Softwares.
+ * Uses are not live presence. /status can lag site_live_viewers_components.
  * Never software_nodes. Softwares catalog stays separate.
  * Presence rollup is live|locked|isolated counts only. No Node Gate. No auto-heal.
  * Read-only suite presence ON. This Worker has no mesh-off function.
@@ -166,8 +169,14 @@ export const LIVE_NODES_WORKER_VERSION_ID = "d7b63ac1";
 export const LIVE_NODES_SOT = "aziel-runtime#151 LIVE Worker " + LIVE_NODES_WORKER_VERSION_ID;
 export const NODES_NOTE =
   "Public Nodes (nodes) count human mesh users (join/heartbeat/presence with human bearers) plus the cited human uses signal (USES / human_uses) from Worker /v1/mesh. Prefer numeric nodes; else human_mesh_users+human_uses; else the legacy combined live_nodes sum when nodes is missing. Isolated humans stay on isolated_nodes. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. Softwares catalog stays separate. Uses are interaction counters, not unique people. Nodes does not invent users.";
+export const LIVE_NODES_FLEET_HOSTS = Object.freeze([
+  "godlock.uk",
+  "azieleliab.com",
+  "azielcorpuslibrary.net",
+]);
+export const LIVE_NODES_FLEET_PLANE = "human-mesh-users-site-viewers";
 export const LIVE_NODES_NOTE =
-  "Public Live Nodes are presence only (join/heartbeat/presence with human bearers) plus current website viewers. Prefer post-break live_nodes only when a numeric nodes count is also present; otherwise human_mesh_users — then add site_live_nodes until Worker /v1/mesh already includes site viewers (single SSoT). Do not add site_live_nodes again after includes_site_viewers / live_nodes_components.site_* ships. Cited human uses are not live presence and must not be labeled live. Isolated humans stay on isolated_nodes. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. Softwares catalog stays separate. Live Nodes does not invent users or bots. Zero is honest when no humans are present.";
+  "Public Live Nodes are presence only — one fleet total from aziel-runtime GET /v1/mesh live_nodes (plane human-mesh-users-site-viewers): human_mesh_users plus current website viewers on godlock.uk, azieleliab.com, and azielcorpuslibrary.net. Not He Didn't Jump. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. When that live_nodes already includes site viewers, display the fleet value and do not add site_live_nodes again. /count, /heartbeat, and /v1/mesh share that GET /v1/mesh read — /v1/mesh/status can lag site_live_viewers_components. Cited human uses are not live presence and must not be labeled live. Isolated humans stay on isolated_nodes. Live Nodes does not invent users or bots. Zero is honest when no humans are present.";
 export const SOFTWARE_NODES_NOTE =
   "software_nodes / rollup.software count Softwares product Workers ({slug}-worker) from suite-presence fan-out. Softwares catalog stays separate. They must never feed public Nodes or Live Nodes.";
 
@@ -185,10 +194,14 @@ export const MESH_LEAVE_PATH = "/v1/mesh/leave";
 export const MESH_ENABLE_PATH = "/v1/mesh/enable";
 export const MESH_DISABLE_PATH = "/v1/mesh/disable";
 export const MESH_REHEAL_PATH = "/v1/mesh/reheal";
-/** @deprecated LIVE QNM rollup is GET /v1/mesh/status and /v1/mesh/nodes. /list 404s. */
+/** @deprecated LIVE QNM rollup SSoT is GET /v1/mesh. /status can lag. /list 404s. */
 export const MESH_LIST_PATH = MESH_NODES_PATH;
 
-export const MESH_READ_PATHS = [MESH_STATUS_PATH, MESH_NODES_PATH, MESH_PATH];
+/**
+ * Fleet SSoT first. GET /v1/mesh/status can serve a staler
+ * site_live_viewers_components than GET /v1/mesh. /nodes is a roster fallback.
+ */
+export const MESH_READ_PATHS = [MESH_PATH, MESH_STATUS_PATH, MESH_NODES_PATH];
 /** Same-origin apex proxies for Live Nodes clients (parity with azieleliab.com / corpus). GET only. */
 export const ORIGIN_MESH_READ_PATHS = [MESH_PATH, MESH_STATUS_PATH];
 /** Public write ops on the runtime door. disable is not a function on this Worker. */
@@ -197,6 +210,13 @@ export const MESH_OPS = ["status", "nodes", "join", "heartbeat", "leave", "enabl
 export function isOriginMeshReadPath(pathname) {
   const p = String(pathname || "").replace(/\/+$/, "") || "/";
   return ORIGIN_MESH_READ_PATHS.includes(p);
+}
+
+/** Apex and /runtime reads whose live_nodes must match /count (GET /v1/mesh). */
+export function isFleetMeshReadPath(pathname) {
+  const raw = String(pathname || "").replace(/\/+$/, "") || "/";
+  const p = raw.startsWith(RUNTIME_PATH + "/") ? raw.slice(RUNTIME_PATH.length) : raw;
+  return p === MESH_PATH || p === MESH_STATUS_PATH;
 }
 
 /** Apex or same-origin runtime mesh JSON that must present as read-only ON. */
@@ -628,9 +648,18 @@ function meshComponents(mesh) {
   return c && typeof c === "object" && !Array.isArray(c) ? c : {};
 }
 
+function numericComponentMap(obj) {
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return false;
+  for (const v of Object.values(obj)) {
+    if (firstNum(v) != null) return true;
+  }
+  return false;
+}
+
 /**
  * True when Worker /v1/mesh live_nodes already includes site viewers.
- * Operator lock 2026-09-21: display that SSoT and do not add site_live_nodes again.
+ * Operator lock 2026-09-21: display that fleet total and do not add site_live_nodes.
+ * site_live_viewers_components is a signal only — never a second sum.
  */
 export function meshIncludesSiteViewers(mesh) {
   const m = mesh && typeof mesh === "object" && !Array.isArray(mesh) ? mesh : {};
@@ -639,6 +668,7 @@ export function meshIncludesSiteViewers(mesh) {
   if (c.includes_site_viewers === true || c.includes_site_live_nodes === true) return true;
   const plane = String(m.live_nodes_plane || "");
   if (/site[-_ ]?(viewers?|live)/i.test(plane)) return true;
+  if (numericComponentMap(m.site_live_viewers_components) && firstNum(m.live_nodes) != null) return true;
   const siteIn = firstNum(
     c.site_live_viewers,
     c.site_live_nodes,
@@ -651,6 +681,40 @@ export function meshIncludesSiteViewers(mesh) {
   const meshLive = parsePublicLivePresence(m);
   const users = firstNum(m.human_mesh_users, c.human_mesh_users) || 0;
   return meshLive >= siteIn && meshLive >= users + siteIn;
+}
+
+/**
+ * Homepage / heartbeat Live Nodes. Fleet live_nodes when the payload says
+ * viewers are already included. Never software_nodes. Never site_live_nodes alone.
+ */
+export function homepageSplitNodes(payload) {
+  const src = payload && typeof payload === "object" && !Array.isArray(payload) ? payload : {};
+  const m = src.mesh && typeof src.mesh === "object" && !Array.isArray(src.mesh) ? src.mesh : {};
+  const named = src.nodes != null ? src.nodes : m.nodes;
+  const users = firstNum(src.human_mesh_users != null ? src.human_mesh_users : m.human_mesh_users);
+  const uses = firstNum(src.human_uses != null ? src.human_uses : m.human_uses);
+  const fleet = firstNum(src.live_nodes, m.live_nodes);
+  const plane = String(src.live_nodes_plane || m.live_nodes_plane || "");
+  const included = src.live_nodes_align === "mesh"
+    || m.live_nodes_align === "mesh"
+    || src.includes_site_viewers === true
+    || m.includes_site_viewers === true
+    || src.includes_site_live_nodes === true
+    || m.includes_site_live_nodes === true
+    || /site[-_ ]?(viewers?|live)/i.test(plane)
+    || (
+      (numericComponentMap(src.site_live_viewers_components) || numericComponentMap(m.site_live_viewers_components))
+      && fleet != null
+    );
+  const nodes = firstNum(named) != null
+    ? firstNum(named)
+    : (users != null || uses != null ? (users || 0) + (uses || 0) : (fleet ?? 0));
+  let live;
+  if (included) live = fleet != null ? fleet : 0;
+  else if (src.live_nodes_align && fleet != null) live = fleet;
+  else if (firstNum(named) != null && fleet != null) live = fleet;
+  else live = users ?? 0;
+  return { nodes, live };
 }
 
 export function liveNodesAlignMode({ mesh } = {}) {
@@ -1050,16 +1114,15 @@ export function alignNodes({ siteLiveNodes, mesh } = {}) {
 }
 
 /**
- * Public Live Nodes (LiveNodes#): mesh presence + current website viewers.
+ * Public Live Nodes (LiveNodes#): one fleet total.
  *
- * SSoT: if Worker /v1/mesh live_nodes already includes site viewers, display that.
- * TEMPORARY until runtime aggregates (operator lock 2026-09-21):
- *   live = mesh_live + site_live_nodes
- * Site heartbeats are a disjoint plane from QNM human mesh users today
- * (website session ≠ mesh join), so sum — not max. Max would hide extra
- * viewers when mesh_live > 0. After includes_site_viewers /
- * live_nodes_components.site_* ships, meshIncludesSiteViewers() wins and
- * we must not add site_live_nodes again. Never software_nodes. Never uses-as-live.
+ * SSoT: aziel-runtime GET /v1/mesh `live_nodes` (plane human-mesh-users-site-viewers)
+ * = human_mesh_users + site viewers on godlock.uk + azieleliab.com +
+ * azielcorpuslibrary.net. Not He Didn't Jump. Not Softwares.
+ * When that figure already includes site viewers, display it. Do not add
+ * site_live_nodes again and do not re-sum site_live_viewers_components
+ * (that map can lag). Until a payload omits the fleet plane, temporary
+ * live = mesh_live + site_live_nodes. Never software_nodes. Never uses-as-live.
  * Otherwise site heartbeats only.
  */
 export function alignLiveNodes({ siteLiveNodes, mesh } = {}) {
@@ -1095,7 +1158,7 @@ async function fetchJson(fetcher, url, ms) {
   const ac = typeof AbortController === "function" ? new AbortController() : null;
   const timer = ac && ms ? setTimeout(() => ac.abort(), ms) : null;
   try {
-    const init = { headers: UA };
+    const init = { headers: UA, cache: "no-store" };
     if (ac) init.signal = ac.signal;
     return await fetcher(url, init);
   } finally {
@@ -1157,20 +1220,34 @@ async function firstMeshCandidate(fetcher, urls, timeoutMs) {
   return null;
 }
 
+/** Same probe gate as /count. Tests set MESH_PROBE_ORIGIN=false. */
+export function meshProbeDeps(env, deps = {}) {
+  if (deps && (deps.probeOrigin != null || deps.fetch)) return deps;
+  if (env && (env.MESH_PROBE_ORIGIN === false || env.MESH_PROBE_ORIGIN === "0")) {
+    return { probeOrigin: false };
+  }
+  return { fetch: globalThis.fetch, probeOrigin: true };
+}
+
 /**
- * Display rollup only. GET /v1/mesh, /status, and /nodes never enable.
- * Prefer the LIVE origin (aziel-runtime.vibelock.workers.dev) when it answers,
- * because the same-account binding can serve a stale isolate. qnm-node stays
- * local. Not a Softwares-tab product. FragGate remains the single write door.
+ * One fleet read for /count, /heartbeat, and /v1/mesh.
+ * Prefer LIVE origin GET /v1/mesh. /status is fallback only — it can lag
+ * site_live_viewers_components. Binding is fallback — it can lag the origin.
+ * cache no-store so routes cannot diverge on a cached body.
+ * GET never enables. qnm-node stays local.
  */
-export async function fetchMeshSnapshot(env, deps = {}) {
+export async function fetchPreferredMeshDoc(env, deps = {}) {
   const timeoutMs = deps.timeoutMs != null ? deps.timeoutMs : 3500;
   const hasBinding = !!(env && env.AZIEL_RUNTIME && typeof env.AZIEL_RUNTIME.fetch === "function");
   const probeOrigin = deps.probeOrigin != null ? !!deps.probeOrigin : !!deps.fetch;
   const httpFetch = deps.fetch || (probeOrigin ? globalThis.fetch : null);
 
   const bindingFetch = hasBinding
-    ? async (url) => env.AZIEL_RUNTIME.fetch(new Request(url, { method: "GET", headers: UA }))
+    ? async (url) => env.AZIEL_RUNTIME.fetch(new Request(url, {
+      method: "GET",
+      headers: UA,
+      cache: "no-store",
+    }))
     : null;
   const originFetch = probeOrigin && typeof httpFetch === "function"
     ? async (url, ms) => fetchJson(httpFetch, url, ms != null ? ms : timeoutMs)
@@ -1197,7 +1274,19 @@ export async function fetchMeshSnapshot(env, deps = {}) {
   const binding = found.find((row) => row.source === "service-binding" && row.hit);
   const chosen = origin || binding;
   if (chosen && chosen.hit && chosen.hit.body) {
-    return parseMeshDoc({ ...chosen.hit.body, source: chosen.source });
+    return { source: chosen.source, url: chosen.hit.url, body: chosen.hit.body };
+  }
+  return null;
+}
+
+/**
+ * Display rollup only. Same fetch as the /v1/mesh proxy (fetchPreferredMeshDoc).
+ * GET /v1/mesh, /status, and /nodes never enable.
+ */
+export async function fetchMeshSnapshot(env, deps = {}) {
+  const chosen = await fetchPreferredMeshDoc(env, deps);
+  if (chosen && chosen.body) {
+    return parseMeshDoc({ ...chosen.body, source: chosen.source });
   }
   return emptyMesh({ status: "unavailable", source: "fallback" });
 }
@@ -1227,8 +1316,10 @@ export function hubMeshStatusDoc(stats, path) {
     mesh: "on",
     status: enabled ? "on" : "unavailable",
     nodes: enabled ? (firstNum(mesh.nodes) ?? parsePublicNodes(mesh)) : 0,
-    live_nodes: enabled ? parsePublicLivePresence(mesh) : 0,
-    live_nodes_plane: LIVE_NODES_PLANE,
+    live_nodes: firstNum(stats && stats.live_nodes) != null
+      ? firstNum(stats && stats.live_nodes)
+      : (enabled ? parsePublicLivePresence(mesh) : 0),
+    live_nodes_plane: (mesh && mesh.live_nodes_plane) || LIVE_NODES_PLANE,
     live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
     live_nodes_sot: LIVE_NODES_SOT,
     live_nodes_note: LIVE_NODES_NOTE,

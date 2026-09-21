@@ -2481,8 +2481,8 @@ export function citeDoc(sot) {
     mesh_auto_heal: false,
     mesh_rollup: "live|locked|isolated counts only",
     nodes: "human mesh users + cited human uses",
-    live_nodes: "presence only (human mesh users + current website viewers; uses are not live)",
-    live_nodes_plane: "human-mesh-users-uses",
+    live_nodes: "one fleet total (human mesh users + site viewers on godlock.uk, azieleliab.com, and azielcorpuslibrary.net; not He Didn't Jump; not Softwares; uses are not live)",
+    live_nodes_plane: "human-mesh-users-site-viewers",
     live_nodes_source: CANON_HOST + "/v1/mesh",
     live_nodes_worker: "d7b63ac1",
     live_nodes_sot: "aziel-runtime#151 LIVE Worker d7b63ac1",
@@ -2689,6 +2689,7 @@ export function llmsDoc(sot) {
     + "Suite mesh (read-only, on): " + PUBLIC_RUNTIME + "/v1/mesh\n"
     + "Nodes: human mesh users + cited human uses from Worker /v1/mesh. Not Softwares.\n"
     + "Live Nodes: presence only (human mesh users + current website viewers). Uses are not live presence.\n"
+    + "Live Nodes fleet: one total from GET /v1/mesh live_nodes (plane human-mesh-users-site-viewers) — godlock.uk + azieleliab.com + azielcorpuslibrary.net. Not He Didn't Jump. Not Softwares. Same number as /count.\n"
     + "Live Nodes SoT: aziel-runtime#151 LIVE Worker d7b63ac1.\n"
     + "QNM-BUILD-1.0 presence: live|locked|isolated counts only. software_nodes stay on the Softwares catalog. No Node Gate. No auto-heal.\n"
     + "SPLIT THE WIRES. Tip-only 0.5–1s tick. Pull-only payload. 1s and 777s never share a socket.\n"

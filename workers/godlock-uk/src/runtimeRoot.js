@@ -22,10 +22,13 @@ import {
 } from "./runtimeUses.js";
 import {
   alignPublicMeshSurface,
+  fetchPreferredMeshDoc,
+  isFleetMeshReadPath,
   isMeshDisablePath,
   isMeshRehealPath,
   isPublicMeshJsonPath,
   meshDisableRefused,
+  meshProbeDeps,
   rehealRefused,
 } from "./mesh.js";
 
@@ -318,8 +321,16 @@ function decorateHeaders(res) {
   return headers;
 }
 
+function stampFleetCache(headers, request) {
+  if (!isFleetMeshReadPath(new URL(request.url).pathname)) return;
+  headers.set("Cache-Control", "no-store");
+  headers.set("CDN-Cache-Control", "no-store");
+  headers.set("Pragma", "no-cache");
+}
+
 async function finishProxy(request, res) {
   const headers = decorateHeaders(res);
+  stampFleetCache(headers, request);
   const ct = headers.get("Content-Type") || "";
   if (request.method === "HEAD") {
     await cancelBody(res);
@@ -381,6 +392,24 @@ export async function handleRuntimeRoot(request, url, env, ctx) {
   if (shouldCountRuntimeUse(request.method, destPath)) {
     const counted = scheduleRuntimeUse(ctx, () => recordRuntimeUse(env, request.method, destPath));
     if (counted) await counted;
+  }
+  if ((request.method === "GET" || request.method === "HEAD") && isFleetMeshReadPath(destPath)) {
+    try {
+      const hit = await fetchPreferredMeshDoc(env, meshProbeDeps(env));
+      if (hit && hit.body) {
+        const stamped = { ...hit.body, source: hit.source || hit.body.source };
+        if (destPath === "/v1/mesh/status" && stamped.op == null) stamped.op = "status";
+        const fleetRes = new Response(JSON.stringify(stamped), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            "Cache-Control": "no-store",
+            "CDN-Cache-Control": "no-store",
+          },
+        });
+        return finishProxy(request, fleetRes);
+      }
+    } catch { /* same proxyOrigin fallback as a missed fleet read */ }
   }
   let res;
   try {

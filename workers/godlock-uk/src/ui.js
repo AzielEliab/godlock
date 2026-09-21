@@ -294,22 +294,30 @@ ${ecosystemNav()}
     });
   }
   function isCount(v){return typeof v==="number"&&isFinite(v)&&v>=0;}
+  function componentMap(obj){
+    if(!obj||typeof obj!=="object"||Object.prototype.toString.call(obj)!=="[object Object]")return false;
+    for(var k in obj){
+      if(Object.prototype.hasOwnProperty.call(obj,k)&&isCount(obj[k]))return true;
+    }
+    return false;
+  }
   function splitNodes(j){
     j=j||{};
     var m=j.mesh&&typeof j.mesh==="object"?j.mesh:{};
     var named=j.nodes!=null?j.nodes:m.nodes;
-    var live=j.live_nodes!=null?j.live_nodes:m.live_nodes;
+    var live=isCount(j.live_nodes)?j.live_nodes:(isCount(m.live_nodes)?m.live_nodes:null);
     var users=j.human_mesh_users!=null?j.human_mesh_users:m.human_mesh_users;
     var uses=j.human_uses!=null?j.human_uses:m.human_uses;
+    var plane=String(j.live_nodes_plane||m.live_nodes_plane||"");
+    var included=j.live_nodes_align==="mesh"||m.live_nodes_align==="mesh"||j.includes_site_viewers===true||m.includes_site_viewers===true||j.includes_site_live_nodes===true||m.includes_site_live_nodes===true||/site[-_ ]?(viewers?|live)/i.test(plane)||((componentMap(j.site_live_viewers_components)||componentMap(m.site_live_viewers_components))&&live!=null);
     var n,l;
-    if(isCount(named)){
-      n=Math.floor(named);
-      l=isCount(live)?Math.floor(live):(isCount(users)?Math.floor(users):0);
-    }else{
-      if(isCount(users)||isCount(uses)) n=(isCount(users)?Math.floor(users):0)+(isCount(uses)?Math.floor(uses):0);
-      else n=isCount(live)?Math.floor(live):0;
-      l=isCount(users)?Math.floor(users):0;
-    }
+    if(isCount(named))n=Math.floor(named);
+    else if(isCount(users)||isCount(uses))n=(isCount(users)?Math.floor(users):0)+(isCount(uses)?Math.floor(uses):0);
+    else n=live!=null?Math.floor(live):0;
+    if(included)l=live!=null?Math.floor(live):0;
+    else if(j.live_nodes_align&&live!=null)l=Math.floor(live);
+    else if(isCount(named)&&live!=null)l=Math.floor(live);
+    else l=isCount(users)?Math.floor(users):0;
     return {nodes:n,live:l};
   }
   function applyStats(j){
@@ -436,7 +444,7 @@ export function statsGrid(stats, { receiptsFallback } = {}) {
   const downloads = s.downloads != null ? s.downloads : 0;
   const receipts = s.receipts != null ? s.receipts : (receiptsFallback != null ? receiptsFallback : 0);
   return `<div class="stats">
-  <div class="stat" title="Nodes = human mesh users + cited human uses. Live Nodes = mesh presence + current website viewers. Not Softwares. Not bots."><b id="stat-nodes-live"><span id="Nodes">${esc(split.nodes)}</span>/<span id="LiveNodes">${esc(split.live)}</span></b><span>Nodes / Live Nodes</span></div>
+  <div class="stat" title="Nodes = human mesh users + cited human uses. Live Nodes = one fleet total: human mesh users + site viewers on godlock.uk, azieleliab.com, and azielcorpuslibrary.net. Not He Didn't Jump. Not Softwares. Not bots."><b id="stat-nodes-live"><span id="Nodes">${esc(split.nodes)}</span>/<span id="LiveNodes">${esc(split.live)}</span></b><span>Nodes / Live Nodes</span></div>
   <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
   <div class="stat"><b id="stat-uses">${esc(uses)}</b><span>Uses</span></div>
   <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>

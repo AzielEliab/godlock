@@ -3,7 +3,7 @@
  * One input. Locked protocol. Append-only hash-chained receipts.
  * Not a forum, not a tunnel. Suite mesh is QNM-BUILD-1.0 (read-only, on):
  * Nodes = human mesh users + cited human uses from /v1/mesh.
- * Live Nodes = presence only (never uses-as-live, never software_nodes).
+ * Live Nodes = mesh presence + current website viewers (never uses-as-live, never software_nodes).
  * Presence live|locked|isolated counts only.
  * Softwares catalog stays separate. No Node Gate. No auto-heal.
  * SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL bind refuse/status even when mesh
@@ -56,12 +56,15 @@ import {
   liveNodeCountFromDb,
   usesCountFromLedger,
   presenceCutoff,
+  isHumanSiteViewer,
+  isSitePresencePath,
 } from "./presence.js";
 import { hideInternalDetermination, publicSafeFields } from "./publicCopy.js";
 import {
   fetchMeshSnapshot,
   alignLiveNodes,
   alignNodes,
+  liveNodesAlignMode,
   publicMesh,
   meshOpsDoc,
   isOriginMeshReadPath,
@@ -384,6 +387,7 @@ async function gatherStats(env, { wrote, visiting } = {}) {
   return {
     nodes,
     live_nodes: live,
+    live_nodes_align: liveNodesAlignMode({ siteLiveNodes: siteNodes, mesh }),
     site_live_nodes: siteNodes,
     mesh,
     views,
@@ -616,9 +620,19 @@ export default {
         const guard = await checkSubmitGuard(env, request, parsedSubmit.text);
         if (!guard.ok) return submitRefuseResponse(request, url, guard);
       }
-      const hb = await touchHeartbeat(env, request, cookieId || newId());
-      const nodeId = hb.id;
-      const wrote = hb.wrote;
+      const humanViewer = isHumanSiteViewer(request);
+      const presencePath = isSitePresencePath(path, request.method, {
+        jsonGet: wantsJson(request, url),
+      });
+      const countPresence = humanViewer && presencePath;
+      const sessionSeed = cookieId || newId();
+      let nodeId = sessionIdFrom(request, sessionSeed);
+      let wrote = false;
+      if (countPresence) {
+        const hb = await touchHeartbeat(env, request, sessionSeed);
+        nodeId = hb.id;
+        wrote = hb.wrote;
+      }
 
       if (path === "/internal" || path.startsWith("/internal/")) {
         return html(page("Not found", `<div class="card"><h2>Not found</h2><p><a href="/">Back</a></p></div>`, { path, kind: "notfound" }), { status: 404 });
@@ -729,6 +743,7 @@ export default {
           ok: true,
           nodes: stats.nodes,
           live_nodes: stats.live_nodes,
+          live_nodes_align: stats.live_nodes_align,
           site_live_nodes: stats.site_live_nodes,
           mesh_enabled: !!(stats.mesh && stats.mesh.enabled),
           mesh_nodes: stats.mesh && stats.mesh.enabled ? (stats.mesh.nodes || 0) : 0,
@@ -988,8 +1003,8 @@ export default {
       }
 
       if (path === "/" && request.method === "GET") {
-        await metaBump(env, "views");
-        const stats = await gatherStats(env, { wrote, visiting: true });
+        if (countPresence) await metaBump(env, "views");
+        const stats = await gatherStats(env, { wrote, visiting: countPresence });
         const rid = url.searchParams.get("r") || "";
         let latest = null;
         if (rid) {

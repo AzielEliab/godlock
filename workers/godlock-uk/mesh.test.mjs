@@ -28,6 +28,8 @@ import {
   publicMesh,
   meshStatusLine,
   alignLiveNodes,
+  meshIncludesSiteViewers,
+  liveNodesAlignMode,
   alignNodes,
   alignPublicMeshSurface,
   compactMeshNode,
@@ -311,9 +313,9 @@ describe("alignLiveNodes", () => {
     assert.equal(alignLiveNodes({ siteLiveNodes: 0, mesh: { enabled: false, live_nodes: 9 }, visiting: true }), 0);
   });
 
-  it("shows Worker Nodes (users+uses) and Live Nodes (presence) when mesh is enabled and never auto-heals a visiting floor", () => {
+  it("shows Worker Nodes (users+uses) and Live Nodes (presence + site viewers until runtime aggregates)", () => {
     assert.equal(alignNodes({ siteLiveNodes: 1, mesh: { enabled: true, live_nodes: 6 }, visiting: false }), 6);
-    assert.equal(alignLiveNodes({ siteLiveNodes: 1, mesh: { enabled: true, live_nodes: 6 }, visiting: false }), 0);
+    assert.equal(alignLiveNodes({ siteLiveNodes: 1, mesh: { enabled: true, live_nodes: 6 }, visiting: false }), 1);
     assert.equal(alignLiveNodes({ siteLiveNodes: 0, mesh: { enabled: true, live_nodes: 0 }, visiting: true }), 0);
     assert.equal(alignNodes({
       siteLiveNodes: 9,
@@ -324,7 +326,7 @@ describe("alignLiveNodes", () => {
       siteLiveNodes: 9,
       mesh: { enabled: true, rollup: { live: 2, locked: 4, isolated: 1 } },
       visiting: true,
-    }), 0);
+    }), 9);
   });
 
   it("never treats software_nodes or all-planes rollup.live as Nodes or Live Nodes", () => {
@@ -361,7 +363,7 @@ describe("alignLiveNodes", () => {
           software: { live: 41, locked: 0, isolated: 0 },
         },
       },
-    }), 1);
+    }), 10);
     assert.equal(parsePublicLiveNodes({
       software_nodes: 41,
       rollup: { live: 41, locked: 0, isolated: 0, software: { live: 41 } },
@@ -436,7 +438,9 @@ describe("Nodes / Live Nodes dual pills (aziel-runtime#151)", () => {
     assert.equal(meshStatusLine(pub), "Suite mesh: on · live 1 · locked 0 · isolated 0");
     assert.doesNotMatch(meshStatusLine(pub), /live 3/);
     assert.equal(alignNodes({ siteLiveNodes: 8, mesh: pub }), 3);
-    assert.equal(alignLiveNodes({ siteLiveNodes: 8, mesh: pub }), 1);
+    assert.equal(alignLiveNodes({ siteLiveNodes: 8, mesh: pub }), 9);
+    assert.equal(liveNodesAlignMode({ mesh: pub }), "mesh+site");
+    assert.equal(meshIncludesSiteViewers(pub), false);
   });
 
   it("reads LIVE Worker d7b63ac1: nodes is human users+uses; live_nodes is presence 0, not software_nodes 41", () => {
@@ -479,10 +483,33 @@ describe("Nodes / Live Nodes dual pills (aziel-runtime#151)", () => {
     assert.equal(live.live_nodes_worker, "d7b63ac1");
     assert.deepEqual(live.rollup, { live: 41, locked: 0, isolated: 0 });
     assert.equal(alignNodes({ siteLiveNodes: 2, mesh: live }), 27206);
-    assert.equal(alignLiveNodes({ siteLiveNodes: 2, mesh: live }), 0);
+    assert.equal(alignLiveNodes({ siteLiveNodes: 2, mesh: live }), 2);
     assert.equal(meshStatusLine(publicMesh(live)), "Suite mesh: on · live 0 · locked 0 · isolated 0");
     assert.equal(formatNodesLive(live.nodes, live.live_nodes), "27206/0");
     assert.notEqual(live.nodes, live.software_nodes);
+  });
+
+  it("uses mesh live_nodes as SSoT once runtime includes site viewers", () => {
+    const aggregated = {
+      enabled: true,
+      nodes: 12,
+      live_nodes: 4,
+      human_mesh_users: 1,
+      includes_site_viewers: true,
+      live_nodes_components: { human_mesh_users: 1, site_live_nodes: 3 },
+    };
+    assert.equal(meshIncludesSiteViewers(aggregated), true);
+    assert.equal(alignLiveNodes({ siteLiveNodes: 3, mesh: aggregated }), 4);
+    assert.equal(liveNodesAlignMode({ mesh: aggregated }), "mesh");
+    const byComponent = {
+      enabled: true,
+      nodes: 12,
+      live_nodes: 3,
+      human_mesh_users: 0,
+      live_nodes_components: { site_live_nodes: 3, human_mesh_users: 0 },
+    };
+    assert.equal(meshIncludesSiteViewers(byComponent), true);
+    assert.equal(alignLiveNodes({ siteLiveNodes: 9, mesh: byComponent }), 3);
   });
 
   it("prefers post-break numeric nodes + presence live_nodes", () => {
@@ -799,10 +826,11 @@ describe("GodLock.uk mesh routes", () => {
       },
     });
     const html = await (await worker.fetch(new Request("https://godlock.uk/"), env)).text();
-    assert.match(html, /id="stat-nodes-live">3\/1</);
+    assert.match(html, /id="Nodes">3</);
+    assert.match(html, /id="LiveNodes">1</);
     assert.match(html, /Nodes \/ Live Nodes/);
     assert.match(html, /id="stat-uses"/);
-    assert.match(html, /title="Nodes = human mesh users \+ cited human uses\. Live Nodes = presence only\. Not Softwares\."/);
+    assert.match(html, /title="Nodes = human mesh users \+ cited human uses\. Live Nodes = mesh presence \+ current website viewers\. Not Softwares\. Not bots\."/);
     assert.match(html, /Suite mesh: on · live 1 · locked 0 · isolated 0/);
     assert.doesNotMatch(html, /Suite mesh: on · live 3 /);
     assert.doesNotMatch(html, /id="stat-nodes-live">41/);
@@ -818,6 +846,46 @@ describe("GodLock.uk mesh routes", () => {
     assert.equal(count.mesh_nodes, 3);
     assert.equal(count.mesh_live_nodes, 1);
     assert.equal(count.software_nodes, 41);
+  });
+
+  it("adds a human site viewer to LiveNodes# and ignores bots", async () => {
+    function env() {
+      return mockDbEnv({
+        AZIEL_RUNTIME: {
+          async fetch(req) {
+            const u = String(req && req.url);
+            if (u.includes("/v1/mesh")) {
+              return new Response(JSON.stringify({
+                enabled: true,
+                nodes: 12,
+                live_nodes: 0,
+                human_mesh_users: 0,
+                human_uses: 12,
+              }), { headers: { "Content-Type": "application/json" } });
+            }
+            return new Response(JSON.stringify({ error: "not found" }), { status: 404 });
+          },
+        },
+      });
+    }
+    const human = await (await worker.fetch(new Request("https://godlock.uk/", {
+      headers: { "User-Agent": "Mozilla/5.0 (Macintosh) Chrome/120" },
+    }), env())).text();
+    assert.match(human, /id="Nodes">12</);
+    assert.match(human, /id="LiveNodes">1</);
+    const bot = await (await worker.fetch(new Request("https://godlock.uk/", {
+      headers: { "User-Agent": "Googlebot/2.1" },
+    }), env())).text();
+    assert.match(bot, /id="Nodes">12</);
+    assert.match(bot, /id="LiveNodes">0</);
+    const count = await (await worker.fetch(new Request("https://godlock.uk/count", {
+      headers: { "User-Agent": "Mozilla/5.0 (Macintosh) Chrome/120" },
+    }), env())).json();
+    assert.equal(count.nodes, 12);
+    assert.equal(count.live_nodes, 0);
+    assert.equal(count.site_live_nodes, 0);
+    assert.equal(count.live_nodes_align, "mesh+site");
+    assert.equal(count.mesh_live_nodes, 0);
   });
 
   it("does not auto-heal an empty enabled mesh to a visiting floor of 1", async () => {
@@ -837,7 +905,8 @@ describe("GodLock.uk mesh routes", () => {
     });
     const stats = await (await worker.fetch(new Request("https://godlock.uk/"), env));
     const html = await stats.text();
-    assert.match(html, /id="stat-nodes-live">0\/0</);
+    assert.match(html, /id="Nodes">0</);
+    assert.match(html, /id="LiveNodes">0</);
     assert.match(html, /Suite mesh: on · live 0 · locked 2 · isolated 1/);
     const visibleMesh = html.replace(/<script[\s\S]*?<\/script>/gi, "");
     assert.doesNotMatch(visibleMesh, /SPLIT THE WIRES|COLD-COPY SURVIVAL|REHEAL refuse|Public HTTPS engine/);

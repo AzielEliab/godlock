@@ -24,7 +24,6 @@ import {
   meshStatusLine,
   parsePublicNodes,
   parsePublicLivePresence,
-  formatNodesLive,
 } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import { receiptScoreDelta } from "./engine.js";
@@ -322,7 +321,11 @@ ${ecosystemNav()}
     var dl=document.getElementById("stat-downloads");
     var recEl=document.getElementById("stat-receipts");
     var meshEl=document.getElementById("mesh-status");
-    if(pill)pill.textContent=split.nodes+"/"+split.live;
+    var nodesEl=document.getElementById("Nodes");
+    var liveEl=document.getElementById("LiveNodes");
+    if(nodesEl)nodesEl.textContent=String(split.nodes);
+    if(liveEl)liveEl.textContent=String(split.live);
+    if(pill&&!nodesEl&&!liveEl)pill.textContent=split.nodes+"/"+split.live;
     if(usesEl&&j.uses!=null)usesEl.textContent=String(j.uses);
     if(views&&j.views!=null)views.textContent=String(j.views);
     if(dl&&j.downloads!=null)dl.textContent=String(j.downloads);
@@ -413,22 +416,27 @@ export function nodesLiveFromStats(stats) {
     human_mesh_users: s.human_mesh_users != null ? s.human_mesh_users : mesh.human_mesh_users,
     human_uses: s.human_uses != null ? s.human_uses : mesh.human_uses,
   };
+  const aligned = Number(s.live_nodes);
   return {
     nodes: parsePublicNodes(src),
-    live: parsePublicLivePresence(src),
+    // gatherStats.live_nodes is the LiveNodes# SSoT (mesh presence + site viewers
+    // until runtime aggregates). Do not re-parse through parsePublicLivePresence
+    // or we drop site_live_nodes.
+    live: Number.isFinite(aligned) && aligned >= 0
+      ? Math.floor(aligned)
+      : parsePublicLivePresence(src),
   };
 }
 
 export function statsGrid(stats, { receiptsFallback } = {}) {
   const s = stats || {};
   const split = nodesLiveFromStats(s);
-  const pill = formatNodesLive(split.nodes, split.live);
   const views = s.views != null ? s.views : 0;
   const uses = s.uses != null ? s.uses : 0;
   const downloads = s.downloads != null ? s.downloads : 0;
   const receipts = s.receipts != null ? s.receipts : (receiptsFallback != null ? receiptsFallback : 0);
   return `<div class="stats">
-  <div class="stat" title="Nodes = human mesh users + cited human uses. Live Nodes = presence only. Not Softwares."><b id="stat-nodes-live">${esc(pill)}</b><span>Nodes / Live Nodes</span></div>
+  <div class="stat" title="Nodes = human mesh users + cited human uses. Live Nodes = mesh presence + current website viewers. Not Softwares. Not bots."><b id="stat-nodes-live"><span id="Nodes">${esc(split.nodes)}</span>/<span id="LiveNodes">${esc(split.live)}</span></b><span>Nodes / Live Nodes</span></div>
   <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
   <div class="stat"><b id="stat-uses">${esc(uses)}</b><span>Uses</span></div>
   <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>
@@ -440,7 +448,7 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
   const s = stats || {};
   const score = s.current_score != null ? s.current_score : 50;
   const residual = s.residual != null ? s.residual : 50;
-  const meshLine = meshStatusLine(s.mesh);
+  const meshLine = meshStatusLine(s.mesh, { live_nodes: s.live_nodes });
   const err = error
     ? `<p class="bad" id="challenge-error">${esc(error)}</p>`
     : `<p class="bad" id="challenge-error" hidden></p>`;

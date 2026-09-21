@@ -176,9 +176,11 @@ export const LIVE_NODES_FLEET_HOSTS = Object.freeze([
 ]);
 export const LIVE_NODES_FLEET_PLANE = "human-mesh-users-site-viewers";
 export const LIVE_NODES_NOTE =
-  "Public Live Nodes are presence only — one fleet total from aziel-runtime GET /v1/mesh live_nodes (plane human-mesh-users-site-viewers): human_mesh_users plus current website viewers on godlock.uk, azieleliab.com, and azielcorpuslibrary.net. Not He Didn't Jump. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. When that live_nodes already includes site viewers, display the fleet value and do not add site_live_nodes again. /count, /heartbeat, and /v1/mesh share that GET /v1/mesh read — /v1/mesh/status can lag site_live_viewers_components. Cited human uses are not live presence and must not be labeled live. Isolated humans stay on isolated_nodes. Live Nodes does not invent users or bots. Zero is honest when no humans are present.";
+  "Public Live Nodes are presence only — one fleet total from aziel-runtime GET /v1/mesh live_nodes (or rollup.mesh; plane human-mesh-users-site-viewers): human_mesh_users plus current website viewers on godlock.uk, azieleliab.com, and azielcorpuslibrary.net. Not He Didn't Jump. Not Softwares catalog length. Not downloaded Softwares instances. Not software_nodes. Not rollup.live. Not active_nodes. software_nodes is the {slug}-worker roster and never feeds this pill. rollup.live is that Softwares roster. When that live_nodes already includes site viewers, display the fleet value and do not add site_live_nodes again. /count, /heartbeat, and /v1/mesh share that GET /v1/mesh read — /v1/mesh/status can lag site_live_viewers_components. Cited human uses are not live presence and must not be labeled live. Isolated humans stay on isolated_nodes. Live Nodes does not invent users or bots. Zero is honest when no humans are present.";
 export const SOFTWARE_NODES_NOTE =
-  "software_nodes / rollup.software count Softwares product Workers ({slug}-worker) from suite-presence fan-out. Softwares catalog stays separate. They must never feed public Nodes or Live Nodes.";
+  "software_nodes / rollup.software / rollup.live / active_nodes count Softwares product Workers ({slug}-worker) from suite-presence fan-out. rollup.live is that Softwares roster, not public Live Nodes. Softwares catalog stays separate. They must never feed public Nodes or Live Nodes.";
+export const ROLLUP_LIVE_NOTE =
+  "rollup.live is the all-planes Softwares roster (same count as software_nodes and active_nodes). It is not public Live Nodes. Public Live Nodes are live_nodes and rollup.mesh. Do not paint rollup.live as Live Nodes. Live Nodes does not invent users.";
 
 export const MESH_NOTE =
   "QNM-BUILD-1.0. QNS-CD-1.0 photon QNS1 packet transfer (hub cite / Worker mesh cross-map only; local qnsd in qnm-node; no public proxy). Suite mesh is on (read-only suite presence). Public Nodes are human mesh users + cited human uses from Worker /v1/mesh. Public Live Nodes are presence only — uses are not live. Not Softwares, not mesh-size software_nodes. Presence stay live|locked|isolated counts only. No Node Gate. No auto-heal. Not an anonymity network. "
@@ -597,6 +599,16 @@ export function alignPublicMeshSurface(doc) {
   if (out.mesh && typeof out.mesh === "object" && !Array.isArray(out.mesh)) {
     out.mesh = alignPublicMeshSurface(out.mesh);
   }
+  out.rollup_live_note = ROLLUP_LIVE_NOTE;
+  if (firstNum(out.live_nodes) == null) {
+    const pinned = fleetLiveCount(out);
+    const named = numericNodesCount(out.nodes);
+    const plane = String(out.live_nodes_plane || "");
+    const viewers = /site[-_ ]?(viewers?|live)/i.test(plane)
+      || out.includes_site_viewers === true
+      || out.includes_site_live_nodes === true;
+    if (pinned != null && (named != null || viewers)) out.live_nodes = pinned;
+  }
   return stampMeshLaw(out);
 }
 
@@ -693,7 +705,9 @@ export function homepageSplitNodes(payload) {
   const named = src.nodes != null ? src.nodes : m.nodes;
   const users = firstNum(src.human_mesh_users != null ? src.human_mesh_users : m.human_mesh_users);
   const uses = firstNum(src.human_uses != null ? src.human_uses : m.human_uses);
-  const fleet = firstNum(src.live_nodes, m.live_nodes);
+  const srcRoll = src.rollup && typeof src.rollup === "object" && !Array.isArray(src.rollup) ? src.rollup : {};
+  const meshRoll = m.rollup && typeof m.rollup === "object" && !Array.isArray(m.rollup) ? m.rollup : {};
+  const fleet = firstNum(src.live_nodes, m.live_nodes, srcRoll.mesh, meshRoll.mesh);
   const plane = String(src.live_nodes_plane || m.live_nodes_plane || "");
   const included = src.live_nodes_align === "mesh"
     || m.live_nodes_align === "mesh"
@@ -840,16 +854,31 @@ export function parsePublicNodes(inner, listedLive) {
 }
 
 /**
- * Public Live Nodes: presence only. Prefer post-break `live_nodes` only when a
- * numeric `nodes` count is also present; otherwise `human_mesh_users`. Often 0.
+ * Fleet total for the public Live Nodes pill.
+ * `live_nodes`, else `rollup.mesh`. Never `rollup.live`, `software_nodes`, or `active_nodes`.
+ */
+export function fleetLiveCount(inner) {
+  const src = inner && typeof inner === "object" && !Array.isArray(inner) ? inner : {};
+  const r = rollupObject(src);
+  return firstNum(src.live_nodes, r.mesh);
+}
+
+/**
+ * Public Live Nodes: presence only.
+ * Post-break: numeric `nodes` plus `live_nodes` / `rollup.mesh`.
+ * Also accept that fleet when the plane already includes site viewers.
+ * Otherwise `human_mesh_users` (often 0). Never rollup.live / software_nodes / active_nodes.
  */
 export function parsePublicLivePresence(inner) {
   const src = inner && typeof inner === "object" && !Array.isArray(inner) ? inner : {};
+  const fleet = fleetLiveCount(src);
   const named = numericNodesCount(src.nodes);
-  if (named != null) {
-    const post = firstNum(src.live_nodes);
-    if (post != null) return post;
-  }
+  if (named != null && fleet != null) return fleet;
+  const plane = String(src.live_nodes_plane || "");
+  const viewers = /site[-_ ]?(viewers?|live)/i.test(plane)
+    || src.includes_site_viewers === true
+    || src.includes_site_live_nodes === true;
+  if (viewers && fleet != null) return fleet;
   return firstNum(src.human_mesh_users) ?? 0;
 }
 
@@ -859,12 +888,15 @@ export function formatNodesLive(nodes, live) {
   return n + "/" + l;
 }
 
-/** Presence buckets (all planes). Not the public Live Nodes pill after aziel-runtime#151. */
+/**
+ * All-planes presence buckets. `live` here is rollup.live (Softwares / active_nodes),
+ * not the public Live Nodes pill. The pill is live_nodes / rollup.mesh.
+ */
 export function meshRollup(mesh) {
   const m = mesh && typeof mesh === "object" ? mesh : {};
   const r = rollupObject(m);
   return {
-    live: firstNum(r.live, m.live, r.live_nodes) ?? 0,
+    live: firstNum(r.live, m.live) ?? 0,
     locked: firstNum(r.locked, m.locked_nodes, m.locked) ?? 0,
     isolated: firstNum(r.isolated, m.isolated_nodes, m.isolated) ?? 0,
   };
@@ -1061,6 +1093,7 @@ export function publicMesh(mesh) {
     human_uses_complete: m.human_uses_complete === true,
     software_nodes: enabled && software != null ? software : 0,
     software_nodes_note: SOFTWARE_NODES_NOTE,
+    rollup_live_note: ROLLUP_LIVE_NOTE,
     rollup,
     status: enabled ? "on" : "unavailable",
     source: m.source || "fallback",
@@ -1325,6 +1358,7 @@ export function hubMeshStatusDoc(stats, path) {
     live_nodes_note: LIVE_NODES_NOTE,
     software_nodes: enabled ? (firstNum(mesh.software_nodes) ?? 0) : 0,
     software_nodes_note: SOFTWARE_NODES_NOTE,
+    rollup_live_note: ROLLUP_LIVE_NOTE,
     locked_nodes: enabled ? rollup.locked : 0,
     isolated_nodes: enabled ? rollup.isolated : 0,
     rollup,
@@ -1368,7 +1402,8 @@ export function meshOpsDoc() {
     mcp: PUBLIC_RUNTIME + "/mcp",
     fraggate: PUBLIC_RUNTIME + "/v1/fraggate/call",
     ops: MESH_OPS.slice(),
-    rollup_shape: "nodes = human mesh users + cited human uses; live_nodes = presence only; presence live|locked|isolated; software_nodes separate",
+    rollup_shape: "nodes = human mesh users + cited human uses; live_nodes = presence only (live_nodes / rollup.mesh); rollup.live is Softwares (software_nodes / active_nodes), not Live Nodes; software_nodes separate",
+    rollup_live_note: ROLLUP_LIVE_NOTE,
     live_nodes_plane: LIVE_NODES_PLANE,
     live_nodes_worker: LIVE_NODES_WORKER_VERSION_ID,
     live_nodes_sot: LIVE_NODES_SOT,

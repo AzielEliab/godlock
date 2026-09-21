@@ -537,6 +537,43 @@ describe("Nodes / Live Nodes dual pills (aziel-runtime#151)", () => {
     assert.equal(parsePublicLivePresence({ nodes: 28017, live_nodes: 0, human_mesh_users: 0, human_uses: 28017 }), 0);
     assert.equal(parsePublicNodes({ human_mesh_users: 2, human_uses: 9 }), 11);
     assert.equal(parsePublicLivePresence({ human_mesh_users: 2, human_uses: 9, live_nodes: 11 }), 2);
+    assert.equal(parsePublicLivePresence({
+      nodes: 28258,
+      live_nodes: 28,
+      software_nodes: 41,
+      active_nodes: 41,
+      rollup: { live: 41, mesh: 28, active: 41 },
+    }), 28);
+    assert.equal(parsePublicLivePresence({
+      nodes: 28258,
+      software_nodes: 41,
+      active_nodes: 41,
+      rollup: { live: 41, mesh: 22 },
+      live_nodes_plane: "human-mesh-users-site-viewers",
+    }), 22);
+    assert.equal(parsePublicLivePresence({
+      nodes: 10,
+      software_nodes: 41,
+      active_nodes: 41,
+      human_mesh_users: 0,
+      rollup: { live: 41 },
+    }), 0);
+    const shaped = publicMesh(parseMeshDoc({
+      enabled: true,
+      nodes: 28258,
+      live_nodes: 28,
+      live_nodes_plane: "human-mesh-users-site-viewers",
+      human_mesh_users: 0,
+      human_uses: 28258,
+      software_nodes: 41,
+      active_nodes: 41,
+      rollup: { live: 41, locked: 0, isolated: 0, mesh: 28 },
+    }));
+    assert.equal(shaped.live_nodes, 28);
+    assert.equal(shaped.rollup.live, 41);
+    assert.match(shaped.rollup_live_note, /rollup\.live is the all-planes Softwares roster/);
+    assert.equal(meshStatusLine(shaped), "Suite mesh: on · live 28 · locked 0 · isolated 0");
+    assert.doesNotMatch(meshStatusLine(shaped), /live 41/);
     assert.equal(formatNodesLive(28017, 0), "28017/0");
   });
 });
@@ -869,6 +906,32 @@ describe("homepage fleet Live Nodes", () => {
       site_live_viewers_components: { "godlock.uk": 20 },
     });
     assert.equal(staleMap.live, 22);
+    const softwareRoster = homepageSplitNodes({
+      nodes: 28258,
+      live_nodes: 28,
+      live_nodes_plane: "human-mesh-users-site-viewers",
+      software_nodes: 41,
+      active_nodes: 41,
+      rollup: { live: 41, mesh: 28 },
+    });
+    assert.equal(softwareRoster.live, 28);
+    assert.equal(softwareRoster.nodes, 28258);
+    const meshOnly = homepageSplitNodes({
+      nodes: 28258,
+      live_nodes_plane: "human-mesh-users-site-viewers",
+      software_nodes: 41,
+      active_nodes: 41,
+      rollup: { live: 41, mesh: 22 },
+    });
+    assert.equal(meshOnly.live, 22);
+    const rosterOnly = homepageSplitNodes({
+      nodes: 28258,
+      software_nodes: 41,
+      active_nodes: 41,
+      human_mesh_users: 0,
+      rollup: { live: 41 },
+    });
+    assert.equal(rosterOnly.live, 0);
   });
 });
 
@@ -934,6 +997,51 @@ describe("GodLock.uk mesh routes", () => {
     assert.equal(count.mesh_live_nodes, 0);
     assert.equal(count.mesh_locked, 0);
     assert.equal(count.mesh_isolated, 0);
+  });
+
+  it("paints live_nodes on the pill and suite line, and leaves rollup.live as Softwares", async () => {
+    const body = {
+      enabled: true,
+      nodes: 28258,
+      live_nodes: 28,
+      live_nodes_plane: "human-mesh-users-site-viewers",
+      human_mesh_users: 0,
+      human_uses: 28258,
+      software_nodes: 41,
+      active_nodes: 41,
+      rollup: { live: 41, locked: 0, isolated: 0, mesh: 28, active: 41 },
+    };
+    const env = mockDbEnv({
+      AZIEL_RUNTIME: {
+        async fetch(req) {
+          const u = String(req && req.url);
+          if (u.includes("/v1/mesh")) {
+            return new Response(JSON.stringify(body), { headers: { "Content-Type": "application/json" } });
+          }
+          return new Response(JSON.stringify({ error: "not found" }), { status: 404 });
+        },
+      },
+    });
+    const html = await (await worker.fetch(new Request("https://godlock.uk/"), env)).text();
+    assert.match(html, /id="LiveNodes">28</);
+    assert.match(html, /Suite mesh: on · live 28 · locked 0 · isolated 0/);
+    assert.doesNotMatch(html, /id="LiveNodes">41</);
+    const visible = html.replace(/<script[\s\S]*?<\/script>/gi, "");
+    assert.doesNotMatch(visible, /live 41/);
+    const count = await (await worker.fetch(new Request("https://godlock.uk/count"), env)).json();
+    assert.equal(count.live_nodes, 28);
+    assert.equal(count.software_nodes, 41);
+    assert.notEqual(count.live_nodes, count.software_nodes);
+    const mesh = await (await worker.fetch(new Request("https://godlock.uk/v1/mesh"), env)).json();
+    assert.equal(mesh.live_nodes, count.live_nodes);
+    assert.equal(mesh.rollup.live, 41);
+    assert.equal(mesh.rollup.mesh, 28);
+    assert.equal(mesh.active_nodes, 41);
+    assert.match(mesh.rollup_live_note, /not public Live Nodes/);
+    const beat = await (await worker.fetch(new Request("https://godlock.uk/heartbeat", { method: "POST" }), env)).json();
+    assert.equal(beat.live_nodes, 28);
+    assert.equal(beat.mesh.rollup.live, 41);
+    assert.equal(homepageSplitNodes(beat).live, 28);
   });
 
   it("aligns homepage Nodes/Live Nodes dual pills and keeps Softwares off those pills", async () => {

@@ -305,7 +305,9 @@ ${ecosystemNav()}
     j=j||{};
     var m=j.mesh&&typeof j.mesh==="object"?j.mesh:{};
     var named=j.nodes!=null?j.nodes:m.nodes;
-    var live=isCount(j.live_nodes)?j.live_nodes:(isCount(m.live_nodes)?m.live_nodes:null);
+    var roll=j.rollup&&typeof j.rollup==="object"?j.rollup:{};
+    var mroll=m.rollup&&typeof m.rollup==="object"?m.rollup:{};
+    var live=isCount(j.live_nodes)?j.live_nodes:(isCount(m.live_nodes)?m.live_nodes:(isCount(roll.mesh)?roll.mesh:(isCount(mroll.mesh)?mroll.mesh:null)));
     var users=j.human_mesh_users!=null?j.human_mesh_users:m.human_mesh_users;
     var uses=j.human_uses!=null?j.human_uses:m.human_uses;
     var plane=String(j.live_nodes_plane||m.live_nodes_plane||"");
@@ -347,6 +349,7 @@ ${ecosystemNav()}
       var r=j.mesh.rollup||{};
       var locked=r.locked!=null?r.locked:0;
       var isolated=r.isolated!=null?r.isolated:0;
+      /* r.live is Softwares (software_nodes / active_nodes), not Live Nodes. */
       meshEl.textContent=on
         ?("Suite mesh: on · live "+split.live+" · locked "+locked+" · isolated "+isolated)
         :(j.mesh.status==="unavailable"

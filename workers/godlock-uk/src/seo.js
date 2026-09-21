@@ -2472,6 +2472,8 @@ export function citeDoc(sot) {
     live_nodes: "human mesh users + cited human uses",
     live_nodes_plane: "human-mesh-users-uses",
     live_nodes_source: CANON_HOST + "/v1/mesh",
+    live_nodes_worker: "d7b63ac1",
+    live_nodes_sot: "aziel-runtime#151 LIVE Worker d7b63ac1",
     software_nodes: "Softwares {slug}-worker roster (never Live Nodes)",
     anon_broadcast: ANON_BROADCAST,
     anon_broadcast_note: "Local communique style tool. Cite " + ANON_BROADCAST + ". No ffmpeg farm on this Worker.",
@@ -2674,6 +2676,7 @@ export function llmsDoc(sot) {
     + "MCP discovery: " + CANON_HOST + "/.well-known/mcp.json\n"
     + "Suite mesh (read-only, on): " + PUBLIC_RUNTIME + "/v1/mesh\n"
     + "Live Nodes: human mesh users + cited human uses from Worker /v1/mesh. Not Softwares.\n"
+    + "Live Nodes SoT: aziel-runtime#151 LIVE Worker d7b63ac1.\n"
     + "QNM-BUILD-1.0 presence: live|locked|isolated counts only. software_nodes stay on the Softwares catalog. No Node Gate. No auto-heal.\n"
     + "SPLIT THE WIRES. Tip-only 0.5–1s tick. Pull-only payload. 1s and 777s never share a socket.\n"
     + "Phoenix is local only. Die-with-pull does not bring godlock.uk back.\n"

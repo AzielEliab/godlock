@@ -32,6 +32,8 @@ import {
   compactMeshNode,
   parsePublicLiveNodes,
   LIVE_NODES_PLANE,
+  LIVE_NODES_WORKER_VERSION_ID,
+  LIVE_NODES_SOT,
   LIVE_NODES_NOTE,
   SOFTWARE_NODES_NOTE,
   isSoftwareWorkerNodeId,
@@ -183,6 +185,8 @@ describe("mesh contract", () => {
     assert.match(ops.rollup_shape, /human mesh users \+ cited human uses/);
     assert.match(ops.rollup_shape, /software_nodes separate/);
     assert.equal(ops.live_nodes_plane, "human-mesh-users-uses");
+    assert.equal(ops.live_nodes_worker, "d7b63ac1");
+    assert.equal(ops.live_nodes_sot, "aziel-runtime#151 LIVE Worker d7b63ac1");
     assert.match(ops.live_nodes_note, /human mesh users/);
     assert.match(ops.software_nodes_note, /never feed public Live Nodes/);
     assert.equal(ops.anon_broadcast_publish_path, false);
@@ -337,6 +341,8 @@ describe("alignLiveNodes", () => {
 describe("Live Nodes human users+uses (aziel-runtime#151)", () => {
   it("reads Worker live_nodes / rollup.mesh and keeps Softwares on software_nodes", () => {
     assert.equal(LIVE_NODES_PLANE, "human-mesh-users-uses");
+    assert.equal(LIVE_NODES_WORKER_VERSION_ID, "d7b63ac1");
+    assert.equal(LIVE_NODES_SOT, "aziel-runtime#151 LIVE Worker d7b63ac1");
     assert.match(LIVE_NODES_NOTE, /human mesh users/);
     assert.match(LIVE_NODES_NOTE, /Not software_nodes/);
     assert.match(SOFTWARE_NODES_NOTE, /never feed public Live Nodes/);
@@ -386,6 +392,49 @@ describe("Live Nodes human users+uses (aziel-runtime#151)", () => {
     assert.match(pub.live_nodes_note, /human mesh users/);
     assert.equal(meshStatusLine(pub), "Suite mesh: on · live 3 · locked 0 · isolated 0");
     assert.equal(alignLiveNodes({ siteLiveNodes: 8, mesh: pub }), 3);
+  });
+
+  it("reads LIVE Worker d7b63ac1: live_nodes is human users+uses, not software_nodes 41", () => {
+    const live = parseMeshDoc({
+      ok: true,
+      code: "MESH-OK",
+      enabled: true,
+      live_nodes: 27206,
+      live_nodes_plane: "human-mesh-users-uses",
+      human_mesh_users: 0,
+      human_uses: 27206,
+      human_uses_kv: true,
+      human_uses_complete: true,
+      human_uses_source: "uses.total",
+      software_nodes: 41,
+      live_nodes_components: {
+        human_mesh_users: 0,
+        human_uses: 27206,
+        software_nodes_excluded: true,
+        instance_nodes_excluded: true,
+        invent_users: false,
+      },
+      rollup: {
+        live: 41,
+        locked: 0,
+        isolated: 0,
+        mesh: 27206,
+        active: 41,
+        inactive: 0,
+        software: { live: 41, locked: 0, isolated: 0 },
+        human: { live: 0, locked: 0, isolated: 0 },
+        instances: { live: 0, locked: 0, isolated: 0 },
+      },
+    });
+    assert.equal(live.live_nodes, 27206);
+    assert.equal(live.human_mesh_users, 0);
+    assert.equal(live.human_uses, 27206);
+    assert.equal(live.software_nodes, 41);
+    assert.equal(live.live_nodes_worker, "d7b63ac1");
+    assert.deepEqual(live.rollup, { live: 41, locked: 0, isolated: 0 });
+    assert.equal(alignLiveNodes({ siteLiveNodes: 2, mesh: live }), 27206);
+    assert.equal(meshStatusLine(publicMesh(live)), "Suite mesh: on · live 27206 · locked 0 · isolated 0");
+    assert.notEqual(live.live_nodes, live.software_nodes);
   });
 });
 

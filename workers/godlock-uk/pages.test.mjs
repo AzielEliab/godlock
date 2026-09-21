@@ -619,6 +619,8 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.live_nodes, "human mesh users + cited human uses");
     assert.equal(cite.live_nodes_plane, "human-mesh-users-uses");
     assert.equal(cite.live_nodes_source, CANON_HOST + "/v1/mesh");
+    assert.equal(cite.live_nodes_worker, "d7b63ac1");
+    assert.equal(cite.live_nodes_sot, "aziel-runtime#151 LIVE Worker d7b63ac1");
     assert.equal(cite.software_nodes, "Softwares {slug}-worker roster (never Live Nodes)");
     assert.equal(cite.anon_broadcast, "https://github.com/AzielEliab/anon-broadcast");
     assert.equal(cite.anon_broadcast_publish_path, false);
@@ -698,6 +700,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /Mesh status: https:\/\/godlock\.uk\/runtime\/v1\/mesh\/status/);
     assert.match(llms, /Mesh nodes: https:\/\/godlock\.uk\/runtime\/v1\/mesh\/nodes/);
     assert.match(llms, /Live Nodes: human mesh users \+ cited human uses from Worker \/v1\/mesh\. Not Softwares\./);
+    assert.match(llms, /Live Nodes SoT: aziel-runtime#151 LIVE Worker d7b63ac1/);
     assert.match(llms, /QNM-BUILD-1\.0 presence: live\|locked\|isolated counts only/);
     assert.match(llms, /SPLIT THE WIRES/);
     assert.match(llms, /COLD-COPY SURVIVAL/);

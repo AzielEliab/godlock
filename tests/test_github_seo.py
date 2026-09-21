@@ -157,6 +157,18 @@ def test_ingest_as_receipt_and_re_expand_law():
     assert CITE["cap7_resolves_to_hub"] is False
     assert CITE["cap7_hosted_endpoints"] == "slot"
     assert CITE["lie_to_survive"] is False
+    assert CITE["spore"] == "SPORE-1.0"
+    assert CITE["spore_role"] == "failsafe"
+    assert CITE["spore_failsafe"] is True
+    assert CITE["spore_last_resort"] is True
+    assert CITE["spore_replaces_cold_shelves"] is False
+    assert CITE["spore_software_tab"] is False
+    assert CITE["spore_worker"] == "a8f7fdc9"
+    assert CITE["spore_sot"] == "aziel-runtime#152 LIVE Worker a8f7fdc9"
+    assert CITE["re_cold_store_hook"] == "RE-COLD-STORE"
+    assert CITE["re_cold_store_active"] is False
+    assert CITE["re_cold_store_invent_destination"] is False
+    assert CITE["re_cold_store_destinations"] == []
     assert CITE["published_surfaces"] == 5
     assert "Lamb Lens" in CITE["lamb_lens"]
     assert CITE["growth_on"] is True
@@ -177,6 +189,11 @@ def test_ingest_as_receipt_and_re_expand_law():
         assert "https://aziel-runtime.vibelock.workers.dev/v1/survival" in text
         assert "https://miragegrid.vibelock.workers.dev" in text
         assert "resolves_to_hub" in text
+        assert "SPORE-1.0" in text
+        assert "RE-COLD-STORE" in text
+        assert "a8f7fdc9" in text
+        assert "failsafe" in text
+        assert "Softwares blurbs untouched" in text
         assert "receipts that still hash" in text
         assert "copies not all on one tunnel" in text
         assert "no rewrite key" in text

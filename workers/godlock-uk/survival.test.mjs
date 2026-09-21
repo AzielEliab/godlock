@@ -19,6 +19,12 @@ import {
   BAN_SURVIVAL,
   BAN_PLATFORMS,
   BAN_CALLING_NAME,
+  SPORE,
+  RE_COLD_STORE,
+  SPORE_WORKER_VERSION_ID,
+  SPORE_SOT,
+  SPORE_PAPER,
+  SPORE_FACES,
   SURVIVAL_TTL_MS,
   SURVIVAL_ORIGIN,
   SURVIVAL_LOCAL,
@@ -30,6 +36,8 @@ import {
   looksLikeSurvivalDoc,
   compactSurvivalSot,
   compactLiveDoors,
+  compactSpore,
+  compactReColdStore,
   fetchSurvivalSot,
   resetSurvivalCache,
   survivalCiteFields,
@@ -133,6 +141,26 @@ describe("BAN-SURVIVAL hub pull", () => {
     assert.equal(fields.lie_to_survive, false);
     assert.equal(fields.visible_1520, false);
     assert.equal(fields.product_not_identity, true);
+    assert.equal(fields.spore, SPORE);
+    assert.equal(fields.spore_role, "failsafe");
+    assert.equal(fields.spore_failsafe, true);
+    assert.equal(fields.spore_last_resort, true);
+    assert.equal(fields.spore_replaces_cold_shelves, false);
+    assert.equal(fields.spore_replaces_ban_survival, false);
+    assert.equal(fields.spore_software_tab, false);
+    assert.equal(fields.spore_fraggate_slug, false);
+    assert.deepEqual(fields.spore_faces, SPORE_FACES.slice());
+    assert.equal(fields.spore_paper, SPORE_PAPER);
+    assert.equal(fields.spore_worker, "a8f7fdc9");
+    assert.equal(fields.spore_sot, "aziel-runtime#152 LIVE Worker a8f7fdc9");
+    assert.equal(SPORE_WORKER_VERSION_ID, "a8f7fdc9");
+    assert.equal(SPORE_SOT, "aziel-runtime#152 LIVE Worker a8f7fdc9");
+    assert.equal(fields.re_cold_store_hook, RE_COLD_STORE);
+    assert.equal(fields.re_cold_store_active, false);
+    assert.equal(fields.re_cold_store_invent_destination, false);
+    assert.deepEqual(fields.re_cold_store_destinations, []);
+    assert.deepEqual(fields.survival_stack.map((row) => row.id), ["live-fronts", "cold-shelves", "spore"]);
+    assert.equal(fields.survival_stack[2].role, "failsafe");
   });
 
   it("refuses invented live doors and forged identity on compact", () => {
@@ -157,6 +185,52 @@ describe("BAN-SURVIVAL hub pull", () => {
     assert.equal(compacted.cap7_aznet.resolves_to_hub, false);
     assert.equal(compacted.lie_to_survive, false);
     assert.equal(compacted.visible_1520, false);
+    assert.equal(compacted.spore.spec, SPORE);
+    assert.equal(compacted.spore.failsafe, true);
+    assert.equal(compacted.spore.replaces_cold_shelves, false);
+    assert.equal(compacted.spore.software_tab, false);
+    assert.equal(compacted.re_cold_store.hook, RE_COLD_STORE);
+    assert.equal(compacted.re_cold_store.invent_destination, false);
+    assert.deepEqual(compacted.re_cold_store.destinations, []);
+  });
+
+  it("cites SPORE failsafe + RE-COLD-STORE without inventing destinations or replacing shelves", () => {
+    const forged = compactReColdStore({
+      hook: "invented",
+      active: true,
+      shelves_failed: false,
+      invent_destination: true,
+      destinations: ["https://invented.example/shelf", "not-a-url"],
+    });
+    assert.equal(forged.hook, RE_COLD_STORE);
+    assert.equal(forged.active, false);
+    assert.equal(forged.invent_destination, false);
+    assert.deepEqual(forged.destinations, []);
+    const attested = compactReColdStore({
+      active: true,
+      shelves_failed: true,
+      invent_destination: false,
+      destinations: ["https://archive.org/details/aziel-lockset-tip", "ftp://nope"],
+    });
+    assert.equal(attested.active, true);
+    assert.deepEqual(attested.destinations, ["https://archive.org/details/aziel-lockset-tip"]);
+    const spore = compactSpore({
+      spec: "not-spore",
+      role: "replacement",
+      failsafe: false,
+      replaces_cold_shelves: true,
+      software_tab: true,
+      fraggate_slug: true,
+      paper: "docs/designs/SPORE-1.0.md",
+    });
+    assert.equal(spore.spec, SPORE);
+    assert.equal(spore.role, "failsafe");
+    assert.equal(spore.failsafe, true);
+    assert.equal(spore.replaces_cold_shelves, false);
+    assert.equal(spore.software_tab, false);
+    assert.equal(spore.fraggate_slug, false);
+    assert.equal(spore.worker, "a8f7fdc9");
+    assert.equal(spore.paper, SPORE_PAPER);
   });
 
   it("pulls /survival SoT via binding and caches the short TTL", async () => {
@@ -216,6 +290,18 @@ describe("BAN-SURVIVAL hub pull", () => {
     assert.equal(body.resolves_to_hub, false);
     assert.equal(body.visible_1520, false);
     assert.equal(body.product_not_identity, true);
+    assert.equal(body.spore_spec, SPORE);
+    assert.equal(body.spore_role, "failsafe");
+    assert.equal(body.spore_failsafe, true);
+    assert.equal(body.spore_replaces_cold_shelves, false);
+    assert.equal(body.spore_software_tab, false);
+    assert.equal(body.spore_worker, "a8f7fdc9");
+    assert.equal(body.re_cold_store_hook, RE_COLD_STORE);
+    assert.equal(body.re_cold_store_invent_destination, false);
+    assert.deepEqual(body.re_cold_store.destinations, []);
+    assert.match(body.note, /SPORE-1\.0/);
+    assert.match(body.note, /RE-COLD-STORE/);
+    assert.match(body.note, /Softwares blurbs untouched/);
     assert.match(body.note, /Lamb Lens/);
     assert.match(body.note, /NO-LIE/);
     assert.match(body.note, /GodLock is a challenge\/score product/);
@@ -236,6 +322,14 @@ describe("BAN-SURVIVAL hub pull", () => {
     assert.equal(cite.calling_name, "Aziel Runtime");
     assert.equal(cite.cap7_factory_worker, MIRAGEGRID_WORKER);
     assert.equal(cite.cap7_resolves_to_hub, false);
+    assert.equal(cite.spore, SPORE);
+    assert.equal(cite.spore_role, "failsafe");
+    assert.equal(cite.spore_failsafe, true);
+    assert.equal(cite.spore_replaces_cold_shelves, false);
+    assert.equal(cite.spore_software_tab, false);
+    assert.equal(cite.spore_worker, "a8f7fdc9");
+    assert.equal(cite.re_cold_store_hook, RE_COLD_STORE);
+    assert.equal(cite.re_cold_store_invent_destination, false);
     assert.equal(cite.priority_pages.survival, CANON_HOST + "/survival");
     assert.equal(cite.priority_pages.survival_sot, SURVIVAL_ORIGIN);
     assert.equal(cite.person_id, "https://www.azieleliab.com/#aziel");
@@ -248,12 +342,21 @@ describe("BAN-SURVIVAL hub pull", () => {
     assert.match(llms, /Aziel Runtime/);
     assert.ok(llms.includes(MIRAGEGRID_WORKER));
     assert.match(llms, /resolves_to_hub: false/);
+    assert.match(llms, /SPORE-1\.0/);
+    assert.match(llms, /last-resort failsafe/);
+    assert.match(llms, /RE-COLD-STORE/);
+    assert.match(llms, /a8f7fdc9/);
+    assert.match(llms, /Softwares blurbs untouched/);
     assert.match(llms, /No visible 15:20/);
     assert.equal(aiDoc(), llms);
 
     const who = whoIsAzielEliabTxt();
     assert.match(who, /BAN-SURVIVAL/);
     assert.ok(who.includes(MIRAGEGRID_WORKER));
+    assert.match(who, /SPORE-1\.0/);
+    assert.match(who, /RE-COLD-STORE/);
+    assert.match(who, /a8f7fdc9/);
+    assert.match(who, /Softwares blurbs untouched/);
 
     const mission = wellKnownAzielDoc();
     assert.equal(mission.ban_survival, BAN_SURVIVAL);
@@ -262,12 +365,16 @@ describe("BAN-SURVIVAL hub pull", () => {
     assert.equal(mission.calling_name, "Aziel Runtime");
     assert.equal(mission.cap7_factory_worker, MIRAGEGRID_WORKER);
     assert.equal(mission.cap7_resolves_to_hub, false);
+    assert.equal(mission.spore, SPORE);
+    assert.equal(mission.spore_role, "failsafe");
+    assert.equal(mission.spore_worker, "a8f7fdc9");
+    assert.equal(mission.re_cold_store_hook, RE_COLD_STORE);
     assert.equal(mission.visible_1520, false);
 
     const htmlPerson = personNode();
     const htmlJson = JSON.stringify(htmlPerson);
     assert.ok(htmlJson.length < 2500, "HTML-embedded Person must stay lean; was " + htmlJson.length);
-    assert.doesNotMatch(htmlJson, /BAN-SURVIVAL|miragegrid|calling_name|AZDOC-/);
+    assert.doesNotMatch(htmlJson, /BAN-SURVIVAL|SPORE-1\.0|RE-COLD-STORE|miragegrid|calling_name|AZDOC-/);
     assert.equal(htmlPerson["@id"], "https://www.azieleliab.com/#aziel");
 
     const machine = personJsonLd();
@@ -297,17 +404,26 @@ describe("BAN-SURVIVAL hub pull", () => {
     assert.ok(spec.paths["/v1/survival"]);
     assert.match(spec.paths["/survival"].get.summary, /BAN-SURVIVAL/);
     assert.match(spec.paths["/survival"].get.summary, /hub cite/);
+    assert.match(spec.paths["/survival"].get.summary, /SPORE-1\.0/);
+    assert.match(spec.paths["/survival"].get.summary, /RE-COLD-STORE/);
   });
 
   it("keeps the llms section honest about SLOT hosted Cap-7 /mcp", () => {
     const section = survivalLlmsSection();
     assert.match(section, /Hosted Cap-7 \/mcp slot/);
     assert.match(section, /Never invent a live door/);
+    assert.match(section, /SPORE-1\.0/);
+    assert.match(section, /RE-COLD-STORE/);
+    assert.match(section, /Softwares blurbs untouched/);
     assert.match(section, /GodLock is a challenge\/score product/);
     assert.match(section, /Identity is Aziel Eliab/);
     const hub = survivalHubDoc();
     assert.equal(hub.cap7_aznet.hosted_endpoints.status, "slot");
     assert.equal(hub.cap7_aznet.worker.status, "live");
     assert.equal(hub.cap7_aznet.worker.resolves_to_hub, false);
+    assert.equal(hub.spore.spec, SPORE);
+    assert.equal(hub.spore.failsafe, true);
+    assert.equal(hub.re_cold_store.hook, RE_COLD_STORE);
+    assert.deepEqual(hub.re_cold_store.destinations, []);
   });
 });

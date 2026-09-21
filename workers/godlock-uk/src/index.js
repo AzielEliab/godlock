@@ -60,6 +60,7 @@ import {
   isSitePresencePath,
 } from "./presence.js";
 import { hideInternalDetermination, publicSafeFields } from "./publicCopy.js";
+import { scheduleSitePresence } from "./sitePresence.js";
 import {
   fetchMeshSnapshot,
   alignLiveNodes,
@@ -362,7 +363,7 @@ async function getReceipt(env, id) {
   return env.DB.prepare("SELECT * FROM receipts WHERE id=?").bind(id).first();
 }
 
-async function gatherStats(env, { wrote, visiting } = {}) {
+async function gatherStats(env, { wrote, visiting, ctx } = {}) {
   const score = await currentScore(env);
   const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
   const [siteNodes, downloads, uses, receipts, meshSnap] = await Promise.all([
@@ -373,6 +374,8 @@ async function gatherStats(env, { wrote, visiting } = {}) {
     fetchMeshSnapshot(env, meshSnapshotDeps(env)),
   ]);
   const mesh = publicMesh(meshSnap);
+  // Best-effort runtime SSoT. Do not await — page render must not wait on this POST.
+  scheduleSitePresence(ctx, env, siteNodes);
   const isVisiting = !!(wrote || visiting);
   const live = alignLiveNodes({
     siteLiveNodes: siteNodes,
@@ -530,7 +533,7 @@ export async function processSubmit(env, text) {
   return row;
 }
 
-async function healthPayload(env, { wrote } = {}) {
+async function healthPayload(env, { wrote, ctx } = {}) {
   const extra = {};
   try {
     const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM receipts").first();
@@ -544,7 +547,7 @@ async function healthPayload(env, { wrote } = {}) {
     extra.d1 = "error";
     extra.error = String(err && err.message ? err.message : err);
   }
-  const stats = extra.d1 === "ok" ? await gatherStats(env, { wrote }) : {};
+  const stats = extra.d1 === "ok" ? await gatherStats(env, { wrote, ctx }) : {};
   return {
     ok: extra.d1 === "ok",
     product: "GodLock",
@@ -724,10 +727,10 @@ export default {
           headers: { Location: identityTo, ...corsHeaders(), ...extraHeadersFor(nodeId) },
         });
       }
-      if (path === "/health") return json(await healthPayload(env, { wrote }));
+      if (path === "/health") return json(await healthPayload(env, { wrote, ctx }));
 
       if (path === "/stats") {
-        const stats = await gatherStats(env, { wrote });
+        const stats = await gatherStats(env, { wrote, ctx });
         return json({
           ok: true,
           product: "GodLock",
@@ -738,7 +741,7 @@ export default {
       }
 
       if (path === "/count") {
-        const stats = await gatherStats(env, { wrote });
+        const stats = await gatherStats(env, { wrote, ctx });
         return json({
           ok: true,
           nodes: stats.nodes,
@@ -783,12 +786,12 @@ export default {
             return proxied;
           }
         } catch { /* read-only local snapshot; GET never enables */ }
-        const stats = await gatherStats(env, { wrote });
+        const stats = await gatherStats(env, { wrote, ctx });
         return json(hubMeshStatusDoc(stats, path), 200, extraHeadersFor(nodeId));
       }
 
       if (path === "/mesh") {
-        const stats = await gatherStats(env, { wrote });
+        const stats = await gatherStats(env, { wrote, ctx });
         return json(alignPublicMeshSurface({
           ok: true,
           product: "GodLock",
@@ -813,7 +816,7 @@ export default {
       }
 
       if (path === "/heartbeat" && request.method === "POST") {
-        const stats = await gatherStats(env, { wrote });
+        const stats = await gatherStats(env, { wrote, ctx });
         return json({ ok: true, ...stats }, 200, extraHeadersFor(nodeId));
       }
 
@@ -849,7 +852,7 @@ export default {
         const pageSize = RECEIPTS_PAGE_SIZE;
         const total = await receiptsCount(env);
         const rows = await publicReceipts(env, pageSize, (pageNo - 1) * pageSize);
-        const stats = await gatherStats(env, { wrote });
+        const stats = await gatherStats(env, { wrote, ctx });
         if (wantsJson(request, url)) {
           return json({
             ok: true,
@@ -988,7 +991,7 @@ export default {
 
       if (isSubmitPost) {
         const row = await processSubmit(env, parsedSubmit.text);
-        const stats = await gatherStats(env, { wrote });
+        const stats = await gatherStats(env, { wrote, ctx });
         if (wantsJson(request, url)) {
           if (row.isolated === true || row.isolated === 1) {
             return json({ ok: true, isolated: true, id: row.id, text_sha256: row.text_sha256, stats }, 200, extraHeadersFor(nodeId));
@@ -1004,7 +1007,7 @@ export default {
 
       if (path === "/" && request.method === "GET") {
         if (countPresence) await metaBump(env, "views");
-        const stats = await gatherStats(env, { wrote, visiting: countPresence });
+        const stats = await gatherStats(env, { wrote, visiting: countPresence, ctx });
         const rid = url.searchParams.get("r") || "";
         let latest = null;
         if (rid) {

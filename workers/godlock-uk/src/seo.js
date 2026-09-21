@@ -2480,12 +2480,13 @@ export function citeDoc(sot) {
     mesh_node_gate: false,
     mesh_auto_heal: false,
     mesh_rollup: "live|locked|isolated counts only",
-    live_nodes: "human mesh users + cited human uses",
+    nodes: "human mesh users + cited human uses",
+    live_nodes: "presence only (human mesh users; uses are not live)",
     live_nodes_plane: "human-mesh-users-uses",
     live_nodes_source: CANON_HOST + "/v1/mesh",
     live_nodes_worker: "d7b63ac1",
     live_nodes_sot: "aziel-runtime#151 LIVE Worker d7b63ac1",
-    software_nodes: "Softwares {slug}-worker roster (never Live Nodes)",
+    software_nodes: "Softwares {slug}-worker roster (never Nodes or Live Nodes)",
     anon_broadcast: ANON_BROADCAST,
     anon_broadcast_note: "Local communique style tool. Cite " + ANON_BROADCAST + ". No ffmpeg farm on this Worker.",
     anon_broadcast_publish_path: false,
@@ -2686,7 +2687,8 @@ export function llmsDoc(sot) {
     + "MCP: POST " + PUBLIC_RUNTIME + "/mcp\n"
     + "MCP discovery: " + CANON_HOST + "/.well-known/mcp.json\n"
     + "Suite mesh (read-only, on): " + PUBLIC_RUNTIME + "/v1/mesh\n"
-    + "Live Nodes: human mesh users + cited human uses from Worker /v1/mesh. Not Softwares.\n"
+    + "Nodes: human mesh users + cited human uses from Worker /v1/mesh. Not Softwares.\n"
+    + "Live Nodes: presence only (human mesh users). Uses are not live presence.\n"
     + "Live Nodes SoT: aziel-runtime#151 LIVE Worker d7b63ac1.\n"
     + "QNM-BUILD-1.0 presence: live|locked|isolated counts only. software_nodes stay on the Softwares catalog. No Node Gate. No auto-heal.\n"
     + "SPLIT THE WIRES. Tip-only 0.5–1s tick. Pull-only payload. 1s and 777s never share a socket.\n"
@@ -2793,7 +2795,7 @@ export function siteOpenApi() {
       "/who-is": { get: { operationId: "godlockUkWhoIsAlias", summary: "308 to /who-is-aziel-eliab.txt", responses: { "308": { description: "Permanent redirect" } } } },
       "/why": { get: { operationId: "godlockUkWhyAlias", summary: "308 to /why-aziel-eliab.txt — machine why; official HTML why stays on azieleliab.com", responses: { "308": { description: "Permanent redirect" } } } },
       "/why-aziel-eliab.txt": { get: { operationId: "godlockUkWhyAziel", summary: "Why Aziel Eliab / why GodLock exists — machine txt only", responses: { "200": { description: "OK" } } } },
-      "/count": { get: { operationId: "godlockUkCount", summary: "Public Live Nodes (human mesh users+uses from /v1/mesh) / Uses / Receipts counters", responses: { "200": { description: "OK" } } } },
+      "/count": { get: { operationId: "godlockUkCount", summary: "Public Nodes (human mesh users+uses) / Live Nodes (presence) / Uses / Receipts counters", responses: { "200": { description: "OK" } } } },
       "/openapi.json": { get: { operationId: "godlockUkOpenApi", summary: "This OpenAPI document", responses: { "200": { description: "OK" } } } },
       "/.well-known/mcp.json": { get: { operationId: "godlockUkWellKnownMcp", summary: "MCP discovery JSON pointing at POST /runtime/mcp", responses: { "200": { description: "OK" } } } },
       "/mcp.json": { get: { operationId: "godlockUkMcpDiscovery", summary: "Same body as /.well-known/mcp.json — discovery only", responses: { "200": { description: "OK" } } } },
@@ -2819,15 +2821,15 @@ export function siteOpenApi() {
       "/runtime/mcp": { post: { operationId: "godlockUkRuntimeMcp", summary: "Same-origin FragGate MCP door", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/software": { get: { operationId: "godlockUkRuntimeSoftware", summary: "Live software catalog proxy", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/fraggate/list": { get: { operationId: "godlockUkRuntimeFraggateList", summary: "FragGate list fallback catalog", responses: { "200": { description: "OK" } } } },
-      "/v1/mesh": { get: { operationId: "godlockUkOriginMesh", summary: "Same-origin QNM-BUILD-1.0 mesh proxy (read-only suite presence on; GET never enables; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse). Live Nodes = human mesh users+uses from this path, not Softwares.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
+      "/v1/mesh": { get: { operationId: "godlockUkOriginMesh", summary: "Same-origin QNM-BUILD-1.0 mesh proxy (read-only suite presence on; GET never enables; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse). Nodes = human mesh users+uses; Live Nodes = presence only. Not Softwares.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
       "/v1/mesh/status": { get: { operationId: "godlockUkOriginMeshStatus", summary: "Same-origin LIVE QNM rollup proxy (enabled?, bearers, live|locked|isolated). GET never enables. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
-      "/runtime/v1/mesh": { get: { operationId: "godlockUkRuntimeMesh", summary: "QNM-BUILD-1.0 suite mesh status (read-only, on; Live Nodes = human mesh users+uses, not Softwares; presence live|locked|isolated; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse; GET never enables; no Node Gate; no auto-heal; not an anonymity network)", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
+      "/runtime/v1/mesh": { get: { operationId: "godlockUkRuntimeMesh", summary: "QNM-BUILD-1.0 suite mesh status (read-only, on; Nodes = human mesh users+uses; Live Nodes = presence only, not Softwares; presence live|locked|isolated; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse; GET never enables; no Node Gate; no auto-heal; not an anonymity network)", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
       "/runtime/v1/mesh/status": { get: { operationId: "godlockUkRuntimeMeshStatus", summary: "LIVE QNM-BUILD-1.0 suite rollup (enabled?, bearers, live|locked|isolated). GET never enables. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. Phoenix local only — die-with-pull does not bring godlock.uk back.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
       "/runtime/v1/mesh/nodes": { get: { operationId: "godlockUkRuntimeMeshNodes", summary: "QNM roster with live|locked|isolated presence (5-minute TTL). Not a peer-list publish path. GET never enables.", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
       "/runtime/v1/mesh/join": { post: { operationId: "godlockUkRuntimeMeshJoin", summary: "Join suite mesh (runtime proxy)", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
       "/runtime/v1/mesh/heartbeat": { post: { operationId: "godlockUkRuntimeMeshHeartbeat", summary: "Suite mesh heartbeat (runtime proxy)", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
       "/runtime/v1/mesh/enable": { post: { operationId: "godlockUkRuntimeMeshEnable", summary: "Enable suite mesh (runtime proxy; this Worker has no mesh-off function)", responses: { "200": { description: "OK or graceful empty/unavailable" } } } },
-      "/mesh": { get: { operationId: "godlockUkMesh", summary: "GodLock.uk QNM-BUILD-1.0 mesh snapshot (Live Nodes = human mesh users+uses from /v1/mesh, not Softwares; presence live|locked|isolated; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse; Phoenix local only — die-with-pull does not bring godlock.uk back; no neighbor talk-back-to-health)", responses: { "200": { description: "OK" } } } },
+      "/mesh": { get: { operationId: "godlockUkMesh", summary: "GodLock.uk QNM-BUILD-1.0 mesh snapshot (Nodes = human mesh users+uses; Live Nodes = presence only from /v1/mesh, not Softwares; presence live|locked|isolated; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse; Phoenix local only — die-with-pull does not bring godlock.uk back; no neighbor talk-back-to-health)", responses: { "200": { description: "OK" } } } },
       "/runtime/v1/update/check": { get: { operationId: "godlockUkRuntimeUpdateCheck", summary: "Client update check (prompt only; no silent overwrite)", responses: { "200": { description: "OK" } } } },
     },
   };

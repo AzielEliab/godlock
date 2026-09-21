@@ -20,7 +20,12 @@ import {
   SPECTRALLOCK_FAQ_TITLE, SPECTRALLOCK_ADDENDUM,
   TRADES_FAQ_TITLE, TRADES_ADDENDUM,
 } from "./seo.js";
-import { meshStatusLine } from "./mesh.js";
+import {
+  meshStatusLine,
+  parsePublicNodes,
+  parsePublicLivePresence,
+  formatNodesLive,
+} from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import { receiptScoreDelta } from "./engine.js";
 import { publicSoftwaresHtmlList, invokeHref, workerHref, stripRuntimeFragGateMash, suiteFamily } from "./catalog.js";
@@ -71,7 +76,7 @@ footer .ecosystem{margin:16px 0 0}
 .pill.interesting{background:#2a2410;color:var(--gold);border-color:var(--gold)}
 .pill.ok{background:#14261c;color:var(--yes);border-color:#2e6b45}
 .author{color:var(--muted);margin:0 0 14px;font-size:14px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px;margin:0 0 16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;margin:0 0 16px}
 .stat{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
 .stat b{display:block;font-size:22px;font-weight:800}
 .stat span{color:var(--muted);font-size:12px}
@@ -289,15 +294,35 @@ ${ecosystemNav()}
         .catch(function(){if(btn){btn.disabled=false;}showError("Submit refused.");});
     });
   }
+  function isCount(v){return typeof v==="number"&&isFinite(v)&&v>=0;}
+  function splitNodes(j){
+    j=j||{};
+    var m=j.mesh&&typeof j.mesh==="object"?j.mesh:{};
+    var named=j.nodes!=null?j.nodes:m.nodes;
+    var live=j.live_nodes!=null?j.live_nodes:m.live_nodes;
+    var users=j.human_mesh_users!=null?j.human_mesh_users:m.human_mesh_users;
+    var uses=j.human_uses!=null?j.human_uses:m.human_uses;
+    var n,l;
+    if(isCount(named)){
+      n=Math.floor(named);
+      l=isCount(live)?Math.floor(live):(isCount(users)?Math.floor(users):0);
+    }else{
+      if(isCount(users)||isCount(uses)) n=(isCount(users)?Math.floor(users):0)+(isCount(uses)?Math.floor(uses):0);
+      else n=isCount(live)?Math.floor(live):0;
+      l=isCount(users)?Math.floor(users):0;
+    }
+    return {nodes:n,live:l};
+  }
   function applyStats(j){
     if(!j)return;
-    var live=document.getElementById("stat-live-nodes");
+    var split=splitNodes(j);
+    var pill=document.getElementById("stat-nodes-live");
     var usesEl=document.getElementById("stat-uses");
     var views=document.getElementById("stat-views");
     var dl=document.getElementById("stat-downloads");
     var recEl=document.getElementById("stat-receipts");
     var meshEl=document.getElementById("mesh-status");
-    if(live&&j.live_nodes!=null)live.textContent=String(j.live_nodes);
+    if(pill)pill.textContent=split.nodes+"/"+split.live;
     if(usesEl&&j.uses!=null)usesEl.textContent=String(j.uses);
     if(views&&j.views!=null)views.textContent=String(j.views);
     if(dl&&j.downloads!=null)dl.textContent=String(j.downloads);
@@ -309,11 +334,10 @@ ${ecosystemNav()}
     if(meshEl&&j.mesh){
       var on=!!j.mesh.enabled;
       var r=j.mesh.rollup||{};
-      var live=j.mesh.live_nodes!=null?j.mesh.live_nodes:(r.mesh!=null?r.mesh:(j.live_nodes!=null?j.live_nodes:(r.live!=null?r.live:0)));
       var locked=r.locked!=null?r.locked:0;
       var isolated=r.isolated!=null?r.isolated:0;
       meshEl.textContent=on
-        ?("Suite mesh: on · live "+live+" · locked "+locked+" · isolated "+isolated)
+        ?("Suite mesh: on · live "+split.live+" · locked "+locked+" · isolated "+isolated)
         :(j.mesh.status==="unavailable"
           ?"Suite mesh: on · rollup unavailable"
           :"Suite mesh: on");
@@ -380,13 +404,40 @@ export function priorReceiptItems(rows, { fullChallenge = false } = {}) {
   }).join("");
 }
 
-export function homeBody({ stats, latest, prior, error, products, extras }) {
+export function nodesLiveFromStats(stats) {
+  const s = stats && typeof stats === "object" ? stats : {};
+  const mesh = s.mesh && typeof s.mesh === "object" ? s.mesh : {};
+  const src = {
+    nodes: s.nodes != null ? s.nodes : mesh.nodes,
+    live_nodes: s.live_nodes != null ? s.live_nodes : mesh.live_nodes,
+    human_mesh_users: s.human_mesh_users != null ? s.human_mesh_users : mesh.human_mesh_users,
+    human_uses: s.human_uses != null ? s.human_uses : mesh.human_uses,
+  };
+  return {
+    nodes: parsePublicNodes(src),
+    live: parsePublicLivePresence(src),
+  };
+}
+
+export function statsGrid(stats, { receiptsFallback } = {}) {
   const s = stats || {};
-  const live = s.live_nodes != null ? s.live_nodes : 0;
+  const split = nodesLiveFromStats(s);
+  const pill = formatNodesLive(split.nodes, split.live);
   const views = s.views != null ? s.views : 0;
   const uses = s.uses != null ? s.uses : 0;
   const downloads = s.downloads != null ? s.downloads : 0;
-  const receipts = s.receipts != null ? s.receipts : 0;
+  const receipts = s.receipts != null ? s.receipts : (receiptsFallback != null ? receiptsFallback : 0);
+  return `<div class="stats">
+  <div class="stat" title="Nodes = human mesh users + cited human uses. Live Nodes = presence only. Not Softwares."><b id="stat-nodes-live">${esc(pill)}</b><span>Nodes / Live Nodes</span></div>
+  <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
+  <div class="stat"><b id="stat-uses">${esc(uses)}</b><span>Uses</span></div>
+  <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>
+  <div class="stat"><b id="stat-receipts">${esc(receipts)}</b><span>Receipts</span></div>
+</div>`;
+}
+
+export function homeBody({ stats, latest, prior, error, products, extras }) {
+  const s = stats || {};
   const score = s.current_score != null ? s.current_score : 50;
   const residual = s.residual != null ? s.residual : 50;
   const meshLine = meshStatusLine(s.mesh);
@@ -397,13 +448,7 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
   const shown = (prior || []).slice(0, HOME_PRIOR_LIMIT);
   const list = priorReceiptItems(shown) || `<p class="muted">No public receipts yet. Submit a challenge.</p>`;
   return `
-<div class="stats">
-  <div class="stat" title="Human mesh users + cited human uses from Worker /v1/mesh. Not Softwares."><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
-  <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
-  <div class="stat"><b id="stat-uses">${esc(uses)}</b><span>Uses</span></div>
-  <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>
-  <div class="stat"><b id="stat-receipts">${esc(receipts)}</b><span>Receipts</span></div>
-</div>
+${statsGrid(s)}
 <p class="muted" id="mesh-status">${esc(meshLine)}</p>
 <div class="scorebox">
   <div><div class="n" id="stat-current-score">${esc(score)}%</div><div class="k">Current confidence</div></div>
@@ -456,23 +501,13 @@ export function receiptsPager({ page, pages, total }) {
 
 export function receiptsBody({ rows, total, page, pageSize, stats }) {
   const s = stats || {};
-  const live = s.live_nodes != null ? s.live_nodes : 0;
-  const views = s.views != null ? s.views : 0;
-  const uses = s.uses != null ? s.uses : 0;
-  const downloads = s.downloads != null ? s.downloads : 0;
   const receipts = s.receipts != null ? s.receipts : (total != null ? total : 0);
   const list = priorReceiptItems(rows, { fullChallenge: true })
     || `<p class="muted">No public receipts yet. <a href="/">Submit a challenge</a>.</p>`;
   const size = Number(pageSize) || RECEIPTS_PAGE_SIZE;
   const pages = Math.max(1, Math.ceil((Number(total) || 0) / size));
   return `
-<div class="stats">
-  <div class="stat" title="Human mesh users + cited human uses from Worker /v1/mesh. Not Softwares."><b id="stat-live-nodes">${esc(live)}</b><span>Live Nodes</span></div>
-  <div class="stat"><b id="stat-views">${esc(views)}</b><span>Views</span></div>
-  <div class="stat"><b id="stat-uses">${esc(uses)}</b><span>Uses</span></div>
-  <div class="stat"><b id="stat-downloads">${esc(downloads)}</b><span>Downloads</span></div>
-  <div class="stat"><b id="stat-receipts">${esc(receipts)}</b><span>Receipts</span></div>
-</div>
+${statsGrid(s, { receiptsFallback: total })}
 <h1 class="soft-heading">Receipts</h1>
 <p>Public questions and the hash-chained receipt list. Newest first. GodLock is a stress-test engine — Yes / No / Let's review / Interesting — not a forum.</p>
 <p class="muted">${esc(SPECIFIED_FIT_TITLE)}. ${esc(SPECIFIED_FIT_MOTTO)} <a href="${esc(REASON_PATH)}">Read the brief</a>.</p>

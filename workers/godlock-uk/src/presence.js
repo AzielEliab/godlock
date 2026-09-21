@@ -1,6 +1,8 @@
 /**
  * Heartbeat presence + Uses tally helpers.
- * Live Nodes = distinct sessions with a heartbeat inside PRESENCE_TTL_MS.
+ * Site Live Nodes fallback = distinct sessions with a heartbeat inside PRESENCE_TTL_MS.
+ * Public Live Nodes, when suite mesh is on, come from Worker /v1/mesh
+ * (human mesh users + cited human uses). Never Softwares / software_nodes.
  * Uses = ledger SUBMIT + ISOLATE only (real submissions on the receipt ledger).
  * Heartbeats and page views do not increment Uses. Author: Aziel Eliab.
  */

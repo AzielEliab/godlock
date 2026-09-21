@@ -2,7 +2,9 @@
  * GodLock.uk public HTTPS stress-test engine (Cloudflare Worker).
  * One input. Locked protocol. Append-only hash-chained receipts.
  * Not a forum, not a tunnel. Suite mesh is QNM-BUILD-1.0 (read-only, on):
- * live|locked|isolated counts only. No Node Gate. No auto-heal.
+ * Live Nodes = human mesh users + cited human uses from /v1/mesh
+ * (never software_nodes). Presence live|locked|isolated counts only.
+ * Softwares catalog stays separate. No Node Gate. No auto-heal.
  * SPLIT THE WIRES + COLD-COPY SURVIVAL + REHEAL bind refuse/status even when mesh
  * is unavailable. Phoenix is local only — die-with-pull does not bring .uk back.
  * REHEAL refuse: no neighbor talk-back-to-health. Softwares stays Runtime-only.
@@ -722,6 +724,7 @@ export default {
           mesh_live_nodes: stats.mesh && stats.mesh.enabled ? stats.mesh.live_nodes : 0,
           mesh_locked: stats.mesh && stats.mesh.enabled && stats.mesh.rollup ? stats.mesh.rollup.locked : 0,
           mesh_isolated: stats.mesh && stats.mesh.enabled && stats.mesh.rollup ? stats.mesh.rollup.isolated : 0,
+          software_nodes: stats.mesh && stats.mesh.enabled ? (stats.mesh.software_nodes || 0) : 0,
           uses: stats.uses,
           downloads: stats.downloads,
           receipts: stats.receipts,

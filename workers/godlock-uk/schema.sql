@@ -39,7 +39,9 @@ CREATE TABLE IF NOT EXISTS metadata (
   value TEXT NOT NULL
 );
 
--- Presence: Live Nodes = COUNT(heartbeats) with last_ms inside 5 minutes.
+-- Site presence fallback: COUNT(heartbeats) with last_ms inside 5 minutes.
+-- Public Live Nodes, when suite mesh is on, are Worker /v1/mesh human
+-- mesh users + cited human uses — not this table, not Softwares.
 -- last_ms is the source of truth; last_utc is kept for humans / fallback.
 CREATE TABLE IF NOT EXISTS heartbeats (
   session_id TEXT PRIMARY KEY,

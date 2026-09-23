@@ -35,8 +35,11 @@ tokens) are engagement heuristics only. They do not cast a public Steer vote.
 
 Public Steer (`workers/godlock-uk/src/steer.js`) is a read-time share of
 scored public receipts: Layer B intelligent design, simulation hypothesis,
-Layer C cosmology, undecided. Ledgers stay separate. It is not
-`current_score`. It is not written into the hash chain.
+Layer C cosmology, Came from nothing (creatio ex nihilo / something-from-nothing,
+a fifth frame on that same vote plane, adjacent to Big Bang language, not a
+relabel of Layer C), undecided. Frame shares sum to 100. Current confidence
+and residual uncertainty are a separate pair and sum to 100. Ledgers stay
+separate. Steer is not `current_score`. It is not written into the hash chain.
 
 Parent may wipe D1 `receipts` and `ledger` only. Never wipe counter KV
 or `metadata.views` / `metadata.uses`. See `docs/d1-receipt-wipe.md`.

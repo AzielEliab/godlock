@@ -92,6 +92,12 @@ export function clampScore(n) {
   return Math.min(CEILING, Math.max(FLOOR, Math.round(x * 10) / 10));
 }
 
+/**
+ * Residual uncertainty for a running confidence score.
+ * Balance invariant: clampScore(score) + residualOf(score) = 100.
+ * This pair is separate from Steer frame shares (those also sum to 100,
+ * on their own vote plane). Came from nothing is a Steer share.
+ */
 export function residualOf(score) {
   return Math.round((100 - clampScore(score)) * 10) / 10;
 }

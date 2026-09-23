@@ -31,6 +31,7 @@ import {
   STEER_FRAME_IDS,
   STEER_LABELS,
   STEER_NOTE_PUBLIC,
+  STEER_BALANCE_NOTE,
   classifyChallenge,
   formatSteerPercent,
 } from "./steer.js";
@@ -394,7 +395,7 @@ ${ecosystemNav()}
     if(cEl&&j.current_score!=null)cEl.textContent=String(j.current_score)+"%";
     if(rEl&&j.residual!=null)rEl.textContent=String(j.residual)+"%";
     if(!scales)return;
-    var ids=["intelligent_design","multi_simulation","standard_cosmology","undecided"];
+    var ids=${JSON.stringify(STEER_FRAME_IDS)};
     var leaders={};
     var list=st&&st.leaders;
     if(list&&list.length){for(var i=0;i<list.length;i++)leaders[list[i]]=true;}
@@ -525,12 +526,13 @@ export function steerPanel(steer, stats) {
   const s = stats || {};
   const score = s.current_score != null ? s.current_score : 50;
   const residual = s.residual != null ? s.residual : 50;
-  const confidence = `<p class="muted">Current confidence <span id="steer-current-score">${esc(score)}%</span> · Residual uncertainty <span id="steer-residual">${esc(residual)}%</span> · floor 33.3 · ceiling 99.7.</p>`;
+  const confidence = `<p class="muted">Current confidence <span id="steer-current-score">${esc(score)}%</span> · Residual uncertainty <span id="steer-residual">${esc(residual)}%</span> · these two sum to 100 · floor 33.3 · ceiling 99.7.</p>`;
+  const balance = `<p class="muted" id="steer-balance">${esc(STEER_BALANCE_NOTE)}</p>`;
   if (!steer || steer.available === false || !steer.scales) {
     const note = steer && steer.note
       ? steer.note
       : "Steer is the share of scored public challenges. No share is shown on this view.";
-    return `<section class="steer" id="steer" aria-label="Steer"><h2>Steer</h2><p class="muted">${esc(note)}</p>${confidence}<p class="muted">${esc(STEER_NOTE_PUBLIC)}</p></section>`;
+    return `<section class="steer" id="steer" aria-label="Steer"><h2>Steer</h2><p class="muted">${esc(note)}</p>${confidence}${balance}<p class="muted">${esc(STEER_NOTE_PUBLIC)}</p></section>`;
   }
   const leaders = new Set(steer.leaders || []);
   const ranked = STEER_FRAME_IDS
@@ -545,14 +547,15 @@ export function steerPanel(steer, stats) {
     </li>`;
   }).join("");
   const countLine = steer.inputs
-    ? `<p class="muted"><span id="steer-inputs">${esc(steer.inputs)}</span> scored public challenges. Shares sum to 100 at one decimal. An equal vote stays a tie when rounding prints 0.1 apart. Steer is the mix of those challenges. Current confidence is the running score.</p>`
-    : `<p class="muted" id="steer-inputs">No scored public challenges yet. The scale stays undecided until a receipt is classified.</p>`;
+    ? `<p class="muted"><span id="steer-inputs">${esc(steer.inputs)}</span> scored public challenges. Steer shares, including Came from nothing, sum to 100 at one decimal. An equal vote stays a tie when rounding prints 0.1 apart. Steer is the mix of those challenges. Current confidence is the running score.</p>`
+    : `<p class="muted" id="steer-inputs">No scored public challenges yet. The scale stays undecided until a receipt is classified. Came from nothing stays 0 until a receipt names that claim.</p>`;
   return `<section class="steer" id="steer" aria-label="Steer">
   <h2>Steer</h2>
   <p class="steer-leader" id="steer-leader">Steering toward: ${esc(steer.steering_toward || "")}</p>
   <ol class="steer-list" id="steer-list">${rows}</ol>
   ${countLine}
   ${confidence}
+  ${balance}
   <p class="muted">${esc(STEER_NOTE_PUBLIC)}</p>
 </section>`;
 }

@@ -1,0 +1,11 @@
+GodLock
+
+GodLock records a test on this computer and saves a receipt you can check.
+Author: Aziel Eliab
+
+1. pip install -e .
+2. godlock ui
+3. Open http://127.0.0.1:8080 and choose Record.
+
+godlock doctor
+godlock --help

@@ -5,51 +5,157 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GodLock</title>
   <style>
-    :root { color-scheme: dark; }
-    body { font-family: system-ui, sans-serif; margin: 0; background: #111; color: #e8e0d0; }
-    main { max-width: 40rem; margin: 0 auto; padding: 1.5rem 1.1rem 3rem; }
-    h1 { font-weight: 650; letter-spacing: 0.04em; margin: 0 0 .35rem; font-size: 2rem; }
-    .motto { color: #c4b59a; margin: 0 0 1rem; }
-    .warn { border: 1px solid #8a5a2b; background: #1a140c; padding: 0.85rem 1rem; color: #f0d0a8; border-radius: 10px; }
-    .nums { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin: 1.1rem 0; }
-    .num { border: 1px solid #333; border-radius: 10px; padding: .7rem .85rem; background: #191919; }
-    .num b { display: block; font-size: 1.8rem; }
-    .num span { color: #9a8b74; }
-    textarea { width: 100%; min-height: 7rem; background: #1c1c1c; color: inherit; border: 1px solid #444; padding: 0.75rem; box-sizing: border-box; font: inherit; border-radius: 10px; }
-    .btns { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: .85rem 0 1rem; }
-    @media (max-width: 520px) { .btns { grid-template-columns: 1fr; } }
-    button.btn, a.btn, label.btn { display: block; width: 100%; box-sizing: border-box; text-align: center; font: inherit; font-size: 1.2rem; font-weight: 750; padding: 1rem 1.1rem; border-radius: 12px; border: 1px solid #8a5a2b; cursor: pointer; text-decoration: none; color: #f3e6d0; background: #3d2a16; }
-    button.btn.primary { background: #c9a227; color: #14110a; border-color: #c9a227; }
-    a.btn { line-height: 1.2; }
-    .file { margin: 0 0 1rem; color: #9a8b74; }
-    .file input { display: block; margin-top: .35rem; width: 100%; }
-    .ok { border: 1px solid #2e6b45; background: #102016; color: #b7e4c7; padding: .85rem 1rem; border-radius: 10px; }
-    .bad { border: 1px solid #8a2b2b; background: #201010; color: #f0b8b8; padding: .85rem 1rem; border-radius: 10px; }
-    .card { border: 1px solid #333; border-radius: 10px; padding: .85rem 1rem; margin: 1rem 0; background: #191919; }
-    code, .id { font-family: ui-monospace, monospace; font-size: 0.85rem; }
-    ul { padding-left: 1.2rem; }
-    a { color: #d4b483; }
-    footer { margin-top: 2rem; font-size: 0.85rem; color: #8a8070; }
-    .checks { list-style: none; padding: 0; margin: .5rem 0 0; }
-    .checks li { margin: .2rem 0; font-weight: 650; }
+    :root {
+      color-scheme: light dark;
+      --paper: #f4f0e6;
+      --ink: #1a1814;
+      --muted: #4e4942;
+      --line: #e3d9c6;
+      --card: #fffdf8;
+      --gold: #c9a227;
+      --gold-ink: #1a1408;
+      --link: #6a5010;
+      --ok-bg: #e7f5ec;
+      --ok-ink: #14532d;
+      --ok-line: #8fceb0;
+      --bad-bg: #fdecec;
+      --bad-ink: #7f1d1d;
+      --bad-line: #e4b4b4;
+      --warn-bg: #fbf3df;
+      --warn-ink: #3f3416;
+      --warn-line: #e2cd8d;
+      --ghost: transparent;
+      --shadow: 0 1px 0 rgba(26, 24, 20, 0.04);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #12110e;
+        --ink: #f4efe6;
+        --muted: #d2c6b2;
+        --line: #3a3428;
+        --card: #1c1a16;
+        --gold: #c9a227;
+        --gold-ink: #1a1408;
+        --link: #f0d48a;
+        --ok-bg: #13261b;
+        --ok-ink: #c6efd4;
+        --ok-line: #2f6a45;
+        --bad-bg: #2a1515;
+        --bad-ink: #f3c7c7;
+        --bad-line: #7a3333;
+        --warn-bg: #2a2314;
+        --warn-ink: #f3e2b8;
+        --warn-line: #6d5a2c;
+        --shadow: none;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    a { color: var(--link); }
+    a:hover { text-decoration: none; }
+    :focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+    .wrap { max-width: 40rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .brand { font-weight: 700; letter-spacing: 0.02em; font-size: 1.05rem; }
+    .byline { color: var(--muted); font-size: 0.92rem; }
+    h1 { font-size: 1.85rem; font-weight: 680; letter-spacing: -0.02em; margin: 0 0 0.35rem; }
+    .lead { margin: 0 0 1.15rem; max-width: 38rem; }
+    .notice, .ok, .bad, .card, .panel {
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      margin: 0 0 0.85rem;
+      overflow-wrap: anywhere;
+    }
+    .notice { background: var(--warn-bg); color: var(--warn-ink); border: 1px solid var(--warn-line); }
+    .ok { background: var(--ok-bg); color: var(--ok-ink); border: 1px solid var(--ok-line); }
+    .bad { background: var(--bad-bg); color: var(--bad-ink); border: 1px solid var(--bad-line); }
+    .card, .panel { background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .next { color: var(--muted); margin: -0.35rem 0 0.85rem; }
+    label { display: block; font-weight: 650; margin-bottom: 0.4rem; }
+    textarea, input[type="file"] {
+      width: 100%;
+      font: inherit;
+      color: inherit;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.75rem 0.8rem;
+    }
+    textarea { min-height: 8rem; resize: vertical; }
+    .actions { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.85rem; }
+    @media (min-width: 40rem) {
+      .actions { flex-direction: row; align-items: stretch; }
+      .actions .primary { flex: 1.5; }
+      .actions .ghost { flex: 1; }
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 2.75rem;
+      padding: 0.7rem 1rem;
+      border-radius: 12px;
+      font: inherit;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid var(--line);
+      background: var(--ghost);
+      color: var(--ink);
+    }
+    .btn.primary { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
+    .status { color: var(--muted); margin: 1.15rem 0 0.4rem; }
+    .id { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.86rem; overflow-wrap: anywhere; }
+    ul { margin: 0.35rem 0 0; padding-left: 1.15rem; }
+    .checks { list-style: none; padding: 0; }
+    .checks li { margin: 0.2rem 0; font-weight: 650; }
+    details { margin: 0.35rem 0 0; }
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+      padding: 0.75rem 0;
+    }
+    .panel p:first-child { margin-top: 0; }
+    .panel p:last-child { margin-bottom: 0; }
+    .file { margin-top: 0.8rem; }
+    .file .btn { margin-top: 0.7rem; }
+    footer { margin-top: 1.5rem; color: var(--muted); font-size: 0.92rem; }
   </style>
 </head>
 <body>
-<main>
-  <h1>GodLock</h1>
-  <p class="motto">{{ motto }}</p>
-  <p class="warn">{{ banner }}</p>
-  {% if update and update.update_available %}
-  <p class="warn">Update available: GodLock {{ update.latest }} (you have {{ update.version }}). Counted download (no silent overwrite): <a href="{{ update.download }}">{{ update.download }}</a></p>
-  {% endif %}
+<div class="wrap">
+  <header>
+    <div class="brand">GodLock</div>
+    <div class="byline">Aziel Eliab</div>
+  </header>
 
-  <div class="nums">
-    <div class="num"><b>{{ counter }}</b><span>Tests</span></div>
-    <div class="num"><b>{{ resilience_score }}</b><span>Score</span></div>
-  </div>
+  <h1>Record a test</h1>
+  <p class="lead">GodLock records a test on this computer and saves a receipt you can check.</p>
+
+  {% if update and update.update_available %}
+  <p class="notice">Update available: GodLock {{ update.latest }} (you have {{ update.version }}). Counted download (no silent overwrite): <a href="{{ update.download }}">{{ update.download }}</a></p>
+  {% endif %}
 
   {% if error %}
   <p class="bad">{{ error }}</p>
+  <p class="next">Choose Record for a new test, or open Advanced to import a JSON file.</p>
   {% endif %}
 
   {% if doctor %}
@@ -84,19 +190,12 @@
   {% endif %}
 
   <form id="record-form" method="post" action="/stress">
-    <textarea name="text" required placeholder="Type a test…"></textarea>
-  </form>
-
-  <div class="btns">
-    <button class="btn primary" type="submit" form="record-form">Record</button>
-    <a class="btn" href="/verify">Verify</a>
-    <button class="btn" type="button" id="import-btn">Import JSON</button>
-    <a class="btn" href="/export">Export JSON</a>
-  </div>
-  <form id="import-form" class="file" method="post" action="/import" enctype="multipart/form-data">
-    <label>JSON file
-      <input id="jsonfile" type="file" name="file" accept=".json,application/json" required>
-    </label>
+    <label for="test-text">Test</label>
+    <textarea id="test-text" name="text" required placeholder="Type a test…"></textarea>
+    <div class="actions">
+      <button class="btn primary" type="submit">Record</button>
+      <a class="btn ghost" href="/verify">Verify</a>
+    </div>
   </form>
 
   {% if result %}
@@ -109,32 +208,42 @@
   </div>
   {% endif %}
 
+  <p class="status">{% if counter == 0 %}No tests yet.{% elif counter == 1 %}1 test saved.{% else %}{{ counter }} tests saved.{% endif %}</p>
   <div class="card">
     <p><strong>Recent tests</strong></p>
     <ul>
       {% for rid in recent_ids %}
       <li class="id">{{ rid }}</li>
       {% else %}
-      <li>none yet</li>
+      <li>None yet.</li>
       {% endfor %}
     </ul>
   </div>
 
-  <footer>
-    Aziel Eliab · this computer only · Apache-2.0
-  </footer>
-</main>
-<script>
-  (function () {
-    var btn = document.getElementById("import-btn");
-    var inp = document.getElementById("jsonfile");
-    var form = document.getElementById("import-form");
-    if (!btn || !inp || !form) return;
-    btn.addEventListener("click", function () { inp.click(); });
-    inp.addEventListener("change", function () {
-      if (inp.files && inp.files.length) form.submit();
-    });
-  })();
-</script>
+  <details class="advanced">
+    <summary>Advanced</summary>
+    <div class="panel">
+      <p>Mean engagement {{ resilience_score }}. Rules {{ rules }}.</p>
+      <p><a class="btn ghost" href="/export">Export JSON</a></p>
+      <form class="file" method="post" action="/import" enctype="multipart/form-data">
+        <label for="jsonfile">Import JSON
+          <input id="jsonfile" type="file" name="file" accept=".json,application/json" required>
+        </label>
+        <button class="btn ghost" type="submit">Import JSON</button>
+      </form>
+    </div>
+  </details>
+
+  <details class="about">
+    <summary>About</summary>
+    <div class="panel">
+      <p>{{ motto }}</p>
+      <p>{{ banner }}</p>
+      <p>Author: Aziel Eliab. This page listens on this computer only.</p>
+    </div>
+  </details>
+
+  <footer>Aziel Eliab · this computer only · Apache-2.0</footer>
+</div>
 </body>
 </html>

@@ -1,8 +1,16 @@
 # GodLock
 
-**GodLock is a product name** (Specified Fit stress-test and resilience engine).
-It is **not** a VPN, ghost net, or anonymity tool.
+GodLock records a test on this computer and saves a receipt you can check.
+
 **Author: Aziel Eliab only.**
+
+## Start
+
+1. Install: `curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash`
+2. Run: `godlock ui`
+3. Open http://127.0.0.1:8080 and choose **Record**.
+
+`godlock doctor` checks this install. `godlock --help` lists commands.
 
 > GodLock does not argue. It records, analyzes, hardens, and grows.
 
@@ -45,19 +53,19 @@ GitHub crawl aids (this repo, not a live Worker deploy): [docs/llms.txt](docs/ll
 
 Forks are welcome and always allowed.
 
-## How to use (3 steps)
+## How to use
 
 1. Install: `curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash`
 2. Run: `godlock ui`
-3. Open http://127.0.0.1:8080 and tap **Record**, **Verify**, **Import JSON**, or **Export JSON**.
+3. Open http://127.0.0.1:8080 and choose **Record**.
 
-That's it. This computer only.
+Verify checks this install. Import JSON and Export JSON are under Advanced on that page.
 
 `godlock doctor` prints PASS or FAIL in plain words. Same check as the Verify button.
 
-## What this is
+## Notes
 
-A localhost tool that records a test, saves an honest receipt (id, time, text, SHA-256), and can save or load a JSON file. Governments and kids can both read the file. Receipts are not rewritten. This process is **not** a VPN, proxy, Tor hop, or hiding net.
+A localhost tool that records a test, saves an honest receipt (id, time, text, SHA-256), and can save or load a JSON file. Governments and kids can both read the file. Receipts are not rewritten. Honest scope: GodLock is a product name (Specified Fit stress-test and resilience engine). Not a VPN, ghost net, or anonymity tool.
 
 The public HTTPS stress-test engine is **https://godlock.uk** (fallback: https://godlock-uk.vibelock.workers.dev). Submit a challenge; Yes / No / Let's review / Interesting; hash-chained receipts. Suite mesh is **QNM-BUILD-1.0**: opt-in via `https://godlock.uk/runtime/v1/mesh/*` and **default off**. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. Refuse/status still bind **SPLIT THE WIRES** (tip-only 0.5–1s tick; pull-only payload; Phoenix local only — die-with-pull does not bring .uk back), **COLD-COPY SURVIVAL** (cold copies multiply; refuse live sync; server pull does not erase records; data outlives creators), and **REHEAL** (poisoned node: own last good tip + verified trusted pull OR phoenix-WAIT; no neighbor talk-back-to-health; allowed live/locked/isolated/tip-hash; forbidden bodies/diffs/vote-to-fix; isolate+drop tether+local phoenix). Softwares stays Runtime-only. Not an anonymity network. **QNS-CD-1.0** (photon QNS1 packet transfer) is a hub cite / Worker mesh cross-map only — local qnsd in [qnm-node](https://github.com/AzielEliab/qnm-node), runtime cites in [aziel-runtime](https://github.com/AzielEliab/aziel-runtime), pair custody on [AZInterface](https://github.com/AzielEliab/azinterface). Not a Softwares-tab product. No public qnsd proxy.
 

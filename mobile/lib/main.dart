@@ -18,7 +18,9 @@ class GodLockApp extends StatelessWidget {
     return MaterialApp(
       title: 'GodLock',
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
+      theme: buildAppTheme(Brightness.light),
+      darkTheme: buildAppTheme(Brightness.dark),
+      themeMode: ThemeMode.system,
       home: const DashboardPage(),
     );
   }
@@ -143,41 +145,55 @@ class _DashboardPageState extends State<DashboardPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            color: const Color(0xFF2A1515),
-            child: const Padding(
-              padding: EdgeInsets.all(12),
-              child: Text(
-                'GodLock is a product name (Specified Fit stress-test and resilience engine). '
-                'Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab. '
-                'grid-NN values are labels only — this app does not hide IPs.',
-                style: TextStyle(color: kIvory, height: 1.4),
-              ),
-            ),
+          Text(
+            'GodLock records a test on this phone and keeps a receipt for this session.',
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          const Text(
-            'GodLock does not argue. It records, analyzes, hardens, and grows.',
-            style: TextStyle(color: kGold, fontStyle: FontStyle.italic),
+          Text(
+            _receipts.isEmpty ? 'No tests yet.' : '${_receipts.length} test${_receipts.length == 1 ? '' : 's'} saved.',
           ),
-          const SizedBox(height: 16),
-          Text('Resilience counter: ${_receipts.length}', style: const TextStyle(color: kGold, fontSize: 18)),
           const SizedBox(height: 12),
           TextField(
             controller: _text,
             maxLines: 5,
             decoration: const InputDecoration(
-              labelText: 'Counter-argument (stress test)',
+              labelText: 'Test',
               alignLabelWithHint: true,
             ),
           ),
           const SizedBox(height: 8),
-          FilledButton(onPressed: _submit, child: const Text('Mint receipt')),
+          FilledButton(onPressed: _submit, child: const Text('Record')),
           const SizedBox(height: 8),
-          const Text(
-            'Receipts stay in memory this session. --no-persist analogue: not a wipe. '
-            'Jeeves model: godlock-jeeves-heuristic-0.1 (offline).',
-            style: TextStyle(color: kGoldDim, fontSize: 12),
+          ExpansionTile(
+            title: const Text('Advanced'),
+            children: const [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    'Receipts stay in memory for this session. The note from the local heuristic is kept with each receipt.',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          ExpansionTile(
+            title: const Text('About'),
+            children: const [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    'GodLock is a product name (Specified Fit stress-test and resilience engine). '
+                    'Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab. '
+                    'grid-NN values are labels on this device.',
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           for (final r in _receipts)
@@ -188,14 +204,14 @@ class _DashboardPageState extends State<DashboardPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(r.id, style: const TextStyle(fontFamily: 'monospace', fontSize: 12, color: kGold)),
+                    Text(r.id, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
                     Text('${r.timestamp}  ${r.ingress} → ${r.egress}  (logical names)'),
                     Text('sha256 ${r.hash.substring(0, 16)}…', style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
                     Text('engagement ${r.score}'),
                     const SizedBox(height: 6),
                     Text(r.text),
                     const SizedBox(height: 6),
-                    Text('Jeeves: ${r.hardening}', style: const TextStyle(color: kGoldDim)),
+                    Text('Note: ${r.hardening}'),
                   ],
                 ),
               ),

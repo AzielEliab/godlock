@@ -1,37 +1,39 @@
 import 'package:flutter/material.dart';
 
-/// Matte black + gold Material 3 dark theme. No analytics.
+/// Gold accent. Light and dark follow the system theme.
 const Color kMatteBlack = Color(0xFF0B0B0B);
 const Color kSurface = Color(0xFF141414);
 const Color kGold = Color(0xFFC9A227);
 const Color kGoldDim = Color(0xFF8A7219);
 const Color kIvory = Color(0xFFE8E0D0);
 
-ThemeData buildAppTheme() {
-  const scheme = ColorScheme.dark(
-    brightness: Brightness.dark,
+ThemeData buildAppTheme([Brightness brightness = Brightness.dark]) {
+  final dark = brightness == Brightness.dark;
+  final scheme = ColorScheme(
+    brightness: brightness,
     primary: kGold,
     onPrimary: kMatteBlack,
     secondary: kGoldDim,
-    onSecondary: kIvory,
-    surface: kSurface,
-    onSurface: kIvory,
-    error: Color(0xFFB54A4A),
-    onError: kIvory,
+    onSecondary: dark ? kIvory : kMatteBlack,
+    surface: dark ? kSurface : const Color(0xFFFFFDF8),
+    onSurface: dark ? kIvory : const Color(0xFF1A1814),
+    error: const Color(0xFFB54A4A),
+    onError: dark ? kIvory : const Color(0xFF1A1814),
   );
   return ThemeData(
     useMaterial3: true,
-    brightness: Brightness.dark,
+    brightness: brightness,
     colorScheme: scheme,
-    scaffoldBackgroundColor: kMatteBlack,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: kMatteBlack,
-      foregroundColor: kGold,
+    scaffoldBackgroundColor: dark ? kMatteBlack : const Color(0xFFF4F0E6),
+    appBarTheme: AppBarTheme(
+      backgroundColor: dark ? kMatteBlack : const Color(0xFFF4F0E6),
+      foregroundColor: dark ? kGold : const Color(0xFF1A1814),
       elevation: 0,
       centerTitle: false,
     ),
+    focusColor: kGold,
     cardTheme: CardThemeData(
-      color: kSurface,
+      color: scheme.surface,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -40,7 +42,7 @@ ThemeData buildAppTheme() {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF1A1A1A),
+      fillColor: dark ? const Color(0xFF1A1A1A) : const Color(0xFFFFFDF8),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),

@@ -65,7 +65,7 @@ def test_cli_export_import(tmp_path: Path, capsys, monkeypatch) -> None:
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["receipts"][0]["hash"]
     data2 = tmp_path / "data2"
-    assert main(["--data-dir", str(data2), "import", "--file", str(out)]) == 0
+    assert main(["--data-dir", str(data2), "import", "--file", str(out), "--json"]) == 0
     imported = json.loads(capsys.readouterr().out)
     assert imported["loaded"] == 1
     assert imported["failed"] == []

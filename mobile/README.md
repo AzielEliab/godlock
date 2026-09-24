@@ -1,8 +1,13 @@
 # GodLock — iPhone & Android
 
-Mint and list Specified Fit / GodLock-score receipts on device (uuid, UTC, logical grid nodes, SHA-256). Resilience counter. Heuristic Jeeves note. In-memory.
+Record a test on this phone and keep a receipt for this session.
+Author: Aziel Eliab
 
-Offline. No analytics. Dark matte / gold.
+## Start
+
+1. `cd mobile`
+2. `flutter create --org com.azieeliab --project-name godlock . && flutter pub get`
+3. `flutter run`
 
 Application id: `com.azieeliab.godlock`
 
@@ -21,9 +26,9 @@ flutter run
 Then open `android/` in Android Studio, or `ios/Runner.xcworkspace` in
 Xcode.
 
-## Honest scope
+## Notes
 
-NOT an anonymity network. No IP hiding, no Tor, no proxy, no ghosting. Logical node names only.
+Offline. Receipts stay on the device for the session. Logical node names only. GodLock is a product name (Specified Fit stress-test and resilience engine). Not a VPN, ghost net, or anonymity tool. Author: Aziel Eliab.
 
 ## Desktop package (counted download)
 

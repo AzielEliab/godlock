@@ -41,7 +41,7 @@ import { actReceiptsSection } from "./actReceipts.js";
 import { ingestTipSection, pasteHashSection } from "./ingestReceipt.js";
 
 export const CSS = `
-:root{--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#a89880;--line:#3a3228;--gold:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870}
+:root{color-scheme:dark;--bg:#12100c;--paper:#1b1712;--ink:#efe6d6;--muted:#c4b49a;--line:#3a3228;--gold:#c9a227;--gold-fill:#c9a227;--yes:#7dcea0;--no:#e07a7a;--rev:#e0b15a;--card:#19150f;--royal:#6b3fa0;--royal-deep:#4a2870;--aziel:#e4ccff;--focus:#f0d78c;--field:#16130f;--track:#2a241c;--chip:#2a241c}
 *{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--ink);max-width:100%;overflow-x:hidden}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;line-height:1.5;overflow-wrap:anywhere;overflow-x:hidden}
@@ -52,16 +52,16 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;lin
 .nav2{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;margin:0 0 14px;font-size:14px}
 .nav2 .sep{color:var(--muted);margin:0 8px;flex:0 0 auto}
 .nav2 a{flex:0 1 auto}
-.nav2 a.aziel,.nav2 a.aziel:visited{color:var(--royal);font-weight:700}
-.nav2 a.aziel:hover{color:var(--royal-deep)}
+.nav2 a.aziel,.nav2 a.aziel:visited{color:var(--aziel);font-weight:700}
+.nav2 a.aziel:hover{color:var(--gold)}
 .ecosystem{margin:0 0 16px;font-size:13px;color:var(--muted)}
 .ecosystem p{margin:0 0 6px}
 .ecosystem ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 14px}
 .ecosystem a.secondary{color:var(--muted);font-weight:400}
 footer .ecosystem{margin:16px 0 0}
-.about-aziel,.about-aziel p,.about-prose,.about-sign{color:var(--royal)}
-.about-aziel h1,.about-aziel h2{color:var(--royal)}
-.about-aziel a{color:var(--royal)}
+.about-aziel,.about-aziel p,.about-prose,.about-sign{color:var(--aziel)}
+.about-aziel h1,.about-aziel h2{color:var(--aziel)}
+.about-aziel a{color:var(--aziel)}
 .about-aziel a:hover{color:var(--gold)}
 .about-sign{font-weight:700;margin-top:18px}
 .soft-heading{margin:4px 0 14px;font-size:22px;letter-spacing:-.02em}
@@ -75,7 +75,7 @@ footer .ecosystem{margin:16px 0 0}
 .soft-meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}
 .soft-links{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 0}
 .soft-card.featured{border-color:var(--gold)}
-.pill{border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;background:#2a241c;color:var(--ink);border:1px solid var(--line)}
+.pill{border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;background:var(--chip);color:var(--ink);border:1px solid var(--line)}
 .pill.yes{background:#14261c;color:var(--yes);border-color:#2e6b45}
 .pill.no{background:#2a1414;color:var(--no);border-color:#8a2b2b}
 .pill.review{background:#2a2210;color:var(--rev);border-color:#8a5a2b}
@@ -89,19 +89,19 @@ footer .ecosystem{margin:16px 0 0}
 .scorebox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 16px;display:flex;flex-wrap:wrap;gap:18px}
 .scorebox .n{font-size:32px;font-weight:800;letter-spacing:-.03em}
 .scorebox .k{color:var(--muted);font-size:13px}
-.steer{background:var(--paper);border:1px solid var(--gold);border-radius:14px;padding:16px;margin:0 0 16px}
+.steer{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 16px}
 .steer h2{margin:0 0 6px;font-size:18px}
 .steer-leader{margin:0 0 12px;font-size:18px;font-weight:800;letter-spacing:-.02em}
 .steer-list{list-style:none;padding:0;margin:0 0 10px}
 .steer-list li{margin:0 0 10px}
 .steer-row{display:flex;justify-content:space-between;gap:12px;font-size:14px;align-items:baseline}
-.steer-track{height:12px;background:#2a241c;border-radius:999px;overflow:hidden;margin-top:4px}
+.steer-track{height:12px;background:var(--track);border-radius:999px;overflow:hidden;margin-top:4px}
 .steer-bar{height:100%;background:#8a7340;border-radius:999px;min-width:0}
 .steer-list li.is-leader .steer-row span:first-child{font-weight:800}
 .steer-list li.is-leader .steer-bar{background:var(--gold)}
 form.challenge{margin:0 0 18px}
-textarea{width:100%;min-height:140px;background:#16130f;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:14px;font:inherit;resize:vertical}
-button,.button{background:var(--gold);color:#14110a;border:0;padding:12px 18px;border-radius:12px;font:inherit;font-size:16px;font-weight:750;cursor:pointer;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+textarea{width:100%;min-height:140px;background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:14px;font:inherit;resize:vertical}
+button,.button{background:var(--gold-fill);color:#14110a;border:0;padding:12px 18px;border-radius:12px;font:inherit;font-size:16px;font-weight:750;cursor:pointer;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 button.ghost,.button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 0}
 .card,.answer{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
@@ -115,11 +115,11 @@ button.ghost,.button.ghost{background:transparent;color:var(--ink);border:1px so
 .prior a{color:var(--gold);text-decoration:none}
 .prior .challenge-preview{margin:6px 0;white-space:pre-wrap;word-break:break-word}
 .answer .challenge-text{white-space:pre-wrap;word-break:break-word}
-pre.verify{white-space:pre-wrap;word-break:break-word;background:#16130f;border:1px solid var(--line);border-radius:12px;padding:14px;overflow:auto;color:var(--ink)}
+pre.verify{white-space:pre-wrap;word-break:break-word;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:14px;overflow:auto;color:var(--ink)}
 .ok{color:var(--yes);font-weight:700}
 .bad{color:var(--no);font-weight:700}
 a{color:var(--gold)}
-footer{margin-top:36px;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;overflow-wrap:anywhere}
 .donate-sign{font-weight:700;margin-top:18px}
 .donate-rails{display:grid;grid-template-columns:1fr;gap:12px;margin:0 0 18px}
 .donate-rail h3{margin:0 0 8px;font-size:18px}
@@ -139,13 +139,35 @@ footer{margin-top:36px;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
 .act-receipts .k{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:10px 0 4px}
 .act-receipts .act-field{margin:0 0 6px}
 .act-receipts .act-meta{margin:0 0 6px;font-size:13px}
+.nav2{gap:8px}
+.nav2 .sep{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.nav2 a{text-decoration:none;color:var(--ink);border:1px solid var(--line);background:transparent;border-radius:999px;padding:8px 12px;min-height:44px;display:inline-flex;align-items:center}
+.nav2 a:hover{border-color:var(--gold);color:var(--gold)}
+.nav2 a.current{border-color:var(--gold);background:var(--paper)}
+.hero{margin:2px 0 20px}
+.hero .lede{margin:0 0 16px;font-size:1.25rem;line-height:1.45;max-width:36rem;color:var(--ink)}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin:0}
+.hero-actions .button{font-size:1.125rem;padding:14px 28px;min-height:48px;min-width:11rem}
+.wrap.home .brand{font-size:2rem;letter-spacing:-.03em}
+.ecosystem{font-size:12px}
+a:focus-visible,button:focus-visible,.button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
 @media (max-width:720px){
   .wrap{padding:16px 14px 72px}
   .stats{grid-template-columns:1fr 1fr}
   .brandrow{gap:8px}
   .brand{width:auto;font-size:22px;flex:1 1 auto;min-width:0}
   button,.button{width:100%}
-  .actions{flex-direction:column}
+  .actions,.hero-actions{flex-direction:column}
+}
+@media (prefers-color-scheme:light){
+  :root{color-scheme:light;--bg:#f6f1e7;--paper:#fffdf8;--ink:#1c160f;--muted:#5a4e3e;--line:#d9cbb6;--gold:#7a5a00;--gold-fill:#c9a227;--yes:#0d6b3a;--no:#9d1c1c;--rev:#7a4e00;--card:#fffdf8;--aziel:#5c2d96;--focus:#5c4300;--field:#fffdf8;--track:#e7dcc8;--chip:#efe6d4}
+  .pill.yes{background:#e5f6ec;color:#0d6b3a;border-color:#8fceb0}
+  .pill.no{background:#fdecec;color:#9d1c1c;border-color:#e7b0b0}
+  .pill.review{background:#fbf3e4;color:#7a4e00;border-color:#e4c48a}
+  .pill.interesting{background:#fbf6e8;color:#7a5a00;border-color:#e4c48a}
+  .pill.ok{background:#e5f6ec;color:#0d6b3a;border-color:#8fceb0}
+  .steer-bar{background:#8a7340}
+  .steer-list li.is-leader .steer-bar{background:var(--gold-fill)}
 }
 `;
 
@@ -237,6 +259,11 @@ export function brandRow() {
   return `<div class="brandrow"><img class="brandmark" src="${esc(BRAND_MARK_PATH)}" width="40" height="40" alt="" decoding="async" fetchpriority="high"><div class="brand">GodLock</div><span class="pill">HTTPS engine</span></div>`;
 }
 
+/** Home hero: name is the brand row. One line, then one-click Download and Softwares. */
+export function homeHero() {
+  return `<header class="hero"><p class="lede">GodLock does not argue. It records, analyzes, hardens, and grows.</p><p class="hero-actions"><a class="button" href="${esc(DOWNLOAD)}">Download</a><a class="button ghost" href="${esc(SOFTWARE_PATH)}">Softwares</a></p></header>`;
+}
+
 export function topNav(path) {
   const here = String(path || "/");
   const items = navItems();
@@ -260,9 +287,12 @@ export function ecosystemNav() {
 export function page(title, body, { path, kind, extraHeaders, indexable, products } = {}) {
   const p = path || "/";
   const docTitle = documentTitle(title, kind);
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(docTitle)}</title>${headMeta({ title, path: p, kind, indexable, products })}<style>${CSS}</style></head><body><div class="wrap">
+  const home = kind === "home" || p === "/";
+  const hero = home ? homeHero() : "";
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(docTitle)}</title>${headMeta({ title, path: p, kind, indexable, products })}<style>${CSS}</style></head><body><div class="wrap${home ? " home" : ""}">
 ${brandRow()}
 <p class="author">Author Aziel Eliab</p>
+${hero}
 ${topNav(p)}
 ${ecosystemNav()}
 ${body}

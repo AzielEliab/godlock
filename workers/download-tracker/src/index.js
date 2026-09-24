@@ -394,7 +394,7 @@ async function indexHtml(env) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GodLock — Aziel Eliab</title>
-<meta name="description" content="Specified Fit stress-test and resilience engine by Aziel Eliab; not a VPN, ghost net, or anonymity tool.">
+<meta name="description" content="Specified Fit stress-test and resilience engine by Aziel Eliab. It records, analyzes, hardens, and grows.">
 <meta name="author" content="Aziel Eliab">
 <link rel="canonical" href="https://godlock-download-tracker.vibelock.workers.dev/">
 <link rel="alternate" href="/cite.json" type="application/json">
@@ -402,7 +402,7 @@ async function indexHtml(env) {
 <link rel="alternate" href="/ai.txt" type="text/plain">
 <link rel="alternate" href="/openapi.json" type="application/json" title="OpenAPI">
 <meta property="og:title" content="GodLock — Aziel Eliab">
-<meta property="og:description" content="Specified Fit stress-test and resilience engine by Aziel Eliab; not a VPN, ghost net, or anonymity tool.">
+<meta property="og:description" content="Specified Fit stress-test and resilience engine by Aziel Eliab. It records, analyzes, hardens, and grows.">
 <meta property="og:url" content="https://godlock-download-tracker.vibelock.workers.dev/">
 <meta property="og:type" content="website">
 <script type="application/ld+json">
@@ -418,97 +418,153 @@ async function indexHtml(env) {
   "downloadUrl": "https://godlock-download-tracker.vibelock.workers.dev/download",
   "license": "https://www.apache.org/licenses/LICENSE-2.0",
   "url": "https://godlock-download-tracker.vibelock.workers.dev/",
-  "description": "Specified Fit stress-test and resilience engine by Aziel Eliab; not a VPN, ghost net, or anonymity tool."
+  "description": "Specified Fit stress-test and resilience engine by Aziel Eliab. It records, analyzes, hardens, and grows."
 }
 </script>
 <!-- gitbaby-seo -->
 <style>
-  :root { color-scheme: dark; }
-  body { font: 16px/1.45 system-ui, sans-serif; max-width: 42rem; margin: 3rem auto; padding: 0 1.25rem 4rem; background: #0e1014; color: #e8eaef; }
-  h1 { font-size: 1.75rem; margin: 0 0 .35rem; }
-  .motto { color: #9aa3b2; margin: 0 0 1.5rem; }
-  .card { border: 1px solid #2a3140; border-radius: 12px; padding: 1.25rem 1.35rem; background: #151922; }
-  .nums { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 0 0 1rem; }
-  .count { font-size: 2.2rem; font-variant-numeric: tabular-nums; font-weight: 700; margin: 0; }
-  .count span { display: block; font-size: .95rem; font-weight: 500; color: #9aa3b2; }
-  .kid { font-size: 1.05rem; margin: 0 0 1rem; }
-  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin: 0 0 .85rem; }
-  @media (max-width: 520px) { .btns { grid-template-columns: 1fr; } }
-  a.btn, button.btn { display: block; width: 100%; box-sizing: border-box; text-align: center; font: inherit; font-size: 1.2rem; font-weight: 750; padding: 1rem 1.1rem; border-radius: 10px; border: 0; cursor: pointer; text-decoration: none; }
-  .brandrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 .85rem;min-height:48px}
-  .brandmark{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:0 0 40px;box-shadow:0 0 0 1px #0003,0 0 0 1px #c9a227}
+  :root {
+    color-scheme: dark;
+    --bg: #0b0b0b; --panel: #141414; --ink: #e8e0d0; --muted: #b7c2d0;
+    --line: #2a2414; --gold: #c9a227; --gold-fill: #c9a227; --ink-on-gold: #14110a;
+    --focus: #f0d78c; --field: #0e0e0e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body { font: 16px/1.5 system-ui, "Segoe UI", sans-serif; }
+  a { color: var(--gold); }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  code, pre { font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .wrap { max-width: 42rem; margin: 0 auto; padding: 1.4rem 1.2rem 4rem; }
+  .brandrow { display: flex; align-items: center; gap: 12px; margin: 0 0 8px; min-height: 48px; }
+  .brandmark { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; flex: 0 0 40px; box-shadow: 0 0 0 1px #d4af3733; }
+  .stamp { margin: 0 0 8px; color: var(--gold); font-size: .88rem; letter-spacing: .02em; }
+  h1 { font-size: 2rem; letter-spacing: .02em; margin: 0 0 .2rem; }
+  .motto { color: var(--gold); font-style: italic; margin: 0 0 .7rem; }
+  .lede { color: var(--muted); margin: 0 0 1rem; max-width: 40rem; }
+  nav.toc { display: flex; flex-wrap: wrap; gap: .55rem; margin: 0 0 1.1rem; }
+  nav.toc a { text-decoration: none; color: var(--ink); border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: .45rem .75rem; min-height: 44px; display: inline-flex; align-items: center; font-size: .88rem; }
+  .card, .cite { border: 1px solid var(--line); border-radius: 14px; padding: 1.15rem 1.2rem 1.25rem; background: var(--panel); margin: 0 0 1.1rem; }
+  h2 { font-size: 1.12rem; margin: 0 0 .45rem; letter-spacing: .02em; }
+  .kicker { display: block; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin-bottom: .15rem; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .nums { display: grid; grid-template-columns: 1fr; gap: .8rem; margin: 0 0 1rem; }
+  .count { font-size: 2.1rem; font-variant-numeric: tabular-nums; font-weight: 700; margin: 0; }
+  .count .lbl { display: block; font-size: .92rem; font-weight: 500; color: var(--muted); }
+  .btns { display: grid; grid-template-columns: 1fr; gap: .75rem; margin: 0 0 .85rem; }
+  a.btn, button.btn { display: block; width: 100%; box-sizing: border-box; text-align: center; font: inherit; font-size: 1.15rem; font-weight: 750; padding: 1rem 1.1rem; min-height: 44px; border-radius: 10px; border: 0; cursor: pointer; text-decoration: none; }
   a.btn.primary { background: #e8eaef; color: #0e1014; }
-  button.btn.install { background: #c9a227; color: #14110a; }
+  button.btn.install { background: var(--gold-fill); color: var(--ink-on-gold); }
   button.btn.install.copied { background: #7dcf9a; color: #0e1014; }
-  .meta { margin-top: 1.1rem; color: #9aa3b2; font-size: .92rem; }
-  .meta a { color: #c9d4ff; }
-  .iso { margin-top: .85rem; font-size: .85rem; color: #7d8696; }
-  .banner { border: 1px solid #5c4a1a; background: #241c0d; color: #f0d78c; padding: .85rem 1rem; border-radius: 8px; margin: 0 0 1.2rem; font-size: .92rem; }
-  pre { background: #0e1014; padding: .75rem .9rem; overflow: auto; border-radius: 8px; font-size: .82rem; }
-  code { font-size: .88rem; }
-
-  .cite { margin-top: 1.4rem; padding-top: 1rem; border-top: 1px solid #2a3140; }
-  .cite h2 { font-size: 1.05rem; margin: 0 0 .4rem; }
-  .cite p { color: #c5ccd8; font-size: .95rem; }
-  .cite a { color: #c9d4ff; }
+  pre { background: var(--field); color: var(--ink); padding: .75rem .9rem; overflow: auto; border-radius: 8px; font-size: .82rem; border: 1px solid var(--line); }
+  .meta, .iso { margin: .85rem 0 0; color: var(--muted); font-size: .92rem; }
+  details { margin-top: 1rem; }
+  summary { cursor: pointer; color: var(--ink); }
+  footer { color: var(--muted); font-size: .9rem; margin-top: .4rem; }
+  @media (min-width: 640px) {
+    .nums { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .btns { grid-template-columns: 1fr 1fr; }
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      color-scheme: light;
+      --bg: #f6f1e7; --panel: #fffdf8; --ink: #1c160f; --muted: #5a4e3e;
+      --line: #d9cbb6; --gold: #7a5a00; --gold-fill: #c9a227; --ink-on-gold: #14110a;
+      --focus: #5c4300; --field: #fffdf8;
+    }
+  }
 </style>
 <body>
-  <div class="brandrow"><img class="brandmark" src="/sigil.png" width="40" height="40" alt="" decoding="async"></div>
-  <h1>GodLock</h1>
-  <p class="motto">GodLock does not argue. It records, analyzes, hardens, and grows. Author Aziel Eliab.</p>
-  <p class="banner">GodLock is a product name (Specified Fit stress-test and resilience engine), not an identity label. Author: Aziel Eliab. Not a VPN. Not a ghost net. Not anonymity. Logical GodLock receipts only. Public reasoning: Specified Fit, Not Pretty Spirals.</p>
-  <div class="card">
+<div class="wrap">
+  <header>
+    <div class="brandrow"><img class="brandmark" src="/sigil.png" width="40" height="40" alt="" decoding="async"></div>
+    <p class="stamp">Author Aziel Eliab</p>
+    <h1>GodLock</h1>
+    <p class="motto">GodLock does not argue. It records, analyzes, hardens, and grows.</p>
+    <p class="lede">Specified Fit stress-test and resilience engine. Download saves the gzip. Install runs on this computer.</p>
+    <nav class="toc" aria-label="Product">
+      <a href="#install">Download</a>
+      <a href="https://godlock.uk/software">Softwares</a>
+      <a href="https://godlock.uk/">Engine</a>
+      <a href="/openapi.json">OpenAPI</a>
+      <a href="${GITHUB_REPO}">GitHub</a>
+    </nav>
+  </header>
+  <section class="card" id="install">
+    <h2><span class="kicker">Counted package</span>Download and one-click install</h2>
     <div class="nums">
-      <p class="count">${v}<span>Views</span></p>
-      <p class="count">${n}<span>Downloads</span></p>
+      <p class="count"><span id="Nodes">—</span>/<span id="LiveNodes">—</span><span class="lbl">Nodes / Live Nodes</span></p>
+      <p class="count">${v}<span class="lbl">Views</span></p>
+      <p class="count">${n}<span class="lbl">Downloads</span></p>
     </div>
-    <p class="kid"><strong>Two big buttons.</strong> Download saves the gzip (the Downloads number goes up). One-click install copies a Terminal command. After it finishes, type <code>godlock ui</code>, open http://127.0.0.1:8080, and tap Record, Verify, Import JSON, or Export JSON.</p>
+    <p class="lede">Download saves the gzip from this Worker (the Downloads number goes up). One-click install copies a Terminal command. Then run <code>godlock ui</code> and open http://127.0.0.1:8080 on this computer. Tap Record, Verify, Import JSON, or Export JSON.</p>
     <div class="btns">
       <a class="btn primary dl" href="/download?asset=${DEFAULT_ASSET}">Download</a>
       <button type="button" class="btn install" id="install-btn">One-click install</button>
     </div>
     <pre id="install-cmd">curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash</pre>
-    <p class="kid">Then run: <code>godlock ui</code> and open http://127.0.0.1:8080 (this computer only). Tap Record, Verify, Import JSON, or Export JSON. <code>godlock doctor</code> prints PASS or FAIL.</p>
-    <p class="meta">The download count ticks on the Download click. The Worker serves the gzip (HTTP 200). No 302 to GitHub. Forks using this same link are counted automatically. ${DEFAULT_ASSET} — ${n} counted.</p>
-    <p class="iso">Isolated counter: Worker <code>godlock-download-tracker</code>, project <code>godlock</code>, KV <code>GODLOCK_DOWNLOADS</code>. Not mixed with any other product. /v1 does not increment downloads.</p>
-    
-    <p class="kid">Works with ChatGPT (GPT Actions / OpenAI), Grok (xAI), Venice, Claude (Anthropic), Cursor (MCP), Glama (MCP), Perplexity, Microsoft Copilot / Bing, Google Gemini / Vertex, Mistral, Meta AI, Apple Intelligence surfaces, Amazon Q tooling, DuckAssist, You.com, Cohere, and other MCP/OpenAPI-capable assistants.</p>
+    <p class="lede">Then run <code>godlock ui</code>. <code>godlock doctor</code> prints PASS or FAIL.</p>
+    <p class="meta">The download count ticks on the Download click. The Worker serves the gzip (HTTP 200). Forks using this same link are counted. ${DEFAULT_ASSET} — ${n} counted.</p>
+    <p class="iso">Isolated counter: Worker <code>godlock-download-tracker</code>, project <code>godlock</code>, KV <code>GODLOCK_DOWNLOADS</code>. /v1 does not increment downloads.</p>
     <p class="meta"><a href="/stats">JSON stats</a> · <a href="/openapi.json">OpenAPI</a> · <a href="/v1/skill">Skill</a> · <a href="/ai">AI runtime</a> · <a href="${GITHUB_REPO}">GitHub</a> · <a href="${GITHUB_LATEST}">releases</a></p>
-    <script>
-      (function () {
-        var cmd = "curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash";
-        var btn = document.getElementById("install-btn");
-        var pre = document.getElementById("install-cmd");
-        if (!btn) return;
-        btn.addEventListener("click", function () {
-          function done(ok) {
-            btn.textContent = ok ? "Copied! Paste in Terminal, then run godlock ui" : "Select the command, copy it, then run godlock ui";
-            btn.classList.add("copied");
+    <details>
+      <summary>Branches and forks</summary>
+      <ul>${breakdown}</ul>
+    </details>
+  </section>
+  <section class="cite" id="cite">
+    <h2>How to cite</h2>
+    <p>Aziel Eliab. GodLock. https://github.com/AzielEliab/godlock. https://godlock-download-tracker.vibelock.workers.dev.</p>
+    <p><a href="https://aziel-runtime.vibelock.workers.dev/">Catalog</a> · <a href="https://aziel-runtime.vibelock.workers.dev/v1/software">Software</a> · <a href="https://github.com/AzielEliab/godlock">GitHub</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/download">Download</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/cite.json">cite.json</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/llms.txt">llms.txt</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/openapi.json">OpenAPI</a></p>
+  </section>
+  <footer>Aziel Eliab · <a href="https://godlock.uk/">godlock.uk</a> · <a href="https://godlock.uk/software">Softwares</a></footer>
+</div>
+<script>
+  (function () {
+    var cmd = "curl -fsSL https://godlock-download-tracker.vibelock.workers.dev/install.sh | bash";
+    var btn = document.getElementById("install-btn");
+    var pre = document.getElementById("install-cmd");
+    if (btn) {
+      btn.addEventListener("click", function () {
+        function done(ok) {
+          btn.textContent = ok ? "Copied! Paste in Terminal, then run godlock ui" : "Select the command, copy it, then run godlock ui";
+          btn.classList.add("copied");
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(cmd).then(function () { done(true); }).catch(function () { done(false); });
+        } else {
+          done(false);
+          if (pre && window.getSelection) {
+            var r = document.createRange();
+            r.selectNodeContents(pre);
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(r);
           }
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(cmd).then(function () { done(true); }).catch(function () { done(false); });
-          } else {
-            done(false);
-            if (pre && window.getSelection) {
-              var r = document.createRange();
-              r.selectNodeContents(pre);
-              var sel = window.getSelection();
-              sel.removeAllRanges();
-              sel.addRange(r);
-            }
-          }
-        });
-      })();
-    </script>
-    <h2>Per repo / branch / fork</h2>
-    <ul>${breakdown}</ul>
-  </div>
-
-<section class="cite" id="cite">
-  <h2>How to cite</h2>
-  <p>Aziel Eliab. GodLock. https://github.com/AzielEliab/godlock. https://godlock-download-tracker.vibelock.workers.dev.</p>
-  <p><a href="https://aziel-runtime.vibelock.workers.dev/">Catalog</a> · <a href="https://aziel-runtime.vibelock.workers.dev/v1/software">Software</a> · <a href="https://github.com/AzielEliab/godlock">GitHub</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/download">Download</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/cite.json">cite.json</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/llms.txt">llms.txt</a> · <a href="https://godlock-download-tracker.vibelock.workers.dev/openapi.json">OpenAPI</a></p>
-</section>
+        }
+      });
+    }
+    var nodesEl = document.getElementById("Nodes");
+    var liveEl = document.getElementById("LiveNodes");
+    if (!nodesEl || !liveEl || typeof fetch !== "function") return;
+    function asCount(v) {
+      return typeof v === "number" && isFinite(v) && v >= 0 ? Math.floor(v) : null;
+    }
+    fetch("https://aziel-runtime.vibelock.workers.dev/v1/mesh", { headers: { Accept: "application/json" } })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        j = j || {};
+        var nodes = asCount(j.nodes);
+        if (nodes == null && (asCount(j.human_mesh_users) != null || asCount(j.human_uses) != null)) {
+          nodes = (asCount(j.human_mesh_users) || 0) + (asCount(j.human_uses) || 0);
+        }
+        var live = asCount(j.live_nodes);
+        if (live == null && j.rollup && asCount(j.rollup.mesh) != null) live = asCount(j.rollup.mesh);
+        if (nodes != null) nodesEl.textContent = String(nodes);
+        if (live != null) liveEl.textContent = String(live);
+      })
+      .catch(function () {});
+  })();
+</script>
 <!-- /gitbaby-seo -->
 </body>
 </html>`;

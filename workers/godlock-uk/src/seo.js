@@ -3,7 +3,7 @@ import { hideInternalDetermination } from "./publicCopy.js";
 import { ingestCiteFields, ingestLlmsSection } from "./ingestReceipt.js";
 import { shelvesCiteFields, shelvesLlmsSection } from "./shelves.js";
 import { redlineCiteFields, redlineLlmsSection } from "./redline.js";
-import { launchCiteFields, launchLlmsSection, LAUNCH_READY_NOTE } from "./launchReady.js";
+import { launchCiteFields, launchLlmsSection, launchReadyNoteFrom, LAUNCH_READY_NOTE, RUNTIME_SOT } from "./launchReady.js";
 import { survivalCiteFields, survivalLlmsSection } from "./survival.js";
 
 export const CANON_HOST = "https://godlock.uk";
@@ -154,9 +154,9 @@ export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
 export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
-/** Live origin GET /v1/health + /v1/runtime.json. SoT main 6a3798a / version_id 105fa1ee. Changelog stays below the abstract. */
+/** Live origin GET /v1/health + /v1/runtime.json. SoT main 231b02f / 2.0.0-rc1. Changelog stays below the abstract. */
 export const RUNTIME_VERSION = "2.0.0-rc1";
-export { RUNTIME_GIT_SHA, RUNTIME_GIT_SHA_SHORT, RUNTIME_VERSION_ID, RUNTIME_SOT } from "./launchReady.js";
+export { RUNTIME_GIT_SHA, RUNTIME_GIT_SHA_SHORT, RUNTIME_SOT } from "./launchReady.js";
 /** Crawler lead copy after aziel-runtime #146+#148. Designed-purpose only. */
 export const RUNTIME_ABSTRACT =
   "Aziel Runtime is a node-meshed orchestration suite of MCP-connected software designed to route catalog Softwares through the FragGate door, mint receipts, and coordinate mesh presence. Use it to list, describe, and call product operations over MCP or OpenAPI, then keep the returned receipt. It exists so each Softwares product stays a separate engine behind one door.";
@@ -1503,7 +1503,9 @@ export function isIndexCrawler(ua) {
   return /Googlebot|Google-Extended|bingbot|GPTBot|ChatGPT|OAI-SearchBot|ClaudeBot|Claude-Search|Perplexity|Applebot|Amazonbot|DuckDuck|DuckAssist|Bytespider|CCBot|cohere|Yandex|Baiduspider|Slurp|FacebookBot|Meta-External|YouBot|MistralAI|Cloudflare-AI-Search|Firecrawl|Imagesift|TikTokSpider|peer39/i.test(String(ua || ""));
 }
 
-export function defaultDescription(kind) {
+export function defaultDescription(kind, runtimeCite) {
+  const launchNote = runtimeCite && runtimeCite.cite ? launchReadyNoteFrom(runtimeCite) : LAUNCH_READY_NOTE;
+  const suiteVersion = runtimeCite && runtimeCite.version ? runtimeCite.version : RUNTIME_VERSION;
   if (kind === "verify") return hideInternalDetermination("Verify the public GodLock.uk hash-chained ledger. Append-only receipts. Author Aziel Eliab.");
   if (kind === "receipt") return hideInternalDetermination("A GodLock.uk receipt. Append-only. Author Aziel Eliab.");
   if (kind === "aziel") {
@@ -1520,7 +1522,7 @@ export function defaultDescription(kind) {
     return hideInternalDetermination(
       SOFTWARE_HTML_SUITE_NOTE
         + " "
-        + LAUNCH_READY_NOTE
+        + launchNote
         + " "
         + AI_CLIENTS_SENTENCE
         + " Author Aziel Eliab.",
@@ -1529,12 +1531,12 @@ export function defaultDescription(kind) {
   if (kind === "runtime") {
     return hideInternalDetermination(
       RUNTIME_ABSTRACT
-        + " " + RUNTIME_NAME + " " + RUNTIME_VERSION
+        + " " + RUNTIME_NAME + " " + suiteVersion
         + " (aziel-runtime) on GodLock.uk. Same-origin /runtime/* proxies the live catalog door. OpenAPI "
         + PUBLIC_RUNTIME + "/openapi.json · MCP POST " + PUBLIC_RUNTIME + "/mcp. Suite mesh (QNM-BUILD-1.0, read-only, on; live|locked|isolated counts only; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse): "
         + PUBLIC_RUNTIME + "/v1/mesh. GET /v1/mesh never enables. Read-only suite presence. Phoenix local only — die-with-pull does not bring godlock.uk back. API uses log: "
         + PUBLIC_RUNTIME + "/v1/uses (this door only; not GodLock product Uses). "
-        + LAUNCH_READY_NOTE + " "
+        + launchNote + " "
         + AI_CLIENTS_SENTENCE + " Author Aziel Eliab.",
     );
   }
@@ -1847,7 +1849,7 @@ export function headMeta(opts) {
   const kind = opts.kind || "";
   const indexable = opts.indexable !== false && kind !== "notfound";
   const docTitle = documentTitle(title, kind);
-  const description = hideInternalDetermination(opts.description || defaultDescription(kind));
+  const description = hideInternalDetermination(opts.description || defaultDescription(kind, opts.runtimeCite));
   const url = CANON_HOST + path;
   const ld = jsonLd(title, path, description, kind, opts.products);
   const ldOpen = "<" + "script type=" + Q + "application/ld+json" + Q + ">";
@@ -2254,7 +2256,7 @@ export async function sitemapXml(env, extras = {}) {
     + "\n</urlset>\n";
 }
 
-export function citeDoc(sot) {
+export function citeDoc(sot, runtimeCite) {
   return {
     author: AUTHOR,
     author_id: AZIEL_PERSON_ID,
@@ -2499,8 +2501,8 @@ export function citeDoc(sot) {
     sameAs: runtimeSameAs(),
     related: runtimeSameAs(),
     door: "fraggate",
-    runtime_version: RUNTIME_VERSION,
-    ...launchCiteFields(),
+    runtime_version: (runtimeCite && runtimeCite.version) || RUNTIME_VERSION,
+    ...launchCiteFields(runtimeCite),
     kernel: FRAGGATE_KERNEL,
     specified_fit: CANON_HOST + REASON_PATH,
     reason: CANON_HOST + REASON_PATH,
@@ -2518,7 +2520,9 @@ export function citeDoc(sot) {
   };
 }
 
-export function llmsDoc(sot) {
+export function llmsDoc(sot, runtimeCite) {
+  const suiteVersion = (runtimeCite && runtimeCite.version) || RUNTIME_VERSION;
+  const suiteSot = (runtimeCite && runtimeCite.cite) || RUNTIME_SOT;
   return "# GodLock\n\n"
     + "Author: Aziel Eliab\n"
     + "Also known as: Aziel Elroi Eliab | Elias Artista | The Revealer of The Sealed | Revealer of The Sealed\n"
@@ -2641,7 +2645,7 @@ export function llmsDoc(sot) {
     + ingestLlmsSection()
     + shelvesLlmsSection()
     + redlineLlmsSection()
-    + launchLlmsSection()
+    + launchLlmsSection(runtimeCite)
     + survivalLlmsSection(sot)
     + "Aziel Corpus Library: " + LIBRARY_AZIEL + "\n"
     + "Aziel Corpus Library home: " + LIBRARY + "/\n"
@@ -2672,7 +2676,9 @@ export function llmsDoc(sot) {
     + "Update check: " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, use counted " + DOWNLOAD + " (no silent overwrite).\n\n"
     + "## Runtime (FragGate door)\n\n"
     + RUNTIME_ABSTRACT + "\n\n"
-    + "Live version: " + RUNTIME_VERSION + " (certification-point freeze). SoT LIVE: main 6a3798a / version_id 105fa1ee / " + RUNTIME_VERSION + ". Changelog stays below this abstract.\n"
+    + "Live version: " + suiteVersion + " (certification-point freeze). "
+    + ((runtimeCite && runtimeCite.live === false) ? "SoT last-known: " : "SoT LIVE: ")
+    + suiteSot + ". Changelog stays below this abstract.\n"
     + "Try on Glama: " + GLAMA_RUNTIME + " (verified listing AzielEliab/aziel-runtime)\n"
     + "Official Runtime: " + PUBLIC_RUNTIME + "\n"
     + "Source on GitHub: " + GITHUB_RUNTIME + "\n"
@@ -2722,8 +2728,8 @@ export function llmsDoc(sot) {
     + "Public HTML is Allow for User-agent * and named AI/search crawlers (GPTBot, ChatGPT-User, OAI-SearchBot, Venice, Grok, Google-Extended, GoogleOther, Google-CloudVertexBot, Claude*, Perplexity*, bingbot, Meta-External*, FacebookBot, facebookexternalhit, Applebot*, Amazonbot, DuckDuck*, MistralAI-User, YouBot, CCBot, cohere*, Diffbot, AI2Bot*, TikTokSpider, Baiduspider*, YandexBot, and others listed in /robots.txt).\n";
 }
 
-export function aiDoc(sot) {
-  return llmsDoc(sot);
+export function aiDoc(sot, runtimeCite) {
+  return llmsDoc(sot, runtimeCite);
 }
 
 /** Host-root MCP discovery. Points at POST /runtime/mcp. Not a second FragGate door. */
@@ -2775,6 +2781,31 @@ export function siteOpenApi() {
       "/health": { get: { operationId: "godlockUkHealth", summary: "Liveness", responses: { "200": { description: "OK" } } } },
       "/software": { get: { operationId: "godlockUkSoftware", summary: "GodLock Softwares — GodLock first, Aziel Runtime secondary, official listing at azieleliab.com/software", responses: { "200": { description: "HTML or JSON" } } } },
       "/v1/software": { get: { operationId: "godlockUkSoftwareApi", summary: "Same-origin Softwares JSON (Aziel Runtime only; official listing at azieleliab.com/software)", responses: { "200": { description: "OK" } } } },
+      "/v1/sot": { get: { operationId: "godlockUkSotOutlet", summary: "godlock-uk SoT mesh outlet (SOT-SYNC-1.0). Read contract plus last-known cite. Identity Aziel Eliab only.", responses: { "200": { description: "Outlet contract and current cite" } } } },
+      "/v1/sot/sync": {
+        get: { operationId: "godlockUkSotSyncContract", summary: "Same contract as GET /v1/sot", responses: { "200": { description: "Outlet contract" } } },
+        post: {
+          operationId: "godlockUkSotSyncPull",
+          summary: "Pull live GET /v1/software and preview or apply cite strings. dry_run=true previews. confirm=true applies and seals a receipt. Never GET /download. Unreachable keeps last-known.",
+          requestBody: { required: false, content: { "application/json": { schema: { type: "object", properties: { dry_run: { type: "boolean" }, confirm: { type: "boolean" }, outlet_id: { type: "string", enum: ["godlock-uk"] } } } } } },
+          responses: {
+            "200": { description: "Preview, applied cite, or honest unreachable" },
+            "400": { description: "SOT-CONFIRM-REQUIRED, SOT-VERSION-ID-UNEXPOSED, SOT-IDENTITY, or SOT-BAD-SHA" },
+          },
+        },
+      },
+      "/v1/sot/push": {
+        post: {
+          operationId: "godlockUkSotSyncPush",
+          summary: "Accept a runtime sot_sync push for outlet godlock-uk. Updates short sha, full sha, and suite version only. Ignores software cards. Refuses version_id 105fa1ee.",
+          requestBody: { required: true, content: { "application/json": { schema: { type: "object", properties: { outlet_id: { type: "string" }, op: { type: "string" }, git_sha: { type: "string" }, version: { type: "string" }, count: { type: "integer" }, dry_run: { type: "boolean" }, confirm: { type: "boolean" } } } } } },
+          responses: {
+            "200": { description: "Preview or applied cite" },
+            "400": { description: "Gate, identity, sha, or unexposed version_id refusal" },
+            "405": { description: "GET is not a push" },
+          },
+        },
+      },
       "/donate": { get: { operationId: "godlockUkDonate", summary: "AZL-DONATE-1.0 door (static rails; no KV; payment is not a key)", responses: { "200": { description: "HTML or JSON" } } } },
       "/receipts": { get: { operationId: "godlockUkReceipts", summary: "Public questions + hash-chained receipt list (newest first; isolated omitted)", responses: { "200": { description: "HTML or JSON" } } } },
       "/verify": { get: { operationId: "godlockUkVerify", summary: "Walk the public hash-chained ledger; INGEST-AS-RECEIPT paste-hash yes/no against the first-screen tip", responses: { "200": { description: "HTML or JSON" } } } },

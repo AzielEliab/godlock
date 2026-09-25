@@ -1,6 +1,11 @@
 /**
  * Runtime Softwares launch-readiness cite for godlock.uk.
- * SoT is live aziel-runtime main 6a3798a / version_id 105fa1ee / 2.0.0-rc1.
+ * SoT is live aziel-runtime GET /v1/software: main 231b02f / 2.0.0-rc1.
+ * Live Worker git_sha 231b02fcbb7b50fbd52762a49329042bc1715fe9 (read 2026-09-25).
+ * Suite 2.0.0-rc1 stays the certification-point freeze. Count stays 42 on that Worker.
+ * 105fa1ee was the 2026-09-18 isolate label for git 6a3798a. Live GET /v1/software
+ * does not publish that version_id, so it is not cited as the live tip.
+ * Ask Jeeves is not a Softwares slug. Suite help stays FragGate aziel-corpus jeeves.
  * Cite only. Do not invent LIVE shelves, or a GodLock VPN identity.
  * Softwares HTML stays GodLock-first (heading → list). This copy sits after the list.
  * Author: Aziel Eliab only.
@@ -10,14 +15,12 @@ export const AUTHOR = "Aziel Eliab";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
 export const RUNTIME_VERSION = "2.0.0-rc1";
-/** Live origin GET /v1/software git_sha (2026-09-18). Short form matches operator SoT. */
-export const RUNTIME_GIT_SHA = "6a3798af3a94bfba3ed2e7aaadeed8777ea32bb4";
-export const RUNTIME_GIT_SHA_SHORT = "6a3798a";
-/** Cloudflare Workers version_id for the live SoT isolate. Not a git SHA. */
-export const RUNTIME_VERSION_ID = "105fa1ee";
+/** Live origin GET /v1/software git_sha (read 2026-09-25). Short form is the first 7 hex chars. */
+export const RUNTIME_GIT_SHA = "231b02fcbb7b50fbd52762a49329042bc1715fe9";
+export const RUNTIME_GIT_SHA_SHORT = "231b02f";
 export const RUNTIME_SOT_BRANCH = "main";
 export const RUNTIME_SOT =
-  RUNTIME_SOT_BRANCH + " " + RUNTIME_GIT_SHA_SHORT + " / version_id " + RUNTIME_VERSION_ID + " / " + RUNTIME_VERSION;
+  RUNTIME_SOT_BRANCH + " " + RUNTIME_GIT_SHA_SHORT + " / " + RUNTIME_VERSION;
 
 export const GLAMA_RUNTIME = "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime";
 export const CATALOG = "https://aziel-runtime.vibelock.workers.dev";
@@ -46,32 +49,65 @@ export const LAUNCH_SURFACES = Object.freeze([
   "/download suite pack",
 ]);
 
-export const LAUNCH_READY_NOTE =
-  RUNTIME_NAME + " " + RUNTIME_VERSION + " (" + RUNTIME_SOT + ") launch readiness: "
-  + LAUNCH_SURFACES.join(" + ")
-  + ". GodLock is a challenge/score product. Identity is Aziel Eliab. "
-  + "Identity Aziel Eliab only. Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.";
+/** Committed pin. The mesh outlet may overlay sha and suite version after confirm. */
+export function floorRuntimeCite() {
+  return {
+    branch: RUNTIME_SOT_BRANCH,
+    version: RUNTIME_VERSION,
+    git_sha: RUNTIME_GIT_SHA,
+    git_sha_short: RUNTIME_GIT_SHA_SHORT,
+    version_id: null,
+    cite: RUNTIME_SOT,
+    live: true,
+    status: "floor",
+    source: "floor",
+    author: AUTHOR,
+    identity: AUTHOR,
+  };
+}
 
-export const LAUNCH_READY_HTML_NOTE =
-  RUNTIME_NAME + " " + RUNTIME_VERSION + " launch readiness (SoT " + RUNTIME_SOT
-  + "): human UI + MCP fraggate_call + FragGate sole door + mesh/AZVPN (HTTPS/WS REAL; WireGuard/OpenVPN SLOT) "
-  + "+ radios channel cites worker_hardware:false + suite pack /download. "
-  + "GodLock is a challenge/score product. Identity is Aziel Eliab. Identity Aziel Eliab only. "
-  + "Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.";
+export function launchReadyNoteFrom(cite) {
+  const c = cite && cite.cite ? cite : floorRuntimeCite();
+  const version = c.version || RUNTIME_VERSION;
+  const sot = c.cite || RUNTIME_SOT;
+  return RUNTIME_NAME + " " + version + " (" + sot + ") launch readiness: "
+    + LAUNCH_SURFACES.join(" + ")
+    + ". GodLock is a challenge/score product. Identity is Aziel Eliab. "
+    + "Identity Aziel Eliab only. Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.";
+}
+
+export function launchReadyHtmlNoteFrom(cite) {
+  const c = cite && cite.cite ? cite : floorRuntimeCite();
+  const version = c.version || RUNTIME_VERSION;
+  const sot = c.cite || RUNTIME_SOT;
+  return RUNTIME_NAME + " " + version + " launch readiness (SoT " + sot
+    + "): human UI + MCP fraggate_call + FragGate sole door + mesh/AZVPN (HTTPS/WS REAL; WireGuard/OpenVPN SLOT) "
+    + "+ radios channel cites worker_hardware:false + suite pack /download. "
+    + "GodLock is a challenge/score product. Identity is Aziel Eliab. Identity Aziel Eliab only. "
+    + "Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.";
+}
+
+export const LAUNCH_READY_NOTE = launchReadyNoteFrom();
+export const LAUNCH_READY_HTML_NOTE = launchReadyHtmlNoteFrom();
 
 export function runtimeSot() {
   return {
     version: RUNTIME_VERSION,
     git_sha: RUNTIME_GIT_SHA,
     git_sha_short: RUNTIME_GIT_SHA_SHORT,
-    version_id: RUNTIME_VERSION_ID,
     branch: RUNTIME_SOT_BRANCH,
     cite: RUNTIME_SOT,
     live: true,
   };
 }
 
-export function launchReadiness() {
+function citeInput(cite) {
+  return cite && cite.git_sha && cite.cite ? cite : floorRuntimeCite();
+}
+
+export function launchReadiness(cite) {
+  const sot = citeInput(cite);
+  const note = cite && cite.git_sha ? launchReadyNoteFrom(sot) : LAUNCH_READY_NOTE;
   return {
     ok: true,
     spec: "AZRT-WORKER-LAUNCH-1.0",
@@ -80,12 +116,12 @@ export function launchReadiness() {
     identity: AUTHOR,
     runtime: RUNTIME_NAME,
     runtime_slug: RUNTIME_SLUG,
-    runtime_version: RUNTIME_VERSION,
-    runtime_git_sha: RUNTIME_GIT_SHA,
-    runtime_git_sha_short: RUNTIME_GIT_SHA_SHORT,
-    runtime_version_id: RUNTIME_VERSION_ID,
-    runtime_sot: RUNTIME_SOT,
-    runtime_sot_live: true,
+    runtime_version: sot.version || RUNTIME_VERSION,
+    runtime_git_sha: sot.git_sha,
+    runtime_git_sha_short: sot.git_sha_short,
+    runtime_sot: sot.cite,
+    runtime_sot_live: sot.live !== false,
+    runtime_sot_status: sot.status || "floor",
     door: DOOR,
     kernel: FRAGGATE_KERNEL,
     fraggate_call: FRAGGATE_CALL,
@@ -117,20 +153,20 @@ export function launchReadiness() {
     works_with_subsection: false,
     digital_library_chrome: false,
     softwares_heading_then_list: true,
-    note: LAUNCH_READY_NOTE,
+    note,
   };
 }
 
-export function launchCiteFields() {
-  const ready = launchReadiness();
-  const sot = runtimeSot();
-  return {
+export function launchCiteFields(cite) {
+  const ready = launchReadiness(cite);
+  const sot = citeInput(cite);
+  const fields = {
     runtime_git_sha: sot.git_sha,
     runtime_git_sha_short: sot.git_sha_short,
-    runtime_version_id: sot.version_id,
     runtime_sot: sot.cite,
-    runtime_sot_branch: sot.branch,
-    runtime_sot_live: sot.live,
+    runtime_sot_branch: sot.branch || RUNTIME_SOT_BRANCH,
+    runtime_sot_live: sot.live !== false,
+    runtime_sot_status: sot.status || "floor",
     worker_hardware: ready.radios.worker_hardware,
     invented_hardware: ready.radios.invented_hardware,
     suite_download: ready.suite_download,
@@ -145,12 +181,15 @@ export function launchCiteFields() {
     fraggate_sole_door: ready.fraggate_sole_door,
     mcp_fraggate_call: ready.mcp_fraggate_call,
   };
+  if (sot.version_id) fields.runtime_version_id = sot.version_id;
+  return fields;
 }
 
-export function launchLlmsSection() {
-  const ready = launchReadiness();
+export function launchLlmsSection(cite) {
+  const ready = launchReadiness(cite);
+  const sotLabel = ready.runtime_sot_live ? "SoT LIVE: " : "SoT last-known: ";
   return "\n## Softwares + runtime launch readiness\n\n"
-    + "SoT LIVE: " + ready.runtime_sot + ".\n"
+    + sotLabel + ready.runtime_sot + ".\n"
     + ready.note + "\n"
     + "Human UI: yes. MCP door: " + FRAGGATE_CALL + ". FragGate is THE single door (" + FRAGGATE_KERNEL + ").\n"
     + "mesh/AZVPN: HTTPS/WS REAL; WireGuard/OpenVPN SLOT. GET /v1/mesh cites the bind and never opens a session.\n"
@@ -162,8 +201,9 @@ export function launchLlmsSection() {
     + "Identity Aziel Eliab only. No visible 15:20. Lamb Lens. NO-LIE. Growth-ON.\n";
 }
 
-export function launchReadyHtml() {
-  return `<p class="muted launch-ready">${escapeHtml(LAUNCH_READY_HTML_NOTE)}</p>`;
+export function launchReadyHtml(cite) {
+  const note = cite && cite.git_sha ? launchReadyHtmlNoteFrom(cite) : LAUNCH_READY_HTML_NOTE;
+  return `<p class="muted launch-ready">${escapeHtml(note)}</p>`;
 }
 
 function escapeHtml(s) {

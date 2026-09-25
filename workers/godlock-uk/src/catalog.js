@@ -815,18 +815,20 @@ export function softwareNameList(products) {
 export function softwareApiDoc(products, extras = {}) {
   const list = publicSoftwaresList(products, extras);
   const runtime = list.find((p) => p && p.slug === RUNTIME_SLUG);
-  const ready = launchReadiness();
+  const runtimeCite = extras.runtimeCite || null;
+  const ready = launchReadiness(runtimeCite);
+  const pinned = runtimeCite && runtimeCite.version ? runtimeCite.version : null;
   return {
     ok: true,
     product: "GodLock",
     author: AUTHOR,
     identity: AUTHOR,
     source: extras.source || "godlock-uk",
-    runtime_version: citeRuntimeVersion((runtime && runtime.version) || extras.version),
+    runtime_version: citeRuntimeVersion(pinned || (runtime && runtime.version) || extras.version),
     runtime_distribution: runtimeDistribution(),
     runtime_glama: GLAMA_RUNTIME,
     runtime_docs: RUNTIME_DOCS_2_0,
-    ...launchCiteFields(),
+    ...launchCiteFields(runtimeCite),
     launch_ready_note: ready.note,
     via: SOFTWARE_JSON_PATH,
     html: CANON_HOST + SOFTWARE_PATH,

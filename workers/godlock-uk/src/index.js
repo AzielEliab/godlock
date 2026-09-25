@@ -93,6 +93,7 @@ import {
   ChallengeRefuse,
 } from "./challengeText.js";
 import { checkSubmitGuard } from "./submitGuard.js";
+import { handleSotOutlet, isSotOutletPath, loadAppliedCite } from "./sotOutlet.js";
 
 const NODE_COOKIE = "godlock_node";
 const LEDGER_CHALLENGE_PREVIEW = 160;
@@ -664,6 +665,16 @@ export default {
         return html(page("Not found", `<div class="card"><h2>Not found</h2><p><a href="/">Back</a></p></div>`, { path, kind: "notfound" }), { status: 404 });
       }
 
+      if (isSotOutletPath(path)) {
+        return handleSotOutlet(request, env, path);
+      }
+
+      let runtimeCitePromise = null;
+      const runtimeCite = () => {
+        if (!runtimeCitePromise) runtimeCitePromise = loadAppliedCite(env);
+        return runtimeCitePromise;
+      };
+
       if (isRuntimeRequest(url.pathname) || isRuntimeRequest(path)) {
         const runtime = await handleRuntimeRoot(request, url, env, ctx);
         if (runtime) return runtime;
@@ -682,22 +693,23 @@ export default {
         const products = publicSoftwaresList([], { version: RUNTIME_VERSION });
         const runtime = products.find((p) => p && p.slug === "aziel-runtime");
         const sot = await fetchSurvivalSot(env);
+        const pinned = await runtimeCite();
         return json({
-          ...citeDoc(sot),
+          ...citeDoc(sot, pinned),
           official_softwares: OFFICIAL_SOFTWARES,
           software_product_count: products.length,
           software_slugs: products.map((p) => p.slug),
           software_source: "godlock-uk",
-          runtime_version: citeRuntimeVersion((runtime && runtime.version) || RUNTIME_VERSION),
+          runtime_version: citeRuntimeVersion((pinned && pinned.version) || (runtime && runtime.version) || RUNTIME_VERSION),
         });
       }
       if (path === "/llms.txt") {
         const sot = await fetchSurvivalSot(env);
-        return new Response(llmsDoc(sot), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+        return new Response(llmsDoc(sot, await runtimeCite()), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/ai.txt") {
         const sot = await fetchSurvivalSot(env);
-        return new Response(aiDoc(sot), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+        return new Response(aiDoc(sot, await runtimeCite()), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/shelves" || path === "/v1/shelves") {
         return json(shelvesDoc());
@@ -993,11 +1005,13 @@ export default {
             headers: { Location: SOFTWARE_PATH, ...corsHeaders(), ...extraHeadersFor(nodeId) },
           });
         }
-        return json(softwareApiDoc([], { source: "godlock-uk", version: RUNTIME_VERSION }), 200, extraHeadersFor(nodeId));
+        const pinned = await runtimeCite();
+        return json(softwareApiDoc([], { source: "godlock-uk", version: (pinned && pinned.version) || RUNTIME_VERSION, runtimeCite: pinned }), 200, extraHeadersFor(nodeId));
       }
 
       if (path === SOFTWARE_PATH) {
-        const extras = { version: RUNTIME_VERSION, source: "godlock-uk" };
+        const pinned = await runtimeCite();
+        const extras = { version: (pinned && pinned.version) || RUNTIME_VERSION, source: "godlock-uk", runtimeCite: pinned };
         const products = publicSoftwaresHtmlList([], extras);
         if (wantsJson(request, url)) {
           return json({
@@ -1006,7 +1020,7 @@ export default {
             counters_fetched: 0,
           }, 200, extraHeadersFor(nodeId));
         }
-        return html(page("Softwares", softwareBody({ extras }), { path: SOFTWARE_PATH, kind: "software", products }), {
+        return html(page("Softwares", softwareBody({ extras }), { path: SOFTWARE_PATH, kind: "software", products, runtimeCite: pinned }), {
           extraHeaders: extraHeadersFor(nodeId, { "Cache-Control": SOFTWARE_HTML_CACHE_CONTROL }),
         });
       }
@@ -1063,12 +1077,13 @@ export default {
         const prior = await publicReceipts(env, HOME_PRIOR_LIMIT + (rid ? 1 : 0));
         const priorFiltered = (latest ? prior.filter((p) => p.id !== latest.id) : prior).slice(0, HOME_PRIOR_LIMIT);
         if (wantsJson(request, url)) {
+          const pinned = await runtimeCite();
           return json({
             ok: true,
             stats,
             latest: latest ? publicPayload(latest) : null,
             receipts: priorFiltered.map(publicPayload),
-            software: softwareApiDoc([], { source: "godlock-uk", version: RUNTIME_VERSION }),
+            software: softwareApiDoc([], { source: "godlock-uk", version: (pinned && pinned.version) || RUNTIME_VERSION, runtimeCite: pinned }),
             ingest_as_receipt: ingestPublicDoc(),
             re_expand_from_archive: reExpandPublicDoc(),
           });

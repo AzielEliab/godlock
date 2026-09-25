@@ -38,6 +38,7 @@ case "$UPDATE_JSON" in
     echo "Update available (you have ${VERSION}). Counted download (no silent overwrite): ${HOST}/download"
     ;;
 esac
-echo "Run:  godlock ui"
-echo "Then open http://127.0.0.1:8080  (loopback only)"
+echo "Next:"
+echo "  godlock ui"
+echo "  Open http://127.0.0.1:8080 and choose Record."
 echo "Author: Aziel Eliab."

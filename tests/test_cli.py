@@ -20,7 +20,7 @@ def test_cli_version(capsys, monkeypatch) -> None:
 def test_cli_score_and_submit(tmp_path: Path, capsys, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     data = tmp_path / "data"
-    assert main(["--data-dir", str(data), "score", "--text", "lorem ipsum"]) == 0
+    assert main(["--data-dir", str(data), "score", "--text", "lorem ipsum", "--json"]) == 0
     scored = json.loads(capsys.readouterr().out)
     assert "score" in scored
 
@@ -44,9 +44,10 @@ def test_cli_score_and_submit(tmp_path: Path, capsys, monkeypatch) -> None:
     assert payload["counter"] == 1
     capsys.readouterr()  # drain submit stdout
 
-    assert main(["--data-dir", str(data), "stats"]) == 0
+    assert main(["--data-dir", str(data), "stats", "--json"]) == 0
     stats = json.loads(capsys.readouterr().out)
     assert stats["counter"] == 1
+    assert "resilience_score" in stats
 
 
 def test_cli_serve_defaults_loopback() -> None:
@@ -78,6 +79,43 @@ def test_help_lists_ui_and_version() -> None:
     assert "import" in text
     assert "export" in text
     assert "127.0.0.1:8080" in text or "godlock ui" in text
+
+
+def test_bare_command_is_welcome(capsys) -> None:
+    assert main([]) == 0
+    out = capsys.readouterr().out
+    assert "godlock ui" in out
+    assert "doctor" in out
+    assert "Aziel Eliab" in out
+    assert "the following arguments are required" not in out.lower()
+
+
+def test_unknown_command_has_next_step(capsys) -> None:
+    assert main(["bogus"]) == 2
+    err = capsys.readouterr().err
+    assert 'Unknown command "bogus"' in err
+    assert "godlock --help" in err
+    assert "Traceback" not in err
+
+
+def test_submit_missing_text_has_next_step(capsys) -> None:
+    assert main(["submit"]) == 2
+    err = capsys.readouterr().err
+    assert "--text" in err
+    assert "Traceback" not in err
+
+
+def test_score_human_default_and_json(tmp_path: Path, capsys, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    data = str(tmp_path / "data")
+    assert main(["--data-dir", data, "score", "--text", "phi"]) == 0
+    human = capsys.readouterr().out
+    assert "Engagement" in human
+    assert not human.lstrip().startswith("{")
+    assert main(["--data-dir", data, "--json", "score", "--text", "phi"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert "score" in payload
+    assert "hits" in payload
 
 
 def test_cli_ui_refuses_non_loopback(capsys) -> None:

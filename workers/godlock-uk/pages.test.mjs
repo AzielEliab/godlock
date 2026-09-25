@@ -65,7 +65,6 @@ import {
   RUNTIME_VERSION,
   RUNTIME_GIT_SHA,
   RUNTIME_GIT_SHA_SHORT,
-  RUNTIME_VERSION_ID,
   RUNTIME_SOT,
   RUNTIME_ABSTRACT,
   GLAMA_RUNTIME,
@@ -2451,17 +2450,16 @@ describe("receipts UI and public payload", () => {
 });
 
 describe("Hub launch-update parity — Softwares + runtime SoT", () => {
-  it("pins live runtime SoT main 6a3798a / version_id 105fa1ee / 2.0.0-rc1", () => {
+  it("pins live runtime SoT main 231b02f / 2.0.0-rc1", () => {
     assert.equal(RUNTIME_VERSION, "2.0.0-rc1");
-    assert.equal(RUNTIME_GIT_SHA_SHORT, "6a3798a");
-    assert.equal(RUNTIME_GIT_SHA, "6a3798af3a94bfba3ed2e7aaadeed8777ea32bb4");
-    assert.equal(RUNTIME_VERSION_ID, "105fa1ee");
-    assert.equal(RUNTIME_SOT, "main 6a3798a / version_id 105fa1ee / 2.0.0-rc1");
+    assert.equal(RUNTIME_GIT_SHA_SHORT, "231b02f");
+    assert.equal(RUNTIME_GIT_SHA, "231b02fcbb7b50fbd52762a49329042bc1715fe9");
+    assert.equal(RUNTIME_SOT, "main 231b02f / 2.0.0-rc1");
     const cite = citeDoc();
     assert.equal(cite.runtime_version, "2.0.0-rc1");
     assert.equal(cite.runtime_git_sha, RUNTIME_GIT_SHA);
-    assert.equal(cite.runtime_git_sha_short, "6a3798a");
-    assert.equal(cite.runtime_version_id, "105fa1ee");
+    assert.equal(cite.runtime_git_sha_short, "231b02f");
+    assert.equal(cite.runtime_version_id, undefined);
     assert.equal(cite.runtime_sot, RUNTIME_SOT);
     assert.equal(cite.runtime_sot_live, true);
     assert.equal(cite.worker_hardware, false);
@@ -2522,14 +2520,19 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
   it("stamps /v1/software and llms with the same SoT and no LIVE shelf flip", () => {
     const body = softwareApiDoc([]);
     assert.equal(body.runtime_version, "2.0.0-rc1");
-    assert.equal(body.runtime_git_sha_short, "6a3798a");
-    assert.equal(body.runtime_version_id, "105fa1ee");
+    assert.equal(body.runtime_git_sha_short, "231b02f");
+    assert.equal(body.runtime_git_sha, "231b02fcbb7b50fbd52762a49329042bc1715fe9");
+    assert.equal(body.runtime_version_id, undefined);
+    assert.equal(body.product_count, 1);
+    assert.equal(body.suite_count, 1);
+    assert.deepEqual(body.products.map((p) => p.slug), ["aziel-runtime"]);
     assert.equal(body.godlock_is_vpn, false);
     assert.equal(body.worker_hardware, false);
     assert.equal(body.runtime_distribution[0].label, "Try on Glama");
     const llms = llmsDoc();
     assert.match(llms, /## Softwares \+ runtime launch readiness/);
-    assert.match(llms, /SoT LIVE: main 6a3798a \/ version_id 105fa1ee \/ 2\.0\.0-rc1/);
+    assert.match(llms, /SoT LIVE: main 231b02f \/ 2\.0\.0-rc1/);
+    assert.doesNotMatch(llms, /6a3798a|105fa1ee/);
     assert.match(llms, /Framagit stays SLOT CNS-NO-FORGE-MIRROR/);
     assert.match(llms, /Plane C stays SLOT CNS-OPERATOR-ATTEST/);
     assert.match(llms, /No LIVE flip/);
@@ -2537,8 +2540,8 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(llms, /heading → list only/);
     assert.doesNotMatch(llms, /live_ready:\s*true/i);
     const softwareMeta = defaultDescription("software");
-    assert.match(softwareMeta, /6a3798a/);
-    assert.match(softwareMeta, /105fa1ee/);
+    assert.match(softwareMeta, /231b02f/);
+    assert.doesNotMatch(softwareMeta, /6a3798a|105fa1ee/);
     assert.match(defaultDescription("runtime"), /fraggate_call/);
   });
 });

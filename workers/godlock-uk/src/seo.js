@@ -3,7 +3,7 @@ import { hideInternalDetermination } from "./publicCopy.js";
 import { ingestCiteFields, ingestLlmsSection } from "./ingestReceipt.js";
 import { shelvesCiteFields, shelvesLlmsSection } from "./shelves.js";
 import { redlineCiteFields, redlineLlmsSection } from "./redline.js";
-import { launchCiteFields, launchLlmsSection, LAUNCH_READY_NOTE } from "./launchReady.js";
+import { launchCiteFields, launchLlmsSection, LAUNCH_READY_NOTE, RUNTIME_SOT } from "./launchReady.js";
 import { survivalCiteFields, survivalLlmsSection } from "./survival.js";
 
 export const CANON_HOST = "https://godlock.uk";
@@ -154,9 +154,9 @@ export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
 export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
-/** Live origin GET /v1/health + /v1/runtime.json. SoT main 6a3798a / version_id 105fa1ee. Changelog stays below the abstract. */
+/** Live origin GET /v1/health + /v1/runtime.json. SoT main 231b02f / 2.0.0-rc1. Changelog stays below the abstract. */
 export const RUNTIME_VERSION = "2.0.0-rc1";
-export { RUNTIME_GIT_SHA, RUNTIME_GIT_SHA_SHORT, RUNTIME_VERSION_ID, RUNTIME_SOT } from "./launchReady.js";
+export { RUNTIME_GIT_SHA, RUNTIME_GIT_SHA_SHORT, RUNTIME_SOT } from "./launchReady.js";
 /** Crawler lead copy after aziel-runtime #146+#148. Designed-purpose only. */
 export const RUNTIME_ABSTRACT =
   "Aziel Runtime is a node-meshed orchestration suite of MCP-connected software designed to route catalog Softwares through the FragGate door, mint receipts, and coordinate mesh presence. Use it to list, describe, and call product operations over MCP or OpenAPI, then keep the returned receipt. It exists so each Softwares product stays a separate engine behind one door.";
@@ -2672,7 +2672,7 @@ export function llmsDoc(sot) {
     + "Update check: " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, use counted " + DOWNLOAD + " (no silent overwrite).\n\n"
     + "## Runtime (FragGate door)\n\n"
     + RUNTIME_ABSTRACT + "\n\n"
-    + "Live version: " + RUNTIME_VERSION + " (certification-point freeze). SoT LIVE: main 6a3798a / version_id 105fa1ee / " + RUNTIME_VERSION + ". Changelog stays below this abstract.\n"
+    + "Live version: " + RUNTIME_VERSION + " (certification-point freeze). SoT LIVE: " + RUNTIME_SOT + ". Changelog stays below this abstract.\n"
     + "Try on Glama: " + GLAMA_RUNTIME + " (verified listing AzielEliab/aziel-runtime)\n"
     + "Official Runtime: " + PUBLIC_RUNTIME + "\n"
     + "Source on GitHub: " + GITHUB_RUNTIME + "\n"

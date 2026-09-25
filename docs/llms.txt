@@ -142,6 +142,7 @@ Cursor / Glama / others: OpenAPI or MCP POST https://trades-runtime.vibelock.wor
 Aziel Runtime is a node-meshed orchestration suite of MCP-connected software designed to route catalog Softwares through the FragGate door, mint receipts, and coordinate mesh presence. Use it to list, describe, and call product operations over MCP or OpenAPI, then keep the returned receipt. It exists so each Softwares product stays a separate engine behind one door.
 
 Live version: 2.0.0-rc1 (certification-point freeze). SoT LIVE: main 231b02f / 2.0.0-rc1. Changelog stays below this abstract.
+SoT mesh outlet godlock-uk (SOT-SYNC-1.0): GET https://godlock.uk/v1/sot. Pull POST /v1/sot/sync. Push POST /v1/sot/push. dry_run previews. confirm applies a receipt. Unreachable keeps last-known. Cite strings only. Not a Softwares mirror. version_id 105fa1ee is not claimed.
 Try on Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime (verified listing AzielEliab/aziel-runtime; not an invented server id)
 Official Runtime (same-origin): https://godlock.uk/runtime
 Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/

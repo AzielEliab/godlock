@@ -257,10 +257,10 @@ export function ecosystemNav() {
   return `<nav class="ecosystem" aria-label="Aziel Eliab ecosystem"><p>Part of the Aziel Eliab ecosystem</p><ul>${items}</ul></nav>`;
 }
 
-export function page(title, body, { path, kind, extraHeaders, indexable, products } = {}) {
+export function page(title, body, { path, kind, extraHeaders, indexable, products, runtimeCite } = {}) {
   const p = path || "/";
   const docTitle = documentTitle(title, kind);
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(docTitle)}</title>${headMeta({ title, path: p, kind, indexable, products })}<style>${CSS}</style></head><body><div class="wrap">
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(docTitle)}</title>${headMeta({ title, path: p, kind, indexable, products, runtimeCite })}<style>${CSS}</style></head><body><div class="wrap">
 ${brandRow()}
 <p class="author">Author Aziel Eliab</p>
 ${topNav(p)}
@@ -867,7 +867,7 @@ export function softwareBody({ products, extras } = {}) {
 <div class="soft-grid">${cards}</div>
 ${officialSoftwaresPointer()}
 ${suiteSoftwaresSsotPointer()}
-${launchReadyHtml()}`;
+${launchReadyHtml(extras && extras.runtimeCite)}`;
 }
 
 export function donateBody() {

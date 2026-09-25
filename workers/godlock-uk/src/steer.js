@@ -8,12 +8,27 @@
  *   —  simulation hypothesis                   → multi_simulation
  *   C  big bang, standard cosmology, fine-tuning,
  *      anthropic, multiverse replies           → standard_cosmology
+ *   —  creatio ex nihilo / something-from-nothing
+ *      (adjacent to Big Bang; not ledger C)    → came_from_nothing
  *   other / no retained frame                  → undecided
  *
- * Pretty spirals and φ are engagement heuristics. They do not cast a
- * design vote. A cosmology text that says "intelligent design" stays on
- * ledger C. A receipt that names more than one frame splits its one vote
+ * Came from nothing is a fifth frame on this same vote plane, not a
+ * percentage derived by relabeling Layer C and not a second 0–100 beside
+ * the frames. A physics-ledger receipt without ex-nihilo language stays
+ * standard_cosmology. An ex-nihilo receipt without physics-ledger language
+ * stays came_from_nothing. Both phrases on one receipt split that one vote.
+ * Creationism as a label does not cast this share. It does not spend Layer B.
+ *
+ * Balance invariant: Steer frame shares sum to 100. Current confidence and
+ * residual uncertainty are a separate pair and sum to 100. Each plane is its
+ * own whole. Pretty spirals and φ are engagement heuristics. They do not
+ * cast a design vote. A cosmology text that says "intelligent design" stays
+ * on ledger C. A receipt that names more than one frame splits its one vote
  * equally so neither ledger spends the other's capital.
+ *
+ * Published order is the remainder tie-break only. came_from_nothing sits
+ * after standard_cosmology so an equal leftover tenth still prefers Layer B
+ * before this claim. That 0.1 is rounding, not a preference.
  *
  * Author: Aziel Eliab. GodLock is a product name.
  */
@@ -23,6 +38,7 @@ export const STEER_FRAME_IDS = Object.freeze([
   "intelligent_design",
   "multi_simulation",
   "standard_cosmology",
+  "came_from_nothing",
   "undecided",
 ]);
 
@@ -30,14 +46,19 @@ export const STEER_LABELS = Object.freeze({
   intelligent_design: "Intelligent design (Specified Fit / bio code+reader)",
   multi_simulation: "Multi-simulation",
   standard_cosmology: "Big Bang / standard cosmology (physics ledger)",
+  came_from_nothing: "Came from nothing",
   undecided: "Undecided / Let's review / other",
 });
 
 export const STEER_NOTE_PUBLIC =
-  "Layer C (cosmology, including fine-tuning and multiverse replies) and Layer B (biology, code+reader) are separate ledgers. Cosmology does not spend biological capital. Biology does not settle the Big Bang. GodLock records, analyzes, hardens, and grows. It does not sermonize.";
+  "Layer C (cosmology, including fine-tuning and multiverse replies) and Layer B (biology, code+reader) are separate ledgers. Cosmology does not spend biological capital. Biology does not settle the Big Bang. Came from nothing does not spend either ledger. GodLock records, analyzes, hardens, and grows. It does not sermonize.";
+
+/** Public muted note. Two planes, each a whole. Came from nothing is inside the Steer whole. */
+export const STEER_BALANCE_NOTE =
+  "Balance: Steer frames are one vote plane and sum to 100. Came from nothing is the creatio-ex-nihilo / something-from-nothing share on that plane, adjacent to Big Bang language, not a second 0–100. Current confidence and residual uncertainty are a separate pair and sum to 100.";
 
 export const STEER_METHOD =
-  "Each non-isolated public receipt is one input. Frames are keyword classes the engine already uses: Layer B code+reader, Specified Fit, specified complexity, and other biological design objects; the simulation hypothesis (not a bare computer simulation); Layer C big bang, standard cosmology, cosmic microwave background, fine-tuning, anthropic reasoning, and multiverse replies. Pretty spirals and φ do not add a design share. Intelligent-design wording on a cosmology-only or spiral-only text does not spend the biology ledger. A receipt that hits more than one frame splits its one vote equally. Shares are those votes over the scored public receipts, in percent to one decimal, largest-remainder rounded so they sum to 100. Equal remainders break toward the earlier frame in the published order; that 0.1 is rounding, not a preference. The leader follows the exact vote, so an equal vote stays a tie even when the printed percents differ by 0.1. An empty archive is 100% undecided. Rows with no retained challenge text count as undecided. Isolated rows and refused empty submits are excluded. Steer is the mix of challenges. Current confidence is the separate running score (floor 33.3 · ceiling 99.7).";
+  "Each non-isolated public receipt is one input. Frames are keyword classes the engine already uses: Layer B code+reader, Specified Fit, specified complexity, and other biological design objects; the simulation hypothesis (not a bare computer simulation); Layer C big bang, standard cosmology, cosmic microwave background, fine-tuning, anthropic reasoning, and multiverse replies; Came from nothing, the creatio-ex-nihilo / something-from-nothing claim (ex nihilo, came from nothing, something from nothing, universe from nothing). Came from nothing is a frame on this vote plane. It is not derived by relabeling Layer C. A physics-ledger receipt without that language stays standard cosmology. Creationism as a label does not cast this share. Pretty spirals and φ do not add a design share. Intelligent-design wording on a cosmology-only or spiral-only text does not spend the biology ledger. A receipt that hits more than one frame splits its one vote equally. Shares are those votes over the scored public receipts, in percent to one decimal, largest-remainder rounded so they sum to 100. Equal remainders break toward the earlier frame in the published order; that 0.1 is rounding, not a preference. The leader follows the exact vote, so an equal vote stays a tie even when the printed percents differ by 0.1. An empty archive is 100% undecided. Rows with no retained challenge text count as undecided. Isolated rows and refused empty submits are excluded. Steer is the mix of challenges. Current confidence is the separate running score (floor 33.3 · ceiling 99.7). Current confidence plus residual uncertainty sum to 100. Came from nothing is one Steer share, not a free-floating second score.";
 
 /** Biological object / Specified Fit steel vocabulary. Not φ. Not cosmology. */
 const BIO_OBJECT_RE = /code\s*\+\s*reader|code\s*\/\s*reader|code-plus-reader|code\s+and\s+(?:the\s+)?reader|codon|genetic\s+code|mapping\s+table|translation\s*(?:\/|\+)?\s*reader|translation\s+system|flagell\w*|ribosom\w*|\bDNA\b|\bRNA\b|\bprotein\b|nucleotide|amino\s+acid|specified\s+fit|specified\s+complexity|specified\s+information|functionally\s+specified|semantic\s+mapping|functional\s+information|irreducible\s+complexity|digital\s+sequence/i;
@@ -50,12 +71,22 @@ const SIM_RE = /simulation\s+hypothesis|simulated\s+(?:universe|reality|world|co
 /** Ledger C. Multiverse replies stay here. Bare "physics" does not match. */
 const COSMO_RE = /big\s+bang|standard\s+cosmology|standard\s+model\s+of\s+cosmology|λ\s*cdm|lambda[-\s]?cdm|\blcdm\b|cosmic\s+microwave|\bcmb\b|fine[-\s]?tun(?:e|ing)|anthropic|multiverse|\bcosmolog/i;
 
+/**
+ * Creatio ex nihilo / something-from-nothing. Not Layer C by itself.
+ * "creationism" does not match. Bare "nothing" does not match.
+ */
+const NIHIL_RE = /creatio(?:\s+|-)ex(?:\s+|-)nihilo|\bex\s+nihilo\b|\b(?:came|come|comes|coming)\s+from\s+nothing\b|\b(?:created|creation)\s+(?:from|out\s+of)\s+nothing\b|\bsomething\s+from\s+nothing\b|\bout\s+of\s+nothing\b|\buniverse\s+from\s+nothing\b|\bfrom\s+nothingness\b/i;
+
 export function hitsSimulationHypothesis(text) {
   return SIM_RE.test(String(text || ""));
 }
 
 export function hitsStandardCosmology(text) {
   return COSMO_RE.test(String(text || ""));
+}
+
+export function hitsCameFromNothing(text) {
+  return NIHIL_RE.test(String(text || ""));
 }
 
 export function hitsBiologicalDesign(text) {
@@ -72,6 +103,7 @@ function emptyWeights() {
     intelligent_design: 0,
     multi_simulation: 0,
     standard_cosmology: 0,
+    came_from_nothing: 0,
     undecided: 0,
   };
 }
@@ -98,6 +130,7 @@ export function classifyChallenge(text) {
   if (hitsBiologicalDesign(text)) hits.push("intelligent_design");
   if (hitsSimulationHypothesis(text)) hits.push("multi_simulation");
   if (hitsStandardCosmology(text)) hits.push("standard_cosmology");
+  if (hitsCameFromNothing(text)) hits.push("came_from_nothing");
   if (!hits.length) hits.push("undecided");
   const units = voteUnits(hits);
   const weights = emptyWeights();
@@ -180,6 +213,7 @@ function steerDocument(scales, inputs, units) {
     empty: inputs === 0,
     method: STEER_METHOD,
     note: STEER_NOTE_PUBLIC,
+    balance: STEER_BALANCE_NOTE,
     floor: 33.3,
     ceiling: 99.7,
   };
@@ -200,6 +234,7 @@ export function unavailableSteer() {
     empty: null,
     method: STEER_METHOD,
     note: "Steer could not be read from the public receipt archive. No share is shown.",
+    balance: STEER_BALANCE_NOTE,
     floor: 33.3,
     ceiling: 99.7,
   };

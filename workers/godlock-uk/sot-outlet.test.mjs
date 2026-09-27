@@ -15,7 +15,7 @@ import {
   parseSotDocument,
   runSotSync,
 } from "./src/sotOutlet.js";
-import { floorRuntimeCite, RUNTIME_GIT_SHA, RUNTIME_SOT } from "./src/launchReady.js";
+import { floorRuntimeCite, RUNTIME_GIT_SHA, RUNTIME_SOT, RUNTIME_VERSION_ID } from "./src/launchReady.js";
 import { siteOpenApi } from "./src/seo.js";
 
 const NEXT_SHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
@@ -105,7 +105,9 @@ describe("godlock-uk SoT mesh outlet", () => {
     assert.match(body.version_id_policy, /105fa1ee/);
     assert.equal(body.current.cite, RUNTIME_SOT);
     assert.equal(body.current.status, "floor");
-    assert.equal(body.current.version_id, null);
+    assert.equal(body.current.version_id, RUNTIME_VERSION_ID);
+    assert.equal(body.current.version, "2.0.0-rc1");
+    assert.equal(body.current.git_sha, RUNTIME_GIT_SHA);
     const alias = await (await worker.fetch(new Request("https://godlock.uk/v1/sot/sync"), mockEnv())).json();
     assert.equal(alias.outlet_id, OUTLET_ID);
     const openapi = siteOpenApi();
@@ -277,7 +279,7 @@ describe("godlock-uk SoT mesh outlet", () => {
     assert.equal(refused.applied, false);
     const current = await (await worker.fetch(new Request("https://godlock.uk/v1/sot"), env)).json();
     assert.equal(current.current.git_sha, RUNTIME_GIT_SHA);
-    assert.equal(current.current.version_id, null);
+    assert.equal(current.current.version_id, RUNTIME_VERSION_ID);
     assert.doesNotMatch(current.current.cite, /105fa1ee/);
 
     const identity = await (await post(env, "/v1/sot/push", {
@@ -350,7 +352,7 @@ describe("godlock-uk SoT mesh outlet", () => {
     assert.equal(cite.runtime_sot_live, false);
     assert.equal(cite.runtime_sot_status, "unreachable");
     const llms = await (await worker.fetch(new Request("https://godlock.uk/llms.txt"), env)).text();
-    assert.match(llms, /SoT last-known: main 231b02f \/ 2\.0\.0-rc1/);
+    assert.match(llms, /SoT last-known: main 70cc0b0 \/ 2\.0\.0-rc1/);
     assert.doesNotMatch(llms, /SoT LIVE:/);
   });
 

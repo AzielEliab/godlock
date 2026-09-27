@@ -4,12 +4,15 @@
  *
  * Authority is live GET https://aziel-runtime.vibelock.workers.dev/v1/software.
  * One SoT change fans in here by pull or by push. This outlet updates
- * Softwares/runtime cite strings only: full git sha, 7-char short sha, and
- * suite version. It does not mirror Softwares cards. GodLock stays
- * GodLock-first. Ask Jeeves is not a Softwares peer.
+ * Softwares/runtime cite strings only: full git sha, 7-char short sha,
+ * suite version, and a published version_id. It does not mirror Softwares
+ * cards. GodLock stays GodLock-first. Hub Softwares is hub-scope, not the
+ * suite's 42 cards. Ask Jeeves is not a Softwares peer.
  *
  * version_id 105fa1ee is the 2026-09-18 isolate label for git 6a3798a.
- * Live GET /v1/software does not publish it. This outlet never re-claims it.
+ * This outlet never re-claims it. A version_id is cited only when the live
+ * SoT document publishes one (CF_VERSION_METADATA.id, serve-time, not a
+ * baked suite constant).
  *
  * Gate: dry_run previews, confirm applies and seals a receipt. confirm is
  * consent to apply the cite. It is not tenant auth.
@@ -158,10 +161,10 @@ export function sotContract() {
     read: { method: "GET", path: "/v1/sot", alias: "/v1/sot/sync" },
     authority: SOT_AUTHORITY,
     authority_method: "GET",
-    authority_fields: ["version", "git_sha", "count"],
-    cite_fields: ["git_sha", "git_sha_short", "version", "runtime_sot"],
+    authority_fields: ["version", "git_sha", "version_id", "count"],
+    cite_fields: ["git_sha", "git_sha_short", "version", "version_id", "runtime_sot"],
     version_id_policy:
-      "Omit version_id unless the live SoT document publishes one. Never claim 105fa1ee. That id is the 2026-09-18 isolate label for git 6a3798a and is not on GET /v1/software.",
+      "Cite version_id when live GET /v1/software publishes one. version_id is env.CF_VERSION_METADATA.id, read at serve time, not a baked suite constant. Never claim 105fa1ee. That id is the 2026-09-18 isolate label for git 6a3798a and is not this tip.",
     pull: {
       direction: "pull",
       method: "POST",
@@ -174,7 +177,7 @@ export function sotContract() {
       method: "POST",
       path: "/v1/sot/push",
       outlet_id: OUTLET_ID,
-      body_fields: ["outlet_id", "op", "git_sha", "version", "count", "dry_run", "confirm"],
+      body_fields: ["outlet_id", "op", "git_sha", "version", "version_id", "count", "dry_run", "confirm"],
       wrapped_sot: "Optional object field sot with git_sha and version. software[] cards are ignored.",
     },
     gate: {
@@ -223,7 +226,7 @@ export function parseSotDocument(doc) {
     return {
       ok: false,
       code: SOT_VERSION_ID_UNEXPOSED,
-      message: "Refused unexposed version_id 105fa1ee. Live GET /v1/software does not publish it. Cite not updated.",
+      message: "Refused unexposed version_id 105fa1ee. That id is the 2026-09-18 isolate label for git 6a3798a and is not this tip. Cite not updated.",
     };
   }
   const git_sha = String(doc.git_sha || "").trim().toLowerCase();
@@ -444,7 +447,10 @@ export async function runSotSync({ direction, body, env, store, fetch, now } = {
   }
 
   const after = citeSnapshot(parsed.cite);
-  const citeChanged = after.git_sha !== before.git_sha || after.version !== before.version || after.cite !== before.cite;
+  const citeChanged = after.git_sha !== before.git_sha
+    || after.version !== before.version
+    || (after.version_id || null) !== (before.version_id || null)
+    || after.cite !== before.cite;
   const would = {
     ...after,
     observed_count: parsed.cite.observed_count,

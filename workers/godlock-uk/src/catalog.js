@@ -2,6 +2,7 @@
  * Aziel Eliab software catalog helpers.
  * GodLock.uk Softwares HTML is GodLock-first (heading → list): GodLock then Aziel Runtime.
  * /v1/software JSON is hub-local (Aziel Runtime only plus sister_cites; Trades-Runtime is not a card).
+ * Hub-scope, not the suite's 42 Softwares cards. Authority count 42 stays on Worker GET /v1/software.
  * Not an ae/corpus suite-catalog proxy. Suite Softwares SSoT is Worker GET /v1/software.
  * Whitestone is a Worker SSoT machine cite (not a FragGate door; not a Softwares HTML card).
  * Live fetch via AZIEL_RUNTIME still feeds Runtime sitemap / describe / pull URLs.

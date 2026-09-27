@@ -55,11 +55,11 @@ export const SOFTWARE_HTML_SUITE_NOTE =
   "GodLock Softwares is GodLock-first (heading → list): first card is GodLock, this hub's product. Aziel Runtime is a secondary cite (Try on Glama). Software listing: "
   + OFFICIAL_SOFTWARES
   + ". FragGate is the Runtime kernel (FG-0.1).";
-/** Hub-local /v1/software is not the ae/corpus suite catalog proxy. */
+/** Hub-local /v1/software is hub-scope, not the ae/corpus suite catalog and not suite-42. */
 export const SOFTWARE_HUB_LOCAL_NOTE =
-  " /v1/software JSON is hub-local (Aziel Runtime only plus sister_cites; Trades-Runtime, engine:false) — not the suite catalog. Suite Softwares SSoT is Worker GET "
+  " /v1/software JSON is hub-local (Aziel Runtime only plus sister_cites; Trades-Runtime, engine:false) — hub-scope, not the suite catalog and not the suite's 42 Softwares cards. Authority count 42 stays on Worker GET "
   + SOFTWARE_SSOT
-  + ". FragGate list is fallback only.";
+  + ". HTML ItemList numberOfItems stays 2 (GodLock, then Aziel Runtime). FragGate list is fallback only.";
 export const AZIEL_PERSON_ID = "https://www.azieleliab.com/#aziel";
 export const LOCAL_PERSON_STUB_ID = CANON_HOST + "/AzielEliab#aziel-eliab";
 /** Hub parent Runtime product. Satellites reference this; they do not mint a competing Runtime @id. */
@@ -154,9 +154,9 @@ export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
 export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
-/** Live origin GET /v1/health + /v1/runtime.json. SoT main 231b02f / 2.0.0-rc1. Changelog stays below the abstract. */
+/** Live origin GET /v1/health + /v1/runtime.json. SoT main 70cc0b0 / 2.0.0-rc1. Changelog stays below the abstract. */
 export const RUNTIME_VERSION = "2.0.0-rc1";
-export { RUNTIME_GIT_SHA, RUNTIME_GIT_SHA_SHORT, RUNTIME_SOT } from "./launchReady.js";
+export { RUNTIME_GIT_SHA, RUNTIME_GIT_SHA_SHORT, RUNTIME_SOT, RUNTIME_VERSION_ID } from "./launchReady.js";
 /** Crawler lead copy after aziel-runtime #146+#148. Designed-purpose only. */
 export const RUNTIME_ABSTRACT =
   "Aziel Runtime is a node-meshed orchestration suite of MCP-connected software designed to route catalog Softwares through the FragGate door, mint receipts, and coordinate mesh presence. Use it to list, describe, and call product operations over MCP or OpenAPI, then keep the returned receipt. It exists so each Softwares product stays a separate engine behind one door.";
@@ -207,7 +207,8 @@ export const ARK_COUNT = "https://ark-download-tracker.vibelock.workers.dev/coun
 /** Sister machine cite. Local-first BYO field-trades. Not a FragGate true-engine. */
 export const TRADES_NAME = "Trades-Runtime";
 export const TRADES_SLUG = "trades-runtime";
-export const TRADES_VERSION = "0.3.3";
+/** Live trades-runtime cite.json + GET /v1/health version (read 2026-09-27). Sister cite, not a Softwares card. */
+export const TRADES_VERSION = "0.4.9";
 export const TRADES_WORKER = "https://trades-runtime.vibelock.workers.dev";
 export const TRADES_GITHUB = "https://github.com/AzielEliab/trades-runtime";
 export const TRADES_DOWNLOAD = TRADES_WORKER + "/download";
@@ -2376,7 +2377,7 @@ export function citeDoc(sot, runtimeCite) {
     sister_stats: { ...SISTER_STATS },
     host_stats: CANON_HOST + "/stats",
     software_html: CANON_HOST + SOFTWARE_PATH,
-    software_api_note: "Thin hub-local Softwares JSON on /v1/software: Aziel Runtime only plus official listing at https://www.azieleliab.com/software. Not the suite catalog (not an ae/corpus-style proxy). Suite Softwares SSoT is Worker GET " + SOFTWARE_SSOT + " (same-origin " + PUBLIC_RUNTIME + "/v1/software). FragGate list is fallback only. Whitestone is a Worker SSoT Softwares cite (engine:false, not a FragGate door). Trades-Runtime is a sister / extra machine cite (engine:false). Door remains /runtime.",
+    software_api_note: "Thin hub-local Softwares JSON on /v1/software: Aziel Runtime only plus official listing at https://www.azieleliab.com/software. Hub-scope, not the suite catalog (not an ae/corpus-style proxy) and not the suite's 42 Softwares cards. Authority count 42 stays on Worker GET " + SOFTWARE_SSOT + ". HTML ItemList numberOfItems stays 2 (GodLock, then Aziel Runtime). Suite Softwares SSoT is Worker GET " + SOFTWARE_SSOT + " (same-origin " + PUBLIC_RUNTIME + "/v1/software). FragGate list is fallback only. Whitestone is a Worker SSoT Softwares cite (engine:false, not a FragGate door). Trades-Runtime is a sister / extra machine cite (engine:false). Door remains /runtime.",
     github: GITHUB,
     download: DOWNLOAD,
     verify: CANON_HOST + "/verify",
@@ -2771,7 +2772,7 @@ export function siteOpenApi() {
       version: "0.1.0",
       summary: "Public HTTPS stress-test engine by Aziel Eliab.",
       description: hideInternalDetermination(
-        "GodLock.uk public routes plus same-origin FragGate / MCP door. Softwares HTML is GodLock-first (GodLock then Aziel Runtime) and points at " + OFFICIAL_SOFTWARES + ". /v1/software JSON is hub-local (Aziel Runtime only plus sister_cites), not the suite catalog. Suite Softwares SSoT is Worker GET " + SOFTWARE_SSOT + " (same-origin " + PUBLIC_RUNTIME + "/v1/software). FragGate list is fallback only. Suite mesh (QNM-BUILD-1.0, read-only, on; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse): GET " + CANON_HOST + "/v1/mesh and GET " + CANON_HOST + "/v1/mesh/status (same-origin proxies; GET never enables) plus GET " + PUBLIC_RUNTIME + "/v1/mesh. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health. This Worker has no mesh-off function. Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
+        "GodLock.uk public routes plus same-origin FragGate / MCP door. Softwares HTML is GodLock-first (GodLock then Aziel Runtime) and points at " + OFFICIAL_SOFTWARES + ". /v1/software JSON is hub-local (Aziel Runtime only plus sister_cites) — hub-scope, not the suite catalog and not the suite's 42 Softwares cards. Authority count 42 stays on Worker GET " + SOFTWARE_SSOT + ". HTML ItemList numberOfItems stays 2. Suite Softwares SSoT is Worker GET " + SOFTWARE_SSOT + " (same-origin " + PUBLIC_RUNTIME + "/v1/software). FragGate list is fallback only. Suite mesh (QNM-BUILD-1.0, read-only, on; SPLIT THE WIRES; COLD-COPY SURVIVAL; REHEAL refuse): GET " + CANON_HOST + "/v1/mesh and GET " + CANON_HOST + "/v1/mesh/status (same-origin proxies; GET never enables) plus GET " + PUBLIC_RUNTIME + "/v1/mesh. Public rollup is live|locked|isolated counts only. No Node Gate. No auto-heal. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health. This Worker has no mesh-off function. Update prompt: GET " + CATALOG + "/v1/update/check?slug=godlock&version=0.1.0 — when update_available, counted " + DOWNLOAD + " (no silent overwrite). Identity Aziel Eliab only.",
       ),
       contact: { name: AUTHOR, url: CANON_HOST + AZIEL_ELIAB_PATH },
       license: { name: "Apache-2.0", url: "https://www.apache.org/licenses/LICENSE-2.0" },
@@ -2797,8 +2798,8 @@ export function siteOpenApi() {
       "/v1/sot/push": {
         post: {
           operationId: "godlockUkSotSyncPush",
-          summary: "Accept a runtime sot_sync push for outlet godlock-uk. Updates short sha, full sha, and suite version only. Ignores software cards. Refuses version_id 105fa1ee.",
-          requestBody: { required: true, content: { "application/json": { schema: { type: "object", properties: { outlet_id: { type: "string" }, op: { type: "string" }, git_sha: { type: "string" }, version: { type: "string" }, count: { type: "integer" }, dry_run: { type: "boolean" }, confirm: { type: "boolean" } } } } } },
+          summary: "Accept a runtime sot_sync push for outlet godlock-uk. Updates short sha, full sha, suite version, and a published version_id. Ignores software cards. Refuses version_id 105fa1ee.",
+          requestBody: { required: true, content: { "application/json": { schema: { type: "object", properties: { outlet_id: { type: "string" }, op: { type: "string" }, git_sha: { type: "string" }, version: { type: "string" }, version_id: { type: "string" }, count: { type: "integer" }, dry_run: { type: "boolean" }, confirm: { type: "boolean" } } } } } },
           responses: {
             "200": { description: "Preview or applied cite" },
             "400": { description: "Gate, identity, sha, or unexposed version_id refusal" },

@@ -65,6 +65,7 @@ import {
   RUNTIME_VERSION,
   RUNTIME_GIT_SHA,
   RUNTIME_GIT_SHA_SHORT,
+  RUNTIME_VERSION_ID,
   RUNTIME_SOT,
   RUNTIME_ABSTRACT,
   GLAMA_RUNTIME,
@@ -2450,16 +2451,21 @@ describe("receipts UI and public payload", () => {
 });
 
 describe("Hub launch-update parity — Softwares + runtime SoT", () => {
-  it("pins live runtime SoT main 231b02f / 2.0.0-rc1", () => {
+  it("pins live runtime SoT main 70cc0b0 / 2.0.0-rc1", () => {
     assert.equal(RUNTIME_VERSION, "2.0.0-rc1");
-    assert.equal(RUNTIME_GIT_SHA_SHORT, "231b02f");
-    assert.equal(RUNTIME_GIT_SHA, "231b02fcbb7b50fbd52762a49329042bc1715fe9");
-    assert.equal(RUNTIME_SOT, "main 231b02f / 2.0.0-rc1");
+    assert.equal(RUNTIME_GIT_SHA_SHORT, "70cc0b0");
+    assert.equal(RUNTIME_GIT_SHA, "70cc0b06786ad925be49da16d7f8893095df330b");
+    assert.equal(RUNTIME_SOT, "main 70cc0b0 / 2.0.0-rc1");
     const cite = citeDoc();
     assert.equal(cite.runtime_version, "2.0.0-rc1");
     assert.equal(cite.runtime_git_sha, RUNTIME_GIT_SHA);
-    assert.equal(cite.runtime_git_sha_short, "231b02f");
-    assert.equal(cite.runtime_version_id, undefined);
+    assert.equal(cite.runtime_git_sha_short, "70cc0b0");
+    assert.equal(cite.runtime_version_id, RUNTIME_VERSION_ID);
+    assert.match(cite.runtime_version_id_note, /Not a baked suite constant/);
+    assert.equal(cite.trades_runtime_version, "0.4.9");
+    assert.match(cite.software_suite, /hub-scope/);
+    assert.match(cite.software_suite, /not the suite's 42/);
+    assert.equal(cite.software_product_count, null);
     assert.equal(cite.runtime_sot, RUNTIME_SOT);
     assert.equal(cite.runtime_sot_live, true);
     assert.equal(cite.worker_hardware, false);
@@ -2520,9 +2526,12 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
   it("stamps /v1/software and llms with the same SoT and no LIVE shelf flip", () => {
     const body = softwareApiDoc([]);
     assert.equal(body.runtime_version, "2.0.0-rc1");
-    assert.equal(body.runtime_git_sha_short, "231b02f");
-    assert.equal(body.runtime_git_sha, "231b02fcbb7b50fbd52762a49329042bc1715fe9");
-    assert.equal(body.runtime_version_id, undefined);
+    assert.equal(body.runtime_git_sha_short, "70cc0b0");
+    assert.equal(body.runtime_git_sha, "70cc0b06786ad925be49da16d7f8893095df330b");
+    assert.equal(body.runtime_version_id, RUNTIME_VERSION_ID);
+    assert.match(body.software_note, /hub-scope/);
+    assert.match(body.software_note, /not the suite's 42/);
+    assert.equal(body.trades_runtime.version, "0.4.9");
     assert.equal(body.product_count, 1);
     assert.equal(body.suite_count, 1);
     assert.deepEqual(body.products.map((p) => p.slug), ["aziel-runtime"]);
@@ -2531,7 +2540,10 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(body.runtime_distribution[0].label, "Try on Glama");
     const llms = llmsDoc();
     assert.match(llms, /## Softwares \+ runtime launch readiness/);
-    assert.match(llms, /SoT LIVE: main 231b02f \/ 2\.0\.0-rc1/);
+    assert.match(llms, /SoT LIVE: main 70cc0b0 \/ 2\.0\.0-rc1/);
+    assert.match(llms, /Published version_id: be1d6dca-01a9-4d7e-95da-3fffb617a989/);
+    assert.match(llms, /hub-scope/);
+    assert.match(llms, /not the suite's 42/);
     assert.doesNotMatch(llms, /6a3798a|105fa1ee/);
     assert.match(llms, /Framagit stays SLOT CNS-NO-FORGE-MIRROR/);
     assert.match(llms, /Plane C stays SLOT CNS-OPERATOR-ATTEST/);
@@ -2540,7 +2552,7 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(llms, /heading → list only/);
     assert.doesNotMatch(llms, /live_ready:\s*true/i);
     const softwareMeta = defaultDescription("software");
-    assert.match(softwareMeta, /231b02f/);
+    assert.match(softwareMeta, /70cc0b0/);
     assert.doesNotMatch(softwareMeta, /6a3798a|105fa1ee/);
     assert.match(defaultDescription("runtime"), /fraggate_call/);
   });

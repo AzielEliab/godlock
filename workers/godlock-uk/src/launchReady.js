@@ -1,10 +1,13 @@
 /**
  * Runtime Softwares launch-readiness cite for godlock.uk.
- * SoT is live aziel-runtime GET /v1/software: main 231b02f / 2.0.0-rc1.
- * Live Worker git_sha 231b02fcbb7b50fbd52762a49329042bc1715fe9 (read 2026-09-25).
- * Suite 2.0.0-rc1 stays the certification-point freeze. Count stays 42 on that Worker.
- * 105fa1ee was the 2026-09-18 isolate label for git 6a3798a. Live GET /v1/software
- * does not publish that version_id, so it is not cited as the live tip.
+ * SoT is live aziel-runtime GET /v1/software: main 70cc0b0 / 2.0.0-rc1.
+ * Live Worker git_sha 70cc0b06786ad925be49da16d7f8893095df330b (read 2026-09-27).
+ * Published version_id be1d6dca-01a9-4d7e-95da-3fffb617a989 is env.CF_VERSION_METADATA.id
+ * on that read. It is a serve-time isolate id, not a baked suite constant.
+ * Suite 2.0.0-rc1 stays the certification-point freeze. Authority count stays 42
+ * on that Worker. GodLock hub Softwares is hub-scope (JSON one product row;
+ * HTML ItemList numberOfItems 2), not those 42 cards.
+ * 105fa1ee was the 2026-09-18 isolate label for git 6a3798a. It is not this tip.
  * Ask Jeeves is not a Softwares slug. Suite help stays FragGate aziel-corpus jeeves.
  * Cite only. Do not invent LIVE shelves, or a GodLock VPN identity.
  * Softwares HTML stays GodLock-first (heading → list). This copy sits after the list.
@@ -15,9 +18,16 @@ export const AUTHOR = "Aziel Eliab";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
 export const RUNTIME_VERSION = "2.0.0-rc1";
-/** Live origin GET /v1/software git_sha (read 2026-09-25). Short form is the first 7 hex chars. */
-export const RUNTIME_GIT_SHA = "231b02fcbb7b50fbd52762a49329042bc1715fe9";
-export const RUNTIME_GIT_SHA_SHORT = "231b02f";
+/** Live origin GET /v1/software git_sha (read 2026-09-27). Short form is the first 7 hex chars. */
+export const RUNTIME_GIT_SHA = "70cc0b06786ad925be49da16d7f8893095df330b";
+export const RUNTIME_GIT_SHA_SHORT = "70cc0b0";
+/**
+ * Published GET /v1/software version_id on the 2026-09-27 read.
+ * env.CF_VERSION_METADATA.id, read at serve time. Not a baked suite constant.
+ */
+export const RUNTIME_VERSION_ID = "be1d6dca-01a9-4d7e-95da-3fffb617a989";
+export const RUNTIME_VERSION_ID_NOTE =
+  "Published GET /v1/software version_id for this cite. env.CF_VERSION_METADATA.id, read at serve time. Not a baked suite constant.";
 export const RUNTIME_SOT_BRANCH = "main";
 export const RUNTIME_SOT =
   RUNTIME_SOT_BRANCH + " " + RUNTIME_GIT_SHA_SHORT + " / " + RUNTIME_VERSION;
@@ -56,7 +66,7 @@ export function floorRuntimeCite() {
     version: RUNTIME_VERSION,
     git_sha: RUNTIME_GIT_SHA,
     git_sha_short: RUNTIME_GIT_SHA_SHORT,
-    version_id: null,
+    version_id: RUNTIME_VERSION_ID,
     cite: RUNTIME_SOT,
     live: true,
     status: "floor",
@@ -95,6 +105,7 @@ export function runtimeSot() {
     version: RUNTIME_VERSION,
     git_sha: RUNTIME_GIT_SHA,
     git_sha_short: RUNTIME_GIT_SHA_SHORT,
+    version_id: RUNTIME_VERSION_ID,
     branch: RUNTIME_SOT_BRANCH,
     cite: RUNTIME_SOT,
     live: true,
@@ -181,15 +192,23 @@ export function launchCiteFields(cite) {
     fraggate_sole_door: ready.fraggate_sole_door,
     mcp_fraggate_call: ready.mcp_fraggate_call,
   };
-  if (sot.version_id) fields.runtime_version_id = sot.version_id;
+  if (sot.version_id) {
+    fields.runtime_version_id = sot.version_id;
+    fields.runtime_version_id_note = RUNTIME_VERSION_ID_NOTE;
+  }
   return fields;
 }
 
 export function launchLlmsSection(cite) {
   const ready = launchReadiness(cite);
+  const sot = citeInput(cite);
   const sotLabel = ready.runtime_sot_live ? "SoT LIVE: " : "SoT last-known: ";
+  const versionIdLine = sot.version_id
+    ? "Published version_id: " + sot.version_id + ". " + RUNTIME_VERSION_ID_NOTE + "\n"
+    : "";
   return "\n## Softwares + runtime launch readiness\n\n"
     + sotLabel + ready.runtime_sot + ".\n"
+    + versionIdLine
     + ready.note + "\n"
     + "Human UI: yes. MCP door: " + FRAGGATE_CALL + ". FragGate is THE single door (" + FRAGGATE_KERNEL + ").\n"
     + "mesh/AZVPN: HTTPS/WS REAL; WireGuard/OpenVPN SLOT. GET /v1/mesh cites the bind and never opens a session.\n"

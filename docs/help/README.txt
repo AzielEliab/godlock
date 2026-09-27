@@ -19,7 +19,7 @@ Every scored challenge is hash-chained into an append-only ledger.
 ## Softwares
 
 GodLock Softwares is GodLock-first (heading → list): first card is GodLock, this hub's product. Aziel Runtime is a secondary cite (Try on Glama). Software listing: https://www.azieleliab.com/software. FragGate is the Runtime kernel (FG-0.1).
-/v1/software JSON is hub-local (Aziel Runtime only plus sister_cites; Trades-Runtime, engine:false) — not the suite catalog. Suite Softwares SSoT is Worker GET https://aziel-runtime.vibelock.workers.dev/v1/software. FragGate list is fallback only.
+/v1/software JSON is hub-local (Aziel Runtime only plus sister_cites; Trades-Runtime, engine:false) — hub-scope, not the suite catalog and not the suite's 42 Softwares cards. Authority count 42 stays on that Worker SSoT. HTML ItemList numberOfItems stays 2 (GodLock, then Aziel Runtime). Suite Softwares SSoT is Worker GET https://aziel-runtime.vibelock.workers.dev/v1/software. FragGate list is fallback only.
 GodLock Softwares page: https://godlock.uk/software
 Official Softwares listing: https://www.azieleliab.com/software
 Suite Softwares catalog (Worker SSoT): https://aziel-runtime.vibelock.workers.dev/v1/software

@@ -61,7 +61,11 @@ describe("GodLock Softwares Whitestone via Worker SSoT", () => {
     assert.equal(body.whitestone.not_a_fraggate_door, true);
     assert.equal(body.whitestone.invent_door_ops, false);
     assert.match(body.software_note, /hub-local/);
+    assert.match(body.software_note, /hub-scope/);
     assert.match(body.software_note, /not the suite catalog/);
+    assert.match(body.software_note, /not the suite's 42/);
+    assert.equal(body.product_count, 1);
+    assert.equal(body.trades_runtime.version, "0.4.9");
   });
 
   it("does not invent a FragGate door for Whitestone", () => {

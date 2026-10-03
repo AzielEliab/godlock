@@ -66,6 +66,23 @@ CREATE TABLE IF NOT EXISTS submit_guard (
 );
 CREATE INDEX IF NOT EXISTS idx_submit_guard_last ON submit_guard(last_ms);
 
+-- Append-only triad rescores. Never UPDATE or DELETE receipts to change a score.
+-- A rescore row names the earlier receipt, the previous number, and what changed.
+CREATE TABLE IF NOT EXISTS receipt_rescores (
+  id TEXT PRIMARY KEY,
+  receipt_id TEXT NOT NULL,
+  created_utc TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  previous_display REAL,
+  previous_source TEXT NOT NULL,
+  display REAL,
+  combined REAL,
+  changed_note TEXT NOT NULL,
+  triad_json TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_rescores_receipt ON receipt_rescores(receipt_id, created_utc);
+
 INSERT OR IGNORE INTO metadata(key, value) VALUES ('current_score', '50');
 INSERT OR IGNORE INTO metadata(key, value) VALUES ('views', '0');
 INSERT OR IGNORE INTO metadata(key, value) VALUES ('uses', '0');

@@ -231,7 +231,7 @@ describe("Aziel Eliab page chrome", () => {
     assert.match(html, /<title>About Aziel Eliab — GodLock<\/title>/);
     assert.match(html, /name="robots" content="index,follow"/);
     assert.match(html, /rel="canonical" href="https:\/\/godlock\.uk\/AzielEliab"/);
-    assert.match(html, /name="keywords" content="Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test, About Aziel Eliab"/);
+    assert.match(html, /name="keywords" content="Aziel Eliab, GodLock, TRIAD_V3, receipt, intelligent design debate, About Aziel Eliab"/);
     assert.ok(html.includes(AZIEL_MANIFESTO[0]));
     assert.ok(html.includes("— Aziel Eliab"));
     assert.match(html, /GodLock is a product/);
@@ -292,7 +292,7 @@ describe("Aziel Eliab page chrome", () => {
     const faq = ld["@graph"].find((n) => n["@type"] === "FAQPage");
     assert.ok(faq);
     assert.ok((faq.mainEntity || []).some((q) => q.name === "Why does GodLock exist?"));
-    assert.ok((about.mentions || []).some((m) => m && m.name === "Specified Fit, Not Pretty Spirals"));
+    assert.ok((about.mentions || []).some((m) => m && m.name === "How GodLock is scored"));
     assert.equal(person.identifier, "Aziel Eliab");
     assert.equal(person.givenName, "Aziel");
     assert.equal(person.familyName, "Eliab");
@@ -519,7 +519,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.equal(cite.hedidntjump, "https://www.hedidntjump.com/");
     assert.equal(cite.identity, "Aziel Eliab");
     assert.match(cite.identity_note, /alternateName only/);
-    assert.equal(cite.reasoning_spine, "Specified Fit, Not Pretty Spirals");
+    assert.equal(cite.reasoning_spine, "TRIAD_V3 cycle mean. Published corpus triad. No Specified Fit prior.");
     assert.equal(cite.software_html, CANON_HOST + "/software");
     assert.match(cite.software_api_note, /Door remains \/runtime/);
     assert.equal(cite.priority_pages.home, CANON_HOST + "/");
@@ -652,7 +652,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.match(llms, /About Aziel Eliab: https:\/\/godlock\.uk\/AzielEliab/);
     assert.match(llms, /Runtime FragGate door: https:\/\/godlock\.uk\/runtime/);
     assert.match(llms, /Catalog JSON \(SEO proxy; door remains \/runtime\): https:\/\/godlock\.uk\/v1\/software/);
-    assert.match(llms, /Specified Fit, Not Pretty Spirals: https:\/\/godlock\.uk\/reason/);
+    assert.match(llms, /How GodLock is scored \(TRIAD_V3\): https:\/\/godlock\.uk\/reason/);
     assert.match(llms, /Receipts: https:\/\/godlock\.uk\/receipts/);
     assert.match(llms, /Donate: https:\/\/godlock\.uk\/donate \(AZL-DONATE-1\.0\)\. Same door: https:\/\/www\.azieleliab\.com\/donate/);
     assert.match(llms, /AZCoherence \(azcoherence\)/);
@@ -811,13 +811,13 @@ describe("Aziel Eliab SEO surfaces", () => {
 
 describe("priority page SEO", () => {
   it("keeps unique titles and does not suffix GodLock twice", () => {
-    assert.equal(documentTitle("GodLock", "home"), "GodLock by Aziel Eliab — Specified Fit, Not Pretty Spirals");
+    assert.equal(documentTitle("GodLock", "home"), "Godlock. The Debate Site of Intelligent Design");
     assert.equal(documentTitle("Softwares", "software"), "GodLock Softwares");
     assert.equal(documentTitle("Aziel Eliab", "aziel"), "About Aziel Eliab — GodLock");
     assert.equal(documentTitle("Verify", "verify"), "Verify — GodLock");
     assert.equal(documentTitle("Receipts", "receipts"), "Receipts — GodLock");
     const homeHead = headMeta({ title: "GodLock", path: "/", kind: "home" });
-    assert.match(homeHead, /og:title" content="GodLock by Aziel Eliab — Specified Fit, Not Pretty Spirals"/);
+    assert.match(homeHead, /og:title" content="Godlock\. The Debate Site of Intelligent Design"/);
     assert.match(homeHead, /name="twitter:site" content="@AzielEliab"/);
     assert.match(homeHead, /name="twitter:creator" content="@AzielEliab"/);
     assert.match(homeHead, /rel="me" href="https:\/\/github.com\/AzielEliab"/);
@@ -892,15 +892,17 @@ describe("priority page SEO", () => {
 });
 
 describe("homepage stays a natural argument surface", () => {
-  it("puts Specified Fit on the spine and does not coach a paste-block", async () => {
+  it("puts the triad on the spine and does not coach a paste-block", async () => {
     const res = await worker.fetch(new Request("https://godlock.uk/"), mockEnv());
     assert.equal(res.status, 200);
     const html = await res.text();
-    assert.match(html, /Specified Fit, Not Pretty Spirals/);
-    assert.match(html, /Functionally specified digital information joined to a translation \/ reader system/);
-    assert.match(html, /href="\/reason">Read the brief</);
-    assert.match(html, /Answers open with Yes, No, Let's review, or Interesting/);
-    assert.match(html, /GodLock records a receipt\. It does not sermonize/);
+    assert.match(html, /Godlock\. The Debate Site of Intelligent Design/);
+    assert.match(html, /published corpus triad \(TRIAD_V3\)/);
+    assert.match(html, /href="\/reason">How it is scored</);
+    assert.match(html, /That is not a claim that bias is impossible/);
+    assert.doesNotMatch(html, /Specified Fit, Not Pretty Spirals/);
+    assert.doesNotMatch(html, /Score floor 33\.3/);
+    assert.doesNotMatch(html, /Answers open with Yes, No, Let's review, or Interesting/);
     const visibleHome = html.split(/<body[^>]*>/i)[1] || "";
     assert.doesNotMatch(visibleHome, /Works with ChatGPT \(GPT Actions \/ OpenAI\)/);
     assert.doesNotMatch(visibleHome, /<p class="muted">Works with /);
@@ -934,7 +936,7 @@ describe("homepage stays a natural argument surface", () => {
     assert.doesNotMatch(visibleHomeChrome, /QNM-BUILD-1\.0|Not an anonymity network|Public HTTPS engine/);
     assert.doesNotMatch(html, /Suite mesh: off/);
     assert.doesNotMatch(html, /id="node-gate"/);
-    assert.match(html, /<title>GodLock by Aziel Eliab — Specified Fit, Not Pretty Spirals<\/title>/);
+    assert.match(html, /<title>Godlock\. The Debate Site of Intelligent Design<\/title>/);
     assert.doesNotMatch(html, /<title>GodLock — GodLock<\/title>/);
     const homeLd = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     assert.ok(homeLd["@graph"].some((n) => n["@type"] === "WebSite" && n["@id"] === "https://godlock.uk/#website"));
@@ -1066,7 +1068,8 @@ describe("Aziel Eliab routes", () => {
     assert.match(html, /<title>About Aziel Eliab — GodLock<\/title>/);
     assert.match(html, /index,follow/);
     assert.ok(html.includes(AZIEL_MANIFESTO[3]));
-    assert.match(html, /Specified Fit, Not Pretty Spirals/);
+    assert.match(html, /How GodLock is scored/);
+    assert.doesNotMatch(html, /Specified Fit, Not Pretty Spirals/);
     assert.match(html, /class="aziel current"/);
     assert.doesNotMatch(html, /class="identity-lock"/);
     assert.ok(!html.includes(VISIBLE_IDENTITY_LOCK));
@@ -1112,15 +1115,17 @@ describe("Aziel Eliab routes", () => {
   });
 });
 
-describe("Specified Fit /reason", () => {
-  it("serves the public brief", async () => {
+describe("How GodLock is scored", () => {
+  it("serves the published triad method", async () => {
     const res = await worker.fetch(new Request("https://godlock.uk/reason"), mockEnv());
     assert.equal(res.status, 200);
     const html = await res.text();
-    assert.match(html, /<title>Specified Fit, Not Pretty Spirals — GodLock<\/title>/);
-    assert.match(html, /Functionally specified digital information joined to a translation \/ reader system/);
-    assert.match(html, /A\. Detection/);
-    assert.match(html, /D\. GodLock as method/);
+    assert.match(html, /<title>How GodLock is scored — GodLock<\/title>/);
+    assert.match(html, /published corpus triad \(TRIAD_V3\)/);
+    assert.match(html, /That is not a claim that bias is impossible/);
+    assert.match(html, /https:\/\/www\.azielcorpuslibrary\.net\/how-its-scored/);
+    assert.doesNotMatch(html, /A\. Detection/);
+    assert.doesNotMatch(html, /Score floor 33\.3/);
     assert.doesNotMatch(html, /\bABAD\b/);
     assert.doesNotMatch(html, /Whitestone/);
     assert.doesNotMatch(html, /The ARK/);
@@ -1139,8 +1144,9 @@ describe("Specified Fit /reason", () => {
     const body = await res.json();
     assert.equal(body.author, "Aziel Eliab");
     assert.equal(body.path, "/reason");
-    assert.equal(body.title, "Specified Fit, Not Pretty Spirals");
-    assert.match(body.text, /Functionally specified digital information/);
+    assert.equal(body.title, "How GodLock is scored");
+    assert.match(body.text, /TRIAD_V3/);
+    assert.match(body.text, /https:\/\/www\.azielcorpuslibrary\.net\/how-its-scored/);
   });
 });
 
@@ -2314,7 +2320,8 @@ describe("receipts UI and public payload", () => {
     const home = homeBody({ stats: { current_score: 49.5, residual: 50.5, uses: 3, receipts: 2 }, latest: null, prior });
     assert.match(home, /<h2>Prior receipts<\/h2>/);
     assert.match(home, /challenge text not retained/);
-    assert.match(home, /Full receipt/);
+    assert.match(home, /href="\/receipt\/new">Receipt</);
+    assert.match(home, /href="\/receipt\/old">Receipt</);
     const newerAt = home.indexOf("/receipt/new");
     const olderAt = home.indexOf("/receipt/old");
     assert.ok(newerAt > 0 && olderAt > newerAt);
@@ -2346,7 +2353,8 @@ describe("receipts UI and public payload", () => {
     assert.match(tab, /href="\/receipt\/r6"/);
     assert.match(tab, /href="\/receipt\/r7"/);
     assert.match(tab, /id="stat-receipts">7</);
-    assert.match(tab, /stress-test engine/);
+    assert.match(tab, /Public questions and the hash-chained receipt list/);
+    assert.match(tab, /triad reading/);
   });
 
   it("refreshes scorebox from gatherStats fields in the homepage script", () => {
@@ -2400,16 +2408,16 @@ describe("receipts UI and public payload", () => {
       isolated: 0,
     };
     const latest = answerCard(row, true);
-    assert.match(latest, /<div class="k">Challenge<\/div>/);
+    assert.match(latest, /<div class="k">Question<\/div>/);
     assert.match(latest, /Code plus a reader is specified information/);
-    const challengeAt = latest.indexOf("Challenge");
-    const summaryAt = latest.indexOf("1. Summary");
+    const challengeAt = latest.indexOf("Question");
+    const summaryAt = latest.indexOf("Summary");
     assert.ok(challengeAt > 0 && summaryAt > challengeAt);
     const receipt = receiptBody({ id: row.id, row, entries: [] });
     assert.match(receipt, /Code plus a reader is specified information/);
     const home = homeBody({ stats: {}, latest: null, prior: [row] });
     assert.match(home, /Code plus a reader is specified information/);
-    assert.match(home, /href="\/receipt\/r-text">Full receipt</);
+    assert.match(home, /href="\/receipt\/r-text">Receipt</);
   });
 
   it("shows challenge text not retained for legacy null columns", () => {

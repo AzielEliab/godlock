@@ -9,7 +9,7 @@ import {
 } from "./src/challengeText.js";
 import { checkSubmitGuard, SUBMIT_RATE_MAX, submitFingerprint } from "./src/submitGuard.js";
 import { sha256hex } from "./src/ledger.js";
-import { FLOOR, CEILING, LABELS, hashReceipt } from "./src/engine.js";
+import { hashReceipt } from "./src/engine.js";
 import { homeBody } from "./src/ui.js";
 import { siteOpenApi } from "./src/seo.js";
 
@@ -20,6 +20,7 @@ const EMPTY_SHA256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b78
 function submitEnv() {
   const receipts = [];
   const ledger = [];
+  const rescores = [];
   const heartbeats = new Map();
   const guard = new Map();
   const metadata = new Map([
@@ -41,6 +42,10 @@ function submitEnv() {
         return stmt;
       },
       async first() {
+        if (/latest-rescore/.test(q)) {
+          const rows = rescores.filter((r) => r.receipt_id === bound[0]);
+          return rows.length ? rows[rows.length - 1] : null;
+        }
         if (/SELECT value FROM metadata/.test(q)) {
           const v = metadata.get(bound[0]);
           return v != null ? { value: v } : null;
@@ -74,6 +79,24 @@ function submitEnv() {
         return null;
       },
       async all() {
+        if (/rescore-candidates/.test(q)) {
+          return {
+            results: receipts
+              .filter((r) => !Number(r.isolated))
+              .map((r) => ({
+                id: r.id,
+                challenge_text: r.challenge_text,
+                text_sha256: r.text_sha256,
+                score_after: r.score_after,
+                label: r.label,
+                isolated: r.isolated,
+                created_utc: r.created_utc,
+              })),
+          };
+        }
+        if (/rescore-history/.test(q)) {
+          return { results: rescores.filter((r) => r.receipt_id === bound[0]) };
+        }
         if (/steer-aggregate/.test(q)) {
           return {
             results: receipts
@@ -96,6 +119,16 @@ function submitEnv() {
         return { results: [] };
       },
       async run() {
+        if (/INSERT INTO receipt_rescores/.test(q)) {
+          const cols = (q.match(/INSERT INTO receipt_rescores\(([^)]+)\)/i) || ["", ""])[1]
+            .split(",")
+            .map((c) => c.trim());
+          const row = {};
+          cols.forEach((c, i) => {
+            row[c] = bound[i];
+          });
+          rescores.push(row);
+        }
         if (/INSERT INTO receipts/.test(q)) {
           const cols = (q.match(/INSERT INTO receipts\(([^)]+)\)/i) || ["", ""])[1]
             .split(",")
@@ -275,7 +308,7 @@ describe("POST /submit refuses empty/null and does not archive", () => {
 });
 
 describe("POST /submit still scores one valid challenge", () => {
-  it("archives a real challenge and keeps floor 33.3 / ceiling 99.7 labels", async () => {
+  it("archives a real challenge and scores it with TRIAD_V3", async () => {
     const rec = submitEnv();
     const res = await postSubmit(rec.env, { text: VALID });
     assert.equal(res.status, 200);
@@ -286,9 +319,12 @@ describe("POST /submit still scores one valid challenge", () => {
     assert.equal(j.challenge_text, VALID);
     assert.equal(j.text_sha256, sha256hex(VALID));
     assert.notEqual(j.text_sha256, EMPTY_SHA256);
-    assert.ok(LABELS.includes(j.label));
-    assert.ok(j.score_after >= FLOOR && j.score_after <= CEILING);
-    assert.ok(j.score_before >= FLOOR && j.score_before <= CEILING);
+    assert.equal(j.label, "Triad");
+    assert.equal(j.triad_display, j.score_after);
+    assert.equal(j.score_after, Math.round(Number(j.triad_combined) * 100));
+    assert.equal(j.rescore.reason, "initial");
+    assert.ok(Number.isInteger(j.score_after));
+    assert.equal(j.residual, 100 - j.score_after);
     assert.equal(j.author, undefined);
     assert.equal(rec.receipts.length, 1);
     assert.ok(rec.ledger.some((e) => e.action === "SUBMIT"));
@@ -302,19 +338,56 @@ describe("POST /submit still scores one valid challenge", () => {
     assert.equal(j.stats.scales.undecided, 0);
     assert.equal(j.stats.current_score, j.score_after);
     assert.equal(j.stats.residual, j.residual);
+    assert.equal(j.stats.triad_display, j.score_after);
     assert.equal(j.content_sha256, hashReceipt(rec.receipts[0]));
     assert.doesNotMatch(JSON.stringify(j), /INTERNAL_CRITERIA|weighing|bootstrap lock/i);
     const submitEntry = rec.ledger.find((e) => e.action === "SUBMIT");
     const payload = JSON.parse(submitEntry.payload_json);
     assert.equal(payload.classification, undefined);
     assert.equal(payload.steer, undefined);
-    const visible = homeBody({ stats: { current_score: j.score_after, residual: j.residual, steer: j.stats.steer }, latest: rec.receipts[0], prior: [] });
+    const visible = homeBody({
+      stats: {
+        current_score: j.score_after,
+        residual: j.residual,
+        triad_display: j.score_after,
+        meter_remainder: j.residual,
+        steer: j.stats.steer,
+      },
+      latest: rec.receipts[0],
+      prior: [],
+    });
     assert.match(visible, /id="steer"/);
     assert.match(visible, /Steering toward: Intelligent design/);
-    assert.match(visible, /Score floor 33\.3 · ceiling 99\.7/);
-    assert.match(visible, /Yes, No, Let's review, or Interesting/);
+    assert.match(visible, /Godlock\. The Debate Site of Intelligent Design/);
+    assert.match(visible, /id="stat-current-score">/);
+    assert.doesNotMatch(visible, /Score floor 33\.3/);
+    assert.doesNotMatch(visible, /Yes, No, Let's review, or Interesting/);
     assert.doesNotMatch(visible, /1 Chronicles 15:20/);
     assert.doesNotMatch(visible, /uploads/i);
+  });
+
+  it("rescores the prior receipt named by a later question and keeps the old row", async () => {
+    const rec = submitEnv();
+    const first = await postSubmit(rec.env, { text: VALID });
+    assert.equal(first.status, 200);
+    const earlier = await first.json();
+    const follow = "Please look again at receipt " + earlier.id + ". The mapping is still the question.";
+    const second = await postSubmit(rec.env, { text: follow });
+    assert.equal(second.status, 200);
+    const later = await second.json();
+    assert.match(later.explanation, new RegExp("Rescored earlier receipts: " + earlier.id));
+    assert.equal(rec.receipts.length, 2);
+    assert.equal(rec.receipts[0].score_after, earlier.score_after);
+    assert.ok(rec.ledger.some((e) => e.action === "RESCORE"));
+    const home = await worker.fetch(new Request("https://godlock.uk/", {
+      headers: { "User-Agent": "Mozilla/5.0" },
+    }), rec.env);
+    const html = await home.text();
+    assert.match(html, /Earlier receipt was rescored/);
+    assert.match(html, /is kept on the original receipt|was not rewritten/);
+    assert.match(html, /Godlock\. The Debate Site of Intelligent Design/);
+    assert.match(html, /id="stat-current-score">/);
+    assert.match(html, /id="steer"/);
   });
 });
 

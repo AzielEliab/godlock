@@ -50,6 +50,8 @@ import {
   ABOUT_UNSCORED_CLAIM,
   SPECIFIED_FIT_TITLE,
   SPECIFIED_FIT_MOTTO,
+  SCORE_METHOD_LINE,
+  DEBATE_HEADLINE,
   identityMachineUrls,
   citeDoc,
   graphJsonLd,
@@ -316,8 +318,9 @@ describe("AZindex identity machine", () => {
     const argue = faq.mainEntity.find((q) => q.name === "Does GodLock argue?");
     assert.match(argue.acceptedAnswer.text, /records, analyzes, hardens, and grows/);
     assert.match(argue.acceptedAnswer.text, /challenge\/score product/);
-    const specified = faq.mainEntity.find((q) => q.name === "What is Specified Fit, Not Pretty Spirals?");
-    assert.match(specified.acceptedAnswer.text, /GodLock does not argue/);
+    const scored = faq.mainEntity.find((q) => q.name === "How does GodLock score?");
+    assert.match(scored.acceptedAnswer.text, /TRIAD_V3/);
+    assert.match(scored.acceptedAnswer.text, /Specified Fit prior is not added/);
     const aboutWork = nodes.find((n) => n["@id"] === CANON_HOST + "/AzielEliab#public-work");
     assert.ok(aboutWork);
     assert.equal(aboutWork["@type"], "CreativeWork");
@@ -345,7 +348,7 @@ describe("AZindex identity machine", () => {
     for (const rule of IDENTITY_MODEL_RULES) assert.ok(text.includes(rule), rule);
     assert.match(text, /This host \(https:\/\/godlock\.uk\/\) is a GodLock product surface/);
     assert.match(text, /He Didn't Jump remains in the ecosystem/);
-    assert.match(text, /Specified Fit, Not Pretty Spirals is a public design motto/);
+    assert.match(text, /Scores use the published corpus triad \(TRIAD_V3\)/);
     assert.match(text, /## Living identity/);
     assert.doesNotMatch(text, /## Disambiguation/);
     assert.doesNotMatch(text, /## Biblical disambiguation/);
@@ -381,9 +384,9 @@ describe("AZindex identity machine", () => {
     assert.equal(doc.mission.godlock_is_vpn, false);
     assert.equal(doc.mission.godlock_is_identity_label, false);
     assert.equal(doc.mission.godlock_is_anonymity_tool, false);
-    assert.equal(doc.mission.design_motto, SPECIFIED_FIT_TITLE);
+    assert.equal(doc.mission.design_motto, DEBATE_HEADLINE);
     assert.equal(doc.mission.design_motto_kind, "public_work");
-    assert.equal(doc.mission.godlock_method, SPECIFIED_FIT_MOTTO);
+    assert.equal(doc.mission.godlock_method, SCORE_METHOD_LINE);
     assert.equal(doc.mission.philosophy, "public_work");
     assert.equal(doc.mission.status, "public_work");
     assert.deepEqual(doc.about_public_work, aboutPublicWorkDoc());

@@ -53,6 +53,7 @@ import {
 } from "./engine.js";
 import {
   TRIAD_LABEL, scoreDebateText, triadSnapshot, debateSummary, debateExplanation, describeRescore, meterRemainder,
+  publishedReading, newestPublishedMeter,
 } from "./debateScore.js";
 import { affectedPriors } from "./rescore.js";
 import { aggregateSteer, classifyChallenge, unavailableSteer } from "./steer.js";
@@ -209,7 +210,21 @@ async function readTriadMeter(env) {
   const n = Number(raw);
   if (!Number.isFinite(n)) return null;
   const display = Math.round(n);
-  return { display, remainder: meterRemainder(display) };
+  return { display, remainder: meterRemainder(display), source: "metadata", receipt_id: null };
+}
+
+/** Stored metadata meter, else the newest public receipt TRIAD_V3 can score. Does not write. */
+async function publishedMeter(env) {
+  const stored = await readTriadMeter(env);
+  if (stored) return stored;
+  try {
+    const res = await env.DB.prepare(
+      "SELECT id, created_utc, challenge_text, text_sha256, isolated FROM receipts WHERE isolated=0 ORDER BY created_utc DESC /* published-meter */"
+    ).all();
+    return newestPublishedMeter(res && res.results ? res.results : []);
+  } catch {
+    return null;
+  }
 }
 
 function sessionIdFrom(request, cookieId) {
@@ -461,9 +476,10 @@ async function publicSteer(env) {
 }
 
 async function gatherStats(env, { wrote, visiting, ctx } = {}) {
-  const meter = await readTriadMeter(env);
-  const score = meter ? meter.display : await currentScore(env);
-  const residual = meter ? meter.remainder : residualOf(score);
+  const meter = await publishedMeter(env);
+  const storedMeta = !!(meter && meter.source === "metadata");
+  const score = storedMeta ? meter.display : await currentScore(env);
+  const residual = storedMeta ? meter.remainder : residualOf(score);
   const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
   const [siteNodes, downloads, uses, receipts, meshSnap, steer] = await Promise.all([
     liveNodes(env, { wrote, visiting }),
@@ -501,6 +517,7 @@ async function gatherStats(env, { wrote, visiting, ctx } = {}) {
     residual,
     triad_display: meter ? meter.display : null,
     meter_remainder: meter ? meter.remainder : null,
+    triad_display_source: meter ? meter.source : null,
     steer,
     steer_leader: steer.leader,
     scales: steer.scales,
@@ -579,6 +596,22 @@ export function publicPayload(row) {
         changed_note: item.changed_note,
         created_utc: item.created_utc,
       }));
+    }
+    const reading = publishedReading(safe);
+    if (reading) {
+      payload.published_reading = {
+        status: reading.status,
+        display: reading.display,
+        combined: reading.combined,
+        note: reading.note,
+      };
+      payload.old_stored_label = safe.label;
+      payload.old_stored_score_before = score_before;
+      payload.old_stored_score_after = score_after;
+      if (reading.ready) {
+        payload.triad_display = reading.display;
+        payload.triad_combined = reading.combined;
+      }
     }
   }
   return payload;
@@ -992,6 +1025,7 @@ export default {
           residual: stats.residual,
           triad_display: stats.triad_display,
           meter_remainder: stats.meter_remainder,
+          triad_display_source: stats.triad_display_source,
           steer: stats.steer,
           steer_leader: stats.steer_leader,
           scales: stats.scales,
@@ -1144,6 +1178,8 @@ export default {
             text: reasonText(),
             current_score: stats.current_score,
             residual: stats.residual,
+            triad_display: stats.triad_display,
+            meter_remainder: stats.meter_remainder,
             steer: stats.steer,
             steer_leader: stats.steer_leader,
             scales: stats.scales,
@@ -1239,6 +1275,8 @@ export default {
             ledger: entries,
             current_score: stats.current_score,
             residual: stats.residual,
+            triad_display: stats.triad_display,
+            meter_remainder: stats.meter_remainder,
             steer: stats.steer,
             steer_leader: stats.steer_leader,
             scales: stats.scales,

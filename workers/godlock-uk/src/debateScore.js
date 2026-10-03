@@ -6,6 +6,8 @@
  * Author: Aziel Eliab.
  */
 import { reviewDocument, TRIAD_SCHEMA } from "./corpus/review.js";
+import { visibleChallengeText } from "./challengeText.js";
+import { sha256hex } from "./ledger.js";
 
 export const DEBATE_HEADLINE = "Godlock. The Debate Site of Intelligent Design";
 export const SCORE_METHOD_URL = "https://www.azielcorpuslibrary.net/how-its-scored";
@@ -20,6 +22,9 @@ export const BIAS_PUBLIC =
 
 export const RESCORE_RULE_PUBLIC =
   "A later question rescores an earlier receipt when the match is flawless: the new text names that receipt id, it is an explicit supersedes link to that id, or the normalized text is the same succession after version tails are stripped. Loose topical similarity does not rescore. Rescore runs TRIAD_V3 again on the stored text. It does not merge the new question into the old text. The original receipt row is kept. The rescore is an added record.";
+
+export const READING_PUBLIC =
+  "A public receipt whose challenge text is stored shows the published TRIAD_V3 reading of that text. The original receipt row is kept. The old stored label and the old stored score stay on that row and are labeled as the old number. If the stored challenge text is missing, that row is not scored. Showing the reading does not rewrite the receipt.";
 
 export function meterRemainder(display) {
   const n = Math.round(Number(display));
@@ -67,6 +72,121 @@ export function triadSnapshot(review) {
     omitted: omittedFactorNames(review),
     public_score: triad && triad.public_score ? triad.public_score : null,
   };
+}
+
+function storedContentSha(row, text) {
+  const sha = row && row.text_sha256 ? String(row.text_sha256) : "";
+  return sha || sha256hex(text);
+}
+
+/**
+ * Published TRIAD_V3 reading of a stored challenge.
+ * Read-only. Does not write the receipt, the ledger, or combined.
+ * Missing or empty stored text stays unscored.
+ */
+export function publishedReading(row) {
+  if (!row || Number(row.isolated)) return null;
+  if (row.challenge_text == null) {
+    return {
+      status: "missing",
+      ready: false,
+      display: null,
+      combined: null,
+      note: "Stored challenge text is missing. This receipt is not scored with TRIAD_V3.",
+    };
+  }
+  const text = String(row.challenge_text);
+  if (!visibleChallengeText(text)) {
+    return {
+      status: "empty",
+      ready: false,
+      display: null,
+      combined: null,
+      note: "Stored challenge text is empty. This receipt is not scored with TRIAD_V3.",
+    };
+  }
+  const review = scoreDebateText(text, storedContentSha(row, text));
+  const snap = triadSnapshot(review);
+  if (!snap.ready || snap.display == null || snap.combined == null) {
+    return {
+      status: "unscored",
+      ready: false,
+      display: null,
+      combined: null,
+      note: "TRIAD_V3 did not publish a combined score for this stored text.",
+    };
+  }
+  return {
+    status: "ready",
+    ready: true,
+    display: snap.display,
+    combined: snap.combined,
+    schema: snap.schema,
+    note: "TRIAD_V3 display " + snap.display + ". Combined " + snap.combined + ". This reading is the published corpus triad on the stored challenge text. The original receipt row was not rewritten.",
+  };
+}
+
+/** Newest public row whose stored text publishes a TRIAD_V3 display. */
+export function newestPublishedMeter(rows) {
+  const list = (rows || []).slice().sort((a, b) => String(b && b.created_utc || "").localeCompare(String(a && a.created_utc || "")));
+  for (const row of list) {
+    if (!row || Number(row.isolated)) continue;
+    const reading = publishedReading(row);
+    if (reading && reading.ready && reading.display != null) {
+      const display = Math.round(Number(reading.display));
+      return {
+        display,
+        remainder: meterRemainder(display),
+        receipt_id: row.id || null,
+        source: "stored_challenge_text",
+      };
+    }
+  }
+  return null;
+}
+
+export function oldStoredScorePhrase(row) {
+  const label = row && row.label != null && String(row.label) !== "" ? String(row.label) : "none";
+  const before = row ? row.score_before : null;
+  const after = row ? row.score_after : null;
+  const hasScores = before != null && before !== "" && after != null && after !== "";
+  if (!hasScores) return "Old stored label " + label + ".";
+  return "Old stored label " + label + ". Old stored score " + before + "% → " + after + "%.";
+}
+
+function laterRescoreRows(row) {
+  const history = Array.isArray(row && row.rescores) ? row.rescores : [];
+  return history.filter((item) => item && item.reason && item.reason !== "initial");
+}
+
+/** Visitor line. The triad reading leads. The old stored score stays labeled as the old number. */
+export function visitorReceiptLine(row) {
+  const old = oldStoredScorePhrase(row);
+  const kept = "Original receipt kept.";
+  const later = laterRescoreRows(row);
+  const history = Array.isArray(row && row.rescores) ? row.rescores : [];
+  const latest = row && row.latest_rescore
+    ? row.latest_rescore
+    : (history.length ? history[history.length - 1] : null);
+  const reading = row && row.published_reading ? row.published_reading : publishedReading(row);
+  if (later.length) {
+    const note = latest && latest.changed_note ? String(latest.changed_note) : "";
+    const storedDisplay = latest && latest.display != null ? Number(latest.display) : null;
+    const live = reading && reading.ready && reading.display != null ? Number(reading.display) : null;
+    const shown = live != null ? live : (storedDisplay != null && Number.isFinite(storedDisplay) ? storedDisplay : "none");
+    let head = "TRIAD_V3 display " + shown + ".";
+    if (live != null && storedDisplay != null && Number.isFinite(storedDisplay) && live !== storedDisplay) {
+      head += " The stored rescore display was " + storedDisplay + ".";
+    }
+    return head + " Earlier receipt was rescored. " + note + " " + old + " " + kept;
+  }
+  if (!reading || reading.status === "missing" || reading.status === "empty" || !reading.ready) {
+    const note = reading && reading.note
+      ? reading.note
+      : "Stored challenge text is missing. This receipt is not scored with TRIAD_V3.";
+    return note + " " + old + " " + kept;
+  }
+  return reading.note + " " + old + " " + kept;
 }
 
 export function debateSummary(review) {

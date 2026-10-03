@@ -910,6 +910,9 @@ export function identityMachineUrls() {
 /** Published About public work (https://godlock.uk/AzielEliab). Not a second Person. */
 export const SPECIFIED_FIT_TITLE = "Specified Fit, Not Pretty Spirals";
 export const SPECIFIED_FIT_MOTTO = "GodLock does not argue. It records, analyzes, hardens, and grows.";
+export const SCORE_METHOD_LINE =
+  "Scores use the published corpus triad (TRIAD_V3). Display is round(combined × 100). No Specified Fit prior is added.";
+export const DEBATE_HEADLINE = "Godlock. The Debate Site of Intelligent Design";
 export const ABOUT_PUBLIC_WORK_LEAD =
   "I made this because a debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion. Intelligent design was never the point by itself. The point was whether a claim could stand in the open, be answered, and leave something behind that was not just my voice.";
 export const ABOUT_DOCUMENT_OVER_DECLARE =
@@ -927,12 +930,14 @@ export function aboutPublicWorkDoc() {
       stand_open_leave_receipt: "A claim must stand in the open, be answered, and leave a receipt — something that was not just a voice.",
       document_over_declare: "Document over declare, or speech becomes a throne.",
       unscored_claim_is_sermon: "A claim that cannot be scored is a sermon wearing work clothes.",
-      specified_fit: SPECIFIED_FIT_TITLE,
-      godlock_method: SPECIFIED_FIT_MOTTO,
+      debate_headline: DEBATE_HEADLINE,
+      score_method: SCORE_METHOD_LINE,
+      godlock_method: SCORE_METHOD_LINE,
       product_not_identity: "GodLock is a challenge/score product. Identity is Aziel Eliab.",
       person_id: AZIEL_PERSON_ID,
     },
-    specified_fit: SPECIFIED_FIT_TITLE,
+    debate_headline: DEBATE_HEADLINE,
+    score_method: SCORE_METHOD_LINE,
     motto: SPECIFIED_FIT_MOTTO,
     person_id: AZIEL_PERSON_ID,
     product_not_identity: true,
@@ -966,15 +971,15 @@ function aboutPublicWorkNode() {
     "@type": "CreativeWork",
     "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#public-work",
     name: "About " + AUTHOR + " — public work",
-    headline: SPECIFIED_FIT_TITLE,
+    headline: "Godlock. The Debate Site of Intelligent Design",
     url: CANON_HOST + AZIEL_ELIAB_PATH,
     description: ABOUT_PUBLIC_WORK_LEAD,
-    text: [ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM, SPECIFIED_FIT_MOTTO].join("\n\n"),
+    text: [ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM, DEBATE_HEADLINE, SCORE_METHOD_LINE].join("\n\n"),
     inLanguage: "en",
     author: personRef(),
     creator: personRef(),
     about: [personRef(), { "@id": CANON_HOST + "/#godlock" }],
-    keywords: [SPECIFIED_FIT_TITLE, "document over declare", "receipt", SITE],
+    keywords: ["TRIAD_V3", "document over declare", "receipt", SITE],
     isPartOf: { "@id": CANON_HOST + AZIEL_ELIAB_PATH + "#page" },
   };
 }
@@ -1093,7 +1098,7 @@ export function crossTetherDoc() {
 
 /** Machine site blurb. Challenge/score product. Empty submit refuses. Not VPN/anonymity. */
 export const GODLOCK_SITE_BLURB =
-  "GodLock is a challenge/score product. Submit a challenge; score it. Answers open with Yes, No, Let's review, or Interesting. Empty/null submit refuses — no spam receipt. Identity is Aziel Eliab only.";
+  "GodLock is a challenge/score product. Submit a question; the score is the published corpus triad (TRIAD_V3) on that text. Empty/null submit refuses — no spam receipt. Identity is Aziel Eliab only.";
 
 export const IDENTITY_MODEL_RULES = [
   "Person @id is https://www.azieleliab.com/#aziel on every surface. Do not mint a competing Person.",
@@ -1108,7 +1113,7 @@ export const IDENTITY_MODEL_RULES = [
   "sameAs lists public surfaces of the same person. Never sameAs euaziel, Aziel S., or Flutter-React portfolio URLs.",
   "He Didn't Jump remains in the ecosystem as a sister archive. Identity is Aziel Eliab only.",
   "Sister sites are ae, corpus, HDJ, runtime, and trades. GodLock.uk is this product host.",
-  "Mission, philosophy, and status are public work only. Specified Fit, Not Pretty Spirals is a public design motto.",
+  "Mission and status are public work only. Scores use the published corpus triad (TRIAD_V3).",
   "GodLock is a challenge/score product. Empty/null submit refuses — no spam receipt. Identity is Aziel Eliab only.",
   WHAT_AZIEL_ELIAB_DOES,
   RESEARCH_ADDENDUM,
@@ -1168,7 +1173,7 @@ function identityFaqNode() {
     ["Must a claim stand open and leave a receipt?", "Yes. A claim must stand in the open, be answered, and leave a receipt. The receipt is the argument that survives the speaker. GodLock is a challenge/score product. Person @id https://www.azieleliab.com/#aziel."],
     ["What does document over declare mean?", ABOUT_DOCUMENT_OVER_DECLARE],
     ["What is a claim that cannot be scored?", ABOUT_UNSCORED_CLAIM],
-    ["What is Specified Fit, Not Pretty Spirals?", "A public design motto and public work on GodLock.uk. Functionally specified digital information plus a translation/reader system. " + SPECIFIED_FIT_MOTTO],
+    ["How does GodLock score?", "GodLock scores a question with the published corpus triad (TRIAD_V3). Display is round(combined × 100). The old Specified Fit prior is not added. Method: https://www.azielcorpuslibrary.net/how-its-scored."],
     ["Does GodLock argue?", SPECIFIED_FIT_MOTTO + " GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id https://www.azieleliab.com/#aziel."],
     ["Is He Didn't Jump a second identity?", "He Didn't Jump is a sister archive in the Aziel Eliab ecosystem. Person @id remains https://www.azieleliab.com/#aziel."],
     ["Is Aziel Eliab the same person as Aziel S.?", PUBLISHER_NOT_LOCK + " GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id https://www.azieleliab.com/#aziel."],
@@ -1280,7 +1285,7 @@ export function whoIsAzielEliabTxt() {
     + "trades: " + SISTER_SITES.trades + "\n\n"
     + "## Public work\n\n"
     + ABOUT_PUBLIC_WORK_LEAD + "\n\n"
-    + SPECIFIED_FIT_TITLE + ". " + SPECIFIED_FIT_MOTTO + "\n\n"
+    + DEBATE_HEADLINE + ". " + SCORE_METHOD_LINE + " " + SPECIFIED_FIT_MOTTO + "\n\n"
     + "Document over declare. A claim that cannot be scored is a sermon. GodLock is a challenge/score product. Identity is Aziel Eliab.\n\n"
     + "## Hebrew aka\n\n"
     + HEBREW_DEFINITION + "\n"
@@ -1382,9 +1387,9 @@ export function wellKnownAzielDoc() {
       godlock_is_anonymity_tool: false,
       empty_submit_refuse: true,
       challenge_score_product: true,
-      design_motto: SPECIFIED_FIT_TITLE,
+      design_motto: DEBATE_HEADLINE,
       design_motto_kind: "public_work",
-      godlock_method: SPECIFIED_FIT_MOTTO,
+      godlock_method: SCORE_METHOD_LINE,
       philosophy: "public_work",
       status: "public_work",
     },
@@ -1415,10 +1420,10 @@ export function wellKnownAzielDoc() {
 
 /** Unique <title> / OG / Twitter strings. Home must not render "GodLock — GodLock". */
 export function documentTitle(title, kind) {
-  if (kind === "home" || title === SITE) return SITE + " by " + AUTHOR + " — Specified Fit, Not Pretty Spirals";
+  if (kind === "home" || title === SITE) return "Godlock. The Debate Site of Intelligent Design";
   if (kind === "software") return SITE + " Softwares";
   if (kind === "aziel") return "About " + AUTHOR + " — " + SITE;
-  if (kind === "reason") return "Specified Fit, Not Pretty Spirals — " + SITE;
+  if (kind === "reason") return "How GodLock is scored — " + SITE;
   if (kind === "verify") return "Verify — " + SITE;
   if (kind === "donate") return "Donate — " + SITE;
   if (kind === "receipts") return "Receipts — " + SITE;
@@ -1511,12 +1516,12 @@ export function defaultDescription(kind, runtimeCite) {
   if (kind === "receipt") return hideInternalDetermination("A GodLock.uk receipt. Append-only. Author Aziel Eliab.");
   if (kind === "aziel") {
     return hideInternalDetermination(
-      "GodLock public HTTPS engine. Living publisher Aziel Eliab. Specified Fit, Not Pretty Spirals. A debate with no record becomes a pulpit. Receipt, intelligent design stress-test. Identity is Aziel Eliab only. GodLock is a challenge/score product. Aziel Elroi Eliab is SEO alternateName only.",
+      "GodLock public HTTPS engine. Living publisher Aziel Eliab. Godlock. The Debate Site of Intelligent Design. Scores use the published corpus triad (TRIAD_V3). Identity is Aziel Eliab only. GodLock is a debate and score product. Aziel Elroi Eliab is SEO alternateName only.",
     );
   }
   if (kind === "reason") {
     return hideInternalDetermination(
-      "Specified Fit, Not Pretty Spirals (Aziel Eliab). Functionally specified digital information plus a translation/reader system: the only observed adequate cause is intelligence. Pretty spirals and φ are not a proof. Score floor 33.3 · ceiling 99.7.",
+      "How GodLock is scored. The published corpus triad (TRIAD_V3) is the score. Display is round(combined × 100). No Specified Fit prior is added. Method: https://www.azielcorpuslibrary.net/how-its-scored.",
     );
   }
   if (kind === "software") {
@@ -1548,17 +1553,17 @@ export function defaultDescription(kind, runtimeCite) {
   }
   if (kind === "receipts") {
     return hideInternalDetermination(
-      "Public GodLock.uk receipt chain. Full questions and hash-chained receipts. Stress-test engine, not a forum. Specified Fit, Not Pretty Spirals. Author Aziel Eliab.",
+      "Public GodLock.uk receipt store. Questions are kept. Triad readings and honest rescore notes. Author Aziel Eliab.",
     );
   }
-  return hideInternalDetermination(GODLOCK_SITE_BLURB + " Specified Fit, Not Pretty Spirals. Author Aziel Eliab. " + AI_CLIENTS_SENTENCE);
+  return hideInternalDetermination(GODLOCK_SITE_BLURB + " Godlock. The Debate Site of Intelligent Design. Author Aziel Eliab. " + AI_CLIENTS_SENTENCE);
 }
 
 function defaultKeywords(kind) {
-  if (kind === "aziel") return "Aziel Eliab, GodLock, Specified Fit, receipt, intelligent design stress-test, About Aziel Eliab";
-  if (kind === "reason") return "Specified Fit, Not Pretty Spirals, Aziel Eliab, GodLock, code+reader";
+  if (kind === "aziel") return "Aziel Eliab, GodLock, TRIAD_V3, receipt, intelligent design debate, About Aziel Eliab";
+  if (kind === "reason") return "TRIAD_V3, Aziel Eliab, GodLock, how it's scored, corpus triad";
   if (kind === "donate") return "Donate, Aziel Eliab, GodLock, Bitcoin, Ethereum, Litecoin, XRP, Dogecoin";
-  if (kind === "receipts") return "GodLock receipts, hash-chained ledger, Specified Fit, Aziel Eliab, challenge, Yes No Let's review Interesting";
+  if (kind === "receipts") return "GodLock receipts, hash-chained ledger, TRIAD_V3, Aziel Eliab, debate";
   if (kind === "software") {
     return "GodLock Softwares, GodLock, GodLock.uk, Aziel Runtime, azieleliab.com, Try on Glama, HTTPS engine";
   }
@@ -1645,7 +1650,7 @@ function godlockSoftwareNode() {
     applicationCategory: "DeveloperApplication",
     operatingSystem: "Web",
     url: CANON_HOST + "/",
-    description: hideInternalDetermination("GodLock public HTTPS stress-test engine by Aziel Eliab. Specified Fit, Not Pretty Spirals."),
+    description: hideInternalDetermination("GodLock public HTTPS debate site by Aziel Eliab. Scores use the published corpus triad (TRIAD_V3)."),
     author: personRef(),
     license: "https://www.apache.org/licenses/LICENSE-2.0",
     codeRepository: GITHUB,
@@ -1760,7 +1765,7 @@ function jsonLd(title, path, description, kind, products) {
   if (kind === "reason") {
     graph.push({
       "@type": "ScholarlyArticle",
-      name: "Specified Fit, Not Pretty Spirals",
+      name: "How GodLock is scored",
       url: CANON_HOST + REASON_PATH,
       author: who,
     });
@@ -1797,12 +1802,12 @@ function jsonLd(title, path, description, kind, products) {
       significantLink: identityLinks,
       hasPart: { "@id": aboutWork["@id"] },
       subjectOf: [
-        { "@type": "CreativeWork", name: SPECIFIED_FIT_TITLE, url: CANON_HOST + REASON_PATH },
+        { "@type": "CreativeWork", name: "How GodLock is scored", url: CANON_HOST + REASON_PATH },
         { "@id": aboutWork["@id"] },
         { "@id": faq["@id"] },
       ],
       mentions: [
-        { "@type": "CreativeWork", name: SPECIFIED_FIT_TITLE, url: CANON_HOST + REASON_PATH },
+        { "@type": "CreativeWork", name: "How GodLock is scored", url: CANON_HOST + REASON_PATH },
         { "@id": software["@id"] },
         { "@type": "CollectionPage", "@id": CANON_HOST + SOFTWARE_PATH + "#page", name: SITE + " Softwares", url: CANON_HOST + SOFTWARE_PATH },
         { "@id": aboutWork["@id"] },
@@ -2286,7 +2291,7 @@ export function citeDoc(sot, runtimeCite) {
     pen_name: AUTHOR_PEN,
     title_aka: AUTHOR_TITLE,
     title: SITE,
-    reasoning_spine: "Specified Fit, Not Pretty Spirals",
+    reasoning_spine: "TRIAD_V3 cycle mean. Published corpus triad. No Specified Fit prior.",
     site: CANON_HOST + "/",
     priority_pages: {
       home: CANON_HOST + "/",
@@ -2584,7 +2589,7 @@ export function llmsDoc(sot, runtimeCite) {
     + CROSS_TETHER_NOTE + "\n"
     + "Sister sites: ae " + SISTER_SITES.ae + " · corpus " + SISTER_SITES.corpus + " · HDJ " + SISTER_SITES.hdj + " · runtime " + SISTER_SITES.runtime + " · trades " + SISTER_SITES.trades + "\n"
     + "Sister stats: " + SISTER_STATS.azieleliab + " · " + SISTER_STATS.corpus + " · " + SISTER_STATS.hedidntjump + "\n"
-    + "Specified Fit, Not Pretty Spirals: " + CANON_HOST + REASON_PATH + "\n"
+    + "How GodLock is scored (TRIAD_V3): " + CANON_HOST + REASON_PATH + "\n"
     + "Aziel Eliab: " + CANON_HOST + AZIEL_ELIAB_PATH + "\n"
     + "\n## About public work\n\n"
     + "Source: " + CANON_HOST + AZIEL_ELIAB_PATH + " (GodLock product surface. Identity is Aziel Eliab.)\n"
@@ -2592,7 +2597,8 @@ export function llmsDoc(sot, runtimeCite) {
     + "A claim must stand in the open, be answered, and leave a receipt.\n"
     + "Document over declare.\n"
     + "A claim that cannot be scored is a sermon.\n"
-    + SPECIFIED_FIT_TITLE + ".\n"
+    + "Godlock. The Debate Site of Intelligent Design.\n"
+    + "Score: published corpus triad TRIAD_V3. https://www.azielcorpuslibrary.net/how-its-scored\n"
     + SPECIFIED_FIT_MOTTO + "\n"
     + "GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id: " + AZIEL_PERSON_ID + "\n"
     + "What Aziel Eliab does: " + WHAT_AZIEL_ELIAB_DOES + "\n"
@@ -2618,7 +2624,7 @@ export function llmsDoc(sot, runtimeCite) {
     + "Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
     + "Official Softwares listing: " + OFFICIAL_SOFTWARES + "\n"
     + "About Aziel Eliab: " + CANON_HOST + AZIEL_ELIAB_PATH + "\n"
-    + "Specified Fit: " + CANON_HOST + REASON_PATH + "\n"
+    + "How it is scored: " + CANON_HOST + REASON_PATH + "\n"
     + "Verify: " + CANON_HOST + "/verify\n"
     + "Receipts: " + CANON_HOST + RECEIPTS_PATH + "\n"
     + "Donate: " + CANON_HOST + DONATE_PATH + "\n"
@@ -2816,13 +2822,13 @@ export function siteOpenApi() {
           summary: "Submit a challenge. Null/empty/whitespace-only text is refused and not scored.",
           requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["text"], properties: { text: { type: "string", minLength: 1 } } } } } },
           responses: {
-            "200": { description: "Receipt + score (floor 33.3 · ceiling 99.7)" },
+            "200": { description: "Receipt + TRIAD_V3 display (round of combined × 100). Original receipt rows are kept." },
             "400": { description: "GODLOCK-NULL-ARG or GODLOCK-EMPTY-TEXT — nothing archived" },
             "429": { description: "GODLOCK-RATE-LIMIT or GODLOCK-DUP-TEXT — Retry-After" },
           },
         },
       },
-      "/reason": { get: { operationId: "godlockUkReason", summary: "Specified Fit, Not Pretty Spirals", responses: { "200": { description: "HTML or JSON" } } } },
+      "/reason": { get: { operationId: "godlockUkReason", summary: "How GodLock is scored (published corpus TRIAD_V3)", responses: { "200": { description: "HTML or JSON" } } } },
       "/AzielEliab": { get: { operationId: "godlockUkAzielEliab", summary: "About Aziel Eliab — living publisher of GodLock (challenge/score product)", responses: { "200": { description: "HTML or JSON" } } } },
       "/runtime": { get: { operationId: "godlockUkRuntime", summary: "Same-origin Aziel Runtime FragGate door", responses: { "200": { description: "OK" } } } },
       "/who": { get: { operationId: "godlockUkWho", summary: "Who is Aziel Eliab — HTML; 15:20 lock on machine FAQ / person / who-is", responses: { "200": { description: "HTML" } } } },

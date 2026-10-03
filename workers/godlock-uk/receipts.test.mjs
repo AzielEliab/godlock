@@ -193,7 +193,7 @@ describe("receipt HTML/JSON and prior list", () => {
     );
     assert.equal(htmlRes.status, 200);
     const html = await htmlRes.text();
-    assert.match(html, /<div class="k">Challenge<\/div>/);
+    assert.match(html, /<div class="k">Question<\/div>/);
     assert.match(html, /Functionally specified digital information/);
     const jsonRes = await worker.fetch(
       new Request("https://godlock.uk/receipt/" + row.id + "?format=json", {
@@ -223,7 +223,7 @@ describe("receipt HTML/JSON and prior list", () => {
     assert.match(html, /href="\/receipts">Full receipts chain</);
     assert.match(html, /id="stat-receipts">/);
     assert.match(html, /Functionally specified digital information/);
-    assert.match(html, new RegExp("href=\"/receipt/" + row.id + "\">Full receipt<"));
+    assert.match(html, new RegExp("href=\"/receipt/" + row.id + "\">Receipt<"));
     assert.doesNotMatch(html, /class="donate-home"/);
     const jsonRes = await worker.fetch(
       new Request("https://godlock.uk/?format=json", {
@@ -308,7 +308,8 @@ describe("Receipts tab and homepage last five", () => {
     assert.match(html, /Functionally specified digital information/);
     assert.match(html, new RegExp("/receipt/" + row.id));
     assert.match(html, /id="stat-receipts">1</);
-    assert.match(html, /stress-test engine/);
+    assert.match(html, /Public questions and the hash-chained receipt list/);
+    assert.match(html, /triad reading/);
     const jsonRes = await worker.fetch(
       new Request("https://godlock.uk/receipts?format=json", {
         headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },

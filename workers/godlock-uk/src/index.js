@@ -48,9 +48,13 @@ import {
   SOFTWARE_HTML_CACHE_CONTROL,
 } from "./catalog.js";
 import {
-  START, shouldIsolate, answerChallenge, clampScore, residualOf, hashReceipt,
+  START, shouldIsolate, clampScore, residualOf, hashReceipt,
   receiptScoreDelta,
 } from "./engine.js";
+import {
+  TRIAD_LABEL, scoreDebateText, triadSnapshot, debateSummary, debateExplanation, describeRescore, meterRemainder,
+} from "./debateScore.js";
+import { affectedPriors } from "./rescore.js";
 import { aggregateSteer, classifyChallenge, unavailableSteer } from "./steer.js";
 import {
   PRESENCE_TTL_MS,
@@ -133,6 +137,19 @@ async function ensureSchema(env) {
       kind TEXT NOT NULL, key TEXT NOT NULL, last_ms INTEGER NOT NULL,
       count INTEGER NOT NULL DEFAULT 1, PRIMARY KEY (kind, key))`),
     env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_submit_guard_last ON submit_guard(last_ms)"),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS receipt_rescores (
+      id TEXT PRIMARY KEY,
+      receipt_id TEXT NOT NULL,
+      created_utc TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      previous_display REAL,
+      previous_source TEXT NOT NULL,
+      display REAL,
+      combined REAL,
+      changed_note TEXT NOT NULL,
+      triad_json TEXT NOT NULL
+    )`),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_rescores_receipt ON receipt_rescores(receipt_id, created_utc)"),
   ]);
   try {
     await env.DB.prepare("ALTER TABLE receipts ADD COLUMN challenge_text TEXT").run();
@@ -184,6 +201,15 @@ async function currentScore(env) {
   const raw = await metaGet(env, "current_score", String(START));
   const n = parseFloat(raw);
   return clampScore(Number.isFinite(n) ? n : START);
+}
+
+async function readTriadMeter(env) {
+  const raw = await metaGet(env, "triad_display", "");
+  if (raw == null || raw === "") return null;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return null;
+  const display = Math.round(n);
+  return { display, remainder: meterRemainder(display) };
 }
 
 function sessionIdFrom(request, cookieId) {
@@ -363,6 +389,65 @@ async function getReceipt(env, id) {
   return env.DB.prepare("SELECT * FROM receipts WHERE id=?").bind(id).first();
 }
 
+async function rescoreCandidates(env) {
+  try {
+    const res = await env.DB.prepare(
+      "SELECT id, challenge_text, text_sha256, score_after, label, isolated, created_utc FROM receipts WHERE isolated = 0 /* rescore-candidates */"
+    ).all();
+    return res && res.results ? res.results : [];
+  } catch {
+    return [];
+  }
+}
+
+async function latestRescore(env, receiptId) {
+  try {
+    return await env.DB.prepare(
+      "SELECT id, receipt_id, created_utc, reason, previous_display, previous_source, display, combined, changed_note, triad_json FROM receipt_rescores WHERE receipt_id = ? ORDER BY created_utc DESC LIMIT 1 /* latest-rescore */"
+    ).bind(receiptId).first();
+  } catch {
+    return null;
+  }
+}
+
+async function rescoreHistory(env, receiptId) {
+  try {
+    const res = await env.DB.prepare(
+      "SELECT id, receipt_id, created_utc, reason, previous_display, previous_source, display, combined, changed_note FROM receipt_rescores WHERE receipt_id = ? ORDER BY created_utc ASC /* rescore-history */"
+    ).bind(receiptId).all();
+    return res && res.results ? res.results : [];
+  } catch {
+    return [];
+  }
+}
+
+async function insertRescore(env, row) {
+  await env.DB.prepare(
+    "INSERT INTO receipt_rescores(id, receipt_id, created_utc, reason, previous_display, previous_source, display, combined, changed_note, triad_json) VALUES(?,?,?,?,?,?,?,?,?,?)"
+  ).bind(
+    row.id,
+    row.receipt_id,
+    row.created_utc,
+    row.reason,
+    row.previous_display,
+    row.previous_source,
+    row.display,
+    row.combined,
+    row.changed_note,
+    row.triad_json,
+  ).run();
+}
+
+async function attachRescores(env, rows) {
+  const list = rows || [];
+  for (const row of list) {
+    if (!row || !row.id) continue;
+    row.rescores = await rescoreHistory(env, row.id);
+    row.latest_rescore = row.rescores.length ? row.rescores[row.rescores.length - 1] : null;
+  }
+  return list;
+}
+
 /** Read-time Steer. Does not write receipts, ledger, or metadata. */
 async function publicSteer(env) {
   try {
@@ -376,7 +461,9 @@ async function publicSteer(env) {
 }
 
 async function gatherStats(env, { wrote, visiting, ctx } = {}) {
-  const score = await currentScore(env);
+  const meter = await readTriadMeter(env);
+  const score = meter ? meter.display : await currentScore(env);
+  const residual = meter ? meter.remainder : residualOf(score);
   const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
   const [siteNodes, downloads, uses, receipts, meshSnap, steer] = await Promise.all([
     liveNodes(env, { wrote, visiting }),
@@ -411,7 +498,9 @@ async function gatherStats(env, { wrote, visiting, ctx } = {}) {
     downloads,
     receipts,
     current_score: score,
-    residual: residualOf(score),
+    residual,
+    triad_display: meter ? meter.display : null,
+    meter_remainder: meter ? meter.remainder : null,
     steer,
     steer_leader: steer.leader,
     scales: steer.scales,
@@ -467,6 +556,30 @@ export function publicPayload(row) {
       primary: classification.primary,
       text_retained: retained,
     };
+    if (safe.latest_rescore) {
+      payload.triad_display = safe.latest_rescore.display;
+      payload.triad_combined = safe.latest_rescore.combined;
+      payload.rescore = {
+        id: safe.latest_rescore.id,
+        reason: safe.latest_rescore.reason,
+        previous_display: safe.latest_rescore.previous_display,
+        previous_source: safe.latest_rescore.previous_source,
+        display: safe.latest_rescore.display,
+        changed_note: safe.latest_rescore.changed_note,
+        created_utc: safe.latest_rescore.created_utc,
+      };
+    }
+    if (Array.isArray(safe.rescores) && safe.rescores.length) {
+      payload.rescores = safe.rescores.map((item) => ({
+        id: item.id,
+        reason: item.reason,
+        previous_display: item.previous_display,
+        previous_source: item.previous_source,
+        display: item.display,
+        changed_note: item.changed_note,
+        created_utc: item.created_utc,
+      }));
+    }
   }
   return payload;
 }
@@ -481,7 +594,8 @@ export async function processSubmit(env, text) {
   const challenge_text = checked.text;
   const text_sha256 = sha256hex(challenge_text);
   const isolated = shouldIsolate(challenge_text) ? 1 : 0;
-  const score_before = await currentScore(env);
+  const priorMeterForIsolate = await readTriadMeter(env);
+  const score_before = priorMeterForIsolate ? priorMeterForIsolate.display : await currentScore(env);
 
   if (isolated) {
     const row = {
@@ -513,45 +627,126 @@ export async function processSubmit(env, text) {
     return { ...row, isolated: true };
   }
 
-  const prior = await publicReceipts(env, 8);
-  const answered = await answerChallenge(env, challenge_text, score_before, prior);
-  const score_after = clampScore(score_before + Number(answered.score_delta || 0));
-  const residual = residualOf(score_after);
+  const review = scoreDebateText(challenge_text, text_sha256);
+  const snap = triadSnapshot(review);
+  const priorMeter = await readTriadMeter(env);
+  const score_after = snap.ready ? snap.display : (priorMeter ? priorMeter.display : score_before);
+  const scored_before = priorMeter ? priorMeter.display : score_after;
+  const residual = snap.ready ? meterRemainder(snap.display) : residualOf(score_after);
+  const candidates = await rescoreCandidates(env);
+  const affected = affectedPriors(challenge_text, candidates, text_sha256);
+  const rescoreNotes = [];
+  const pendingRescores = [];
+  for (const hit of affected) {
+    const priorText = hit.prior.challenge_text == null ? "" : String(hit.prior.challenge_text);
+    const priorSha = hit.prior.text_sha256 || sha256hex(priorText);
+    const priorReview = priorText ? scoreDebateText(priorText, priorSha) : null;
+    const afterSnap = priorReview ? triadSnapshot(priorReview) : triadSnapshot(null);
+    const previous = await latestRescore(env, hit.prior.id);
+    const previousSource = previous && previous.display != null ? "triad_display" : "stored_score_after";
+    const previousDisplay = previous && previous.display != null
+      ? Number(previous.display)
+      : (hit.prior.score_after != null ? Number(hit.prior.score_after) : null);
+    let beforeSnap = null;
+    if (previous && previous.triad_json) {
+      try { beforeSnap = JSON.parse(previous.triad_json); } catch { beforeSnap = null; }
+    }
+    const changed_note = describeRescore({
+      affectReason: hit.reason,
+      previousDisplay,
+      previousSource,
+      beforeSnap,
+      afterSnap,
+    });
+    rescoreNotes.push(hit.prior.id + ": " + changed_note);
+    pendingRescores.push({
+      id: newId(),
+      receipt_id: hit.prior.id,
+      created_utc,
+      reason: hit.reason,
+      previous_display: previousDisplay,
+      previous_source: previousSource,
+      display: afterSnap.display,
+      combined: afterSnap.combined,
+      changed_note,
+      triad_json: JSON.stringify(afterSnap),
+    });
+  }
+  const extra = rescoreNotes.length
+    ? "Rescored earlier receipts: " + rescoreNotes.join(" ")
+    : "No earlier receipt was in a flawless succession with this question.";
   const row = {
     id,
     created_utc,
     text_sha256,
     challenge_text,
-    label: answered.label,
-    summary: hideInternalDetermination(answered.summary),
-    explanation: hideInternalDetermination(answered.explanation),
-    score_before,
+    label: snap.ready ? TRIAD_LABEL : "Unscored",
+    summary: hideInternalDetermination(debateSummary(review)),
+    explanation: hideInternalDetermination(debateExplanation(review, extra)),
+    score_before: scored_before,
     score_after,
     residual,
     isolated: 0,
   };
   row.content_sha256 = hashReceipt(row);
   await env.DB.prepare(RECEIPT_INSERT)
-    .bind(id, created_utc, text_sha256, challenge_text, row.label, row.summary, row.explanation, score_before, score_after, residual, 0, row.content_sha256).run();
+    .bind(id, created_utc, text_sha256, challenge_text, row.label, row.summary, row.explanation, row.score_before, row.score_after, row.residual, 0, row.content_sha256).run();
+  const initialNote = "Initial TRIAD_V3 reading of this question. Combined " + (snap.combined == null ? "none" : snap.combined) + ". Display " + (snap.display == null ? "none" : snap.display) + ".";
+  const initial = {
+    id: newId(),
+    receipt_id: id,
+    created_utc,
+    reason: "initial",
+    previous_display: priorMeter ? priorMeter.display : null,
+    previous_source: priorMeter ? "triad_display" : "none",
+    display: snap.display,
+    combined: snap.combined,
+    changed_note: initialNote,
+    triad_json: JSON.stringify(snap),
+  };
+  await insertRescore(env, initial);
+  for (const pending of pendingRescores) {
+    await insertRescore(env, pending);
+    await appendLedger(env, "RESCORE", {
+      receipt_id: pending.receipt_id,
+      rescore_id: pending.id,
+      caused_by: id,
+      reason: pending.reason,
+      previous_display: pending.previous_display,
+      previous_source: pending.previous_source,
+      display: pending.display,
+      combined: pending.combined,
+      changed_note: pending.changed_note,
+    });
+  }
+  row.rescores = [initial];
+  row.latest_rescore = initial;
   await appendLedger(env, "SUBMIT", {
     receipt_id: id,
     label: row.label,
     text_sha256,
     content_sha256: row.content_sha256,
     challenge_preview: ledgerChallengePreview(challenge_text),
-    score_before,
+    score_before: row.score_before,
     score_after,
     residual,
+    triad_display: snap.display,
+    triad_combined: snap.combined,
   });
-  const delta = receiptScoreDelta(score_before, score_after);
+  const delta = receiptScoreDelta(row.score_before, score_after);
   await appendLedger(env, "SCORE", {
     receipt_id: id,
-    score_before,
+    score_before: row.score_before,
     score_after,
     residual,
     delta,
+    triad_display: snap.display,
+    triad_schema: snap.schema,
   });
-  if (delta !== 0) await metaSet(env, "current_score", String(score_after));
+  if (snap.ready) {
+    await metaSet(env, "triad_display", String(snap.display));
+    await metaSet(env, "current_score", String(snap.display));
+  }
   const uses = await usesCount(env);
   try { if (uses > 0) await metaSet(env, "uses", String(uses)); } catch { /* keep prior floor */ }
   return row;
@@ -795,6 +990,8 @@ export default {
           views: stats.views,
           current_score: stats.current_score,
           residual: stats.residual,
+          triad_display: stats.triad_display,
+          meter_remainder: stats.meter_remainder,
           steer: stats.steer,
           steer_leader: stats.steer_leader,
           scales: stats.scales,
@@ -891,7 +1088,7 @@ export default {
         const pageNo = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10) || 1);
         const pageSize = RECEIPTS_PAGE_SIZE;
         const total = await receiptsCount(env);
-        const rows = await publicReceipts(env, pageSize, (pageNo - 1) * pageSize);
+        const rows = await attachRescores(env, await publicReceipts(env, pageSize, (pageNo - 1) * pageSize));
         const stats = await gatherStats(env, { wrote, ctx });
         if (wantsJson(request, url)) {
           return json({
@@ -941,7 +1138,7 @@ export default {
             product: "GodLock",
             site: "godlock.uk",
             author: AUTHOR,
-            title: "Specified Fit, Not Pretty Spirals",
+            title: "How GodLock is scored",
             path: REASON_PATH,
             identity: AUTHOR,
             text: reasonText(),
@@ -952,7 +1149,7 @@ export default {
             scales: stats.scales,
           }, 200, extraHeadersFor(nodeId));
         }
-        return html(page("Specified Fit, Not Pretty Spirals", reasonBody({ stats }), { path: REASON_PATH, kind: "reason" }), {
+        return html(page("How GodLock is scored", reasonBody({ stats }), { path: REASON_PATH, kind: "reason" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }
@@ -1028,6 +1225,7 @@ export default {
       if (path.startsWith("/receipt/")) {
         const id = decodeURIComponent(path.slice("/receipt/".length));
         const row = await getReceipt(env, id);
+        if (row && !Number(row.isolated)) await attachRescores(env, [row]);
         if (!row || Number(row.isolated)) {
           if (wantsJson(request, url)) return json({ ok: false, error: "not found" }, 404);
           return html(page("Receipt", receiptBody({ id, row: null, entries: [] }), { path: "/receipt/" + id, kind: "receipt", indexable: false }), { status: 404 });
@@ -1072,9 +1270,12 @@ export default {
         let latest = null;
         if (rid) {
           const row = await getReceipt(env, rid);
-          if (row && !Number(row.isolated)) latest = row;
+          if (row && !Number(row.isolated)) {
+            await attachRescores(env, [row]);
+            latest = row;
+          }
         }
-        const prior = await publicReceipts(env, HOME_PRIOR_LIMIT + (rid ? 1 : 0));
+        const prior = await attachRescores(env, await publicReceipts(env, HOME_PRIOR_LIMIT + (rid ? 1 : 0)));
         const priorFiltered = (latest ? prior.filter((p) => p.id !== latest.id) : prior).slice(0, HOME_PRIOR_LIMIT);
         if (wantsJson(request, url)) {
           const pinned = await runtimeCite();

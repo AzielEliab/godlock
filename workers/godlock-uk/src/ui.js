@@ -26,7 +26,9 @@ import {
   parsePublicLivePresence,
 } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
-import { receiptScoreDelta } from "./engine.js";
+import {
+  DEBATE_HEADLINE, METHOD_PUBLIC, BIAS_PUBLIC, RESCORE_RULE_PUBLIC, SCORE_METHOD_URL,
+} from "./debateScore.js";
 import {
   STEER_FRAME_IDS,
   STEER_LABELS,
@@ -215,15 +217,6 @@ export function navItems() {
 }
 
 export { SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO };
-export const SPECIFIED_FIT_STEEL =
-  "Functionally specified digital information joined to a translation / reader system has only one observed adequate cause: intelligence. Pretty spirals and φ are not a proof. Darwinian selection is conceded after a replicator exists. Residual uncertainty stays. Score ceiling 99.7 · floor 33.3.";
-export const SPECIFIED_FIT_ANSWERS = "Answers: Yes / No / Let's review / Interesting.";
-export const SPECIFIED_FIT_LAYERS = [
-  { letter: "A", title: "Detection", body: "Specified complexity / functional information: complex and independently specifiable. Same move as cryptanalysis / SETI. A spiral is not a specification." },
-  { letter: "B", title: "Biological object", body: "Digital sequence + mapping table + machines that implement the mapping + error repair + machines encoded in the sequences (compiler+source / code+reader). Not “life is complicated.”" },
-  { letter: "C", title: "Fine-tuning physics", body: "Separate ledger. Cosmology does not write a codon table. Do not spend biological capital on a physics dispute." },
-  { letter: "D", title: "GodLock as method", body: "Receipts are specified information. GodLock is the ledger, not evidence biology was designed." },
-];
 
 export const AZIEL_MANIFESTO = [
   ABOUT_PUBLIC_WORK_LEAD,
@@ -360,8 +353,17 @@ ${ecosystemNav()}
     if(recEl&&j.receipts!=null)recEl.textContent=String(j.receipts);
     var scoreEl=document.getElementById("stat-current-score");
     var residualEl=document.getElementById("stat-residual");
-    if(scoreEl&&j.current_score!=null)scoreEl.textContent=String(j.current_score)+"%";
-    if(residualEl&&j.residual!=null)residualEl.textContent=String(j.residual)+"%";
+    function paintMeter(el, value){
+      if(!el)return;
+      el.textContent=value==null?"—":String(value)+"%";
+    }
+    if(j.triad_display!==undefined){
+      paintMeter(scoreEl, j.triad_display);
+      paintMeter(residualEl, j.meter_remainder!=null?j.meter_remainder:(j.triad_display==null?null:(100-Number(j.triad_display))));
+    }else{
+      if(scoreEl&&j.current_score!=null)scoreEl.textContent=String(j.current_score)+"%";
+      if(residualEl&&j.residual!=null)residualEl.textContent=String(j.residual)+"%";
+    }
     if(meshEl&&j.mesh){
       var on=!!j.mesh.enabled;
       var r=j.mesh.rollup||{};
@@ -392,8 +394,13 @@ ${ecosystemNav()}
     if(inputsEl&&st&&st.inputs!=null)inputsEl.textContent=String(st.inputs);
     var cEl=document.getElementById("steer-current-score");
     var rEl=document.getElementById("steer-residual");
-    if(cEl&&j.current_score!=null)cEl.textContent=String(j.current_score)+"%";
-    if(rEl&&j.residual!=null)rEl.textContent=String(j.residual)+"%";
+    if(j.triad_display!==undefined){
+      if(cEl)cEl.textContent=j.triad_display==null?"—":String(j.triad_display)+"%";
+      if(rEl)rEl.textContent=j.meter_remainder==null?(j.triad_display==null?"—":String(100-Number(j.triad_display))+"%"):String(j.meter_remainder)+"%";
+    }else{
+      if(cEl&&j.current_score!=null)cEl.textContent=String(j.current_score)+"%";
+      if(rEl&&j.residual!=null)rEl.textContent=String(j.residual)+"%";
+    }
     if(!scales)return;
     var ids=${JSON.stringify(STEER_FRAME_IDS)};
     var leaders={};
@@ -473,15 +480,50 @@ export function homeSoftwareLine() {
 </section>`;
 }
 
+function meterView(stats) {
+  const s = stats || {};
+  if (Object.prototype.hasOwnProperty.call(s, "triad_display")) {
+    if (s.triad_display == null || s.triad_display === "") {
+      return { ready: false, score: "—", residual: "—" };
+    }
+    const display = Number(s.triad_display);
+    const remainder = s.meter_remainder != null ? Number(s.meter_remainder) : (100 - display);
+    return { ready: true, score: display + "%", residual: remainder + "%" };
+  }
+  const score = s.current_score != null ? s.current_score : 50;
+  const residual = s.residual != null ? s.residual : 50;
+  return { ready: true, score: score + "%", residual: residual + "%" };
+}
+
+function storedScorePhrase(row) {
+  const label = row && row.label != null && row.label !== "" ? String(row.label) : "none";
+  const before = row ? row.score_before : null;
+  const after = row ? row.score_after : null;
+  const hasScores = before != null && before !== "" && after != null && after !== "";
+  if (!hasScores) return "Stored label " + label + ".";
+  return "Stored label " + label + ". Stored score " + before + "% → " + after + "%.";
+}
+
+function rescoreLine(row) {
+  const history = Array.isArray(row && row.rescores) ? row.rescores : [];
+  const latest = row && row.latest_rescore ? row.latest_rescore : (history.length ? history[history.length - 1] : null);
+  if (!latest) {
+    return `<p class="muted">Original receipt kept. Not yet rescored with TRIAD_V3. ${esc(storedScorePhrase(row))}</p>`;
+  }
+  if (latest.reason === "initial" && history.length < 2) {
+    return `<p>Triad display ${esc(latest.display)}.</p>`;
+  }
+  return `<p class="rescore">Earlier receipt was rescored. ${esc(latest.changed_note || "")}</p>`;
+}
+
 export function priorReceiptItems(rows, { fullChallenge = false } = {}) {
   return (rows || []).map((r) => {
     const challenge = fullChallenge ? challengeBlockText(r) : challengePreview(r);
-    return `<li><span class="pill ${pillClass(r.label)}">${esc(r.label)}</span>
+    return `<li>
       <div class="challenge-preview">${esc(challenge)}</div>
-      <a href="/receipt/${esc(r.id)}">${esc(publicText(r.summary, r.label))}</a>
+      ${rescoreLine(r)}
       <div class="muted">${esc(when(r.created_utc))}</div>
-      <div class="hash">${esc(r.content_sha256 || "")}</div>
-      <a href="/receipt/${esc(r.id)}">Full receipt</a></li>`;
+      <a href="/receipt/${esc(r.id)}">Receipt</a></li>`;
   }).join("");
 }
 
@@ -523,10 +565,8 @@ export function statsGrid(stats, { receiptsFallback } = {}) {
 }
 
 export function steerPanel(steer, stats) {
-  const s = stats || {};
-  const score = s.current_score != null ? s.current_score : 50;
-  const residual = s.residual != null ? s.residual : 50;
-  const confidence = `<p class="muted">Current confidence <span id="steer-current-score">${esc(score)}%</span> · Residual uncertainty <span id="steer-residual">${esc(residual)}%</span> · these two sum to 100 · floor 33.3 · ceiling 99.7.</p>`;
+  const meter = meterView(stats);
+  const confidence = `<p class="muted">Triad display <span id="steer-current-score">${esc(meter.score)}</span> · Meter remainder <span id="steer-residual">${esc(meter.residual)}</span> · these two sum to 100 when a TRIAD_V3 display is present. The remainder is 100 − display. It is not a corpus factor.</p>`;
   const balance = `<p class="muted" id="steer-balance">${esc(STEER_BALANCE_NOTE)}</p>`;
   if (!steer || steer.available === false || !steer.scales) {
     const note = steer && steer.note
@@ -547,7 +587,7 @@ export function steerPanel(steer, stats) {
     </li>`;
   }).join("");
   const countLine = steer.inputs
-    ? `<p class="muted"><span id="steer-inputs">${esc(steer.inputs)}</span> scored public challenges. Steer shares, including Came from nothing, sum to 100 at one decimal. An equal vote stays a tie when rounding prints 0.1 apart. Steer is the mix of those challenges. Current confidence is the running score.</p>`
+    ? `<p class="muted"><span id="steer-inputs">${esc(steer.inputs)}</span> scored public challenges. Steer shares, including Came from nothing, sum to 100 at one decimal. An equal vote stays a tie when rounding prints 0.1 apart. Steer is the mix of those challenges. The triad display is a separate meter.</p>`
     : `<p class="muted" id="steer-inputs">No scored public challenges yet. The scale stays undecided until a receipt is classified. Came from nothing stays 0 until a receipt names that claim.</p>`;
   return `<section class="steer" id="steer" aria-label="Steer">
   <h2>Steer</h2>
@@ -574,33 +614,31 @@ function frameBlock(row) {
 
 export function homeBody({ stats, latest, prior, error, products, extras }) {
   const s = stats || {};
-  const score = s.current_score != null ? s.current_score : 50;
-  const residual = s.residual != null ? s.residual : 50;
+  const meter = meterView(s);
   const meshLine = meshStatusLine(s.mesh, { live_nodes: s.live_nodes });
   const err = error
     ? `<p class="bad" id="challenge-error">${esc(error)}</p>`
     : `<p class="bad" id="challenge-error" hidden></p>`;
   const latestHtml = latest && !latest.isolated ? answerCard(latest, true) : "";
   const shown = (prior || []).slice(0, HOME_PRIOR_LIMIT);
-  const list = priorReceiptItems(shown) || `<p class="muted">No public receipts yet. Submit a challenge.</p>`;
+  const list = priorReceiptItems(shown) || `<p class="muted">No public receipts yet. Submit a question.</p>`;
   return `
+<h1 class="soft-heading">${esc(DEBATE_HEADLINE)}</h1>
 ${statsGrid(s)}
 <p class="muted" id="mesh-status">${esc(meshLine)}</p>
 <div class="scorebox">
-  <div><div class="n" id="stat-current-score">${esc(score)}%</div><div class="k">Current confidence</div></div>
-  <div><div class="n" id="stat-residual">${esc(residual)}%</div><div class="k">Residual uncertainty</div></div>
+  <div><div class="n" id="stat-current-score">${esc(meter.score)}</div><div class="k">Triad display</div></div>
+  <div><div class="n" id="stat-residual">${esc(meter.residual)}</div><div class="k">Meter remainder</div></div>
 </div>
 ${steerPanel(s.steer, s)}
 <div class="card">
-  <h2>${esc(SPECIFIED_FIT_TITLE)}</h2>
-  <p>${esc(SPECIFIED_FIT_STEEL)}</p>
-  <p>${esc(SPECIFIED_FIT_ANSWERS)} ${esc(SPECIFIED_FIT_MOTTO)}</p>
-  <p class="muted">Four layers stay separate: detection criterion · biological code+reader · fine-tuning physics · GodLock as method, not evidence. <a href="${esc(REASON_PATH)}">Read the brief</a>.</p>
+  <p>${esc(METHOD_PUBLIC)}</p>
+  <p>${esc(BIAS_PUBLIC)}</p>
+  <p class="muted">${esc(RESCORE_RULE_PUBLIC)} <a href="${esc(REASON_PATH)}">How it is scored</a> · <a href="${esc(SCORE_METHOD_URL)}">Corpus method</a>.</p>
 </div>
-<p class="muted">Answers open with Yes, No, Let's review, or Interesting. Intelligent-design disputes are processed under the same rules. Score floor 33.3 · ceiling 99.7. GodLock records a receipt. It does not sermonize.</p>
 ${err}
 <form class="challenge" id="challenge-form" method="post" action="/submit">
-  <textarea id="challenge" name="text" maxlength="8000" required placeholder="Submit a challenge. Intelligent-design disputes are processed under the same rules."></textarea>
+  <textarea id="challenge" name="text" maxlength="8000" required placeholder="Ask a question. The score is the published triad on this text."></textarea>
   <div class="actions">
     <button type="submit">Submit</button>
     <a class="button ghost" href="/verify">Verify</a>
@@ -613,7 +651,7 @@ ${err}
 ${homeSoftwareLine()}
 ${latestHtml}
 <h2>Prior receipts</h2>
-<p class="muted prior-more">Newest ${esc(HOME_PRIOR_LIMIT)}. <a href="${esc(RECEIPTS_PATH)}">Full receipts chain</a>.</p>
+<p class="muted prior-more">Newest ${esc(HOME_PRIOR_LIMIT)}. Every receipt is kept. <a href="${esc(RECEIPTS_PATH)}">Full receipts chain</a>.</p>
 <ul class="prior">${list}</ul>
 `;
 }
@@ -647,9 +685,8 @@ export function receiptsBody({ rows, total, page, pageSize, stats }) {
 ${statsGrid(s, { receiptsFallback: total })}
 ${steerPanel(s.steer, s)}
 <h1 class="soft-heading">Receipts</h1>
-<p>Public questions and the hash-chained receipt list. Newest first. GodLock is a stress-test engine — Yes / No / Let's review / Interesting — not a forum.</p>
-<p class="muted">${esc(SPECIFIED_FIT_TITLE)}. ${esc(SPECIFIED_FIT_MOTTO)} <a href="${esc(REASON_PATH)}">Read the brief</a>.</p>
-<p class="muted"><a href="/">Submit a challenge</a> on the Engine.</p>
+<p>Public questions and the hash-chained receipt list. Questions stay in the store. This list shows the triad reading. A rescored receipt says what changed and that the earlier receipt was rescored.</p>
+<p class="muted"><a href="${esc(REASON_PATH)}">How it is scored</a> · <a href="/">Ask a question</a>.</p>
 ${receiptsPager({ page, pages, total: total != null ? total : receipts })}
 <ul class="prior">${list}</ul>
 ${ingestTipSection()}
@@ -659,19 +696,29 @@ ${actReceiptsSection(rows)}
 
 export function answerCard(row, latest) {
   if (!row) return "";
-  const delta = receiptScoreDelta(row.score_before, row.score_after);
-  const sign = delta > 0 ? "+" : "";
   const title = latest ? "Latest answer" : "Receipt";
+  const history = Array.isArray(row.rescores) ? row.rescores : [];
+  const latestRescore = row.latest_rescore || (history.length ? history[history.length - 1] : null);
+  const remainderBit = row.residual != null && row.residual !== ""
+    ? " Meter remainder on that row " + row.residual + "%."
+    : "";
+  const stored = `<div class="block"><div class="k">Original receipt kept</div><p>${esc(storedScorePhrase(row) + remainderBit)} ${history.length ? "A later rescore did not erase this row." : "No TRIAD_V3 rescore is stored on this row yet."}</p></div>`;
+  const triad = latestRescore
+    ? `<div class="block"><div class="k">Triad</div><p>Display ${esc(latestRescore.display)}. Combined ${esc(latestRescore.combined)}. ${esc(latestRescore.changed_note || "")}</p></div>`
+    : "";
+  const priorNotes = history.filter((item) => item && item.reason && item.reason !== "initial").map((item) => {
+    return `<li>${esc(when(item.created_utc))}: ${esc(item.changed_note || item.reason)}</li>`;
+  }).join("");
   return `<article class="answer">
-    <span class="pill ${pillClass(row.label)}">${esc(row.label)}</span>
     <h2>${esc(title)}</h2>
-    <div class="block"><div class="k">Challenge</div><p class="challenge-text">${esc(challengeBlockText(row))}</p></div>
-    <div class="block"><div class="k">1. Summary</div><p>${esc(publicText(row.summary))}</p></div>
-    <div class="block"><div class="k">2. Explanation</div><p>${esc(publicText(row.explanation))}</p></div>
-    <div class="block"><div class="k">3. Score change</div><p>${esc(row.score_before)}% → ${esc(row.score_after)}% (${sign}${esc(delta)})</p></div>
-    <div class="block"><div class="k">4. Residual uncertainty</div><p>${esc(row.residual)}%</p></div>
+    <div class="block"><div class="k">Question</div><p class="challenge-text">${esc(challengeBlockText(row))}</p></div>
+    <div class="block"><div class="k">Summary</div><p>${esc(publicText(row.summary))}</p></div>
+    <div class="block"><div class="k">Explanation</div><p>${esc(publicText(row.explanation))}</p></div>
+    ${triad}
+    ${stored}
+    ${priorNotes ? `<div class="block"><div class="k">Rescores</div><ul>${priorNotes}</ul></div>` : ""}
     ${frameBlock(row)}
-    <p class="hash muted">${esc(row.content_sha256 || "")} · <a href="/receipt/${esc(row.id)}">receipt</a></p>
+    <p class="muted"><a href="/receipt/${esc(row.id)}">receipt ${esc(row.id)}</a></p>
   </article>`;
 }
 
@@ -693,33 +740,24 @@ export function verifyBody({ report, paste }) {
   return `${pasteHashSection(paste)}<div class="card"><h2 class="${cls}">${title}</h2><p class="muted">The ledger is walked. Each entry_hash is recomputed from canonical JSON (sorted keys, comma-colon separators) without the stored hash. Isolated submissions stay in the archive and are omitted from the public feed. Challenge ledger walk stays distinct from ACT-RECEIPT and from the first-screen paste-hash above.</p><pre class="verify">${esc(JSON.stringify(safe, null, 2))}</pre><p class="actions"><a class="button" href="/">Back</a></p></div>`;
 }
 
-export function specifiedFitPublicHtml() {
-  const layers = SPECIFIED_FIT_LAYERS.map((L) => {
-    return `<div class="block"><div class="k">${esc(L.letter)}. ${esc(L.title)}</div><p>${esc(L.body)}</p></div>`;
-  }).join("");
-  return `<section class="answer" id="specified-fit">
-  <h2>${esc(SPECIFIED_FIT_TITLE)}</h2>
-  <p><strong>Aziel Eliab</strong></p>
-  <p>${esc(SPECIFIED_FIT_STEEL)}</p>
-  <p>${esc(SPECIFIED_FIT_ANSWERS)}</p>
-  <p>${esc(SPECIFIED_FIT_MOTTO)}</p>
-  ${layers}
-  <p class="muted">Public identity is Aziel Eliab only. GodLock is a product name.</p>
-</section>`;
-}
-
 export function reasonBody({ stats } = {}) {
   const s = stats || {};
-  return `${steerPanel(s.steer, s)}<section class="about-aziel" id="specified-fit-brief"><div class="card about-prose">
-${specifiedFitPublicHtml()}
+  return `${steerPanel(s.steer, s)}<section class="about-aziel" id="how-scored"><div class="card about-prose">
+  <h2>How GodLock is scored</h2>
+  <p><strong>Aziel Eliab</strong></p>
+  <p>${esc(DEBATE_HEADLINE)}</p>
+  <p>${esc(METHOD_PUBLIC)}</p>
+  <p>${esc(BIAS_PUBLIC)}</p>
+  <p>${esc(RESCORE_RULE_PUBLIC)}</p>
+  <p class="muted">Corpus method: <a href="${esc(SCORE_METHOD_URL)}">${esc(SCORE_METHOD_URL)}</a>.</p>
 <p><a href="${esc(AZIEL_ELIAB_PATH)}">Aziel Eliab</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a></p>
 </div></section>`;
 }
 
 export function reasonText() {
-  const layers = SPECIFIED_FIT_LAYERS.map((L) => L.letter + ". " + L.title + " — " + L.body).join("\n\n");
-  return SPECIFIED_FIT_TITLE + "\n\nAziel Eliab\n\n" + SPECIFIED_FIT_STEEL + "\n\n"
-    + SPECIFIED_FIT_ANSWERS + "\n\n" + SPECIFIED_FIT_MOTTO + "\n\n" + layers + "\n";
+  return "How GodLock is scored\n\nAziel Eliab\n\n" + DEBATE_HEADLINE + "\n\n"
+    + METHOD_PUBLIC + "\n\n" + BIAS_PUBLIC + "\n\n" + RESCORE_RULE_PUBLIC + "\n\n"
+    + SCORE_METHOD_URL + "\n";
 }
 
 export function azielEliabBody() {
@@ -727,8 +765,7 @@ export function azielEliabBody() {
   return `<section class="about-aziel" id="aziel-eliab"><div class="card about-prose">
 ${paras}
 <p class="about-sign">${esc(AZIEL_SIGNATURE)}</p>
-${specifiedFitPublicHtml()}
-<p><a href="${esc(REASON_PATH)}">Specified Fit, Not Pretty Spirals</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a></p>
+<p><a href="${esc(REASON_PATH)}">How GodLock is scored</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a></p>
 </div></section>`;
 }
 

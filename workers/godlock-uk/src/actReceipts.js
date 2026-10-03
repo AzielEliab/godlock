@@ -122,7 +122,7 @@ export function challengeToActEvent(row) {
   const challenge = row && row.challenge_text != null ? String(row.challenge_text) : "";
   return {
     id: row && row.id ? "AZACT-" + String(row.id).replace(/[^A-Za-z0-9]/g, "").slice(0, 12) : undefined,
-    action: challenge || "Submit a Specified Fit challenge.",
+    action: challenge || "Submit a GodLock question.",
     output: (row && (row.summary || row.label)) || "Challenge recorded on GodLock.",
     created_utc: row && row.created_utc ? row.created_utc : "",
     metadata: {

@@ -367,7 +367,7 @@ describe("steer public surfaces", () => {
     assert.match(html, /id="stat-residual">50\.5%/);
     assert.match(html, /id="steer"/);
     assert.match(html, /Steering toward: Tied:/);
-    assert.match(html, /Intelligent design \(Specified Fit \/ bio code\+reader\)/);
+    assert.match(html, /Intelligent design \(bio code\+reader\)/);
     assert.match(html, /Multi-simulation/);
     assert.match(html, /Big Bang \/ standard cosmology \(physics ledger\)/);
     assert.match(html, /Came from nothing/);
@@ -388,7 +388,8 @@ describe("steer public surfaces", () => {
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|weighing|bootstrap lock/);
     const reason = reasonBody({ stats: { current_score: 49.5, residual: 50.5, steer } });
     assert.match(reason, /id="steer-leader"/);
-    assert.match(reason, /A\. Detection/);
+    assert.match(reason, /published corpus triad \(TRIAD_V3\)/);
+    assert.doesNotMatch(reason, /A\. Detection/);
   });
 
   it("publishes steer on /count, /reason, and the receipt", async () => {
@@ -411,14 +412,17 @@ describe("steer public surfaces", () => {
     const home = await (await worker.fetch(new Request("https://godlock.uk/"), env)).text();
     assert.match(home, /id="steer-leader">Steering toward: Tied:/);
     assert.match(home, /class="scorebox"/);
-    assert.match(home, /Current confidence/);
-    assert.match(home, /Residual uncertainty/);
+    assert.match(home, /Triad display/);
+    assert.match(home, /Meter remainder/);
+    assert.doesNotMatch(home, /Current confidence/);
+    assert.doesNotMatch(home, /Residual uncertainty/);
 
     const reason = await (await worker.fetch(new Request("https://godlock.uk/reason?format=json"), env)).json();
     assert.equal(reason.steer_leader, "tie");
     assert.equal(reason.current_score, 49.5);
     assert.equal(reason.scales.intelligent_design, 50);
-    assert.match(reason.text, /Functionally specified digital information/);
+    assert.match(reason.text, /TRIAD_V3/);
+    assert.doesNotMatch(reason.text, /Functionally specified digital information/);
 
     const receipt = await (await worker.fetch(new Request("https://godlock.uk/receipt/bio1", {
       headers: { Accept: "application/json" },
@@ -467,6 +471,7 @@ describe("steer public surfaces", () => {
     assert.match(home, /Came from nothing/);
     assert.match(home, /id="steer-pct-came_from_nothing">0%/);
     assert.match(home, /No scored public challenges yet/);
-    assert.match(home, /id="stat-current-score">50%/);
+    assert.match(home, /id="stat-current-score">—</);
+    assert.match(home, /id="stat-residual">—</);
   });
 });

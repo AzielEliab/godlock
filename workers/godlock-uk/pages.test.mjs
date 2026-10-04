@@ -76,6 +76,7 @@ import {
   BRAND_MARK_ALT,
 } from "./src/seo.js";
 import worker, { publicPayload } from "./src/index.js";
+import { responseParagraph, visitorResponse } from "./src/visitorResponse.js";
 import {
   CATALOG_FALLBACK_PRODUCTS,
   CATALOG_SLUGS,
@@ -2563,5 +2564,186 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(softwareMeta, /70cc0b0/);
     assert.doesNotMatch(softwareMeta, /6a3798a|105fa1ee/);
     assert.match(defaultDescription("runtime"), /fraggate_call/);
+  });
+});
+
+describe("home page shows the response", () => {
+  const OLDER = "Why is the sky blue?";
+  const NEWER = "Functionally specified digital information joined to a translation reader is the steel class. Pretty spirals are not a proof.";
+  const SECRET = "ISOLATED SECRET QUESTION should not show";
+  const METHOD_SUMMARY = "TRIAD_V3 display 31. Combined 0.3136. The display is not written back into combined.";
+  const METHOD_EXPLANATION = "The score is the published corpus triad (TRIAD_V3). Public combined is the mean of factor_i × factor_j over the applicable factors among physics, linguistics, bayesian, truth_formula, CLCE, and SPRE. Factors that do not apply are omitted. They are not entered as 0. No earlier receipt was in a flawless succession with this question.";
+
+  function row(id, created, text, isolated) {
+    return {
+      id,
+      created_utc: created,
+      challenge_text: text,
+      text_sha256: "sha-" + id,
+      label: "Triad",
+      summary: METHOD_SUMMARY,
+      explanation: METHOD_EXPLANATION,
+      score_before: 50,
+      score_after: 31,
+      residual: 69,
+      isolated,
+      content_sha256: "hash-" + id,
+    };
+  }
+
+  function responseEnv() {
+    const rows = [
+      row("older", "2026-10-01T00:00:00.000Z", OLDER, 0),
+      row("newer", "2026-10-02T00:00:00.000Z", NEWER, 0),
+      row("secret", "2026-10-03T00:00:00.000Z", SECRET, 1),
+    ];
+    const writes = [];
+    function prepare(sql) {
+      const q = String(sql);
+      let bound = [];
+      const stmt = {
+        bind(...args) {
+          bound = args;
+          return stmt;
+        },
+        async first() {
+          if (/SELECT value FROM metadata/.test(q)) return null;
+          if (/COUNT\(\*\) AS n FROM receipts WHERE isolated=0/.test(q)) {
+            return { n: rows.filter((r) => !Number(r.isolated)).length };
+          }
+          if (/COUNT\(\*\) AS n FROM receipts/.test(q)) return { n: rows.length };
+          if (/COUNT\(\*\) AS n FROM ledger/.test(q)) return { n: 0 };
+          if (/FROM heartbeats/.test(q)) return { n: 0 };
+          if (/SELECT \* FROM receipts WHERE id=/.test(q)) {
+            return rows.find((r) => r.id === bound[0]) || null;
+          }
+          return null;
+        },
+        async all() {
+          if (/WHERE isolated=0/.test(q)) {
+            const list = rows
+              .filter((r) => !Number(r.isolated))
+              .slice()
+              .sort((a, b) => String(b.created_utc).localeCompare(String(a.created_utc)));
+            const limit = Number(bound[0]);
+            const offset = Number(bound[1]) || 0;
+            const sliced = Number.isFinite(limit) && limit > 0 ? list.slice(offset, offset + limit) : list;
+            return { results: sliced };
+          }
+          return { results: [] };
+        },
+        async run() {
+          writes.push(q);
+          return { success: true };
+        },
+      };
+      return stmt;
+    }
+    return {
+      rows,
+      writes,
+      env: {
+        DB: { prepare, async batch() { return []; } },
+        MESH_PROBE_ORIGIN: false,
+      },
+    };
+  }
+
+  function answerSlice(html) {
+    const start = html.indexOf('id="response"');
+    const end = html.indexOf("</article>", start);
+    return start >= 0 && end > start ? html.slice(start, end) : "";
+  }
+
+  it("shows the response for a pinned receipt and for the newest public receipt", async () => {
+    const rec = responseEnv();
+    const before = rec.rows.map((r) => JSON.stringify({
+      id: r.id,
+      summary: r.summary,
+      explanation: r.explanation,
+      challenge_text: r.challenge_text,
+      content_sha256: r.content_sha256,
+      score_after: r.score_after,
+      label: r.label,
+      isolated: r.isolated,
+    }));
+    const newer = rec.rows.find((r) => r.id === "newer");
+    const older = rec.rows.find((r) => r.id === "older");
+    const newerSpoken = visitorResponse(newer);
+    const olderSpoken = visitorResponse(older);
+    assert.equal(newerSpoken.derived, true);
+    assert.equal(olderSpoken.derived, true);
+    assert.equal(JSON.stringify(newer), JSON.stringify(rec.rows.find((r) => r.id === "newer")));
+    const newerParagraph = responseParagraph(newer, { full: true });
+    const olderParagraph = responseParagraph(older, { full: true });
+    assert.match(newerParagraph, /A complete intelligent-design challenge is recorded under the locked protocol/);
+    assert.match(olderParagraph, /The input is too thin to weigh/);
+    assert.ok(newerParagraph.length > newerSpoken.summary.length);
+    assert.doesNotMatch(newerParagraph, /Factors that do not apply are omitted/);
+
+    const homeRes = await worker.fetch(new Request("https://godlock.uk/", {
+      headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
+    }), rec.env);
+    assert.equal(homeRes.status, 200);
+    const home = await homeRes.text();
+    const homeAnswer = answerSlice(home);
+    assert.match(home, /#response/);
+    assert.ok(home.indexOf('id="response"') < home.indexOf('id="steer"'));
+    assert.ok(home.indexOf('id="response"') < home.indexOf('id="challenge-form"'));
+    assert.match(homeAnswer, /Functionally specified digital information joined to a translation reader/);
+    assert.match(homeAnswer, /A complete intelligent-design challenge is recorded under the locked protocol/);
+    assert.match(homeAnswer, /class="response-text"/);
+    assert.doesNotMatch(homeAnswer, /Factors that do not apply are omitted/);
+    assert.match(home, /The input is too thin to weigh/);
+    assert.match(home, /class="response-preview"/);
+    assert.doesNotMatch(home, /ISOLATED SECRET QUESTION/);
+
+    const pinnedRes = await worker.fetch(new Request("https://godlock.uk/?r=older", {
+      headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
+    }), rec.env);
+    const pinned = await pinnedRes.text();
+    const pinnedAnswer = answerSlice(pinned);
+    assert.match(pinnedAnswer, /Why is the sky blue\?/);
+    assert.match(pinnedAnswer, /The input is too thin to weigh/);
+    assert.doesNotMatch(pinnedAnswer, /A complete intelligent-design challenge is recorded under the locked protocol/);
+    assert.doesNotMatch(pinnedAnswer, /Factors that do not apply are omitted/);
+    assert.ok(pinned.indexOf('id="response"') < pinned.indexOf('id="challenge-form"'));
+    assert.match(pinned, /A complete intelligent-design challenge is recorded under the locked protocol/);
+
+    const isolatedPin = await (await worker.fetch(new Request("https://godlock.uk/?r=secret", {
+      headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
+    }), rec.env)).text();
+    assert.doesNotMatch(isolatedPin, /ISOLATED SECRET QUESTION/);
+    assert.match(answerSlice(isolatedPin), /A complete intelligent-design challenge is recorded under the locked protocol/);
+
+    const receipt = await (await worker.fetch(new Request("https://godlock.uk/receipt/newer", {
+      headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
+    }), rec.env)).text();
+    const receiptAnswer = answerSlice(receipt);
+    assert.match(receiptAnswer, /Functionally specified digital information joined to a translation reader/);
+    assert.ok(receiptAnswer.includes(newerParagraph));
+    assert.match(receiptAnswer, /The engine answers Interesting/);
+    assert.match(receiptAnswer, /No earlier receipt was in a flawless succession/);
+
+    const json = await (await worker.fetch(new Request("https://godlock.uk/?format=json", {
+      headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
+    }), rec.env)).json();
+    assert.equal(json.latest.id, "newer");
+    assert.equal(json.latest.summary, METHOD_SUMMARY);
+    assert.match(json.latest.explanation, /The score is the published corpus triad/);
+    assert.equal((json.receipts || []).some((r) => r.id === "secret"), false);
+
+    const after = rec.rows.map((r) => JSON.stringify({
+      id: r.id,
+      summary: r.summary,
+      explanation: r.explanation,
+      challenge_text: r.challenge_text,
+      content_sha256: r.content_sha256,
+      score_after: r.score_after,
+      label: r.label,
+      isolated: r.isolated,
+    }));
+    assert.deepEqual(after, before);
+    assert.equal(rec.writes.some((q) => /UPDATE receipts|INSERT INTO receipts|DELETE FROM receipts/i.test(q)), false);
   });
 });

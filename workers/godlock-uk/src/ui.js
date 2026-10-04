@@ -26,6 +26,7 @@ import {
   parsePublicLivePresence,
 } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
+import { paragraphFrom, responseParagraph, visitorResponse } from "./visitorResponse.js";
 import {
   DEBATE_HEADLINE, METHOD_PUBLIC, BIAS_PUBLIC, RESCORE_RULE_PUBLIC, READING_PUBLIC, SCORE_METHOD_URL,
   oldStoredScorePhrase, publishedReading, visitorReceiptLine,
@@ -49,7 +50,13 @@ export const CSS = `
 *{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--ink);max-width:100%;overflow-x:hidden}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;line-height:1.5;overflow-wrap:anywhere;overflow-x:hidden}
-.wrap{max-width:720px;margin:auto;padding:24px 18px 80px;min-width:0}
+.wrap{max-width:720px;margin:auto;padding:24px 18px 80px;min-width:0;display:flex;flex-direction:column}
+.wrap > *{order:10}
+.wrap > .brandrow{order:1}
+.wrap > .author{order:2}
+.wrap > #response{order:3}
+.wrap > .nav2{order:4}
+.wrap > .ecosystem{order:5}
 .brandrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px;min-height:48px}
 .brandmark{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:0 0 40px;box-shadow:0 0 0 1px #0003,0 0 0 1px var(--gold)}
 .brand{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
@@ -109,6 +116,9 @@ button,.button{background:var(--gold);color:#14110a;border:0;padding:12px 18px;b
 button.ghost,.button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 0}
 .card,.answer{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+#response{scroll-margin-top:12px}
+.response-text{font-size:17px}
+.response-preview{margin:6px 0;white-space:pre-wrap;word-break:break-word}
 .answer h2{margin:8px 0 10px;font-size:18px}
 .answer .block{margin:12px 0}
 .answer .k{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
@@ -160,12 +170,6 @@ export function esc(s) {
 function when(iso) {
   const s = String(iso || "");
   return s ? s.replace("T", " ").replace(/\.\d+Z$/, " UTC").replace(/Z$/, " UTC") : "";
-}
-
-function publicText(s, fallback) {
-  const t = hideInternalDetermination(String(s == null ? "" : s).trim());
-  if (!t || t === "[object Object]") return fallback || "Receipt recorded under the locked protocol.";
-  return t;
 }
 
 export const CHALLENGE_NOT_RETAINED = "challenge text not retained";
@@ -299,7 +303,7 @@ ${ecosystemNav()}
           ta.value="";
           if(j.stats){applyStats(j.stats);}
           if(j.isolated){location.href="/";return;}
-          if(j.id){location.href="/?r="+encodeURIComponent(j.id);return;}
+          if(j.id){location.href="/?r="+encodeURIComponent(j.id)+"#response";return;}
           location.href="/";
         })
         .catch(function(){if(btn){btn.disabled=false;}showError("Submit refused.");});
@@ -506,8 +510,11 @@ function rescoreLine(row) {
 export function priorReceiptItems(rows, { fullChallenge = false } = {}) {
   return (rows || []).map((r) => {
     const challenge = fullChallenge ? challengeBlockText(r) : challengePreview(r);
+    const preview = responseParagraph(r, { full: false });
+    const shown = preview.length > 180 ? preview.slice(0, 180) + "…" : preview;
     return `<li>
       <div class="challenge-preview">${esc(challenge)}</div>
+      <div class="response-preview">${esc(shown)}</div>
       ${rescoreLine(r)}
       <div class="muted">${esc(when(r.created_utc))}</div>
       <a href="/receipt/${esc(r.id)}">Receipt</a></li>`;
@@ -611,6 +618,7 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
   const list = priorReceiptItems(shown) || `<p class="muted">No public receipts yet. Submit a question.</p>`;
   return `
 <h1 class="soft-heading">${esc(DEBATE_HEADLINE)}</h1>
+${latestHtml}
 ${statsGrid(s)}
 <p class="muted" id="mesh-status">${esc(meshLine)}</p>
 <div class="scorebox">
@@ -637,7 +645,6 @@ ${err}
   </div>
 </form>
 ${homeSoftwareLine()}
-${latestHtml}
 <h2>Prior receipts</h2>
 <p class="muted prior-more">Newest ${esc(HOME_PRIOR_LIMIT)}. Every receipt is kept. <a href="${esc(RECEIPTS_PATH)}">Full receipts chain</a>.</p>
 <ul class="prior">${list}</ul>
@@ -688,6 +695,10 @@ export function answerCard(row, latest) {
   const history = Array.isArray(row.rescores) ? row.rescores : [];
   const latestRescore = row.latest_rescore || (history.length ? history[history.length - 1] : null);
   const later = history.filter((item) => item && item.reason && item.reason !== "initial");
+  const spoken = visitorResponse(row);
+  const paragraph = paragraphFrom(spoken, { full: !latest });
+  const summaryText = paragraphFrom({ label: "", summary: spoken.summary, explanation: "" }, { full: !latest });
+  const explanationText = paragraphFrom({ label: "", summary: "", explanation: spoken.explanation }, { full: !latest });
   const reading = publishedReading(row);
   const remainderBit = row.residual != null && row.residual !== ""
     ? " Old stored residual " + row.residual + "%."
@@ -701,11 +712,12 @@ export function answerCard(row, latest) {
   const priorNotes = history.filter((item) => item && item.reason && item.reason !== "initial").map((item) => {
     return `<li>${esc(when(item.created_utc))}: ${esc(item.changed_note || item.reason)}</li>`;
   }).join("");
-  return `<article class="answer">
+  return `<article class="answer" id="response">
     <h2>${esc(title)}</h2>
     <div class="block"><div class="k">Question</div><p class="challenge-text">${esc(challengeBlockText(row))}</p></div>
-    <div class="block"><div class="k">Summary</div><p>${esc(publicText(row.summary))}</p></div>
-    <div class="block"><div class="k">Explanation</div><p>${esc(publicText(row.explanation))}</p></div>
+    <div class="block"><div class="k">Response</div><p class="response-text">${esc(paragraph)}</p></div>
+    <div class="block"><div class="k">Summary</div><p>${esc(summaryText)}</p></div>
+    <div class="block"><div class="k">Explanation</div><p>${esc(explanationText)}</p></div>
     ${triad}
     ${stored}
     ${priorNotes ? `<div class="block"><div class="k">Rescores</div><ul>${priorNotes}</ul></div>` : ""}

@@ -637,6 +637,12 @@ describe("AZindex identity machine", () => {
     assert.equal(cite.publisher, AUTHOR);
     assert.deepEqual(cite.sameAs_lattice, IDENTITY_SAME_AS);
     assert.equal(cite.person_id, AZIEL_PERSON_ID);
+    assert.equal(cite.person["@type"], "Person");
+    assert.equal(cite.person["@id"], AZIEL_PERSON_ID);
+    assert.equal(cite.person.name, AUTHOR);
+    assert.deepEqual(cite.person, personJsonLd());
+    assert.deepEqual(cite.person.sameAs, IDENTITY_SAME_AS);
+    assert.equal(cite.person.sameAs.length, IDENTITY_SAME_AS.length);
     assert.equal(cite.priority_pages.who_is, CANON_HOST + WHO_IS_ALIAS_PATH);
     assert.equal(cite.priority_pages.reason, CANON_HOST + "/reason");
     assert.equal(cite.priority_pages.count, CANON_HOST + COUNT_PATH);

@@ -1,4 +1,5 @@
 /** Crawl/index metadata for GodLock.uk. Author: Aziel Eliab. */
+import { CONTENT_SIGNAL } from "./http.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import { ingestCiteFields, ingestLlmsSection } from "./ingestReceipt.js";
 import { shelvesCiteFields, shelvesLlmsSection } from "./shelves.js";
@@ -2102,6 +2103,39 @@ export const PUBLIC_ALLOW = [
   "/v1/mesh/status",
 ];
 
+function headerValue(request, name) {
+  if (!request || !request.headers || typeof request.headers.get !== "function") return "";
+  return String(request.headers.get(name) || "");
+}
+
+/** Client scheme. Cloudflare often shows the Worker an https URL for an http fetch. */
+export function requestPublicScheme(url, request) {
+  const visitor = headerValue(request, "CF-Visitor");
+  if (visitor) {
+    try {
+      const parsed = JSON.parse(visitor);
+      const scheme = String(parsed && parsed.scheme || "").toLowerCase();
+      if (scheme === "http" || scheme === "https") return scheme;
+    } catch { /* ignore a malformed visitor header */ }
+  }
+  const forwarded = headerValue(request, "X-Forwarded-Proto").split(",")[0].trim().toLowerCase();
+  if (forwarded === "http" || forwarded === "https") return forwarded;
+  return String(url.protocol || "").replace(":", "").toLowerCase() === "http" ? "http" : "https";
+}
+
+/**
+ * Crawler canonical host is https://godlock.uk.
+ * www and cleartext http on this host 308 to that origin, same path and query.
+ * Other hosts (including the workers.dev origin) stay, so existing public URLs keep working.
+ */
+export function canonicalHostRedirect(url, request) {
+  const host = String(url.hostname || "").toLowerCase().replace(/\.$/, "");
+  if (host !== "godlock.uk" && host !== "www.godlock.uk") return "";
+  const scheme = requestPublicScheme(url, request);
+  if (host === "godlock.uk" && scheme !== "http") return "";
+  return CANON_HOST + (url.pathname || "/") + (url.search || "");
+}
+
 export function robotsTxt() {
   const header = [
     "# GodLock.uk — open crawl for Google and AI search.",
@@ -2123,7 +2157,7 @@ export function robotsTxt() {
   const star = [
     "User-agent: *",
     "Allow: /",
-    "Content-Signal: search=yes, ai-input=yes, ai-train=yes",
+    "Content-Signal: " + CONTENT_SIGNAL,
   ].concat(PUBLIC_ALLOW.filter((p) => p !== "/").map((p) => "Allow: " + p));
   const bots = AI_CRAWLER_AGENTS.flatMap((agent) => ["", "User-agent: " + agent, "Allow: /"]);
   const maps = uniquePreserve([
@@ -2284,6 +2318,7 @@ export function citeDoc(sot, runtimeCite) {
     identity: AUTHOR,
     identity_note: IDENTITY_LOCK_LINE + " " + VISIBLE_IDENTITY_LOCK + " " + PUBLISHER_NOT_LOCK + " Aziel Elroi Eliab, Elias Artista, and The Revealer of The Sealed are SEO alternateName only.",
     person_id: AZIEL_PERSON_ID,
+    person: personJsonLd(),
     publisher: AUTHOR,
     living_publisher: true,
     host_kind: "product_surface",

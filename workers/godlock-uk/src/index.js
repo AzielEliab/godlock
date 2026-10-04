@@ -25,6 +25,7 @@ import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, mcpDiscoveryDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR,
+  indexNowKeyBody, INDEXNOW_KEY_PATH, INDEXNOW_WELL_KNOWN_PATH,
   PUBLIC_RUNTIME, RUNTIME_PATH, RUNTIME_VERSION, OFFICIAL_SOFTWARES, permanentIdentityRedirect, citeRuntimeVersion,
   BRAND_MARK_PATH,
   personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, whyAzielEliabTxt, wellKnownAzielDoc,
@@ -910,6 +911,9 @@ export default {
 
       if (path === "/robots.txt") {
         return new Response(robotsTxt(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+      }
+      if (path === INDEXNOW_KEY_PATH || path === INDEXNOW_WELL_KNOWN_PATH) {
+        return new Response(indexNowKeyBody(), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/sitemap.xml") {
         const fetched = await fetchCatalogProducts(env);

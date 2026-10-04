@@ -1298,7 +1298,7 @@ export default {
           }
           return json({ ok: true, isolated: false, ...publicPayload(row), stats }, 200, extraHeadersFor(nodeId));
         }
-        const loc = (row.isolated === true || row.isolated === 1) ? "/" : "/?r=" + encodeURIComponent(row.id);
+        const loc = (row.isolated === true || row.isolated === 1) ? "/" : "/?r=" + encodeURIComponent(row.id) + "#response";
         return new Response(null, {
           status: 303,
           headers: { Location: loc, ...corsHeaders(), ...extraHeadersFor(nodeId) },
@@ -1309,16 +1309,18 @@ export default {
         if (countPresence) await metaBump(env, "views");
         const stats = await gatherStats(env, { wrote, visiting: countPresence, ctx });
         const rid = url.searchParams.get("r") || "";
+        const prior = await attachRescores(env, await publicReceipts(env, HOME_PRIOR_LIMIT + (rid ? 1 : 0)));
         let latest = null;
         if (rid) {
-          const row = await getReceipt(env, rid);
-          if (row && !Number(row.isolated)) {
-            await attachRescores(env, [row]);
-            latest = row;
+          const pinnedRow = prior.find((p) => p && p.id === rid) || await getReceipt(env, rid);
+          if (pinnedRow && !Number(pinnedRow.isolated)) {
+            if (!Array.isArray(pinnedRow.rescores)) await attachRescores(env, [pinnedRow]);
+            latest = pinnedRow;
           }
         }
-        const prior = await attachRescores(env, await publicReceipts(env, HOME_PRIOR_LIMIT + (rid ? 1 : 0)));
-        const priorFiltered = (latest ? prior.filter((p) => p.id !== latest.id) : prior).slice(0, HOME_PRIOR_LIMIT);
+        if (!latest && prior.length) latest = prior[0];
+        const pinnedOk = !!(rid && latest && latest.id === rid);
+        const priorFiltered = (pinnedOk ? prior.filter((p) => p.id !== latest.id) : prior).slice(0, HOME_PRIOR_LIMIT);
         if (wantsJson(request, url)) {
           const pinned = await runtimeCite();
           return json({

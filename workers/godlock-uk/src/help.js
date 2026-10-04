@@ -74,6 +74,7 @@ export function helpDoc() {
     "Steer is the share of scored public challenges: intelligent design (bio code+reader), multi-simulation, Big Bang / standard cosmology (physics ledger), Came from nothing (creatio ex nihilo / something-from-nothing), and undecided.",
     "Steer frames are one vote plane and sum to 100. Came from nothing is a share on that plane, adjacent to Big Bang language, not a second 0–100.",
     "Triad display and meter remainder are a separate pair and sum to 100 when a TRIAD_V3 display is present. The remainder is 100 − display. It is not a corpus factor.",
+    "A public receipt whose challenge text is stored shows the published TRIAD_V3 reading of that text. The old stored score stays on the original row and is labeled as the old number. Missing challenge text is not scored. Receipt rows are not rewritten.",
     "Layer B (biology) and Layer C (cosmology) stay separate ledgers. Came from nothing does not spend either ledger. GodLock records, analyzes, hardens, and grows.",
     "Machine fields live on " + CANON_HOST + "/count : current_score, residual, steer, steer.balance, steer_leader, scales (including scales.came_from_nothing).",
     "",

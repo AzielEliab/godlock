@@ -27,7 +27,8 @@ import {
 } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 import {
-  DEBATE_HEADLINE, METHOD_PUBLIC, BIAS_PUBLIC, RESCORE_RULE_PUBLIC, SCORE_METHOD_URL,
+  DEBATE_HEADLINE, METHOD_PUBLIC, BIAS_PUBLIC, RESCORE_RULE_PUBLIC, READING_PUBLIC, SCORE_METHOD_URL,
+  oldStoredScorePhrase, publishedReading, visitorReceiptLine,
 } from "./debateScore.js";
 import {
   STEER_FRAME_IDS,
@@ -495,25 +496,11 @@ function meterView(stats) {
   return { ready: true, score: score + "%", residual: residual + "%" };
 }
 
-function storedScorePhrase(row) {
-  const label = row && row.label != null && row.label !== "" ? String(row.label) : "none";
-  const before = row ? row.score_before : null;
-  const after = row ? row.score_after : null;
-  const hasScores = before != null && before !== "" && after != null && after !== "";
-  if (!hasScores) return "Stored label " + label + ".";
-  return "Stored label " + label + ". Stored score " + before + "% → " + after + "%.";
-}
-
 function rescoreLine(row) {
   const history = Array.isArray(row && row.rescores) ? row.rescores : [];
-  const latest = row && row.latest_rescore ? row.latest_rescore : (history.length ? history[history.length - 1] : null);
-  if (!latest) {
-    return `<p class="muted">Original receipt kept. Not yet rescored with TRIAD_V3. ${esc(storedScorePhrase(row))}</p>`;
-  }
-  if (latest.reason === "initial" && history.length < 2) {
-    return `<p>Triad display ${esc(latest.display)}.</p>`;
-  }
-  return `<p class="rescore">Earlier receipt was rescored. ${esc(latest.changed_note || "")}</p>`;
+  const rescored = history.some((item) => item && item.reason && item.reason !== "initial");
+  const cls = rescored ? "rescore" : "muted";
+  return `<p class="${cls}">${esc(visitorReceiptLine(row))}</p>`;
 }
 
 export function priorReceiptItems(rows, { fullChallenge = false } = {}) {
@@ -566,7 +553,7 @@ export function statsGrid(stats, { receiptsFallback } = {}) {
 
 export function steerPanel(steer, stats) {
   const meter = meterView(stats);
-  const confidence = `<p class="muted">Triad display <span id="steer-current-score">${esc(meter.score)}</span> · Meter remainder <span id="steer-residual">${esc(meter.residual)}</span> · these two sum to 100 when a TRIAD_V3 display is present. The remainder is 100 − display. It is not a corpus factor.</p>`;
+  const confidence = `<p class="muted">Triad display <span id="steer-current-score">${esc(meter.score)}</span> · Meter remainder <span id="steer-residual">${esc(meter.residual)}</span> · these two sum to 100 when a TRIAD_V3 display is present. The remainder is 100 − display. It is not a corpus factor. A number here is a TRIAD_V3 display. It is not the old stored score.</p>`;
   const balance = `<p class="muted" id="steer-balance">${esc(STEER_BALANCE_NOTE)}</p>`;
   if (!steer || steer.available === false || !steer.scales) {
     const note = steer && steer.note
@@ -634,6 +621,7 @@ ${steerPanel(s.steer, s)}
 <div class="card">
   <p>${esc(METHOD_PUBLIC)}</p>
   <p>${esc(BIAS_PUBLIC)}</p>
+  <p>${esc(READING_PUBLIC)}</p>
   <p class="muted">${esc(RESCORE_RULE_PUBLIC)} <a href="${esc(REASON_PATH)}">How it is scored</a> · <a href="${esc(SCORE_METHOD_URL)}">Corpus method</a>.</p>
 </div>
 ${err}
@@ -685,7 +673,7 @@ export function receiptsBody({ rows, total, page, pageSize, stats }) {
 ${statsGrid(s, { receiptsFallback: total })}
 ${steerPanel(s.steer, s)}
 <h1 class="soft-heading">Receipts</h1>
-<p>Public questions and the hash-chained receipt list. Questions stay in the store. This list shows the triad reading. A rescored receipt says what changed and that the earlier receipt was rescored.</p>
+<p>Public questions and the hash-chained receipt list. Questions stay in the store. This list shows the triad reading. It is the published TRIAD_V3 reading of each stored challenge text. The old stored score is labeled as the old number. If the stored challenge text is missing, that row is not scored. A rescored receipt says what changed and that the earlier receipt was rescored. Original receipt rows are kept.</p>
 <p class="muted"><a href="${esc(REASON_PATH)}">How it is scored</a> · <a href="/">Ask a question</a>.</p>
 ${receiptsPager({ page, pages, total: total != null ? total : receipts })}
 <ul class="prior">${list}</ul>
@@ -699,13 +687,17 @@ export function answerCard(row, latest) {
   const title = latest ? "Latest answer" : "Receipt";
   const history = Array.isArray(row.rescores) ? row.rescores : [];
   const latestRescore = row.latest_rescore || (history.length ? history[history.length - 1] : null);
+  const later = history.filter((item) => item && item.reason && item.reason !== "initial");
+  const reading = publishedReading(row);
   const remainderBit = row.residual != null && row.residual !== ""
-    ? " Meter remainder on that row " + row.residual + "%."
+    ? " Old stored residual " + row.residual + "%."
     : "";
-  const stored = `<div class="block"><div class="k">Original receipt kept</div><p>${esc(storedScorePhrase(row) + remainderBit)} ${history.length ? "A later rescore did not erase this row." : "No TRIAD_V3 rescore is stored on this row yet."}</p></div>`;
-  const triad = latestRescore
-    ? `<div class="block"><div class="k">Triad</div><p>Display ${esc(latestRescore.display)}. Combined ${esc(latestRescore.combined)}. ${esc(latestRescore.changed_note || "")}</p></div>`
-    : "";
+  const stored = `<div class="block"><div class="k">Original receipt kept</div><p>${esc(oldStoredScorePhrase(row) + remainderBit)} ${later.length ? "A later rescore did not erase this row." : "This row was not rewritten."}</p></div>`;
+  const triad = reading
+    ? `<div class="block"><div class="k">Triad</div><p>${esc(reading.note)}</p></div>`
+    : (latestRescore
+      ? `<div class="block"><div class="k">Triad</div><p>Display ${esc(latestRescore.display)}. Combined ${esc(latestRescore.combined)}. ${esc(latestRescore.changed_note || "")}</p></div>`
+      : "");
   const priorNotes = history.filter((item) => item && item.reason && item.reason !== "initial").map((item) => {
     return `<li>${esc(when(item.created_utc))}: ${esc(item.changed_note || item.reason)}</li>`;
   }).join("");
@@ -748,6 +740,7 @@ export function reasonBody({ stats } = {}) {
   <p>${esc(DEBATE_HEADLINE)}</p>
   <p>${esc(METHOD_PUBLIC)}</p>
   <p>${esc(BIAS_PUBLIC)}</p>
+  <p>${esc(READING_PUBLIC)}</p>
   <p>${esc(RESCORE_RULE_PUBLIC)}</p>
   <p class="muted">Corpus method: <a href="${esc(SCORE_METHOD_URL)}">${esc(SCORE_METHOD_URL)}</a>.</p>
 <p><a href="${esc(AZIEL_ELIAB_PATH)}">Aziel Eliab</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a></p>
@@ -756,7 +749,7 @@ export function reasonBody({ stats } = {}) {
 
 export function reasonText() {
   return "How GodLock is scored\n\nAziel Eliab\n\n" + DEBATE_HEADLINE + "\n\n"
-    + METHOD_PUBLIC + "\n\n" + BIAS_PUBLIC + "\n\n" + RESCORE_RULE_PUBLIC + "\n\n"
+    + METHOD_PUBLIC + "\n\n" + BIAS_PUBLIC + "\n\n" + READING_PUBLIC + "\n\n" + RESCORE_RULE_PUBLIC + "\n\n"
     + SCORE_METHOD_URL + "\n";
 }
 

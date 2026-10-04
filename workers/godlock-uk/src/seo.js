@@ -2045,6 +2045,16 @@ export const AI_CRAWLER_AGENTS = uniquePreserve([
   "NeevaBot",
 ]);
 
+/** Dedicated IndexNow key for godlock.uk only. Do not reuse sister-host keys. */
+export const INDEXNOW_KEY = "b0b86ddf-503d-4f16-8898-054dee51c307";
+export const INDEXNOW_KEY_PATH = "/" + INDEXNOW_KEY + ".txt";
+export const INDEXNOW_WELL_KNOWN_PATH = "/.well-known/indexnow-key.txt";
+
+/** text/plain key file. Payload is the key; one trailing newline, same as azieleliab.com. */
+export function indexNowKeyBody() {
+  return INDEXNOW_KEY + "\n";
+}
+
 export const PUBLIC_ALLOW = [
   "/",
   "/verify",
@@ -2080,6 +2090,8 @@ export const PUBLIC_ALLOW = [
   "/.well-known/aziel.json",
   "/.well-known/person.jsonld",
   "/.well-known/mcp.json",
+  INDEXNOW_WELL_KNOWN_PATH,
+  INDEXNOW_KEY_PATH,
   "/mcp.json",
   "/openapi.json",
   "/count",
@@ -2097,6 +2109,7 @@ export function robotsTxt() {
     "# Content-Signal opens search + AI input + AI train.",
     "# Identity machine: /person.jsonld /identity.jsonld /graph.jsonld /who /who-is-aziel-eliab.txt /who-is /why-aziel-eliab.txt /why /.well-known/aziel.json /.well-known/person.jsonld",
     "# MCP discovery: /.well-known/mcp.json /mcp.json → POST /runtime/mcp.",
+    "# IndexNow: " + INDEXNOW_WELL_KNOWN_PATH + " " + INDEXNOW_KEY_PATH + ".",
     "# GodLock product surface. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.",
     "# Homepage hashes (#software #runtime #receipts #donate #reason #verify #AzielEliab) map to real paths.",
     "# Softwares HTML: /software. Catalog JSON: /v1/software. Door: /runtime.",
@@ -2180,6 +2193,8 @@ export async function sitemapXml(env, extras = {}) {
   add(CANON_HOST + "/.well-known/aziel.json", "0.8", "weekly");
   add(CANON_HOST + "/.well-known/person.jsonld", "0.85", "weekly");
   add(CANON_HOST + "/.well-known/mcp.json", "0.7", "weekly");
+  add(CANON_HOST + INDEXNOW_WELL_KNOWN_PATH, "0.4", "weekly");
+  add(CANON_HOST + INDEXNOW_KEY_PATH, "0.4", "weekly");
   add(CANON_HOST + "/mcp.json", "0.65", "weekly");
   add(CANON_HOST + "/stats", "0.45", "daily");
   add(CANON_HOST + COUNT_PATH, "0.4", "daily");

@@ -74,8 +74,12 @@ import {
   BRAND_MARK,
   BRAND_MARK_PATH,
   BRAND_MARK_ALT,
+  canonicalHostRedirect,
+  personJsonLd,
+  IDENTITY_SAME_AS,
 } from "./src/seo.js";
 import worker, { publicPayload } from "./src/index.js";
+import { CONTENT_SIGNAL } from "./src/http.js";
 import {
   CATALOG_FALLBACK_PRODUCTS,
   CATALOG_SLUGS,
@@ -2563,5 +2567,111 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(softwareMeta, /70cc0b0/);
     assert.doesNotMatch(softwareMeta, /6a3798a|105fa1ee/);
     assert.match(defaultDescription("runtime"), /fraggate_call/);
+  });
+});
+
+describe("crawler discovery — canonical host, HEAD, Content-Signal, cite Person", () => {
+  it("keeps robots allow-all and points Content-Signal at the same header value", () => {
+    const robots = robotsTxt();
+    assert.doesNotMatch(robots, /Disallow/);
+    assert.match(robots, /User-agent: \*\nAllow: \/\nContent-Signal: search=yes, ai-input=yes, ai-train=yes/);
+    assert.match(robots, /User-agent: GPTBot\nAllow: \//);
+    assert.match(robots, /User-agent: ClaudeBot\nAllow: \//);
+    assert.match(robots, /User-agent: PerplexityBot\nAllow: \//);
+    assert.match(robots, /User-agent: Google-Extended\nAllow: \//);
+    assert.equal(CONTENT_SIGNAL, "search=yes, ai-input=yes, ai-train=yes");
+  });
+
+  it("308s www and cleartext http to https://godlock.uk and leaves other hosts", () => {
+    assert.equal(
+      canonicalHostRedirect(new URL("https://www.godlock.uk/software?x=1")),
+      "https://godlock.uk/software?x=1",
+    );
+    assert.equal(
+      canonicalHostRedirect(new URL("http://godlock.uk/verify")),
+      "https://godlock.uk/verify",
+    );
+    assert.equal(
+      canonicalHostRedirect(new URL("http://www.godlock.uk/who")),
+      "https://godlock.uk/who",
+    );
+    assert.equal(canonicalHostRedirect(new URL("https://godlock.uk/cite.json")), "");
+    assert.equal(canonicalHostRedirect(new URL("https://godlock-uk.vibelock.workers.dev/")), "");
+    assert.equal(
+      canonicalHostRedirect(new URL("https://godlock.uk/"), new Request("https://godlock.uk/", {
+        headers: { "CF-Visitor": "{\"scheme\":\"http\"}" },
+      })),
+      "https://godlock.uk/",
+    );
+    assert.equal(
+      canonicalHostRedirect(new URL("https://godlock.uk/llms.txt"), new Request("https://godlock.uk/llms.txt", {
+        headers: { "X-Forwarded-Proto": "http" },
+      })),
+      "https://godlock.uk/llms.txt",
+    );
+  });
+
+  it("answers HEAD / like GET / and sends Content-Signal without restyling HTML", async () => {
+    const headers = { "User-Agent": "Mozilla/5.0" };
+    const get = await worker.fetch(new Request("https://godlock.uk/", { headers }), mockEnv());
+    const head = await worker.fetch(new Request("https://godlock.uk/", { method: "HEAD", headers }), mockEnv());
+    assert.equal(get.status, 200);
+    assert.equal(head.status, 200);
+    assert.match(get.headers.get("content-type"), /text\/html/);
+    assert.match(head.headers.get("content-type"), /text\/html/);
+    assert.equal(get.headers.get("Content-Signal"), CONTENT_SIGNAL);
+    assert.equal(head.headers.get("Content-Signal"), CONTENT_SIGNAL);
+    const html = await get.text();
+    const headHtml = await head.text();
+    assert.match(html, /<title>Godlock\. The Debate Site of Intelligent Design<\/title>/);
+    assert.match(headHtml, /<title>Godlock\. The Debate Site of Intelligent Design<\/title>/);
+    const visible = html.replace(/<script[\s\S]*?<\/script>/gi, "");
+    assert.doesNotMatch(visible, /1 Chronicles 15:20/);
+    assert.doesNotMatch(visible, /class="identity-lock"/);
+    const www = await worker.fetch(new Request("https://www.godlock.uk/cite.json?keep=1", { method: "HEAD" }), mockEnv());
+    assert.equal(www.status, 308);
+    assert.equal(www.headers.get("Location"), "https://godlock.uk/cite.json?keep=1");
+    assert.equal(www.headers.get("Content-Signal"), CONTENT_SIGNAL);
+    const httpHome = await worker.fetch(new Request("http://godlock.uk/reason"), mockEnv());
+    assert.equal(httpHome.status, 308);
+    assert.equal(httpHome.headers.get("Location"), "https://godlock.uk/reason");
+    const origin = await worker.fetch(new Request("https://godlock-uk.vibelock.workers.dev/robots.txt"), mockEnv());
+    assert.equal(origin.status, 200);
+    assert.equal(origin.headers.get("Content-Signal"), CONTENT_SIGNAL);
+    assert.doesNotMatch(await origin.text(), /Disallow/);
+  });
+
+  it("embeds the published Person in cite.json and does not invent llms-full.txt", async () => {
+    const citeRes = await worker.fetch(new Request("https://godlock.uk/cite.json"), mockEnv());
+    assert.equal(citeRes.status, 200);
+    assert.equal(citeRes.headers.get("Content-Signal"), CONTENT_SIGNAL);
+    const cite = await citeRes.json();
+    assert.equal(cite.person["@type"], "Person");
+    assert.equal(cite.person["@id"], "https://www.azieleliab.com/#aziel");
+    assert.equal(cite.person["@id"], AZIEL_PERSON_ID);
+    assert.deepEqual(cite.person.sameAs, IDENTITY_SAME_AS);
+    assert.deepEqual(cite.person, personJsonLd());
+    assert.equal(cite.person.name, "Aziel Eliab");
+    assert.equal(cite.person.worksFor, undefined);
+    const full = await worker.fetch(new Request("https://godlock.uk/llms-full.txt"), mockEnv());
+    assert.equal(full.status, 404);
+    const xml = await sitemapXml({});
+    for (const loc of [
+      "/person.jsonld",
+      "/identity.jsonld",
+      "/.well-known/person.jsonld",
+      "/.well-known/mcp.json",
+      "/mcp.json",
+      "/openapi.json",
+      "/.well-known/indexnow-key.txt",
+      "/b0b86ddf-503d-4f16-8898-054dee51c307.txt",
+      "/llms.txt",
+      "/ai.txt",
+      "/cite.json",
+    ]) {
+      assert.ok(xml.includes("<loc>" + CANON_HOST + loc + "</loc>"), loc);
+    }
+    assert.ok(!xml.includes("llms-full.txt"));
+    assert.equal(aiDoc(), llmsDoc());
   });
 });

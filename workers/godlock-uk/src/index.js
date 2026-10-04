@@ -14,7 +14,7 @@
  * Not an anonymity network. Author: Aziel Eliab.
  */
 import { randomBytes } from "node:crypto";
-import { json, html, corsHeaders, wantsJson, readCookie } from "./http.js";
+import { json, html, corsHeaders, stampContentSignal, wantsJson, readCookie } from "./http.js";
 import {
   page, homeBody, verifyBody, receiptBody, receiptsBody, azielEliabBody, azielEliabText,
   whoPageHtml, reasonBody, reasonText, softwareBody, donateBody, AZIEL_ELIAB_PATH, REASON_PATH, SOFTWARE_PATH, DONATE_PATH,
@@ -25,6 +25,7 @@ import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, mcpDiscoveryDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR,
+  canonicalHostRedirect,
   indexNowKeyBody, INDEXNOW_KEY_PATH, INDEXNOW_WELL_KNOWN_PATH,
   PUBLIC_RUNTIME, RUNTIME_PATH, RUNTIME_VERSION, OFFICIAL_SOFTWARES, permanentIdentityRedirect, citeRuntimeVersion,
   BRAND_MARK_PATH,
@@ -850,9 +851,20 @@ async function servePublicPng(request, env, path) {
   return new Response(assetRes.body, { status: 200, headers });
 }
 
-export default {
-  async fetch(request, env, ctx) {
+async function handleGodlock(request, env, ctx) {
     const url = new URL(request.url);
+    if (request.method === "GET" || request.method === "HEAD") {
+      const canonical = canonicalHostRedirect(url, request);
+      if (canonical) {
+        return new Response(null, {
+          status: 308,
+          headers: {
+            Location: canonical,
+            ...corsHeaders(),
+          },
+        });
+      }
+    }
     const path = url.pathname.replace(/\/+$/, "") || "/";
     if (request.method === "OPTIONS") {
       if (isRuntimeRequest(url.pathname) || isRuntimeRequest(path)) {
@@ -1305,8 +1317,8 @@ export default {
         });
       }
 
-      if (path === "/" && request.method === "GET") {
-        if (countPresence) await metaBump(env, "views");
+      if (path === "/" && (request.method === "GET" || request.method === "HEAD")) {
+        if (request.method === "GET" && countPresence) await metaBump(env, "views");
         const stats = await gatherStats(env, { wrote, visiting: countPresence, ctx });
         const rid = url.searchParams.get("r") || "";
         let latest = null;
@@ -1347,5 +1359,11 @@ export default {
       }
       return json({ ok: false, error: String(err && err.message ? err.message : err), author: AUTHOR, banner: BANNER }, 500);
     }
+}
+
+export default {
+  async fetch(request, env, ctx) {
+    const response = await handleGodlock(request, env, ctx);
+    return stampContentSignal(response);
   },
 };

@@ -1,11 +1,27 @@
 /** Small HTTP helpers. Author: Aziel Eliab. */
 
+/** Cloudflare Content-Signal. Same policy as robots.txt. Search and AI input/train stay open. */
+export const CONTENT_SIGNAL = "search=yes, ai-input=yes, ai-train=yes";
+
 export function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
+    "Content-Signal": CONTENT_SIGNAL,
   };
+}
+
+/** Public responses carry Content-Signal even when a proxy path built its own header set. */
+export function stampContentSignal(response) {
+  if (!response) return response;
+  const headers = new Headers(response.headers);
+  headers.set("Content-Signal", CONTENT_SIGNAL);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
 }
 
 export function cacheHeaders() {

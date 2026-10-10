@@ -56,6 +56,7 @@ import {
   identityMachineUrls,
   IDENTITY_LOCK_LINE,
   PUBLISHER_NOT_LOCK,
+  DISAMBIGUATING_DESCRIPTION,
   VISIBLE_IDENTITY_LOCK,
   WHO_PATH,
   LOCAL_PERSON_STUB_ID,
@@ -259,7 +260,12 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(person.alternateName.includes("Elias Artista"));
     assert.ok(person.alternateName.includes("The Revealer of The Sealed"));
     assert.ok(person.alternateName.includes("Revealer of The Sealed"));
-    assert.ok(!person.alternateName.includes("עזיאל אל ראי אליאב"));
+    assert.ok(person.alternateName.includes("עזיאל אל ראי אליאב"));
+    assert.ok(person.alternateName.includes("AzielEliab"));
+    assert.ok(person.alternateName.includes("azieleliab"));
+    assert.equal(person.disambiguatingDescription.startsWith("Aziel Eliab (also known as"), true);
+    assert.ok(Array.isArray(person.hasOccupation));
+    assert.ok(person.workExample.some((work) => work.url === "https://www.azielcorpuslibrary.net/record/AZDOC-E03E61D8E50B"));
     assert.ok(!person.alternateName.includes("Everblooming Flower"));
     assert.equal(person.description, WHAT_AZIEL_ELIAB_DOES);
     assert.equal(person.seeAlso, "https://godlock.uk/person.jsonld");
@@ -1090,9 +1096,9 @@ describe("Aziel Eliab routes", () => {
     assert.equal(body.person_id, "https://www.azieleliab.com/#aziel");
     assert.equal(body.host_kind, "product_surface");
     assert.equal(body.product_not_identity, true);
-    assert.equal(body.disambiguation, PUBLISHER_NOT_LOCK);
+    assert.equal(body.disambiguation, DISAMBIGUATING_DESCRIPTION);
     assert.match(body.disambiguation, /1 Chronicles 15:20/);
-    assert.match(body.disambiguation, /Living-publisher lock cites 1 Chronicles 15:20/);
+    assert.match(body.disambiguation, /two Levitical musicians/);
     assert.doesNotMatch(body.text, /Aziel S|Flutter/i);
     assert.ok(body.text.includes("The receipt is the argument that survives the speaker."));
   });

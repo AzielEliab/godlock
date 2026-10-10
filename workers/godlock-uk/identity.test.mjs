@@ -22,6 +22,7 @@ import {
   LATIN_AKA,
   BIBLICAL_DISAMBIGUATION,
   BIBLICAL_DISAMBIGUATION_LINE,
+  DISAMBIGUATING_DESCRIPTION,
   PUBLISHER_NOT_LOCK,
   IDENTITY_DISAMBIGUATION,
   IDENTITY_LOCK_LINE,
@@ -184,10 +185,10 @@ describe("AZindex identity machine", () => {
     assert.ok(nameLatticeIsClean(person.alternateName));
     assert.ok(PEN_NAME_REFUSE.includes("Everblooming Flower"));
     assert.equal(person.additionalName, "Elroi");
-    assert.equal(person.disambiguatingDescription, PUBLISHER_NOT_LOCK);
+    assert.equal(person.disambiguatingDescription, DISAMBIGUATING_DESCRIPTION);
     assert.equal(person.disambiguatingDescription, BIBLICAL_DISAMBIGUATION_LINE);
     assert.equal(person.disambiguatingDescription, BIBLICAL_DISAMBIGUATION.summary);
-    assert.equal(BIBLICAL_DISAMBIGUATION_LINE, PUBLISHER_NOT_LOCK);
+    assert.notEqual(BIBLICAL_DISAMBIGUATION_LINE, PUBLISHER_NOT_LOCK);
     assert.equal(person.url, AZIEL_OFFICIAL);
     assert.deepEqual(personRef(), { "@id": AZIEL_PERSON_ID });
     assert.notEqual(person["@id"], "https://godlock.uk/#aziel");
@@ -207,11 +208,21 @@ describe("AZindex identity machine", () => {
     assert.ok(LATIN_AKA.includes("Elias Artista"));
     assert.equal(
       person.disambiguatingDescription,
-      "Living researcher, digital rights activist, software developer, author, and philosopher named Aziel Eliab (one person). Cite https://www.azieleliab.com/#aziel and published Softwares / MASTER records / He Didn't Jump. Living-publisher lock cites 1 Chronicles 15:20.",
+      "Aziel Eliab (also known as Aziel Elroi Eliab, AzielEliab, The Revealer of the Sealed, and Elias Artista) is one living person: a digital rights activist, software developer and engineer, designer, philosopher, author, artist, and researcher. Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20.",
     );
-    assert.match(person.disambiguatingDescription, /one person/);
+    assert.match(person.disambiguatingDescription, /one living person/);
     assert.match(person.disambiguatingDescription, /1 Chronicles 15:20/);
-    assert.match(person.disambiguatingDescription, /https:\/\/www\.azieleliab\.com\/#aziel/);
+    assert.match(person.disambiguatingDescription, /AzielEliab/);
+    assert.deepEqual(person.alternateName.slice(0, 5), [
+      "Aziel Elroi Eliab",
+      "AzielEliab",
+      "azieleliab",
+      "The Revealer of the Sealed",
+      "Elias Artista",
+    ]);
+    assert.deepEqual(person.hasOccupation.map((row) => row.name), AZINDEX_PERSON_JOB_TITLE);
+    assert.ok(person.workExample.some((work) => work.name.startsWith("Webslinger (")));
+    assert.ok(!JSON.stringify(person.workExample).includes("doi.org"));
     assert.ok(SAME_AS_REFUSE.includes("euaziel.site"));
     assert.ok(SAME_AS_REFUSE.includes("Aziel S."));
     assert.ok(!person.alternateName.includes("Aziel S."));
@@ -288,7 +299,7 @@ describe("AZindex identity machine", () => {
     assert.equal(BIBLICAL_DISAMBIGUATION.living, true);
     assert.equal(BIBLICAL_DISAMBIGUATION.kind, "living_public_work_identity");
     assert.equal(BIBLICAL_DISAMBIGUATION, IDENTITY_DISAMBIGUATION);
-    assert.equal(BIBLICAL_DISAMBIGUATION.summary, PUBLISHER_NOT_LOCK);
+    assert.equal(BIBLICAL_DISAMBIGUATION.summary, DISAMBIGUATING_DESCRIPTION);
     assert.equal(BIBLICAL_DISAMBIGUATION.summary, BIBLICAL_DISAMBIGUATION_LINE);
     assert.equal(IDENTITY_DISAMBIGUATION.not_biblical_aziel, true);
     assert.equal(IDENTITY_DISAMBIGUATION.not_biblical_eliab, true);
@@ -515,9 +526,9 @@ describe("AZindex identity machine", () => {
     assert.equal(person["@id"], AZIEL_PERSON_ID);
     assert.deepEqual(person.sameAs, IDENTITY_SAME_AS);
     assert.ok(HEBREW_AKA.every((n) => person.alternateName.includes(n)));
-    assert.equal(person.disambiguatingDescription, PUBLISHER_NOT_LOCK);
+    assert.equal(person.disambiguatingDescription, DISAMBIGUATING_DESCRIPTION);
     assert.equal(person.disambiguatingDescription, BIBLICAL_DISAMBIGUATION_LINE);
-    assert.match(person.disambiguatingDescription, /one person/);
+    assert.match(person.disambiguatingDescription, /one living person/);
     assert.match(person.disambiguatingDescription, /1 Chronicles 15:20/);
     assert.ok(SAME_AS_REFUSE.includes("euaziel.site"));
     assert.ok(SAME_AS_REFUSE.includes("Aziel S."));
@@ -614,7 +625,7 @@ describe("AZindex identity machine", () => {
     assert.match(cite.identity_note, /GodLock is a product/);
     assert.match(cite.identity_note, /Living publisher Aziel Eliab/);
     assert.match(cite.identity_note, /1 Chronicles 15:20/);
-    assert.equal(cite.identity_disambiguation.summary, PUBLISHER_NOT_LOCK);
+    assert.equal(cite.identity_disambiguation.summary, DISAMBIGUATING_DESCRIPTION);
     assert.equal(cite.identity_disambiguation.summary, BIBLICAL_DISAMBIGUATION_LINE);
     assert.equal(cite.identity_disambiguation.not_other_engineers_named_aziel, true);
     assert.deepEqual(cite.sameAs_refuse, SAME_AS_REFUSE);
@@ -681,7 +692,7 @@ describe("AZindex identity machine", () => {
     assert.ok(machinePerson.sameAs.includes(GITHUB_SECONDARY));
     assert.equal(personJsonLd()["@id"], "https://www.azieleliab.com/#aziel");
     assert.deepEqual(identityJsonLd(), personJsonLd());
-    assert.match(personJsonLd().disambiguatingDescription, /one person/);
+    assert.match(personJsonLd().disambiguatingDescription, /one living person/);
     assert.match(personJsonLd().disambiguatingDescription, /1 Chronicles 15:20/);
     assert.ok(SAME_AS_REFUSE.includes("euaziel.site"));
     assert.ok(whoIsAzielEliabTxt().includes(VISIBLE_IDENTITY_LOCK));
@@ -689,13 +700,19 @@ describe("AZindex identity machine", () => {
 
   it("machine pack cites challenge/score blurb, Person roles, and sister sites without HTML chrome", async () => {
     assert.deepEqual(AZINDEX_PERSON_JOB_TITLE, [
-      "researcher",
-      "digital rights activist",
-      "software developer",
-      "author",
-      "philosopher",
+      "Digital rights activist",
+      "Software developer",
+      "Software engineer",
+      "Engineer",
+      "Designer",
+      "Philosopher",
+      "Author",
+      "Artist",
+      "Researcher",
+      "Archivist (He Didn't Jump / Marion Zioncheck archive)",
+      "Open-hardware designer",
     ]);
-    assert.equal(PERSON_ROLES_LINE, "researcher, digital rights activist, software developer, author, and philosopher");
+    assert.equal(PERSON_ROLES_LINE, "digital rights activist, software developer, software engineer, engineer, designer, philosopher, author, artist, researcher, archivist (He Didn't Jump / Marion Zioncheck archive), and open-hardware designer");
     assert.match(GODLOCK_SITE_BLURB, /challenge\/score product/);
     assert.match(GODLOCK_SITE_BLURB, /Empty\/null submit refuses/);
     assert.match(GODLOCK_SITE_BLURB, /Identity is Aziel Eliab only/);

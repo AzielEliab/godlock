@@ -2,6 +2,9 @@
  * Behind-scenes SEO / MCP discoverability for the GodLock download tracker.
  * No UI redesign. Author: Aziel Eliab.
  */
+import { authorPersonLd, machineAkaLine, AZIEL_PERSON_ID, DISAMBIGUATING_DESCRIPTION, AZIEL_JOB_TITLES } from "../../aziel-person.js";
+
+export { authorPersonLd };
 
 export const HOST = "https://godlock-download-tracker.vibelock.workers.dev";
 export const GITHUB = "https://github.com/AzielEliab/godlock";
@@ -102,7 +105,12 @@ export function sitemapXml() {
 export function citeDoc() {
   return {
     author: AUTHOR,
+    author_id: AZIEL_PERSON_ID,
+    person: authorPersonLd(),
     alternateName: AUTHOR_AKA,
+    jobTitle: AZIEL_JOB_TITLES.slice(),
+    disambiguatingDescription: DISAMBIGUATING_DESCRIPTION,
+    works_url: "https://godlock.uk/works.json",
     title: "GodLock",
     identity: AUTHOR,
     github: GITHUB,
@@ -153,7 +161,10 @@ export function citeDoc() {
 export function llmsDoc() {
   return "# GodLock\n\n"
     + "Author: Aziel Eliab\n"
-    + "Also known as: Aziel Elroi Eliab\n"
+    + "Also known as: " + machineAkaLine() + "\n"
+    + "Person @id: " + AZIEL_PERSON_ID + "\n"
+    + DISAMBIGUATING_DESCRIPTION + "\n"
+    + "Works: https://godlock.uk/works.json\n"
     + "Primary credit: Aziel Eliab\n"
     + "Identity is Aziel Eliab only. GodLock is a product name.\n"
     + "Worker: " + HOST + "/\n"

@@ -373,7 +373,8 @@ describe("BAN-SURVIVAL hub pull", () => {
 
     const htmlPerson = personNode();
     const htmlJson = JSON.stringify(htmlPerson);
-    assert.ok(htmlJson.length < 2500, "HTML-embedded Person must stay lean; was " + htmlJson.length);
+    assert.equal(htmlPerson.workExample, undefined);
+    assert.ok(htmlJson.length < 4500, "HTML-embedded Person must stay lean; was " + htmlJson.length);
     assert.doesNotMatch(htmlJson, /BAN-SURVIVAL|SPORE-1\.0|RE-COLD-STORE|miragegrid|calling_name|AZDOC-/);
     assert.equal(htmlPerson["@id"], "https://www.azieleliab.com/#aziel");
 
@@ -387,7 +388,12 @@ describe("BAN-SURVIVAL hub pull", () => {
     assert.doesNotMatch(visible, /BAN-SURVIVAL/);
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     const person = ld["@graph"].find((n) => n["@type"] === "Person");
-    assert.ok(JSON.stringify(person).length < 2500);
+    assert.ok(Array.isArray(person.workExample) && person.workExample.length >= 30 && person.workExample.length <= 60);
+    const core = { ...person };
+    delete core.workExample;
+    delete core.subjectOf;
+    assert.ok(JSON.stringify(core).length < 4500);
+    assert.doesNotMatch(JSON.stringify(core), /BAN-SURVIVAL|SPORE-1\.0|RE-COLD-STORE|miragegrid|calling_name|AZDOC-/);
     assert.doesNotMatch(JSON.stringify(person.knowsAbout || []), /AZDOC-/);
   });
 

@@ -28,7 +28,7 @@ import {
   indexNowKeyBody, INDEXNOW_KEY_PATH, INDEXNOW_WELL_KNOWN_PATH,
   PUBLIC_RUNTIME, RUNTIME_PATH, RUNTIME_VERSION, OFFICIAL_SOFTWARES, permanentIdentityRedirect, citeRuntimeVersion,
   BRAND_MARK_PATH,
-  personJsonLd, identityJsonLd, graphJsonLd, whoIsAzielEliabTxt, whyAzielEliabTxt, wellKnownAzielDoc,
+  personJsonLd, identityJsonLd, graphJsonLd, worksDoc, whoIsAzielEliabTxt, whyAzielEliabTxt, wellKnownAzielDoc,
   AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE, WHO_PATH, WHY_IS_PATH,
   WHAT_AZIEL_ELIAB_DOES, WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
   RESEARCH_ADDENDUM, HARDWARE_ADDENDUM, WHITESTONE_ADDENDUM, WHITESTONE_URL, WHITESTONE_NAME, WHITESTONE_ONE_LINE,
@@ -949,6 +949,9 @@ export default {
       if (path === "/survival" || path === "/v1/survival") {
         const sot = await fetchSurvivalSot(env);
         return json(survivalHubDoc(sot), 200, { "Cache-Control": SURVIVAL_CACHE_CONTROL });
+      }
+      if (path === "/works.json") {
+        return json(worksDoc());
       }
       if (path === "/person.jsonld" || path === "/.well-known/person.jsonld") {
         return new Response(JSON.stringify(personJsonLd(), null, 2), {

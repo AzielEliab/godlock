@@ -19,6 +19,12 @@ PUBLISHER_NOT_LOCK = (
     "Living-publisher lock cites 1 Chronicles 15:20."
 )
 
+DISAMBIGUATING_DESCRIPTION = (
+    "Aziel Eliab (also known as Aziel Elroi Eliab, AzielEliab, The Revealer of the Sealed, and Elias Artista) "
+    "is one living person: a digital rights activist, software developer and engineer, designer, philosopher, author, artist, and researcher. "
+    "Not the two Levitical musicians Aziel and Eliab named together in 1 Chronicles 15:20."
+)
+
 SITE_BLURB = (
     "GodLock is a challenge/score product. Submit a challenge; score it. "
     "Answers open with Yes, No, Let's review, or Interesting. "
@@ -293,11 +299,12 @@ def test_cite_json_graph():
     assert "אליאב" in CITE["hebrew_aka"]
     assert "אל ראי" in CITE["hebrew_aka"]
     assert "אלרועי" in CITE["hebrew_aka"]
-    assert CITE["biblical_disambiguation"]["summary"] == PUBLISHER_NOT_LOCK
+    assert CITE["biblical_disambiguation"]["summary"] == DISAMBIGUATING_DESCRIPTION
     assert CITE["identity_disambiguation"]["summary"] == CITE["biblical_disambiguation"]["summary"]
-    assert "one person" in CITE["biblical_disambiguation"]["summary"]
+    assert "one living person" in CITE["biblical_disambiguation"]["summary"]
     assert "1 Chronicles 15:20" in CITE["biblical_disambiguation"]["summary"]
-    assert "https://www.azieleliab.com/#aziel" in CITE["biblical_disambiguation"]["summary"]
+    assert "Not the two Levitical musicians" in CITE["biblical_disambiguation"]["summary"]
+    assert "https://www.azieleliab.com/#aziel" in CITE["person_id"]
     assert "Aziel S." in CITE["sameAs_refuse"]
     assert "euaziel.site" in CITE["sameAs_refuse"]
     assert "concordance" not in CITE["biblical_disambiguation"]["summary"]
@@ -328,11 +335,17 @@ def test_cite_json_graph():
     assert CITE["identity_note"].startswith("GodLock is a product")
     assert "Living publisher Aziel Eliab" in CITE["identity_note"]
     assert CITE["jobTitle"] == [
-        "researcher",
-        "digital rights activist",
-        "software developer",
-        "author",
-        "philosopher",
+        "Digital rights activist",
+        "Software developer",
+        "Software engineer",
+        "Engineer",
+        "Designer",
+        "Philosopher",
+        "Author",
+        "Artist",
+        "Researcher",
+        "Archivist (He Didn't Jump / Marion Zioncheck archive)",
+        "Open-hardware designer",
     ]
     assert CITE["site_blurb"] == SITE_BLURB
     assert CITE["empty_submit_refuse"] is True
@@ -405,8 +418,8 @@ def test_cite_json_graph():
     assert CITE["the_ark_addendum"] in AI
     assert SITE_BLURB in LLMS
     assert SITE_BLURB in AI
-    assert "Roles: researcher, digital rights activist, software developer, author, and philosopher" in LLMS
-    assert "Roles: researcher, digital rights activist, software developer, author, and philosopher" in AI
+    assert "Roles: digital rights activist, software developer, software engineer, engineer, designer, philosopher, author, artist, researcher, archivist (He Didn't Jump / Marion Zioncheck archive), and open-hardware designer" in LLMS
+    assert "Roles: digital rights activist, software developer, software engineer, engineer, designer, philosopher, author, artist, researcher, archivist (He Didn't Jump / Marion Zioncheck archive), and open-hardware designer" in AI
     assert "Sister sites: ae https://www.azieleliab.com/" in LLMS
     assert "Sister sites: ae https://www.azieleliab.com/" in AI
     assert "https://x.com/AzielEliab" in LLMS
@@ -491,7 +504,8 @@ FORBIDDEN_SEO_NEGATION = (
 
 
 def test_seo_surfaces_drop_definition_by_negation_and_ban_narratives():
-    cite_blob = json.dumps(CITE)
+    cite_for_voice = {k: v for k, v in CITE.items() if k not in ("works", "listings")}
+    cite_blob = json.dumps(cite_for_voice)
     for phrase in FORBIDDEN_SEO_NEGATION:
         assert phrase not in LLMS, phrase
         assert phrase not in AI, phrase

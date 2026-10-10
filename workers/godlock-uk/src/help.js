@@ -91,6 +91,7 @@ export function helpDoc() {
     "## Person",
     "",
     "Public identity is Aziel Eliab only. Person @id is always " + AZIEL_PERSON_ID + ".",
+    "Works: " + CANON_HOST + "/works.json",
     "Who page: " + CANON_HOST + WHO_PATH,
     "Why (machine): " + CANON_HOST + WHY_IS_PATH,
     "Official why: " + WHY_OFFICIAL,

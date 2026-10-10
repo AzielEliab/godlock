@@ -1,5 +1,5 @@
 import { handleRuntime } from "./runtime.js";
-import { robotsTxt, sitemapXml, citeDoc, llmsDoc } from "./discover.js";
+import { robotsTxt, sitemapXml, citeDoc, llmsDoc, authorPersonLd } from "./discover.js";
 import { classifyRequest, readBotManagement } from "./classify.js";
 import {
   isolatedKeys,
@@ -410,10 +410,7 @@ async function indexHtml(env) {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   "name": "GodLock",
-  "author": {
-    "@type": "Person",
-    "name": "Aziel Eliab"
-  },
+  "author": ${JSON.stringify(authorPersonLd())},
   "codeRepository": "https://github.com/AzielEliab/godlock",
   "downloadUrl": "https://godlock-download-tracker.vibelock.workers.dev/download",
   "license": "https://www.apache.org/licenses/LICENSE-2.0",

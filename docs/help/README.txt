@@ -29,6 +29,7 @@ FragGate list fallback only: https://aziel-runtime.vibelock.workers.dev/v1/fragg
 ## Person
 
 Public identity is Aziel Eliab only. Person @id is always https://www.azieleliab.com/#aziel.
+Works: https://godlock.uk/works.json
 Who page: https://godlock.uk/who
 Why (machine): https://godlock.uk/why-aziel-eliab.txt
 Official why: https://www.azieleliab.com/why

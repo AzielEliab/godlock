@@ -129,7 +129,7 @@ export async function ledgerEntriesForId(env, id) {
   return out;
 }
 
-function publicEntry(row) {
+export function publicEntry(row) {
   let payload = {};
   try { payload = JSON.parse(row.payload_json || "{}"); } catch { payload = {}; }
   const safe = { ...payload };

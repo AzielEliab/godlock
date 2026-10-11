@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { scoreDebateText } from "./src/debateScore.js";
-import { factorDetail, storedFactorView, factorDetailSealed, NOT_STORED, NOT_SEALED_LABEL, FACTOR_KEYS } from "./src/factorDetail.js";
+import { factorDetail, storedFactorView, factorDetailSealed, ledgerRescoreLines, reasoningSealed, NOT_STORED, NOT_SEALED_LABEL, FACTOR_KEYS } from "./src/factorDetail.js";
 import { hashPayload, canonicalJson, ZERO } from "./src/ledger.js";
 import { receiptLedgerAndProof, _resetProofCache, HEAD_SQL, TAIL_SQL, BY_RECEIPT_SQL } from "./src/receiptProof.js";
 import { threadView, threadExpandScript } from "./src/ui.js";
@@ -38,25 +38,16 @@ describe("factor detail at write time", () => {
   it("no triad means no detail", () => assert.equal(factorDetail({}), null));
 });
 
+function mkDetail(vals) {
+  const factors = {};
+  for (const k of Object.keys(vals)) factors[k] = { value: vals[k] };
+  return { schema: "godlock.factor_detail.v1", cycle_factors: Object.keys(vals), factors, pairings: [], omitted: [] };
+}
+
 describe("stored factor view (read time, no recompute)", () => {
   it("old receipt without stored detail says so", () => {
     const v = storedFactorView([{ reason: "initial", triad_json: JSON.stringify({ factors: { spre: 0.1 } }) }]);
     assert.equal(v.factor_detail, null); assert.equal(v.factor_detail_note, NOT_STORED);
-  });
-  it("rescore rows show which factors changed and by how much", () => {
-    const v = storedFactorView([
-      { reason: "initial", triad_json: JSON.stringify({ factors: { spre: 0.15, bayesian: 0.5, clce: null } }) },
-      { reason: "supersedes", created_utc: "t2", triad_json: JSON.stringify({ factors: { spre: 0.3, bayesian: 0.5, clce: 0.2 } }) },
-    ]);
-    assert.deepEqual(v.rescore_factor_changes[0].changes, [
-      { factor: "clce", before: null, after: 0.2, delta: null },
-      { factor: "spre", before: 0.15, after: 0.3, delta: 0.15 },
-    ]);
-  });
-  it("rescore without stored factors is not guessed", () => {
-    const v = storedFactorView([{ reason: "initial", triad_json: null }, { reason: "x", triad_json: JSON.stringify({ factors: { spre: 1 } }) }]);
-    assert.equal(v.rescore_factor_changes[0].changes, null);
-    assert.equal(v.rescore_factor_changes[0].note, NOT_STORED);
   });
 });
 
@@ -76,8 +67,8 @@ describe("drop-down view", () => {
     assert.deepEqual(v.factors, [["Seal coverage", NOT_SEALED_LABEL], ["Per-factor", "per-factor detail not stored for this receipt"]]);
   });
   it("rescore changes render with signed deltas", () => {
-    const v = threadView({ ...base, receipt: { factor_detail: null, rescore_factor_changes: [{ created_utc: "t2", changes: [{ factor: "spre", before: 0.15, after: 0.3, delta: 0.15 }] }] } });
-    assert.deepEqual(v.factors[2], ["Rescore t2", "spre 0.15 → 0.3 (+0.15)"]);
+    const v = threadView({ ...base, receipt: { factor_detail: null, rescore_factor_changes: [{ ledger_seq: 7, ledger_timestamp_utc: "T7", created_utc: "IGNORED", changes: [{ factor: "spre", before: 0.15, after: 0.3, delta: 0.15 }] }] } });
+    assert.deepEqual(v.factors.find((x) => x[0].startsWith("Rescore")), ["Rescore T7 (ledger #7)", "spre 0.15 → 0.3 (+0.15) (stored data, not covered)"]);
   });
   it("script uses textContent only and still parses", () => {
     const js = threadExpandScript();
@@ -143,5 +134,96 @@ describe("factor detail seal coverage", () => {
   it("pairing products display rounded to 4 places", () => {
     const v = threadView({ ok: true, proof: {}, receipt: { factor_detail: { cycle_factors: [], factors: {}, pairings: [{ i: "a", j: "b", product: 0.123456789 }], omitted: [] } } });
     assert.deepEqual(v.factors.find((x) => x[0] === "Pairing a × b"), ["Pairing a × b", "0.1235"]);
+  });
+});
+
+describe("normalized detail and rescore sealing", () => {
+  it("factorDetail is JSON-normalized: no undefined fields, hash survives a store round trip", () => {
+    const review = scoreDebateText(TEXT, "");
+    review.spre.band = undefined; // checker leaves a nested field undefined
+    const fd = factorDetail(review);
+    const roundTrip = JSON.parse(JSON.stringify({ factor_detail: fd })).factor_detail;
+    assert.deepEqual(roundTrip, fd);
+    assert.equal(hashPayload(roundTrip), hashPayload(fd));
+    assert.ok(!("band" in fd.factors.spre.checker));
+  });
+});
+
+describe("rescore lines are ordered and paired by the hashed ledger", () => {
+  const d0 = mkDetail({ spre: 0.1 });
+  const d1 = mkDetail({ spre: 0.2 });
+  const d2 = mkDetail({ spre: 0.5 });
+  const L = (extra = []) => ledgerWith([
+    ["SUBMIT", { receipt_id: "r1", factor_detail_sha256: hashPayload(d0) }],
+    ["RESCORE", { receipt_id: "r1", rescore_id: "a", reason: "supersedes", factor_detail_sha256: hashPayload(d1) }],
+    ...extra,
+    ["RESCORE", { receipt_id: "r1", rescore_id: "b", reason: "same-succession", factor_detail_sha256: hashPayload(d2) }],
+  ]);
+  const H = (tA = "t1", tB = "t2", omit) => [
+    { id: "i", reason: "initial", created_utc: "t0", triad_json: JSON.stringify({ factor_detail: d0 }) },
+    { id: "a", reason: "x", created_utc: tA, triad_json: JSON.stringify({ factor_detail: d1 }) },
+    { id: "b", reason: "x", created_utc: tB, triad_json: JSON.stringify({ factor_detail: d2 }) },
+  ].filter((h) => h.id !== omit);
+  async function run(ledger, hist) {
+    _resetProofCache();
+    const { rows, proof } = await receiptLedgerAndProof({ DB: fakeDb(ledger) }, "r1");
+    return ledgerRescoreLines(hist, rows, proof, "r1");
+  }
+  it("baseline: both covered, ledger order, ledger timestamps and reasons", async () => {
+    const lines = await run(L(), H());
+    assert.deepEqual(lines.map((l) => [l.id, l.ledger_seq, l.sealed, l.reason]), [["a", 2, true, "supersedes"], ["b", 3, true, "same-succession"]]);
+    assert.equal(lines[0].ledger_timestamp_utc, "t1");
+    assert.deepEqual(lines[1].changes, [{ factor: "spre", before: 0.2, after: 0.5, delta: 0.3 }]);
+  });
+  it("swapped created_utc: original ledger order and correct deltas", async () => {
+    const lines = await run(L(), H("t9", "t0"));
+    assert.deepEqual(lines.map((l) => l.id), ["a", "b"]);
+    assert.deepEqual(lines[0].changes, [{ factor: "spre", before: 0.1, after: 0.2, delta: 0.1 }]);
+    assert.deepEqual(lines[1].changes, [{ factor: "spre", before: 0.2, after: 0.5, delta: 0.3 }]);
+    assert.ok(lines.every((l) => l.sealed));
+  });
+  it("history order is irrelevant", async () => {
+    const lines = await run(L(), H().reverse());
+    assert.deepEqual(lines.map((l) => l.id), ["a", "b"]);
+  });
+  it("missing stored row for the middle rescore: it and the next line are not covered", async () => {
+    const lines = await run(L(), H("t1", "t2", "a"));
+    assert.equal(lines.find((l) => l.id === "a").sealed, false);
+    assert.equal(lines.find((l) => l.id === "b").sealed, false);
+    assert.equal(lines.find((l) => l.id === "b").changes, null);
+  });
+  it("stored rescore with no ledger row: listed, not covered", async () => {
+    const hist = H().concat([{ id: "ghost", reason: "x", created_utc: "t5", triad_json: JSON.stringify({ factor_detail: d2 }) }]);
+    const g = (await run(L(), hist)).find((l) => l.id === "ghost");
+    assert.equal(g.sealed, false); assert.equal(g.ledger_seq, null);
+  });
+  it("intervening RESCORE for this receipt: b pairs with the intervening row, not with a", async () => {
+    const dx = mkDetail({ spre: 0.9 });
+    const lines = await run(L([["RESCORE", { receipt_id: "r1", rescore_id: "x", factor_detail_sha256: hashPayload(dx) }]]), H());
+    const b = lines.find((l) => l.id === "b");
+    assert.equal(b.sealed, false, "x has no stored detail, so the link into b is not covered");
+    assert.equal(b.changes, null);
+  });
+  it("label uses the ledger timestamp, never created_utc", async () => {
+    _resetProofCache();
+    const { rows, proof } = await receiptLedgerAndProof({ DB: fakeDb(L()) }, "r1");
+    const lines = ledgerRescoreLines(H("FAKE1", "FAKE2"), rows, proof, "r1");
+    const v = threadView({ ok: true, proof, receipt: { rescore_factor_changes: lines } });
+    const labels = v.factors.filter((x) => x[0].startsWith("Rescore")).map((x) => x[0]);
+    assert.deepEqual(labels, ["Rescore t1 (ledger #2)", "Rescore t2 (ledger #3)"]);
+    assert.ok(!labels.join().includes("FAKE"));
+  });
+});
+
+describe("reasoning seal", () => {
+  const row = { id: "r1", created_utc: "c", text_sha256: "x", label: "Triad", summary: "S", explanation: "E", score_before: 50, score_after: 31, residual: 69, isolated: 0 };
+  const hash = (r) => hashPayload({ id: r.id, created_utc: r.created_utc, text_sha256: r.text_sha256, label: r.label, summary: r.summary, explanation: r.explanation, score_before: r.score_before, score_after: r.score_after, residual: r.residual, isolated: r.isolated });
+  it("covered when receipt row hashes to sealed SUBMIT content_sha256", async () => {
+    _resetProofCache();
+    const { rows, proof } = await receiptLedgerAndProof({ DB: fakeDb(ledgerWith([["SUBMIT", { receipt_id: "r1", content_sha256: hash(row) }]])) }, "r1");
+    assert.equal(reasoningSealed(row, rows, proof, hash), true);
+    assert.equal(reasoningSealed({ ...row, explanation: "edited" }, rows, proof, hash), false);
+    const v = threadView({ ok: true, proof, receipt: { summary: "S", reasoning_sealed: false } });
+    assert.match(v.reasoning.find((x) => x[0] === "Reasoning seal")[1], /not covered/);
   });
 });

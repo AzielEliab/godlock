@@ -75,6 +75,16 @@ NO-LIE / NO-REWRITE: receipts that still hash; copies not all on one tunnel; rul
 See docs/llms.txt for the full brief.
 
 
+## AZ triad
+
+Design relationship only. One system with three sides: the operating-system layer (AZ-OS), the MCP runtime (Aziel Runtime), and the UI software (The AZInterface).
+Person @id https://www.azieleliab.com/#aziel. Triad @id https://www.azieleliab.com/#az-triad.
+- AZ-OS, operating-system side. Not a kernel. https://github.com/AzielEliab/azos
+- Aziel Runtime, MCP side. https://github.com/AzielEliab/aziel-runtime
+  Worker: https://aziel-runtime.vibelock.workers.dev/
+  Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
+- The AZInterface, UI-software side. https://github.com/AzielEliab/azinterface
+  White paper: https://www.azielcorpuslibrary.net/record/AZDOC-EB7454682E74
 ## Works
 
 Person @id https://www.azieleliab.com/#aziel. Filtered from the owner catalog. verified:true, no caution, no doi.org or zenodo.org URL, no third-party forks. He Didn't Jump is a document archive.

@@ -22,8 +22,8 @@ import {
 } from "./ui.js";
 import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
-import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
-import { receiptProofForId } from "./receiptProof.js";
+import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex, publicEntry } from "./ledger.js";
+import { receiptLedgerAndProof } from "./receiptProof.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, mcpDiscoveryDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR,
   indexNowKeyBody, INDEXNOW_KEY_PATH, INDEXNOW_WELL_KNOWN_PATH,
@@ -1274,10 +1274,10 @@ export default {
           if (wantsJson(request, url)) return json({ ok: false, error: "not found" }, 404);
           return html(page("Receipt", receiptBody({ id, row: null, entries: [] }), { path: "/receipt/" + id, kind: "receipt", indexable: false }), { status: 404 });
         }
-        const entries = await ledgerEntriesForId(env, id);
+        const { rows: ledgerRows, proof } = await receiptLedgerAndProof(env, id);
+        const entries = ledgerRows.map(publicEntry);
         const stats = await gatherStats(env, { wrote, ctx });
         if (wantsJson(request, url)) {
-          const proof = await receiptProofForId(env, id);
           return json({
             ok: true,
             receipt: publicPayload(row),

@@ -546,7 +546,7 @@ export function threadView(j) {
   out.receipt.push(["Prev hash", p.prev_hash || "missing"]);
   out.receipt.push(["Seal (verified ledger head)", st === "verified" ? p.seal : "missing"]);
   out.receipt.push(["Timestamp", p.timestamp_utc || "missing"]);
-  out.receipt.push(["Verify", p.verify_url || "/verify"]);
+  out.receipt.push(["Verify", "/verify"]);
   return out;
 }
 
@@ -555,7 +555,7 @@ export function threadExpandScript() {
 (function(){
   var threadView=${threadView.toString()};
   function row(box,k,v,mono){var p=document.createElement("p");var b=document.createElement("b");b.textContent=k+": ";p.appendChild(b);
-    if(k==="Verify"){var a=document.createElement("a");a.href=v;a.textContent="Verify chain";p.appendChild(a);}
+    if(k==="Verify"){var a=document.createElement("a");a.href="/verify";a.textContent="Verify chain";p.appendChild(a);}
     else{var s=document.createElement("span");s.textContent=String(v);if(mono)s.className="hash";p.appendChild(s);}box.appendChild(p);}
   function render(body,j){var m=threadView(j);body.textContent="";
     m.reasoning.forEach(function(x){row(body,x[0],x[1],false);});

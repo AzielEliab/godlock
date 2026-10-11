@@ -507,11 +507,74 @@ export function priorReceiptItems(rows, { fullChallenge = false } = {}) {
   return (rows || []).map((r) => {
     const challenge = fullChallenge ? challengeBlockText(r) : challengePreview(r);
     return `<li>
-      <div class="challenge-preview">${esc(challenge)}</div>
+      <details class="thread" data-receipt-id="${esc(r.id)}">
+      <summary><span class="challenge-preview">${esc(challenge)}</span></summary>
+      <div class="thread-body" aria-live="polite"><p class="muted">Loading reasoning and receipt…</p></div>
+      </details>
       ${rescoreLine(r)}
       <div class="muted">${esc(when(r.created_utc))}</div>
       <a href="/receipt/${esc(r.id)}">Receipt</a></li>`;
   }).join("");
+}
+
+/**
+ * Pure view model for an expanded thread. Input is the /receipt/:id?format=json
+ * body (or null on fetch failure). Fails closed: only status "verified" from the
+ * server proof is shown as verified. Never invents reasoning or a receipt.
+ * Kept free of outer references so it can be inlined via toString().
+ */
+export function threadView(j) {
+  var out = { reasoning: [], receipt: [], status: "missing", note: "Hash-linked and sealed. Not signed." };
+  if (!j || j.ok !== true || !j.receipt) {
+    out.receipt.push(["Receipt", "missing (could not be fetched)"]);
+    return out;
+  }
+  var r = j.receipt;
+  if (typeof r.summary === "string" && r.summary) out.reasoning.push(["Summary", r.summary]);
+  if (typeof r.explanation === "string" && r.explanation) out.reasoning.push(["Reasoning", r.explanation]);
+  if (!out.reasoning.length) out.reasoning.push(["Reasoning", "No reasoning was recorded for this receipt."]);
+  var p = j.proof;
+  if (!p || typeof p !== "object") {
+    out.receipt.push(["Receipt", "missing (no proof returned)"]);
+    return out;
+  }
+  var st = p.status === "verified" ? "verified" : (p.status === "unverified" ? "unverified" : "missing");
+  if (st === "verified" && !(p.receipt_hash && p.prev_hash && p.seal)) st = "unverified";
+  out.status = st;
+  out.receipt.push(["Status", st]);
+  out.receipt.push(["Receipt hash", p.receipt_hash || "missing"]);
+  out.receipt.push(["Prev hash", p.prev_hash || "missing"]);
+  out.receipt.push(["Seal (verified ledger head)", st === "verified" ? p.seal : "missing"]);
+  out.receipt.push(["Timestamp", p.timestamp_utc || "missing"]);
+  out.receipt.push(["Verify", p.verify_url || "/verify"]);
+  return out;
+}
+
+export function threadExpandScript() {
+  return `<script>
+(function(){
+  var threadView=${threadView.toString()};
+  function row(box,k,v,mono){var p=document.createElement("p");var b=document.createElement("b");b.textContent=k+": ";p.appendChild(b);
+    if(k==="Verify"){var a=document.createElement("a");a.href=v;a.textContent="Verify chain";p.appendChild(a);}
+    else{var s=document.createElement("span");s.textContent=String(v);if(mono)s.className="hash";p.appendChild(s);}box.appendChild(p);}
+  function render(body,j){var m=threadView(j);body.textContent="";
+    m.reasoning.forEach(function(x){row(body,x[0],x[1],false);});
+    var h=document.createElement("div");h.className="k";h.textContent="Receipt ("+m.status+")";body.appendChild(h);
+    m.receipt.forEach(function(x){row(body,x[0],x[1],/hash|Seal/.test(x[0]));});
+    var n=document.createElement("p");n.className="muted";n.textContent=m.note;body.appendChild(n);}
+  document.querySelectorAll("details.thread").forEach(function(d){
+    d.addEventListener("toggle",function(){
+      if(!d.open||d.getAttribute("data-loaded"))return;
+      d.setAttribute("data-loaded","1");
+      var body=d.querySelector(".thread-body");
+      fetch("/receipt/"+encodeURIComponent(d.getAttribute("data-receipt-id"))+"?format=json",{headers:{"Accept":"application/json"}})
+        .then(function(r){return r.ok?r.json():null;})
+        .then(function(j){render(body,j);})
+        .catch(function(){render(body,null);});
+    });
+  });
+})();
+</script>`;
 }
 
 export function nodesLiveFromStats(stats) {
@@ -641,6 +704,7 @@ ${latestHtml}
 <h2>Prior receipts</h2>
 <p class="muted prior-more">Newest ${esc(HOME_PRIOR_LIMIT)}. Every receipt is kept. <a href="${esc(RECEIPTS_PATH)}">Full receipts chain</a>.</p>
 <ul class="prior">${list}</ul>
+${threadExpandScript()}
 `;
 }
 
@@ -677,6 +741,7 @@ ${steerPanel(s.steer, s)}
 <p class="muted"><a href="${esc(REASON_PATH)}">How it is scored</a> · <a href="/">Ask a question</a>.</p>
 ${receiptsPager({ page, pages, total: total != null ? total : receipts })}
 <ul class="prior">${list}</ul>
+${threadExpandScript()}
 ${ingestTipSection()}
 ${actReceiptsSection(rows)}
 `;

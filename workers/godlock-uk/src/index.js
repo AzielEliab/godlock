@@ -23,6 +23,7 @@ import {
 import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex } from "./ledger.js";
+import { receiptProofForId } from "./receiptProof.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, mcpDiscoveryDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR,
   indexNowKeyBody, INDEXNOW_KEY_PATH, INDEXNOW_WELL_KNOWN_PATH,
@@ -1276,10 +1277,12 @@ export default {
         const entries = await ledgerEntriesForId(env, id);
         const stats = await gatherStats(env, { wrote, ctx });
         if (wantsJson(request, url)) {
+          const proof = await receiptProofForId(env, id);
           return json({
             ok: true,
             receipt: publicPayload(row),
             ledger: entries,
+            proof,
             current_score: stats.current_score,
             residual: stats.residual,
             triad_display: stats.triad_display,

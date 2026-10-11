@@ -92,6 +92,26 @@ describe("receipt proof", () => {
     const { proof } = await receiptLedgerAndProof(env, "aaa");
     assert.equal(proof.status, "unverified"); assert.equal(proof.seal, null);
   });
+  it("row below the checkpoint rewritten with recomputed hash, head and count unchanged: unverified", async () => {
+    _resetProofCache();
+    const rows = chain(payloads()); const env = { DB: fakeDb(rows, []) };
+    const first = await receiptLedgerAndProof(env, "aaa");
+    assert.equal(first.proof.status, "verified");
+    const forged = { sequence: 1, timestamp_utc: rows[0].timestamp_utc, action: "submit", payload: { receipt_id: "aaa", forged: true }, previous_hash: ZERO };
+    rows[0] = { ...forged, payload_json: canonicalJson(forged.payload), entry_hash: hashPayload(forged) };
+    const { proof } = await receiptLedgerAndProof(env, "aaa");
+    assert.equal(proof.status, "unverified"); assert.equal(proof.seal, null);
+  });
+  it("checkpoint stores a verified hash for every seq", () => {
+    const rows = chain(payloads());
+    const r = verifyForward({ seq: 0, hash: ZERO, count: 0, at: null, hashes: [] }, rows, rows[3]);
+    assert.deepEqual(r.checkpoint.hashes, rows.map((x) => x.entry_hash));
+  });
+  it("migration file holds the receipt_id index and wrangler points at it", async () => {
+    const fs = await import("node:fs");
+    assert.match(fs.readFileSync(new URL("./migrations/0001_ledger_receipt_id_index.sql", import.meta.url), "utf8"), /idx_ledger_receipt_id/);
+    assert.match(fs.readFileSync(new URL("./wrangler.toml", import.meta.url), "utf8"), /migrations_dir = "migrations"/);
+  });
   it("ledger read failure is missing", async () => {
     _resetProofCache();
     const { proof } = await receiptLedgerAndProof({ DB: { prepare() { throw new Error("D1 down"); } } }, "aaa");

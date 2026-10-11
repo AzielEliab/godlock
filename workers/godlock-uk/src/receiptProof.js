@@ -6,6 +6,10 @@
  * and in the Cache API (no KV writes). Each request does a one-row head probe
  * (ORDER BY sequence DESC LIMIT 1), verifies only rows after the checkpoint,
  * and reads this receipt's rows by the indexed receipt_id expression.
+ * The checkpoint keeps the verified entry_hash for every seq (~64 B/row,
+ * ~4.5 KB today) so receipt rows are matched against verified hashes, not just
+ * re-hashed in isolation. TODO when the ledger grows large: replace the full
+ * hash list with a Merkle root plus per-row inclusion paths.
  *
  * Fails closed: "verified" only when the chain verifies up to the probed head,
  * the row count read equals head.seq - checkpoint.seq, and every receipt row
@@ -25,7 +29,7 @@ export const HEAD_SQL = "SELECT sequence, entry_hash, timestamp_utc FROM ledger 
 export const TAIL_SQL = "SELECT " + COLS + " FROM ledger WHERE sequence > ? ORDER BY sequence ASC";
 export const BY_RECEIPT_SQL = "SELECT " + COLS + " FROM ledger WHERE " + RECEIPT_ID_EXPR + " = ? ORDER BY sequence ASC";
 
-const GENESIS = { seq: 0, hash: ZERO, count: 0, at: null };
+const GENESIS = { seq: 0, hash: ZERO, count: 0, at: null, hashes: [] };
 let isolateCheckpoint = null;
 let indexEnsured = false;
 
@@ -54,12 +58,14 @@ export function verifyForward(cp, rows, head) {
   let prev = cp.hash;
   let seq = cp.seq;
   let at = cp.at;
+  const hashes = (cp.hashes || []).slice();
   for (const row of list) {
     const s = Number(row.sequence);
     if (s !== seq + 1) errors.push("sequence gap at " + s);
     if (String(row.previous_hash) !== prev) errors.push("previous_hash mismatch at sequence " + s);
     if (!rowHashOk(row)) errors.push("entry_hash mismatch at sequence " + s);
     prev = String(row.entry_hash);
+    hashes.push(prev);
     seq = s;
     at = row.timestamp_utc;
   }
@@ -68,11 +74,13 @@ export function verifyForward(cp, rows, head) {
   if (list.length !== headSeq - cp.seq) errors.push("partial read: got " + list.length + " rows, head expects " + (headSeq - cp.seq));
   if (seq !== headSeq || prev !== headHash) errors.push("chain does not end at probed head");
   if (errors.length) return { ok: false, errors };
-  return { ok: true, errors, checkpoint: { seq: headSeq, hash: headHash, count: headSeq, at } };
+  return { ok: true, errors, checkpoint: { seq: headSeq, hash: headHash, count: headSeq, at, hashes } };
 }
 
 function validCheckpoint(cp) {
-  return cp && Number.isInteger(cp.seq) && cp.seq >= 0 && typeof cp.hash === "string" && cp.hash.length === 64 && cp.count === cp.seq;
+  return !!cp && Number.isInteger(cp.seq) && cp.seq >= 0 && typeof cp.hash === "string" && cp.hash.length === 64
+    && cp.count === cp.seq && Array.isArray(cp.hashes) && cp.hashes.length === cp.seq
+    && (cp.seq === 0 || cp.hashes[cp.seq - 1] === cp.hash);
 }
 
 async function loadCheckpoint() {
@@ -126,6 +134,19 @@ export async function verifiedHead(env) {
   return { ok: true, checkpoint: res.checkpoint, errors: [] };
 }
 
+/**
+ * A receipt row counts only if its entry_hash equals the verified hash saved at
+ * its seq and its previous_hash equals the verified hash at seq-1. This catches
+ * a row below the checkpoint that was rewritten with a recomputed entry_hash.
+ */
+export function matchesCheckpoint(cp, r) {
+  if (!cp || !Array.isArray(cp.hashes)) return false;
+  const seq = Number(r.sequence);
+  if (!Number.isInteger(seq) || seq < 1 || seq > cp.hashes.length) return false;
+  const expectPrev = seq === 1 ? ZERO : cp.hashes[seq - 2];
+  return String(r.entry_hash) === cp.hashes[seq - 1] && String(r.previous_hash) === expectPrev;
+}
+
 /** Pure. Build the proof from the verified head and this receipt's rows. */
 export function buildReceiptProof(headResult, receiptRows) {
   const base = { not_signed: PROOF_NOT_SIGNED, verify_url: VERIFY_PATH };
@@ -139,13 +160,14 @@ export function buildReceiptProof(headResult, receiptRows) {
     previous_hash: String(r.previous_hash),
     hash_ok: rowHashOk(r),
     in_verified_range: !!cp && Number(r.sequence) <= cp.seq,
+    matches_checkpoint: matchesCheckpoint(cp, r),
   }));
   const errors = (headResult && headResult.errors) ? headResult.errors.slice() : [];
   if (!entries.length) {
     return { ...base, entries, status: "missing", receipt_hash: null, prev_hash: null, seal: null, sealed_at: null, errors: errors.concat(["no ledger entry for this receipt"]) };
   }
   const first = entries[0];
-  const ok = !!cp && entries.every((e) => e.hash_ok && e.in_verified_range);
+  const ok = !!cp && entries.every((e) => e.hash_ok && e.in_verified_range && e.matches_checkpoint);
   if (!ok && !errors.length) errors.push("receipt entry not inside verified chain");
   return {
     ...base,
@@ -161,6 +183,7 @@ export function buildReceiptProof(headResult, receiptRows) {
   };
 }
 
+// Fallback only. The real index ships as migrations/0001_ledger_receipt_id_index.sql.
 async function ensureReceiptIndex(env) {
   if (indexEnsured) return;
   await env.DB.prepare(RECEIPT_ID_INDEX_SQL).run();

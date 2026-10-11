@@ -24,6 +24,7 @@ import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex, publicEntry } from "./ledger.js";
 import { receiptLedgerAndProof } from "./receiptProof.js";
+import { factorDetail, storedFactorView } from "./factorDetail.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, mcpDiscoveryDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR,
   indexNowKeyBody, INDEXNOW_KEY_PATH, INDEXNOW_WELL_KNOWN_PATH,
@@ -430,7 +431,7 @@ async function latestRescore(env, receiptId) {
 async function rescoreHistory(env, receiptId) {
   try {
     const res = await env.DB.prepare(
-      "SELECT id, receipt_id, created_utc, reason, previous_display, previous_source, display, combined, changed_note FROM receipt_rescores WHERE receipt_id = ? ORDER BY created_utc ASC /* rescore-history */"
+      "SELECT id, receipt_id, created_utc, reason, previous_display, previous_source, display, combined, changed_note, triad_json FROM receipt_rescores WHERE receipt_id = ? ORDER BY created_utc ASC /* rescore-history */"
     ).bind(receiptId).all();
     return res && res.results ? res.results : [];
   } catch {
@@ -704,7 +705,7 @@ export async function processSubmit(env, text) {
       display: afterSnap.display,
       combined: afterSnap.combined,
       changed_note,
-      triad_json: JSON.stringify(afterSnap),
+      triad_json: JSON.stringify({ ...afterSnap, factor_detail: priorReview ? factorDetail(priorReview) : null }),
     });
   }
   const extra = rescoreNotes.length
@@ -737,7 +738,7 @@ export async function processSubmit(env, text) {
     display: snap.display,
     combined: snap.combined,
     changed_note: initialNote,
-    triad_json: JSON.stringify(snap),
+    triad_json: JSON.stringify({ ...snap, factor_detail: factorDetail(review) }),
   };
   await insertRescore(env, initial);
   for (const pending of pendingRescores) {
@@ -1280,7 +1281,7 @@ export default {
         if (wantsJson(request, url)) {
           return json({
             ok: true,
-            receipt: publicPayload(row),
+            receipt: { ...publicPayload(row), ...storedFactorView(row.rescores) },
             ledger: entries,
             proof,
             current_score: stats.current_score,

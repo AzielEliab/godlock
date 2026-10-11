@@ -102,25 +102,35 @@ export function storedFactorView(rows) {
     ? snapInitial.factor_detail
     : null;
   const changes = [];
-  let prev = snapInitial;
+  const detailOf = (snap) => (snap && snap.factor_detail && snap.factor_detail.schema === FACTOR_DETAIL_SCHEMA ? snap.factor_detail : null);
+  // Values come only from the hashed factor_detail, never the unhashed top-level triad_json.factors.
+  const valueOf = (d, key) => {
+    const f = d && d.factors ? d.factors[key] : null;
+    return f && f.value != null ? Number(f.value) : null;
+  };
+  let prevDetail = detail;
+  let prevRef = { kind: "SUBMIT", id: null };
   for (const r of list) {
     if (!r || r === initial) continue;
-    const snap = parse(r.triad_json);
+    const d = detailOf(parse(r.triad_json));
     const entry = { id: r.id == null ? null : r.id, created_utc: r.created_utc, reason: r.reason, changes: null, note: null, sealed: false };
-    Object.defineProperty(entry, "_detail", { value: snap && snap.factor_detail && snap.factor_detail.schema === FACTOR_DETAIL_SCHEMA ? snap.factor_detail : null, enumerable: false });
-    if (!prev || !prev.factors || !snap || !snap.factors) {
+    Object.defineProperty(entry, "_detail", { value: d, enumerable: false });
+    Object.defineProperty(entry, "_prevDetail", { value: prevDetail, enumerable: false });
+    Object.defineProperty(entry, "_prevRef", { value: prevRef, enumerable: false });
+    if (!prevDetail || !d) {
       entry.note = NOT_STORED;
     } else {
       entry.changes = [];
       for (const key of FACTOR_KEYS) {
-        const a = prev.factors[key] == null ? null : Number(prev.factors[key]);
-        const b = snap.factors[key] == null ? null : Number(snap.factors[key]);
-        if (a === b) continue;
-        entry.changes.push({ factor: key, before: a, after: b, delta: a != null && b != null ? Math.round((b - a) * 10000) / 10000 : null });
+        const x = valueOf(prevDetail, key);
+        const y = valueOf(d, key);
+        if (x === y) continue;
+        entry.changes.push({ factor: key, before: x, after: y, delta: x != null && y != null ? Math.round((y - x) * 10000) / 10000 : null });
       }
     }
     changes.push(entry);
-    if (snap) prev = snap;
+    prevDetail = d;
+    prevRef = { kind: "RESCORE", id: entry.id };
   }
   return { factor_detail: detail, factor_detail_note: detail ? null : NOT_STORED, rescore_factor_changes: changes };
 }
@@ -151,11 +161,19 @@ export function factorDetailSealed(detail, ledgerRows, proof, match) {
   return false;
 }
 
-/** Mark each rescore change line sealed only if its RESCORE entry's factor_detail_sha256 checks out. */
+/**
+ * A rescore line is covered only if its own detail is sealed by its RESCORE
+ * entry AND the previous detail (SUBMIT or prior RESCORE) is sealed too.
+ */
 export function sealRescoreChanges(changes, ledgerRows, proof) {
+  const rescoreMatch = (id) => (row, payload) => String(row.action) === "RESCORE" && payload && payload.rescore_id === id;
   for (const c of Array.isArray(changes) ? changes : []) {
-    c.sealed = !!c.id && factorDetailSealed(c._detail, ledgerRows, proof,
-      (row, payload) => String(row.action) === "RESCORE" && payload && payload.rescore_id === c.id);
+    const own = !!c.id && factorDetailSealed(c._detail, ledgerRows, proof, rescoreMatch(c.id));
+    const ref = c._prevRef || {};
+    const prev = ref.kind === "SUBMIT"
+      ? factorDetailSealed(c._prevDetail, ledgerRows, proof)
+      : (!!ref.id && factorDetailSealed(c._prevDetail, ledgerRows, proof, rescoreMatch(ref.id)));
+    c.sealed = own && prev;
   }
   return changes;
 }

@@ -38,6 +38,12 @@ describe("factor detail at write time", () => {
   it("no triad means no detail", () => assert.equal(factorDetail({}), null));
 });
 
+function mkDetail(vals) {
+  const factors = {};
+  for (const k of Object.keys(vals)) factors[k] = { value: vals[k] };
+  return { schema: "godlock.factor_detail.v1", cycle_factors: Object.keys(vals), factors, pairings: [], omitted: [] };
+}
+
 describe("stored factor view (read time, no recompute)", () => {
   it("old receipt without stored detail says so", () => {
     const v = storedFactorView([{ reason: "initial", triad_json: JSON.stringify({ factors: { spre: 0.1 } }) }]);
@@ -45,8 +51,8 @@ describe("stored factor view (read time, no recompute)", () => {
   });
   it("rescore rows show which factors changed and by how much", () => {
     const v = storedFactorView([
-      { reason: "initial", triad_json: JSON.stringify({ factors: { spre: 0.15, bayesian: 0.5, clce: null } }) },
-      { reason: "supersedes", created_utc: "t2", triad_json: JSON.stringify({ factors: { spre: 0.3, bayesian: 0.5, clce: 0.2 } }) },
+      { reason: "initial", triad_json: JSON.stringify({ factor_detail: mkDetail({ spre: 0.15, bayesian: 0.5 }) }) },
+      { reason: "supersedes", created_utc: "t2", triad_json: JSON.stringify({ factor_detail: mkDetail({ spre: 0.3, bayesian: 0.5, clce: 0.2 }) }) },
     ]);
     assert.deepEqual(v.rescore_factor_changes[0].changes, [
       { factor: "clce", before: null, after: 0.2, delta: null },
@@ -190,6 +196,50 @@ describe("normalized detail and rescore sealing", () => {
     const only = ledgerWith([["SUBMIT", { receipt_id: "r1", factor_detail_sha256: hashPayload(fd2) }]]);
     const { rows: lr, proof } = await receiptLedgerAndProof({ DB: fakeDb(only) }, "r1");
     const fv = storedFactorView(history(fd2));
+    sealRescoreChanges(fv.rescore_factor_changes, lr, proof);
+    assert.equal(fv.rescore_factor_changes[0].sealed, false);
+  });
+});
+
+describe("rescore lines render only hashed detail", () => {
+  const d0 = mkDetail({ spre: 0.15 });
+  const d1 = mkDetail({ spre: 0.3 });
+  const ledger = (submitSha) => ledgerWith([
+    ["SUBMIT", { receipt_id: "r1", factor_detail_sha256: submitSha }],
+    ["RESCORE", { receipt_id: "r1", rescore_id: "rs1", factor_detail_sha256: hashPayload(d1) }],
+  ]);
+  const hist = (extra) => [
+    { id: "i0", reason: "initial", triad_json: JSON.stringify({ factors: { spre: 0.15 }, factor_detail: d0 }) },
+    { id: "rs1", reason: "x", created_utc: "t2", triad_json: JSON.stringify({ factors: { spre: 0.3 }, factor_detail: d1, ...extra }) },
+  ];
+  it("both sealed: covered, values from factor_detail", async () => {
+    _resetProofCache();
+    const { rows: lr, proof } = await receiptLedgerAndProof({ DB: fakeDb(ledger(hashPayload(d0))) }, "r1");
+    const fv = storedFactorView(hist({}));
+    sealRescoreChanges(fv.rescore_factor_changes, lr, proof);
+    assert.equal(fv.rescore_factor_changes[0].sealed, true);
+    assert.deepEqual(fv.rescore_factor_changes[0].changes, [{ factor: "spre", before: 0.15, after: 0.3, delta: 0.15 }]);
+  });
+  it("editing triad_json.factors (not factor_detail) changes nothing shown and cannot fake numbers", async () => {
+    _resetProofCache();
+    const { rows: lr, proof } = await receiptLedgerAndProof({ DB: fakeDb(ledger(hashPayload(d0))) }, "r1");
+    const fv = storedFactorView(hist({ factors: { spre: 0.99 } }));
+    sealRescoreChanges(fv.rescore_factor_changes, lr, proof);
+    assert.equal(fv.rescore_factor_changes[0].changes[0].after, 0.3, "unhashed top-level copy is ignored");
+  });
+  it("edited factor_detail values: not covered", async () => {
+    _resetProofCache();
+    const { rows: lr, proof } = await receiptLedgerAndProof({ DB: fakeDb(ledger(hashPayload(d0))) }, "r1");
+    const fv = storedFactorView(hist({ factor_detail: mkDetail({ spre: 0.99 }) }));
+    sealRescoreChanges(fv.rescore_factor_changes, lr, proof);
+    assert.equal(fv.rescore_factor_changes[0].sealed, false);
+    const v = threadView({ ok: true, proof, receipt: fv });
+    assert.match(v.factors.find((x) => x[0] === "Rescore t2")[1], /\(stored data, not covered\)$/);
+  });
+  it("previous snapshot unsealed: not covered even if own detail is sealed", async () => {
+    _resetProofCache();
+    const { rows: lr, proof } = await receiptLedgerAndProof({ DB: fakeDb(ledger("0".repeat(64))) }, "r1");
+    const fv = storedFactorView(hist({}));
     sealRescoreChanges(fv.rescore_factor_changes, lr, proof);
     assert.equal(fv.rescore_factor_changes[0].sealed, false);
   });

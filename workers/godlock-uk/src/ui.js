@@ -533,6 +533,9 @@ export function threadView(j) {
   if (typeof r.summary === "string" && r.summary) out.reasoning.push(["Summary", r.summary]);
   if (typeof r.explanation === "string" && r.explanation) out.reasoning.push(["Reasoning", r.explanation]);
   if (!out.reasoning.length) out.reasoning.push(["Reasoning", "No reasoning was recorded for this receipt."]);
+  out.reasoning.push(["Reasoning seal", r.reasoning_sealed === true
+    ? "Summary and reasoning are covered by the seal: the receipt row hashes to content_sha256 in the sealed SUBMIT entry."
+    : "Summary and reasoning are stored data. They are not covered by the seal."]);
   var fmt = function (v) { return v === null || v === undefined ? "none" : (typeof v === "object" ? JSON.stringify(v) : String(v)); };
   var fd = r.factor_detail;
   out.factors.push(["Seal coverage", r.factor_detail_sealed === true
@@ -558,7 +561,8 @@ export function threadView(j) {
   var rc = Array.isArray(r.rescore_factor_changes) ? r.rescore_factor_changes : [];
   for (var c = 0; c < rc.length; c++) {
     var e = rc[c] || {};
-    var label = "Rescore " + fmt(e.created_utc);
+    var label = e.ledger_timestamp_utc ? "Rescore " + e.ledger_timestamp_utc + " (ledger #" + e.ledger_seq + ")" : "Rescore (no ledger entry)";
+    if (e.note && e.note !== "per-factor detail not stored for this receipt" && !Array.isArray(e.changes)) { out.factors.push([label, e.note + " (stored data, not covered)"]); continue; }
     var sfx = e.sealed === true ? " (covered by seal)" : " (stored data, not covered)";
     if (!Array.isArray(e.changes)) { out.factors.push([label, "per-factor detail not stored for this receipt" + sfx]); continue; }
     if (!e.changes.length) { out.factors.push([label, "no factor value changed" + sfx]); continue; }

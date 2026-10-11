@@ -24,7 +24,7 @@ import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex, publicEntry, hashPayload } from "./ledger.js";
 import { receiptLedgerAndProof } from "./receiptProof.js";
-import { factorDetail, storedFactorView, factorDetailSealed, sealRescoreChanges } from "./factorDetail.js";
+import { factorDetail, storedFactorView, factorDetailSealed, ledgerRescoreLines, reasoningSealed } from "./factorDetail.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, mcpDiscoveryDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR,
   indexNowKeyBody, INDEXNOW_KEY_PATH, INDEXNOW_WELL_KNOWN_PATH,
@@ -1288,8 +1288,8 @@ export default {
             ok: true,
             receipt: (() => {
               const fv = storedFactorView(row.rescores);
-              sealRescoreChanges(fv.rescore_factor_changes, ledgerRows, proof);
-              return { ...publicPayload(row), ...fv, factor_detail_sealed: factorDetailSealed(fv.factor_detail, ledgerRows, proof) };
+              fv.rescore_factor_changes = ledgerRescoreLines(row.rescores, ledgerRows, proof, id);
+              return { ...publicPayload(row), ...fv, factor_detail_sealed: factorDetailSealed(fv.factor_detail, ledgerRows, proof), reasoning_sealed: reasoningSealed(row, ledgerRows, proof, hashReceipt) };
             })(),
             ledger: entries,
             proof,

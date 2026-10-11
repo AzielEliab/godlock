@@ -127,7 +127,8 @@ describe("thread expand view", () => {
   it("verified proof renders hashes, seal and verify link", () => {
     const v = threadView({ ok: true, receipt: { summary: "S", explanation: "E" }, proof: { status: "verified", receipt_hash: "h1", prev_hash: "h0", seal: "h9", timestamp_utc: "t", verify_url: "/verify" } });
     assert.equal(v.status, "verified");
-    assert.deepEqual(v.reasoning, [["Summary", "S"], ["Reasoning", "E"]]);
+    assert.deepEqual(v.reasoning.slice(0, 2), [["Summary", "S"], ["Reasoning", "E"]]);
+    assert.deepEqual(v.reasoning[2], ["Reasoning seal", "Summary and reasoning are stored data. They are not covered by the seal."]);
     const m = Object.fromEntries(v.receipt);
     assert.equal(m["Seal (verified ledger head)"], "h9"); assert.equal(m.Verify, "/verify");
   });

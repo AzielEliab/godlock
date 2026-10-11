@@ -101,38 +101,7 @@ export function storedFactorView(rows) {
   const detail = snapInitial && snapInitial.factor_detail && snapInitial.factor_detail.schema === FACTOR_DETAIL_SCHEMA
     ? snapInitial.factor_detail
     : null;
-  const changes = [];
-  const detailOf = (snap) => (snap && snap.factor_detail && snap.factor_detail.schema === FACTOR_DETAIL_SCHEMA ? snap.factor_detail : null);
-  // Values come only from the hashed factor_detail, never the unhashed top-level triad_json.factors.
-  const valueOf = (d, key) => {
-    const f = d && d.factors ? d.factors[key] : null;
-    return f && f.value != null ? Number(f.value) : null;
-  };
-  let prevDetail = detail;
-  let prevRef = { kind: "SUBMIT", id: null };
-  for (const r of list) {
-    if (!r || r === initial) continue;
-    const d = detailOf(parse(r.triad_json));
-    const entry = { id: r.id == null ? null : r.id, created_utc: r.created_utc, reason: r.reason, changes: null, note: null, sealed: false };
-    Object.defineProperty(entry, "_detail", { value: d, enumerable: false });
-    Object.defineProperty(entry, "_prevDetail", { value: prevDetail, enumerable: false });
-    Object.defineProperty(entry, "_prevRef", { value: prevRef, enumerable: false });
-    if (!prevDetail || !d) {
-      entry.note = NOT_STORED;
-    } else {
-      entry.changes = [];
-      for (const key of FACTOR_KEYS) {
-        const x = valueOf(prevDetail, key);
-        const y = valueOf(d, key);
-        if (x === y) continue;
-        entry.changes.push({ factor: key, before: x, after: y, delta: x != null && y != null ? Math.round((y - x) * 10000) / 10000 : null });
-      }
-    }
-    changes.push(entry);
-    prevDetail = d;
-    prevRef = { kind: "RESCORE", id: entry.id };
-  }
-  return { factor_detail: detail, factor_detail_note: detail ? null : NOT_STORED, rescore_factor_changes: changes };
+  return { factor_detail: detail, factor_detail_note: detail ? null : NOT_STORED };
 }
 
 export const NOT_SEALED_LABEL = "Per-factor detail is stored data. It is not covered by the seal.";
@@ -161,19 +130,111 @@ export function factorDetailSealed(detail, ledgerRows, proof, match) {
   return false;
 }
 
+function detailOf(json) {
+  const snap = parse(json);
+  return snap && snap.factor_detail && snap.factor_detail.schema === FACTOR_DETAIL_SCHEMA ? snap.factor_detail : null;
+}
+
+function valueOf(d, key) {
+  const f = d && d.factors ? d.factors[key] : null;
+  return f && f.value != null ? Number(f.value) : null;
+}
+
+function payloadOf(row) {
+  try { return JSON.parse(row.payload_json || "{}"); } catch { return null; }
+}
+
+/** One ledger row is sealed for this detail: in the verified chain and its factor_detail_sha256 matches. */
+function rowSealed(row, detail, proof) {
+  if (!row || !detail || !proof || proof.status !== "verified") return false;
+  const p = payloadOf(row);
+  const want = p && p.factor_detail_sha256;
+  if (typeof want !== "string" || want.length !== 64) return false;
+  const e = (Array.isArray(proof.entries) ? proof.entries : [])
+    .find((x) => Number(x.sequence) === Number(row.sequence) && x.entry_hash === row.entry_hash);
+  if (!e || !e.hash_ok || !e.in_verified_range || !e.matches_checkpoint) return false;
+  return hashPayload(detail) === want;
+}
+
 /**
- * A rescore line is covered only if its own detail is sealed by its RESCORE
- * entry AND the previous detail (SUBMIT or prior RESCORE) is sealed too.
+ * Rescore lines ordered and paired by the hashed ledger, never by unhashed
+ * receipt_rescores fields. history = receipt_rescores rows (any order; used
+ * only to look up stored detail by id). ledgerRows = this receipt's ledger rows.
+ * Line i compares the detail sealed by RESCORE row i with the detail sealed by
+ * the immediately preceding SUBMIT/RESCORE row for this receipt_id (adjacent in
+ * the filtered seq order, so nothing can sit between them). Labels and reason
+ * come from the hashed ledger row. Rescores with no ledger row are listed last
+ * as not covered.
  */
-export function sealRescoreChanges(changes, ledgerRows, proof) {
-  const rescoreMatch = (id) => (row, payload) => String(row.action) === "RESCORE" && payload && payload.rescore_id === id;
-  for (const c of Array.isArray(changes) ? changes : []) {
-    const own = !!c.id && factorDetailSealed(c._detail, ledgerRows, proof, rescoreMatch(c.id));
-    const ref = c._prevRef || {};
-    const prev = ref.kind === "SUBMIT"
-      ? factorDetailSealed(c._prevDetail, ledgerRows, proof)
-      : (!!ref.id && factorDetailSealed(c._prevDetail, ledgerRows, proof, rescoreMatch(ref.id)));
-    c.sealed = own && prev;
+export function ledgerRescoreLines(history, ledgerRows, proof, receiptId) {
+  const hist = Array.isArray(history) ? history : [];
+  const byId = new Map();
+  let initialDetail = null;
+  for (const h of hist) {
+    if (!h) continue;
+    if (h.reason === "initial") initialDetail = detailOf(h.triad_json);
+    else if (h.id != null) byId.set(String(h.id), h);
   }
-  return changes;
+  const rid = String(receiptId || "");
+  const chain = (Array.isArray(ledgerRows) ? ledgerRows : [])
+    .map((row) => ({ row, p: payloadOf(row) }))
+    .filter(({ row, p }) => p && (!rid || p.receipt_id === rid) && (row.action === "SUBMIT" || row.action === "RESCORE"))
+    .sort((x, y) => Number(x.row.sequence) - Number(y.row.sequence));
+  const lines = [];
+  const seen = new Set();
+  let prev = null; // { row, detail }
+  for (const { row, p } of chain) {
+    if (row.action === "SUBMIT") { prev = { row, detail: initialDetail }; continue; }
+    const id = p.rescore_id == null ? null : String(p.rescore_id);
+    const h = id ? byId.get(id) : null;
+    if (id) seen.add(id);
+    const detail = h ? detailOf(h.triad_json) : null;
+    const line = {
+      id,
+      ledger_seq: Number(row.sequence),
+      ledger_timestamp_utc: row.timestamp_utc,
+      reason: typeof p.reason === "string" ? p.reason : null,
+      changes: null,
+      note: null,
+      sealed: false,
+    };
+    if (!prev || !prev.detail || !detail) {
+      line.note = NOT_STORED;
+    } else {
+      line.changes = [];
+      for (const key of FACTOR_KEYS) {
+        const x = valueOf(prev.detail, key);
+        const y = valueOf(detail, key);
+        if (x === y) continue;
+        line.changes.push({ factor: key, before: x, after: y, delta: x != null && y != null ? Math.round((y - x) * 10000) / 10000 : null });
+      }
+    }
+    line.sealed = !!prev && rowSealed(row, detail, proof) && rowSealed(prev.row, prev.detail, proof);
+    lines.push(line);
+    prev = { row, detail };
+  }
+  for (const [id] of byId) {
+    if (seen.has(id)) continue;
+    lines.push({ id, ledger_seq: null, ledger_timestamp_utc: null, reason: null, changes: null, note: "no ledger entry for this rescore", sealed: false });
+  }
+  return lines;
+}
+
+/**
+ * Summary/explanation are covered only when the SUBMIT row is in the verified
+ * chain and its content_sha256 equals the hash recomputed from the stored
+ * receipt row (hashFn = engine.hashReceipt). Else false.
+ */
+export function reasoningSealed(receiptRow, ledgerRows, proof, hashFn) {
+  if (!receiptRow || !proof || proof.status !== "verified" || typeof hashFn !== "function") return false;
+  const sub = (Array.isArray(ledgerRows) ? ledgerRows : []).find((r) => String(r.action) === "SUBMIT");
+  if (!sub) return false;
+  const p = payloadOf(sub);
+  if (!p || typeof p.content_sha256 !== "string") return false;
+  const e = (Array.isArray(proof.entries) ? proof.entries : [])
+    .find((x) => Number(x.sequence) === Number(sub.sequence) && x.entry_hash === sub.entry_hash);
+  if (!e || !e.hash_ok || !e.in_verified_range || !e.matches_checkpoint) return false;
+  let h;
+  try { h = hashFn(receiptRow); } catch { return false; }
+  return h === p.content_sha256;
 }

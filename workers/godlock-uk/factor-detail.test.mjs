@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { scoreDebateText } from "./src/debateScore.js";
-import { factorDetail, storedFactorView, factorDetailSealed, NOT_STORED, NOT_SEALED_LABEL, FACTOR_KEYS } from "./src/factorDetail.js";
+import { factorDetail, storedFactorView, factorDetailSealed, sealRescoreChanges, NOT_STORED, NOT_SEALED_LABEL, FACTOR_KEYS } from "./src/factorDetail.js";
 import { hashPayload, canonicalJson, ZERO } from "./src/ledger.js";
 import { receiptLedgerAndProof, _resetProofCache, HEAD_SQL, TAIL_SQL, BY_RECEIPT_SQL } from "./src/receiptProof.js";
 import { threadView, threadExpandScript } from "./src/ui.js";
@@ -77,7 +77,7 @@ describe("drop-down view", () => {
   });
   it("rescore changes render with signed deltas", () => {
     const v = threadView({ ...base, receipt: { factor_detail: null, rescore_factor_changes: [{ created_utc: "t2", changes: [{ factor: "spre", before: 0.15, after: 0.3, delta: 0.15 }] }] } });
-    assert.deepEqual(v.factors[2], ["Rescore t2", "spre 0.15 → 0.3 (+0.15)"]);
+    assert.deepEqual(v.factors[2], ["Rescore t2", "spre 0.15 → 0.3 (+0.15) (stored data, not covered)"]);
   });
   it("script uses textContent only and still parses", () => {
     const js = threadExpandScript();
@@ -143,5 +143,54 @@ describe("factor detail seal coverage", () => {
   it("pairing products display rounded to 4 places", () => {
     const v = threadView({ ok: true, proof: {}, receipt: { factor_detail: { cycle_factors: [], factors: {}, pairings: [{ i: "a", j: "b", product: 0.123456789 }], omitted: [] } } });
     assert.deepEqual(v.factors.find((x) => x[0] === "Pairing a × b"), ["Pairing a × b", "0.1235"]);
+  });
+});
+
+describe("normalized detail and rescore sealing", () => {
+  it("factorDetail is JSON-normalized: no undefined fields, hash survives a store round trip", () => {
+    const review = scoreDebateText(TEXT, "");
+    review.spre.band = undefined; // checker leaves a nested field undefined
+    const fd = factorDetail(review);
+    const roundTrip = JSON.parse(JSON.stringify({ factor_detail: fd })).factor_detail;
+    assert.deepEqual(roundTrip, fd);
+    assert.equal(hashPayload(roundTrip), hashPayload(fd));
+    assert.ok(!("band" in fd.factors.spre.checker));
+  });
+  const fd1 = factorDetail(scoreDebateText(TEXT, ""));
+  const fd2 = factorDetail(scoreDebateText(TEXT + " Measured evidence from an archive.", ""));
+  const history = (d2) => [
+    { id: "i0", reason: "initial", triad_json: JSON.stringify({ factors: fd1.factors && { spre: 0.15 }, factor_detail: fd1 }) },
+    { id: "rs1", reason: "supersedes", created_utc: "t2", triad_json: JSON.stringify({ factors: { spre: 0.3 }, factor_detail: d2 }) },
+  ];
+  const ledger = () => ledgerWith([
+    ["SUBMIT", { receipt_id: "r1", factor_detail_sha256: hashPayload(fd1) }],
+    ["RESCORE", { receipt_id: "r1", rescore_id: "rs1", factor_detail_sha256: hashPayload(fd2) }],
+  ]);
+  it("rescore line covered when its RESCORE entry sha matches", async () => {
+    _resetProofCache();
+    const { rows: lr, proof } = await receiptLedgerAndProof({ DB: fakeDb(ledger()) }, "r1");
+    const fv = storedFactorView(history(fd2));
+    sealRescoreChanges(fv.rescore_factor_changes, lr, proof);
+    assert.equal(fv.rescore_factor_changes[0].sealed, true);
+    const v = threadView({ ok: true, proof, receipt: { ...fv, factor_detail_sealed: true } });
+    assert.match(v.factors.find((x) => x[0] === "Rescore t2")[1], /\(covered by seal\)$/);
+  });
+  it("rescore detail edited after write: stored data, not covered", async () => {
+    _resetProofCache();
+    const { rows: lr, proof } = await receiptLedgerAndProof({ DB: fakeDb(ledger()) }, "r1");
+    const bad = JSON.parse(JSON.stringify(fd2)); bad.combined = 0.99;
+    const fv = storedFactorView(history(bad));
+    sealRescoreChanges(fv.rescore_factor_changes, lr, proof);
+    assert.equal(fv.rescore_factor_changes[0].sealed, false);
+    const v = threadView({ ok: true, proof, receipt: fv });
+    assert.match(v.factors.find((x) => x[0] === "Rescore t2")[1], /\(stored data, not covered\)$/);
+  });
+  it("SUBMIT sha never seals a rescore line", async () => {
+    _resetProofCache();
+    const only = ledgerWith([["SUBMIT", { receipt_id: "r1", factor_detail_sha256: hashPayload(fd2) }]]);
+    const { rows: lr, proof } = await receiptLedgerAndProof({ DB: fakeDb(only) }, "r1");
+    const fv = storedFactorView(history(fd2));
+    sealRescoreChanges(fv.rescore_factor_changes, lr, proof);
+    assert.equal(fv.rescore_factor_changes[0].sealed, false);
   });
 });

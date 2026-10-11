@@ -559,14 +559,15 @@ export function threadView(j) {
   for (var c = 0; c < rc.length; c++) {
     var e = rc[c] || {};
     var label = "Rescore " + fmt(e.created_utc);
-    if (!Array.isArray(e.changes)) { out.factors.push([label, "per-factor detail not stored for this receipt"]); continue; }
-    if (!e.changes.length) { out.factors.push([label, "no factor value changed"]); continue; }
+    var sfx = e.sealed === true ? " (covered by seal)" : " (stored data, not covered)";
+    if (!Array.isArray(e.changes)) { out.factors.push([label, "per-factor detail not stored for this receipt" + sfx]); continue; }
+    if (!e.changes.length) { out.factors.push([label, "no factor value changed" + sfx]); continue; }
     var bits = [];
     for (var d = 0; d < e.changes.length; d++) {
       var ch = e.changes[d];
       bits.push(ch.factor + " " + (ch.before == null ? "omitted" : ch.before) + " → " + (ch.after == null ? "omitted" : ch.after) + (ch.delta == null ? "" : " (" + (ch.delta > 0 ? "+" : "") + ch.delta + ")"));
     }
-    out.factors.push([label, bits.join("; ")]);
+    out.factors.push([label, bits.join("; ") + sfx]);
   }
   var p = j.proof;
   if (!p || typeof p !== "object") {

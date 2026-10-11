@@ -44,8 +44,13 @@ function applicabilityReason(review, key) {
   return src && typeof src.reason === "string" && src.reason ? src.reason : NO_REASON;
 }
 
-/** Build at write time. Returns null when the checker produced no triad. */
+/** Build at write time, normalized through JSON so the stored bytes and the hashed value agree. */
 export function factorDetail(review) {
+  const raw = rawFactorDetail(review);
+  return raw == null ? null : JSON.parse(JSON.stringify(raw));
+}
+
+function rawFactorDetail(review) {
   const triad = review && review.triad;
   if (!triad || !triad.factors) return null;
   const flags = (review.applicability && review.applicability.flags) || {};
@@ -101,7 +106,8 @@ export function storedFactorView(rows) {
   for (const r of list) {
     if (!r || r === initial) continue;
     const snap = parse(r.triad_json);
-    const entry = { created_utc: r.created_utc, reason: r.reason, changes: null, note: null };
+    const entry = { id: r.id == null ? null : r.id, created_utc: r.created_utc, reason: r.reason, changes: null, note: null, sealed: false };
+    Object.defineProperty(entry, "_detail", { value: snap && snap.factor_detail && snap.factor_detail.schema === FACTOR_DETAIL_SCHEMA ? snap.factor_detail : null, enumerable: false });
     if (!prev || !prev.factors || !snap || !snap.factors) {
       entry.note = NOT_STORED;
     } else {
@@ -127,14 +133,15 @@ export const SEALED_LABEL = "Per-factor detail is covered by the seal: its sha25
  * matches the verified checkpoint, it carries factor_detail_sha256, and the
  * sha256 of the stored factor_detail (canonical JSON) equals it. Else false.
  */
-export function factorDetailSealed(detail, ledgerRows, proof) {
+export function factorDetailSealed(detail, ledgerRows, proof, match) {
   if (!detail || !proof || proof.status !== "verified") return false;
+  const isMine = typeof match === "function" ? match : (row) => String(row.action) === "SUBMIT";
   const entries = Array.isArray(proof.entries) ? proof.entries : [];
   const rows = Array.isArray(ledgerRows) ? ledgerRows : [];
   for (const row of rows) {
-    if (String(row.action) !== "SUBMIT") continue;
     let payload;
     try { payload = JSON.parse(row.payload_json || "{}"); } catch { continue; }
+    if (!isMine(row, payload)) continue;
     const want = payload && payload.factor_detail_sha256;
     if (typeof want !== "string" || want.length !== 64) continue;
     const e = entries.find((x) => Number(x.sequence) === Number(row.sequence) && x.entry_hash === row.entry_hash);
@@ -142,4 +149,13 @@ export function factorDetailSealed(detail, ledgerRows, proof) {
     return hashPayload(detail) === want;
   }
   return false;
+}
+
+/** Mark each rescore change line sealed only if its RESCORE entry's factor_detail_sha256 checks out. */
+export function sealRescoreChanges(changes, ledgerRows, proof) {
+  for (const c of Array.isArray(changes) ? changes : []) {
+    c.sealed = !!c.id && factorDetailSealed(c._detail, ledgerRows, proof,
+      (row, payload) => String(row.action) === "RESCORE" && payload && payload.rescore_id === c.id);
+  }
+  return changes;
 }

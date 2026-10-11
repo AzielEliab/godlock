@@ -22,8 +22,9 @@ import {
 } from "./ui.js";
 import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
-import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex, publicEntry } from "./ledger.js";
+import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex, publicEntry, hashPayload } from "./ledger.js";
 import { receiptLedgerAndProof } from "./receiptProof.js";
+import { factorDetail, storedFactorView, factorDetailSealed } from "./factorDetail.js";
 import {
   robotsTxt, sitemapXml, citeDoc, llmsDoc, aiDoc, siteOpenApi, mcpDiscoveryDoc, BANNER, DOWNLOAD, DOWNLOAD_STATS, DOWNLOAD_COUNT, GITHUB, AUTHOR,
   indexNowKeyBody, INDEXNOW_KEY_PATH, INDEXNOW_WELL_KNOWN_PATH,
@@ -430,7 +431,7 @@ async function latestRescore(env, receiptId) {
 async function rescoreHistory(env, receiptId) {
   try {
     const res = await env.DB.prepare(
-      "SELECT id, receipt_id, created_utc, reason, previous_display, previous_source, display, combined, changed_note FROM receipt_rescores WHERE receipt_id = ? ORDER BY created_utc ASC /* rescore-history */"
+      "SELECT id, receipt_id, created_utc, reason, previous_display, previous_source, display, combined, changed_note, triad_json FROM receipt_rescores WHERE receipt_id = ? ORDER BY created_utc ASC /* rescore-history */"
     ).bind(receiptId).all();
     return res && res.results ? res.results : [];
   } catch {
@@ -677,6 +678,7 @@ export async function processSubmit(env, text) {
     const priorSha = hit.prior.text_sha256 || sha256hex(priorText);
     const priorReview = priorText ? scoreDebateText(priorText, priorSha) : null;
     const afterSnap = priorReview ? triadSnapshot(priorReview) : triadSnapshot(null);
+    const fdPrior = priorReview ? factorDetail(priorReview) : null;
     const previous = await latestRescore(env, hit.prior.id);
     const previousSource = previous && previous.display != null ? "triad_display" : "stored_score_after";
     const previousDisplay = previous && previous.display != null
@@ -704,7 +706,8 @@ export async function processSubmit(env, text) {
       display: afterSnap.display,
       combined: afterSnap.combined,
       changed_note,
-      triad_json: JSON.stringify(afterSnap),
+      factor_detail: fdPrior,
+      triad_json: JSON.stringify({ ...afterSnap, factor_detail: fdPrior }),
     });
   }
   const extra = rescoreNotes.length
@@ -726,6 +729,7 @@ export async function processSubmit(env, text) {
   row.content_sha256 = hashReceipt(row);
   await env.DB.prepare(RECEIPT_INSERT)
     .bind(id, created_utc, text_sha256, challenge_text, row.label, row.summary, row.explanation, row.score_before, row.score_after, row.residual, 0, row.content_sha256).run();
+  const submitDetail = factorDetail(review);
   const initialNote = "Initial TRIAD_V3 reading of this question. Combined " + (snap.combined == null ? "none" : snap.combined) + ". Display " + (snap.display == null ? "none" : snap.display) + ".";
   const initial = {
     id: newId(),
@@ -737,7 +741,7 @@ export async function processSubmit(env, text) {
     display: snap.display,
     combined: snap.combined,
     changed_note: initialNote,
-    triad_json: JSON.stringify(snap),
+    triad_json: JSON.stringify({ ...snap, factor_detail: submitDetail }),
   };
   await insertRescore(env, initial);
   for (const pending of pendingRescores) {
@@ -752,6 +756,7 @@ export async function processSubmit(env, text) {
       display: pending.display,
       combined: pending.combined,
       changed_note: pending.changed_note,
+      factor_detail_sha256: pending.factor_detail ? hashPayload(pending.factor_detail) : null,
     });
   }
   row.rescores = [initial];
@@ -767,6 +772,7 @@ export async function processSubmit(env, text) {
     residual,
     triad_display: snap.display,
     triad_combined: snap.combined,
+    factor_detail_sha256: submitDetail ? hashPayload(submitDetail) : null,
   });
   const delta = receiptScoreDelta(row.score_before, score_after);
   await appendLedger(env, "SCORE", {
@@ -1280,7 +1286,10 @@ export default {
         if (wantsJson(request, url)) {
           return json({
             ok: true,
-            receipt: publicPayload(row),
+            receipt: (() => {
+              const fv = storedFactorView(row.rescores);
+              return { ...publicPayload(row), ...fv, factor_detail_sealed: factorDetailSealed(fv.factor_detail, ledgerRows, proof) };
+            })(),
             ledger: entries,
             proof,
             current_score: stats.current_score,

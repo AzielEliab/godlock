@@ -524,7 +524,7 @@ export function priorReceiptItems(rows, { fullChallenge = false } = {}) {
  * Kept free of outer references so it can be inlined via toString().
  */
 export function threadView(j) {
-  var out = { reasoning: [], receipt: [], status: "missing", note: "Hash-linked and sealed. Not signed." };
+  var out = { reasoning: [], factors: [], receipt: [], status: "missing", note: "Hash-linked and sealed. Not signed." };
   if (!j || j.ok !== true || !j.receipt) {
     out.receipt.push(["Receipt", "missing (could not be fetched)"]);
     return out;
@@ -533,6 +533,41 @@ export function threadView(j) {
   if (typeof r.summary === "string" && r.summary) out.reasoning.push(["Summary", r.summary]);
   if (typeof r.explanation === "string" && r.explanation) out.reasoning.push(["Reasoning", r.explanation]);
   if (!out.reasoning.length) out.reasoning.push(["Reasoning", "No reasoning was recorded for this receipt."]);
+  var fmt = function (v) { return v === null || v === undefined ? "none" : (typeof v === "object" ? JSON.stringify(v) : String(v)); };
+  var fd = r.factor_detail;
+  out.factors.push(["Seal coverage", r.factor_detail_sealed === true
+    ? "Per-factor detail is covered by the seal: its sha256 matches factor_detail_sha256 in the sealed SUBMIT entry."
+    : "Per-factor detail is stored data. It is not covered by the seal."]);
+  if (fd && typeof fd === "object" && fd.factors) {
+    var cyc = Array.isArray(fd.cycle_factors) ? fd.cycle_factors : [];
+    for (var i = 0; i < cyc.length; i++) {
+      var f = fd.factors[cyc[i]] || {};
+      out.factors.push(["Factor " + cyc[i], fmt(f.value)]);
+      out.factors.push(["  Why it applied", fmt(f.applicability_reason)]);
+      var ck = f.checker || {};
+      for (var key in ck) { if (Object.prototype.hasOwnProperty.call(ck, key)) out.factors.push(["  Checker " + key, fmt(ck[key])]); }
+    }
+    var pr = Array.isArray(fd.pairings) ? fd.pairings : [];
+    for (var q = 0; q < pr.length; q++) out.factors.push(["Pairing " + pr[q].i + " × " + pr[q].j, typeof pr[q].product === "number" ? String(Math.round(pr[q].product * 10000) / 10000) : fmt(pr[q].product)]);
+    if (pr.length) out.factors.push(["Combined (mean of " + pr.length + " pairings)", fmt(fd.combined)]);
+    var om = Array.isArray(fd.omitted) ? fd.omitted : [];
+    for (var o = 0; o < om.length; o++) out.factors.push(["Omitted " + om[o].factor, fmt(om[o].reason) + ". Not scored as 0."]);
+  } else {
+    out.factors.push(["Per-factor", "per-factor detail not stored for this receipt"]);
+  }
+  var rc = Array.isArray(r.rescore_factor_changes) ? r.rescore_factor_changes : [];
+  for (var c = 0; c < rc.length; c++) {
+    var e = rc[c] || {};
+    var label = "Rescore " + fmt(e.created_utc);
+    if (!Array.isArray(e.changes)) { out.factors.push([label, "per-factor detail not stored for this receipt"]); continue; }
+    if (!e.changes.length) { out.factors.push([label, "no factor value changed"]); continue; }
+    var bits = [];
+    for (var d = 0; d < e.changes.length; d++) {
+      var ch = e.changes[d];
+      bits.push(ch.factor + " " + (ch.before == null ? "omitted" : ch.before) + " → " + (ch.after == null ? "omitted" : ch.after) + (ch.delta == null ? "" : " (" + (ch.delta > 0 ? "+" : "") + ch.delta + ")"));
+    }
+    out.factors.push([label, bits.join("; ")]);
+  }
   var p = j.proof;
   if (!p || typeof p !== "object") {
     out.receipt.push(["Receipt", "missing (no proof returned)"]);
@@ -559,6 +594,8 @@ export function threadExpandScript() {
     else{var s=document.createElement("span");s.textContent=String(v);if(mono)s.className="hash";p.appendChild(s);}box.appendChild(p);}
   function render(body,j){var m=threadView(j);body.textContent="";
     m.reasoning.forEach(function(x){row(body,x[0],x[1],false);});
+    if(m.factors.length){var fh=document.createElement("div");fh.className="k";fh.textContent="Per-factor scores";body.appendChild(fh);
+      m.factors.forEach(function(x){row(body,x[0],x[1],false);});}
     var h=document.createElement("div");h.className="k";h.textContent="Receipt ("+m.status+")";body.appendChild(h);
     m.receipt.forEach(function(x){row(body,x[0],x[1],/hash|Seal/.test(x[0]));});
     var n=document.createElement("p");n.className="muted";n.textContent=m.note;body.appendChild(n);}

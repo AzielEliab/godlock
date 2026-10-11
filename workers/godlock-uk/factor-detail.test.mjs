@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { scoreDebateText } from "./src/debateScore.js";
-import { factorDetail, storedFactorView, factorDetailSealed, ledgerRescoreLines, reasoningSealed, NOT_STORED, NOT_SEALED_LABEL, FACTOR_KEYS } from "./src/factorDetail.js";
+import { factorDetail, storedFactorView, factorDetailSealed, ledgerRescoreLines, reasoningSealed, challengeSealed, NOT_STORED, NOT_SEALED_LABEL, FACTOR_KEYS } from "./src/factorDetail.js";
 import { hashPayload, canonicalJson, ZERO } from "./src/ledger.js";
 import { receiptLedgerAndProof, _resetProofCache, HEAD_SQL, TAIL_SQL, BY_RECEIPT_SQL } from "./src/receiptProof.js";
 import { threadView, threadExpandScript } from "./src/ui.js";
@@ -225,5 +225,64 @@ describe("reasoning seal", () => {
     assert.equal(reasoningSealed({ ...row, explanation: "edited" }, rows, proof, hash), false);
     const v = threadView({ ok: true, proof, receipt: { summary: "S", reasoning_sealed: false } });
     assert.match(v.reasoning.find((x) => x[0] === "Reasoning seal")[1], /not covered/);
+  });
+});
+
+describe("ledger-form tamper tests", () => {
+  const d0 = mkDetail({ spre: 0.1 });
+  const d1 = mkDetail({ spre: 0.2 });
+  const H = (d1stored) => [
+    { id: "i", reason: "initial", triad_json: JSON.stringify({ factor_detail: d0 }) },
+    { id: "a", reason: "x", triad_json: JSON.stringify({ factor_detail: d1stored }) },
+  ];
+  async function run(submitSha, hist) {
+    _resetProofCache();
+    const ledger = ledgerWith([
+      ["SUBMIT", { receipt_id: "r1", factor_detail_sha256: submitSha }],
+      ["RESCORE", { receipt_id: "r1", rescore_id: "a", factor_detail_sha256: hashPayload(d1) }],
+    ]);
+    const { rows, proof } = await receiptLedgerAndProof({ DB: fakeDb(ledger) }, "r1");
+    assert.equal(proof.status, "verified");
+    return { lines: ledgerRescoreLines(hist, rows, proof, "r1"), proof };
+  }
+  it("edited rescore factor_detail, ledger row kept: not covered", async () => {
+    const { lines, proof } = await run(hashPayload(d0), H(mkDetail({ spre: 0.99 })));
+    assert.equal(lines[0].sealed, false);
+    const v = threadView({ ok: true, proof, receipt: { rescore_factor_changes: lines } });
+    assert.match(v.factors.find((x) => x[0].startsWith("Rescore"))[1], /\(stored data, not covered\)$/);
+  });
+  it("previous (SUBMIT) detail unsealed, own detail sealed: not covered", async () => {
+    const { lines } = await run("0".repeat(64), H(d1));
+    assert.equal(lines[0].sealed, false);
+  });
+  it("control: both sealed is covered", async () => {
+    const { lines } = await run(hashPayload(d0), H(d1));
+    assert.equal(lines[0].sealed, true);
+  });
+});
+
+describe("question seal", () => {
+  const q = "Is the steel class a proof?";
+  async function proofFor(textSha) {
+    _resetProofCache();
+    return receiptLedgerAndProof({ DB: fakeDb(ledgerWith([["SUBMIT", { receipt_id: "r1", text_sha256: textSha }]])) }, "r1");
+  }
+  it("covered when sha256(challenge_text) matches the sealed text_sha256", async () => {
+    const { sha256hex } = await import("./src/ledger.js");
+    const { rows, proof } = await proofFor(sha256hex(q));
+    assert.equal(challengeSealed(q, rows, proof), true);
+    const v = threadView({ ok: true, proof, receipt: { summary: "S", challenge_sealed: true } });
+    assert.match(v.reasoning.find((x) => x[0] === "Question seal")[1], /covered by the seal/);
+  });
+  it("edited challenge_text: stored data, not covered", async () => {
+    const { sha256hex } = await import("./src/ledger.js");
+    const { rows, proof } = await proofFor(sha256hex(q));
+    assert.equal(challengeSealed(q + " edited", rows, proof), false);
+    assert.equal(challengeSealed(null, rows, proof), false);
+    const v = threadView({ ok: true, proof, receipt: { summary: "S", challenge_sealed: false } });
+    assert.equal(v.reasoning.find((x) => x[0] === "Question seal")[1], "Question text is stored data, not covered by the seal.");
+  });
+  it("unverified proof: not covered", () => {
+    assert.equal(challengeSealed(q, [], { status: "unverified", entries: [] }), false);
   });
 });

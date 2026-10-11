@@ -271,7 +271,7 @@ describe("question seal", () => {
     const { sha256hex } = await import("./src/ledger.js");
     const { rows, proof } = await proofFor(sha256hex(q));
     assert.equal(challengeSealed(q, rows, proof), true);
-    const v = threadView({ ok: true, proof, receipt: { summary: "S", challenge_sealed: true } });
+    const v = threadView({ ok: true, proof, receipt: { summary: "S", challenge_text: q, challenge_sealed: true } });
     assert.match(v.reasoning.find((x) => x[0] === "Question seal")[1], /covered by the seal/);
   });
   it("edited challenge_text: stored data, not covered", async () => {
@@ -279,10 +279,25 @@ describe("question seal", () => {
     const { rows, proof } = await proofFor(sha256hex(q));
     assert.equal(challengeSealed(q + " edited", rows, proof), false);
     assert.equal(challengeSealed(null, rows, proof), false);
-    const v = threadView({ ok: true, proof, receipt: { summary: "S", challenge_sealed: false } });
+    const v = threadView({ ok: true, proof, receipt: { summary: "S", challenge_text: q + " edited", challenge_sealed: false } });
     assert.equal(v.reasoning.find((x) => x[0] === "Question seal")[1], "Question text is stored data, not covered by the seal.");
   });
   it("unverified proof: not covered", () => {
     assert.equal(challengeSealed(q, [], { status: "unverified", entries: [] }), false);
+  });
+});
+
+describe("question seal when text is not shown", () => {
+  for (const ct of [null, undefined]) {
+    it("challenge_text " + ct + ": says question text not shown, even if sealed flag is true", () => {
+      const r = { summary: "S", challenge_sealed: true };
+      if (ct === null) r.challenge_text = null;
+      const v = threadView({ ok: true, proof: {}, receipt: r });
+      assert.equal(v.reasoning.find((x) => x[0] === "Question seal")[1], "question text not shown");
+    });
+  }
+  it("text shown and sealed still reads covered", () => {
+    const v = threadView({ ok: true, proof: {}, receipt: { summary: "S", challenge_text: "q", challenge_sealed: true } });
+    assert.match(v.reasoning.find((x) => x[0] === "Question seal")[1], /covered by the seal/);
   });
 });

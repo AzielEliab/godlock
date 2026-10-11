@@ -18,8 +18,38 @@ export function workListings() {
   return AZIEL_WORKS_DATA.listings.map(cloneWork);
 }
 
+/** Design relationship of AZ-OS, Aziel Runtime, and The AZInterface. */
+export const AZ_TRIAD_ID = "https://www.azieleliab.com/#az-triad";
+export const AZ_TRIAD_NAME = "AZ triad: AZ-OS, Aziel Runtime, The AZInterface";
+export const AZ_TRIAD_NOTE =
+  "Design relationship only. One system with three sides: the operating-system layer (AZ-OS), the MCP runtime (Aziel Runtime), and the UI software (The AZInterface).";
+
+const TRIAD_BY_URL = {
+  "https://github.com/AzielEliab/azos": {
+    side: "operating-system",
+    note: "AZ triad operating-system side. Not a kernel.",
+  },
+  "https://github.com/AzielEliab/aziel-runtime": {
+    side: "mcp",
+    note: "AZ triad MCP side.",
+  },
+  "https://aziel-runtime.vibelock.workers.dev/": {
+    side: "mcp",
+    note: "AZ triad MCP side.",
+  },
+  "https://github.com/AzielEliab/azinterface": {
+    side: "ui",
+    note: "AZ triad UI-software side.",
+  },
+  "https://www.azielcorpuslibrary.net/record/AZDOC-EB7454682E74": {
+    side: "ui",
+    note: "AZ triad UI-software side white paper.",
+  },
+};
+
 function cloneWork(work) {
-  return {
+  const side = TRIAD_BY_URL[work.url];
+  const row = {
     name: work.name,
     url: work.url,
     type: work.type,
@@ -27,16 +57,74 @@ function cloneWork(work) {
     category: work.category,
     domain: work.domain,
   };
+  if (side && !row.description.includes(side.note)) {
+    row.description = row.description + " " + side.note;
+    row.triad_side = side.side;
+    row.isPartOf = AZ_TRIAD_ID;
+  }
+  return row;
+}
+
+export function azTriadNode() {
+  return {
+    "@type": "CreativeWork",
+    "@id": AZ_TRIAD_ID,
+    name: AZ_TRIAD_NAME,
+    description: AZ_TRIAD_NOTE,
+    author: { "@id": "https://www.azieleliab.com/#aziel" },
+    creator: { "@id": "https://www.azieleliab.com/#aziel" },
+    hasPart: [
+      {
+        "@type": "SoftwareSourceCode",
+        name: "AZ-OS",
+        url: "https://github.com/AzielEliab/azos",
+        applicationCategory: "operating-system",
+        description: "Operating-system side of the AZ triad. Local ethical overlay. Not a kernel.",
+      },
+      {
+        "@type": "SoftwareSourceCode",
+        name: "Aziel Runtime",
+        url: "https://github.com/AzielEliab/aziel-runtime",
+        applicationCategory: "MCP runtime",
+        description: "MCP side of the AZ triad. Worker https://aziel-runtime.vibelock.workers.dev/ Glama https://glama.ai/mcp/servers/AzielEliab/aziel-runtime",
+      },
+      {
+        "@type": "SoftwareSourceCode",
+        name: "The AZInterface",
+        url: "https://github.com/AzielEliab/azinterface",
+        applicationCategory: "UI software",
+        description: "UI-software side of the AZ triad. White paper https://www.azielcorpuslibrary.net/record/AZDOC-EB7454682E74",
+      },
+    ],
+  };
+}
+
+export function azTriadLlmsSection() {
+  return [
+    "## AZ triad",
+    "",
+    AZ_TRIAD_NOTE,
+    "Person @id https://www.azieleliab.com/#aziel. Triad @id " + AZ_TRIAD_ID + ".",
+    "- AZ-OS, operating-system side. Not a kernel. https://github.com/AzielEliab/azos",
+    "- Aziel Runtime, MCP side. https://github.com/AzielEliab/aziel-runtime",
+    "  Worker: https://aziel-runtime.vibelock.workers.dev/",
+    "  Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime",
+    "- The AZInterface, UI-software side. https://github.com/AzielEliab/azinterface",
+    "  White paper: https://www.azielcorpuslibrary.net/record/AZDOC-EB7454682E74",
+    "",
+  ].join("\n");
 }
 
 /** schema.org node: name, url, description. No DOI. */
 export function workNode(work) {
-  return {
+  const node = {
     "@type": work.type,
     name: work.name,
     url: work.url,
     description: work.description,
   };
+  if (work.isPartOf) node.isPartOf = { "@id": work.isPartOf };
+  return node;
 }
 
 export function curatedWorkNodes() {
@@ -45,6 +133,8 @@ export function curatedWorkNodes() {
 
 export function worksLlmsSection() {
   const lines = [
+    "",
+    azTriadLlmsSection().trimEnd(),
     "",
     "## Works",
     "",

@@ -781,9 +781,11 @@
       "name": "aziel-runtime",
       "url": "https://github.com/AzielEliab/aziel-runtime",
       "type": "SoftwareSourceCode",
-      "description": "Aziel Runtime by Aziel Eliab — FragGate MCP Softwares door. https://aziel-runtime.vibelock.workers.dev/ · OpenAPI+MCP · Glama · hubs azieleliab.com · corpus · godlock.uk · HDJ.",
+      "description": "Aziel Runtime by Aziel Eliab — FragGate MCP Softwares door. https://aziel-runtime.vibelock.workers.dev/ · OpenAPI+MCP · Glama · hubs azieleliab.com · corpus · godlock.uk · HDJ. AZ triad MCP side.",
       "category": "software",
-      "domain": "AI runtime / MCP"
+      "domain": "AI runtime / MCP",
+      "triad_side": "mcp",
+      "isPartOf": "https://www.azieleliab.com/#az-triad"
     },
     {
       "name": "azieleliab",
@@ -805,9 +807,11 @@
       "name": "azinterface",
       "url": "https://github.com/AzielEliab/azinterface",
       "type": "SoftwareSourceCode",
-      "description": "AZInterface (AIH-WP-1.0): custodial operating environment. Author Aziel Eliab.",
+      "description": "AZInterface (AIH-WP-1.0): custodial operating environment. Author Aziel Eliab. AZ triad UI-software side.",
       "category": "software",
-      "domain": "ethical operating environment"
+      "domain": "ethical operating environment",
+      "triad_side": "ui",
+      "isPartOf": "https://www.azieleliab.com/#az-triad"
     },
     {
       "name": "azmail",
@@ -829,9 +833,11 @@
       "name": "AZ-OS",
       "url": "https://github.com/AzielEliab/azos",
       "type": "SoftwareSourceCode",
-      "description": "AZ-OS + AZ Interface: local ethical overlay. Integrity precedes execution. Not a kernel. Forks welcome. Apache-2.0.",
+      "description": "AZ-OS + AZ Interface: local ethical overlay. Integrity precedes execution. Not a kernel. Forks welcome. Apache-2.0. AZ triad operating-system side. Not a kernel.",
       "category": "software",
-      "domain": "philosophy / ethical operating overlay"
+      "domain": "philosophy / ethical operating overlay",
+      "triad_side": "operating-system",
+      "isPartOf": "https://www.azieleliab.com/#az-triad"
     },
     {
       "name": "azvpn",
@@ -1093,9 +1099,11 @@
       "name": "Aziel Runtime (live Worker + public MCP endpoint)",
       "url": "https://aziel-runtime.vibelock.workers.dev/",
       "type": "SoftwareApplication",
-      "description": "Aziel Runtime — node-meshed MCP Softwares suite",
+      "description": "Aziel Runtime — node-meshed MCP Softwares suite AZ triad MCP side.",
       "category": "software",
-      "domain": "AI runtime / MCP"
+      "domain": "AI runtime / MCP",
+      "triad_side": "mcp",
+      "isPartOf": "https://www.azieleliab.com/#az-triad"
     },
     {
       "name": "Trades-Runtime (public Worker)",
@@ -2229,9 +2237,11 @@
       "name": "Aziel Interface — FINAL Custodial Operating Environment White Paper",
       "url": "https://www.azielcorpuslibrary.net/record/AZDOC-EB7454682E74",
       "type": "ScholarlyArticle",
-      "description": "Aziel Corpus Library record: Aziel Interface — FINAL Custodial Operating Environment White Paper",
+      "description": "Aziel Corpus Library record: Aziel Interface — FINAL Custodial Operating Environment White Paper AZ triad UI-software side white paper.",
       "category": "research_papers",
-      "domain": "research"
+      "domain": "research",
+      "triad_side": "ui",
+      "isPartOf": "https://www.azieleliab.com/#az-triad"
     },
     {
       "name": "TERM: Deciomite",
@@ -4181,5 +4191,40 @@
     }
   ],
   "works_url": "https://godlock.uk/works.json",
-  "works_note": "Filtered from the owner catalog. verified:true, no caution, no doi.org or zenodo.org URL, no third-party forks. He Didn't Jump is a document archive."
+  "works_note": "Filtered from the owner catalog. verified:true, no caution, no doi.org or zenodo.org URL, no third-party forks. He Didn't Jump is a document archive.",
+  "az_triad": {
+    "@type": "CreativeWork",
+    "@id": "https://www.azieleliab.com/#az-triad",
+    "name": "AZ triad: AZ-OS, Aziel Runtime, The AZInterface",
+    "description": "Design relationship only. One system with three sides: the operating-system layer (AZ-OS), the MCP runtime (Aziel Runtime), and the UI software (The AZInterface).",
+    "author": {
+      "@id": "https://www.azieleliab.com/#aziel"
+    },
+    "creator": {
+      "@id": "https://www.azieleliab.com/#aziel"
+    },
+    "hasPart": [
+      {
+        "@type": "SoftwareSourceCode",
+        "name": "AZ-OS",
+        "url": "https://github.com/AzielEliab/azos",
+        "applicationCategory": "operating-system",
+        "description": "Operating-system side of the AZ triad. Local ethical overlay. Not a kernel."
+      },
+      {
+        "@type": "SoftwareSourceCode",
+        "name": "Aziel Runtime",
+        "url": "https://github.com/AzielEliab/aziel-runtime",
+        "applicationCategory": "MCP runtime",
+        "description": "MCP side of the AZ triad. Worker https://aziel-runtime.vibelock.workers.dev/ Glama https://glama.ai/mcp/servers/AzielEliab/aziel-runtime"
+      },
+      {
+        "@type": "SoftwareSourceCode",
+        "name": "The AZInterface",
+        "url": "https://github.com/AzielEliab/azinterface",
+        "applicationCategory": "UI software",
+        "description": "UI-software side of the AZ triad. White paper https://www.azielcorpuslibrary.net/record/AZDOC-EB7454682E74"
+      }
+    ]
+  }
 }

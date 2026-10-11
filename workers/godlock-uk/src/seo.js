@@ -12,7 +12,7 @@ import {
   AZINDEX_PERSON_ALTERNATE_NAMES,
 } from "../../aziel-person.js";
 export { AZINDEX_PERSON_ALTERNATE_NAMES };
-import { curatedWorkNodes, curatedWorks, fullWorks, workListings, worksLlmsSection, WORKS_KNOWS_ABOUT, WORKS_CATALOG_NOTE } from "./azielWorks.js";
+import { azTriadNode, curatedWorkNodes, curatedWorks, fullWorks, workListings, worksLlmsSection, WORKS_KNOWS_ABOUT, WORKS_CATALOG_NOTE } from "./azielWorks.js";
 import { hideInternalDetermination } from "./publicCopy.js";
 export {
   AZIEL_PERSON_ID,
@@ -808,7 +808,7 @@ export const HTML_PERSON_ALTERNATE_NAMES = AZINDEX_PERSON_ALTERNATE_NAMES;
 
 function attachCuratedWorks(node) {
   const examples = curatedWorkNodes();
-  node.workExample = examples;
+  node.workExample = [azTriadNode(), ...examples];
   node.subjectOf = examples;
   return node;
 }
@@ -1116,7 +1116,7 @@ export function identityPersonNode() {
     knowsLanguage: ["en", "he"],
     sameAs: IDENTITY_SAME_AS.slice(),
     mainEntityOfPage: "https://www.azieleliab.com/who",
-    workExample: examples,
+    workExample: [azTriadNode(), ...examples],
     subjectOf: [
       {
         "@type": "FAQPage",
@@ -2286,6 +2286,7 @@ export function citeDoc(sot, runtimeCite) {
     jobTitle: AZINDEX_PERSON_JOB_TITLE.slice(),
     hasOccupation: occupationNodes(),
     disambiguatingDescription: DISAMBIGUATING_DESCRIPTION,
+    az_triad: azTriadNode(),
     works: fullWorks(),
     listings: workListings(),
     works_url: CANON_HOST + "/works.json",
@@ -2763,6 +2764,7 @@ export function worksDoc() {
     hasOccupation: occupationNodes(),
     alternateName: AZINDEX_PERSON_ALTERNATE_NAMES.slice(),
     note: WORKS_CATALOG_NOTE,
+    az_triad: azTriadNode(),
     doi: null,
     zenodo_urls_emitted: false,
     he_didnt_jump: "document archive",

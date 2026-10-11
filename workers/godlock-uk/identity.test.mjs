@@ -59,6 +59,7 @@ import {
   identityJsonLd,
   identityPersonNode,
   llmsDoc,
+  worksDoc,
   personJsonLd,
   personRef,
   robotsTxt,
@@ -223,6 +224,47 @@ describe("AZindex identity machine", () => {
     assert.deepEqual(person.hasOccupation.map((row) => row.name), AZINDEX_PERSON_JOB_TITLE);
     assert.ok(person.workExample.some((work) => work.name.startsWith("Webslinger (")));
     assert.ok(!JSON.stringify(person.workExample).includes("doi.org"));
+    const triad = person.workExample[0];
+    assert.equal(triad["@id"], "https://www.azieleliab.com/#az-triad");
+    assert.equal(triad.name, "AZ triad: AZ-OS, Aziel Runtime, The AZInterface");
+    assert.match(triad.description, /operating-system layer \(AZ-OS\)/);
+    assert.match(triad.description, /MCP runtime \(Aziel Runtime\)/);
+    assert.match(triad.description, /UI software \(The AZInterface\)/);
+    assert.equal(triad.author["@id"], AZIEL_PERSON_ID);
+    assert.equal(triad.creator["@id"], AZIEL_PERSON_ID);
+    assert.deepEqual(triad.hasPart.map((part) => part.url), [
+      "https://github.com/AzielEliab/azos",
+      "https://github.com/AzielEliab/aziel-runtime",
+      "https://github.com/AzielEliab/azinterface",
+    ]);
+    assert.match(triad.hasPart[0].description, /Not a kernel/);
+    assert.doesNotMatch(JSON.stringify(triad), /mesh-node|one-click/i);
+    const azos = person.workExample.find((work) => work.url === "https://github.com/AzielEliab/azos");
+    const runtime = person.workExample.find((work) => work.url === "https://github.com/AzielEliab/aziel-runtime");
+    assert.equal(azos.isPartOf["@id"], triad["@id"]);
+    assert.match(azos.description, /operating-system side/);
+    assert.match(azos.description, /Not a kernel/);
+    assert.equal(runtime.isPartOf["@id"], triad["@id"]);
+    assert.match(runtime.description, /MCP side/);
+    const works = worksDoc();
+    const iface = works.works.find((work) => work.url === "https://github.com/AzielEliab/azinterface");
+    assert.equal(iface.isPartOf, triad["@id"]);
+    assert.match(iface.description, /UI-software side/);
+    assert.equal(works.az_triad["@id"], triad["@id"]);
+    assert.equal(citeDoc().az_triad["@id"], triad["@id"]);
+    const llms = llmsDoc();
+    const triadAt = llms.indexOf("## AZ triad");
+    const triadSection = llms.slice(triadAt, llms.indexOf("## Works", triadAt));
+    assert.match(triadSection, /Design relationship only/);
+    assert.match(triadSection, /https:\/\/github\.com\/AzielEliab\/azos/);
+    assert.match(triadSection, /https:\/\/github\.com\/AzielEliab\/aziel-runtime/);
+    assert.match(triadSection, /https:\/\/aziel-runtime\.vibelock\.workers\.dev\//);
+    assert.match(triadSection, /https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime/);
+    assert.match(triadSection, /https:\/\/github\.com\/AzielEliab\/azinterface/);
+    assert.match(triadSection, /AZDOC-EB7454682E74/);
+    assert.match(triadSection, /Not a kernel/);
+    assert.doesNotMatch(triadSection, /mesh-node|one-click/i);
+    assert.equal(personNode().workExample, undefined);
     assert.ok(SAME_AS_REFUSE.includes("euaziel.site"));
     assert.ok(SAME_AS_REFUSE.includes("Aziel S."));
     assert.ok(!person.alternateName.includes("Aziel S."));

@@ -535,6 +535,9 @@ export function threadView(j) {
   if (!out.reasoning.length) out.reasoning.push(["Reasoning", "No reasoning was recorded for this receipt."]);
   var fmt = function (v) { return v === null || v === undefined ? "none" : (typeof v === "object" ? JSON.stringify(v) : String(v)); };
   var fd = r.factor_detail;
+  out.factors.push(["Seal coverage", r.factor_detail_sealed === true
+    ? "Per-factor detail is covered by the seal: its sha256 matches factor_detail_sha256 in the sealed SUBMIT entry."
+    : "Per-factor detail is stored data. It is not covered by the seal."]);
   if (fd && typeof fd === "object" && fd.factors) {
     var cyc = Array.isArray(fd.cycle_factors) ? fd.cycle_factors : [];
     for (var i = 0; i < cyc.length; i++) {
@@ -545,7 +548,7 @@ export function threadView(j) {
       for (var key in ck) { if (Object.prototype.hasOwnProperty.call(ck, key)) out.factors.push(["  Checker " + key, fmt(ck[key])]); }
     }
     var pr = Array.isArray(fd.pairings) ? fd.pairings : [];
-    for (var q = 0; q < pr.length; q++) out.factors.push(["Pairing " + pr[q].i + " × " + pr[q].j, fmt(pr[q].product)]);
+    for (var q = 0; q < pr.length; q++) out.factors.push(["Pairing " + pr[q].i + " × " + pr[q].j, typeof pr[q].product === "number" ? String(Math.round(pr[q].product * 10000) / 10000) : fmt(pr[q].product)]);
     if (pr.length) out.factors.push(["Combined (mean of " + pr.length + " pairings)", fmt(fd.combined)]);
     var om = Array.isArray(fd.omitted) ? fd.omitted : [];
     for (var o = 0; o < om.length; o++) out.factors.push(["Omitted " + om[o].factor, fmt(om[o].reason) + ". Not scored as 0."]);

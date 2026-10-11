@@ -7,6 +7,8 @@
  * or ledger hash, so existing hashes are untouched.
  * Author: Aziel Eliab.
  */
+import { hashPayload } from "./ledger.js";
+
 export const FACTOR_DETAIL_SCHEMA = "godlock.factor_detail.v1";
 export const FACTOR_KEYS = ["physics", "linguistics", "bayesian", "truth_formula", "clce", "spre"];
 export const NOT_STORED = "per-factor detail not stored for this receipt";
@@ -115,4 +117,29 @@ export function storedFactorView(rows) {
     if (snap) prev = snap;
   }
   return { factor_detail: detail, factor_detail_note: detail ? null : NOT_STORED, rescore_factor_changes: changes };
+}
+
+export const NOT_SEALED_LABEL = "Per-factor detail is stored data. It is not covered by the seal.";
+export const SEALED_LABEL = "Per-factor detail is covered by the seal: its sha256 matches factor_detail_sha256 in the sealed SUBMIT entry.";
+
+/**
+ * True only when: proof is verified, the SUBMIT ledger row for this receipt
+ * matches the verified checkpoint, it carries factor_detail_sha256, and the
+ * sha256 of the stored factor_detail (canonical JSON) equals it. Else false.
+ */
+export function factorDetailSealed(detail, ledgerRows, proof) {
+  if (!detail || !proof || proof.status !== "verified") return false;
+  const entries = Array.isArray(proof.entries) ? proof.entries : [];
+  const rows = Array.isArray(ledgerRows) ? ledgerRows : [];
+  for (const row of rows) {
+    if (String(row.action) !== "SUBMIT") continue;
+    let payload;
+    try { payload = JSON.parse(row.payload_json || "{}"); } catch { continue; }
+    const want = payload && payload.factor_detail_sha256;
+    if (typeof want !== "string" || want.length !== 64) continue;
+    const e = entries.find((x) => Number(x.sequence) === Number(row.sequence) && x.entry_hash === row.entry_hash);
+    if (!e || !e.hash_ok || !e.in_verified_range || !e.matches_checkpoint) return false;
+    return hashPayload(detail) === want;
+  }
+  return false;
 }

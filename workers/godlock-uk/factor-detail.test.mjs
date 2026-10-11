@@ -1,7 +1,9 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { scoreDebateText } from "./src/debateScore.js";
-import { factorDetail, storedFactorView, NOT_STORED, FACTOR_KEYS } from "./src/factorDetail.js";
+import { factorDetail, storedFactorView, factorDetailSealed, NOT_STORED, NOT_SEALED_LABEL, FACTOR_KEYS } from "./src/factorDetail.js";
+import { hashPayload, canonicalJson, ZERO } from "./src/ledger.js";
+import { receiptLedgerAndProof, _resetProofCache, HEAD_SQL, TAIL_SQL, BY_RECEIPT_SQL } from "./src/receiptProof.js";
 import { threadView, threadExpandScript } from "./src/ui.js";
 
 const TEXT = "Functionally specified digital information joined to a translation reader is the steel class. Pretty spirals are not a proof. Probability given evidence suggests design.";
@@ -71,15 +73,75 @@ describe("drop-down view", () => {
   });
   it("old receipts show the not-stored line", () => {
     const v = threadView({ ...base, receipt: { summary: "S" } });
-    assert.deepEqual(v.factors, [["Per-factor", "per-factor detail not stored for this receipt"]]);
+    assert.deepEqual(v.factors, [["Seal coverage", NOT_SEALED_LABEL], ["Per-factor", "per-factor detail not stored for this receipt"]]);
   });
   it("rescore changes render with signed deltas", () => {
     const v = threadView({ ...base, receipt: { factor_detail: null, rescore_factor_changes: [{ created_utc: "t2", changes: [{ factor: "spre", before: 0.15, after: 0.3, delta: 0.15 }] }] } });
-    assert.deepEqual(v.factors[1], ["Rescore t2", "spre 0.15 → 0.3 (+0.15)"]);
+    assert.deepEqual(v.factors[2], ["Rescore t2", "spre 0.15 → 0.3 (+0.15)"]);
   });
   it("script uses textContent only and still parses", () => {
     const js = threadExpandScript();
     assert.doesNotMatch(js, /innerHTML|insertAdjacentHTML|document\.write/);
     assert.doesNotThrow(() => new Function(js.replace(/^<script>|<\/script>$/g, "")));
+  });
+});
+
+function fakeDb(rows) {
+  return { prepare(sql) {
+    let args = [];
+    const run = () => {
+      if (sql === HEAD_SQL) return rows[rows.length - 1];
+      if (sql === TAIL_SQL) return rows.filter((r) => r.sequence > args[0]);
+      if (sql === BY_RECEIPT_SQL) return rows.filter((r) => JSON.parse(r.payload_json).receipt_id === args[0]);
+      return null;
+    };
+    const st = { bind(...a) { args = a; return st; }, async first() { return run(); }, async all() { return { results: run() }; }, async run() { return {}; } };
+    return st;
+  } };
+}
+function ledgerWith(payloads) {
+  const rows = []; let prev = ZERO;
+  payloads.forEach(([action, payload], i) => {
+    const e = { sequence: i + 1, timestamp_utc: "t" + i, action, payload, previous_hash: prev };
+    const entry_hash = hashPayload(e);
+    rows.push({ ...e, payload_json: canonicalJson(payload), entry_hash }); prev = entry_hash;
+  });
+  return rows;
+}
+
+describe("factor detail seal coverage", () => {
+  const fd = factorDetail(scoreDebateText(TEXT, ""));
+  const stored = () => [{ reason: "initial", triad_json: JSON.stringify({ factors: {}, factor_detail: fd }) }];
+  const rows = () => ledgerWith([["SUBMIT", { receipt_id: "r1", factor_detail_sha256: hashPayload(fd) }], ["SCORE", { receipt_id: "r1" }]]);
+  it("covered when the row matches the checkpoint and the sha matches", async () => {
+    _resetProofCache();
+    const { rows: lr, proof } = await receiptLedgerAndProof({ DB: fakeDb(rows()) }, "r1");
+    assert.equal(proof.status, "verified");
+    assert.equal(factorDetailSealed(storedFactorView(stored()).factor_detail, lr, proof), true);
+    const v = threadView({ ok: true, proof, receipt: { factor_detail: fd, factor_detail_sealed: true } });
+    assert.match(v.factors[0][1], /covered by the seal/); assert.doesNotMatch(v.factors[0][1], /not covered/);
+  });
+  it("triad_json edited after the write: not covered, sealed false", async () => {
+    _resetProofCache();
+    const { rows: lr, proof } = await receiptLedgerAndProof({ DB: fakeDb(rows()) }, "r1");
+    const s = stored(); const snap = JSON.parse(s[0].triad_json);
+    snap.factor_detail.factors.spre.value = 0.99; s[0].triad_json = JSON.stringify(snap);
+    const sealed = factorDetailSealed(storedFactorView(s).factor_detail, lr, proof);
+    assert.equal(sealed, false);
+    const v = threadView({ ok: true, proof, receipt: { factor_detail: snap.factor_detail, factor_detail_sealed: sealed } });
+    assert.equal(v.factors[0][1], NOT_SEALED_LABEL);
+  });
+  it("old SUBMIT without factor_detail_sha256 is not covered", async () => {
+    _resetProofCache();
+    const old = ledgerWith([["SUBMIT", { receipt_id: "r1" }]]);
+    const { rows: lr, proof } = await receiptLedgerAndProof({ DB: fakeDb(old) }, "r1");
+    assert.equal(factorDetailSealed(fd, lr, proof), false);
+  });
+  it("unverified proof is never covered", () => {
+    assert.equal(factorDetailSealed(fd, rows(), { status: "unverified", entries: [] }), false);
+  });
+  it("pairing products display rounded to 4 places", () => {
+    const v = threadView({ ok: true, proof: {}, receipt: { factor_detail: { cycle_factors: [], factors: {}, pairings: [{ i: "a", j: "b", product: 0.123456789 }], omitted: [] } } });
+    assert.deepEqual(v.factors.find((x) => x[0] === "Pairing a × b"), ["Pairing a × b", "0.1235"]);
   });
 });

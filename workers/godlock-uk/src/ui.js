@@ -533,6 +533,9 @@ export function threadView(j) {
   if (typeof r.summary === "string" && r.summary) out.reasoning.push(["Summary", r.summary]);
   if (typeof r.explanation === "string" && r.explanation) out.reasoning.push(["Reasoning", r.explanation]);
   if (!out.reasoning.length) out.reasoning.push(["Reasoning", "No reasoning was recorded for this receipt."]);
+  out.reasoning.push(["Question seal", r.challenge_sealed === true
+    ? "Question text is covered by the seal: its sha256 matches text_sha256 in the sealed SUBMIT entry."
+    : "Question text is stored data, not covered by the seal."]);
   out.reasoning.push(["Reasoning seal", r.reasoning_sealed === true
     ? "Summary and reasoning are covered by the seal: the receipt row hashes to content_sha256 in the sealed SUBMIT entry."
     : "Summary and reasoning are stored data. They are not covered by the seal."]);

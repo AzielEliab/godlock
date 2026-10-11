@@ -7,7 +7,7 @@
  * or ledger hash, so existing hashes are untouched.
  * Author: Aziel Eliab.
  */
-import { hashPayload } from "./ledger.js";
+import { hashPayload, sha256hex } from "./ledger.js";
 
 export const FACTOR_DETAIL_SCHEMA = "godlock.factor_detail.v1";
 export const FACTOR_KEYS = ["physics", "linguistics", "bayesian", "truth_formula", "clce", "spre"];
@@ -237,4 +237,20 @@ export function reasoningSealed(receiptRow, ledgerRows, proof, hashFn) {
   let h;
   try { h = hashFn(receiptRow); } catch { return false; }
   return h === p.content_sha256;
+}
+
+/**
+ * The question text is covered only when the SUBMIT row is in the verified
+ * chain and sha256(stored challenge_text) equals its text_sha256. Else false.
+ */
+export function challengeSealed(challengeText, ledgerRows, proof) {
+  if (typeof challengeText !== "string" || !proof || proof.status !== "verified") return false;
+  const sub = (Array.isArray(ledgerRows) ? ledgerRows : []).find((r) => String(r.action) === "SUBMIT");
+  if (!sub) return false;
+  const p = payloadOf(sub);
+  if (!p || typeof p.text_sha256 !== "string" || p.text_sha256.length !== 64) return false;
+  const e = (Array.isArray(proof.entries) ? proof.entries : [])
+    .find((x) => Number(x.sequence) === Number(sub.sequence) && x.entry_hash === sub.entry_hash);
+  if (!e || !e.hash_ok || !e.in_verified_range || !e.matches_checkpoint) return false;
+  return sha256hex(challengeText) === p.text_sha256;
 }

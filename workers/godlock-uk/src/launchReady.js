@@ -1,9 +1,11 @@
 /**
  * Runtime Softwares launch-readiness cite for godlock.uk.
- * SoT is live aziel-runtime GET /v1/software: main 70cc0b0 / 2.0.0-rc1.
- * Live Worker git_sha 70cc0b06786ad925be49da16d7f8893095df330b (read 2026-09-27).
- * Published version_id be1d6dca-01a9-4d7e-95da-3fffb617a989 is env.CF_VERSION_METADATA.id
- * on that read. It is a serve-time isolate id, not a baked suite constant.
+ * SoT is live aziel-runtime GET /v1/software: main ed3350c5 / 2.0.0-rc1.
+ * Deployed git_sha ed3350c57a870c11c36efec11378581e04ec4777 (read 2026-10-24).
+ * git_sha_source deploy_var. git_sha_tracks_deployed_tip true. deploy_lag null.
+ * Published version_id 8a416c9b-076b-4ed1-bf3a-2baa85b76733 (vid 8a416c9b)
+ * is env.CF_VERSION_METADATA.id on that read. It is a serve-time isolate id,
+ * not a baked suite constant.
  * Suite 2.0.0-rc1 stays the certification-point freeze. Authority count stays 42
  * on that Worker. GodLock hub Softwares is hub-scope (JSON one product row;
  * HTML ItemList numberOfItems 2), not those 42 cards.
@@ -18,14 +20,14 @@ export const AUTHOR = "Aziel Eliab";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
 export const RUNTIME_VERSION = "2.0.0-rc1";
-/** Live origin GET /v1/software git_sha (read 2026-09-27). Short form is the first 7 hex chars. */
-export const RUNTIME_GIT_SHA = "70cc0b06786ad925be49da16d7f8893095df330b";
-export const RUNTIME_GIT_SHA_SHORT = "70cc0b0";
+/** Deployed GET /v1/software git_sha (read 2026-10-24). Public short stamp is the 8-char tip prefix. */
+export const RUNTIME_GIT_SHA = "ed3350c57a870c11c36efec11378581e04ec4777";
+export const RUNTIME_GIT_SHA_SHORT = "ed3350c5";
 /**
- * Published GET /v1/software version_id on the 2026-09-27 read.
+ * Published GET /v1/software version_id on the 2026-10-24 read (vid 8a416c9b).
  * env.CF_VERSION_METADATA.id, read at serve time. Not a baked suite constant.
  */
-export const RUNTIME_VERSION_ID = "be1d6dca-01a9-4d7e-95da-3fffb617a989";
+export const RUNTIME_VERSION_ID = "8a416c9b-076b-4ed1-bf3a-2baa85b76733";
 export const RUNTIME_VERSION_ID_NOTE =
   "Published GET /v1/software version_id for this cite. env.CF_VERSION_METADATA.id, read at serve time. Not a baked suite constant.";
 export const RUNTIME_SOT_BRANCH = "main";

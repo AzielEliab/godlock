@@ -694,7 +694,22 @@ export async function wrapLedgerEntry(env, entry, deps = {}) {
   };
 }
 
-export function latticePullBody(row) {
+const OFFLINE_USER_KEYS = new Set(["username", "offline_user", "offline_username", "offline-user", "user"]);
+
+/** Copy a pull lattice without the offline submitter handle. Does not mutate the stored row. */
+export function stripOfflineUsernames(value) {
+  if (!value || typeof value !== "object") return value;
+  if (Array.isArray(value)) return value.map(stripOfflineUsernames);
+  const out = {};
+  for (const key of Object.keys(value)) {
+    if (OFFLINE_USER_KEYS.has(key)) continue;
+    const val = value[key];
+    out[key] = val && typeof val === "object" ? stripOfflineUsernames(val) : val;
+  }
+  return out;
+}
+
+export function latticePullBody(row, { includeUsernames = false } = {}) {
   if (!row) {
     return {
       ok: false,
@@ -706,6 +721,7 @@ export function latticePullBody(row) {
       policy: { ...LATTICE_POLICY },
     };
   }
+  const lattice = includeUsernames ? row.lattice : stripOfflineUsernames(row.lattice);
   return {
     ok: true,
     live: false,
@@ -713,7 +729,7 @@ export function latticePullBody(row) {
     entry_hash: row.entry_hash,
     position: row.position,
     target: row.target,
-    lattice: row.lattice,
+    lattice,
     aggregate: false,
     silo: false,
     rebuilt_from_zero: false,
@@ -796,6 +812,7 @@ export async function handleLatticeHttp(request, env, path) {
     return { status: missing ? 404 : 200, body };
   }
   const row = await pullLocal(env, entry_hash);
-  const body = latticePullBody(row && row.entry_hash === entry_hash ? row : null);
+  const includeUsernames = await aggregateAuthorized(request, env);
+  const body = latticePullBody(row && row.entry_hash === entry_hash ? row : null, { includeUsernames });
   return { status: body.ok ? 200 : 404, body };
 }

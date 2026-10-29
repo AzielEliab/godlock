@@ -4,7 +4,8 @@
  *
  * Primary (online writes): aziel-runtime.
  * Secondary (offline writes): aziel-corpus.
- * Third chain: username tie-break so an offline document is not a second chain.
+ * Third chain: the submitting user's tie-break, so an offline document is not a second chain.
+ * The handle is that submitter. It is not a fixed product name.
  *
  * Wrap runs after appendLedger. The ledger entry_hash is the document hash.
  * Position is stored beside the receipt, never inside it.
@@ -20,12 +21,28 @@ export const TIEBREAK_SPEC = "LATTICE-TIEBREAK-1.0";
 export const LATTICE_GENESIS = "0".repeat(64);
 export const PRIMARY_TARGET = "aziel-runtime";
 export const SECONDARY_TARGET = "aziel-corpus";
-export const LATTICE_HANDLE = "godlock";
 export const LATTICE_USER_RE = /^[a-zA-Z0-9._-]{1,80}$/;
 export const PRIMARY_ORIGIN = "https://aziel-runtime.vibelock.workers.dev";
 export const SECONDARY_ORIGIN = "https://www.azielcorpuslibrary.net";
 export const LATTICE_WRAP_PATH = "/v1/lattice/wrap";
 export const LATTICE_PULL_PATH = "/v1/lattice/pull";
+
+/**
+ * Pull scope. One chain across every user, site, use, host, access point, node, and mesh.
+ * A narrower value is a silo and is refused. These are query fields on the existing
+ * /v1/lattice/wrap and /v1/lattice/pull routes. They are not new runtime or corpus routes.
+ */
+export const LATTICE_AGGREGATE_SCOPE = Object.freeze({
+  users: "all",
+  sites: "all",
+  uses: "all",
+  hosts: "all",
+  access_points: "all",
+  nodes: "all",
+  mesh: "all",
+});
+
+const AGGREGATE_KEYS = Object.keys(LATTICE_AGGREGATE_SCOPE);
 
 /** Not a LIVE flag. Cap-7 is not an ICANN name. No spend, no auto-update, RF/sat off. */
 export const LATTICE_POLICY = Object.freeze({
@@ -195,6 +212,71 @@ export function targetForMode(mode) {
   return mode === "offline" ? SECONDARY_TARGET : PRIMARY_TARGET;
 }
 
+/** Remote wrap/pull stays off until LATTICE_REMOTE=1. Unset does not call runtime or corpus. */
+export function latticeRemoteEnabled(env) {
+  return !!(env && String(env.LATTICE_REMOTE) === "1");
+}
+
+/** The tie-break handle is the submitter passed by the worker, never a fixed product name. */
+export function submittingUsername(entry, deps) {
+  const raw = deps && deps.username != null ? deps.username : (entry && entry.username != null ? entry.username : null);
+  if (raw == null) return null;
+  const name = String(raw).trim();
+  return name || null;
+}
+
+export function scopeIsAggregate(scope) {
+  if (!scope || typeof scope !== "object") return false;
+  for (const key of AGGREGATE_KEYS) {
+    if (scope[key] !== "all") return false;
+  }
+  return true;
+}
+
+export function aggregateQuery(entryHash) {
+  const q = new URLSearchParams();
+  if (entryHash) q.set("entry_hash", String(entryHash));
+  q.set("aggregate", "1");
+  for (const key of AGGREGATE_KEYS) q.set(key, LATTICE_AGGREGATE_SCOPE[key]);
+  return q.toString();
+}
+
+function siloParam(url) {
+  for (const key of AGGREGATE_KEYS) {
+    const value = url.searchParams.get(key);
+    if (value != null && value !== "" && value !== "all") return key;
+  }
+  return null;
+}
+
+function wantsAggregate(url) {
+  if (url.searchParams.get("aggregate") === "1") return true;
+  return AGGREGATE_KEYS.some((key) => url.searchParams.get(key) === "all");
+}
+
+/**
+ * Accept a remote pull that aggregated every dimension, including a rows list.
+ * A scope that names one user, site, host, node, or mesh is a silo and is not a hit.
+ */
+export function rowFromRemotePull(body, entryHash) {
+  const want = String(entryHash || "");
+  if (!body || typeof body !== "object") return { row: null, silo: false, aggregate: false };
+  if (body.scope && !scopeIsAggregate(body.scope)) return { row: null, silo: true, aggregate: false };
+  const nested = body.aggregate && typeof body.aggregate === "object" ? body.aggregate : null;
+  const rows = Array.isArray(body.rows) ? body.rows : (nested && Array.isArray(nested.rows) ? nested.rows : null);
+  const aggregate = body.aggregate === true || !!nested || scopeIsAggregate(body.scope) || Array.isArray(rows);
+  if (rows) {
+    const hit = rows.find((row) => row && String(row.entry_hash || "") === want);
+    return { row: hit || null, silo: false, aggregate: true };
+  }
+  if (body.row && typeof body.row === "object") {
+    const row = String(body.row.entry_hash || "") === want ? body.row : null;
+    return { row, silo: false, aggregate };
+  }
+  if (String(body.entry_hash || "") === want) return { row: body, silo: false, aggregate };
+  return { row: null, silo: false, aggregate };
+}
+
 function memoryRows(env) {
   if (!env) return [];
   if (!Array.isArray(env.__latticeRows)) env.__latticeRows = [];
@@ -274,15 +356,14 @@ function originFor(target) {
 }
 
 async function remoteFetch(env, target, url, init, deps) {
+  if (!latticeRemoteEnabled(env)) return { skipped: true, res: null };
   const injected = deps && deps.fetch;
-  if (typeof injected === "function") return injected(url, init, target);
+  if (typeof injected === "function") return { skipped: false, res: await injected(url, init, target) };
   if (target === PRIMARY_TARGET && env && env.AZIEL_RUNTIME && typeof env.AZIEL_RUNTIME.fetch === "function") {
-    return env.AZIEL_RUNTIME.fetch(new Request(url, init));
+    return { skipped: false, res: await env.AZIEL_RUNTIME.fetch(new Request(url, init)) };
   }
-  if (target === SECONDARY_TARGET && env && env.LATTICE_REMOTE === "1" && typeof fetch === "function") {
-    return fetch(url, init);
-  }
-  return null;
+  if (typeof fetch === "function") return { skipped: false, res: await fetch(url, init) };
+  return { skipped: false, res: null };
 }
 
 async function pushRemote(env, target, body, deps) {
@@ -293,48 +374,110 @@ async function pushRemote(env, target, body, deps) {
     body: JSON.stringify(body),
   };
   try {
-    const res = await remoteFetch(env, target, url, init, deps);
-    if (!res) return { ok: false, published: false, code: "LATTICE-REMOTE-SKIPPED", target };
-    const json = await res.json().catch(() => ({}));
-    const status = Number(res.status) || 0;
+    const got = await remoteFetch(env, target, url, init, deps);
+    if (got.skipped) return { ok: false, published: false, called: false, code: "LATTICE-REMOTE-SKIPPED", target };
+    if (!got.res) return { ok: false, published: false, called: true, code: "LATTICE-REMOTE-MISS", target };
+    const json = await got.res.json().catch(() => ({}));
+    const status = Number(got.res.status) || 0;
+    if (status === 404 || status >= 400) {
+      return { ok: false, published: false, called: true, code: "LATTICE-REMOTE-MISS", status, target, body: json };
+    }
     const published = status === 200 || status === 201;
-    return { ok: published && json && json.ok !== false, published, status, target, body: json };
+    const ok = published && json && json.ok !== false;
+    return {
+      ok,
+      published,
+      called: true,
+      status,
+      target,
+      body: json,
+      code: ok ? "LATTICE-WRAP-PUSH" : "LATTICE-REMOTE-MISS",
+    };
   } catch (err) {
-    return { ok: false, published: false, code: "LATTICE-REMOTE-UNREACHABLE", target, detail: String(err && err.message ? err.message : err) };
+    return { ok: false, published: false, called: true, code: "LATTICE-REMOTE-UNREACHABLE", target, detail: String(err && err.message ? err.message : err) };
   }
 }
 
 async function pullRemote(env, target, entryHash, deps) {
-  const url = originFor(target) + LATTICE_PULL_PATH + "?entry_hash=" + encodeURIComponent(entryHash);
+  const url = originFor(target) + LATTICE_PULL_PATH + "?" + aggregateQuery(entryHash);
   const init = { method: "GET", headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" } };
   try {
-    const res = await remoteFetch(env, target, url, init, deps);
-    if (!res) return null;
-    if (!res.ok) return null;
-    const json = await res.json().catch(() => null);
-    if (!json || typeof json !== "object") return null;
-    return json.entry_hash ? json : (json.row || null);
-  } catch {
-    return null;
+    const got = await remoteFetch(env, target, url, init, deps);
+    if (got.skipped) return { skipped: true, missed: false, silo: false, row: null };
+    const status = got.res ? Number(got.res.status) || 0 : 0;
+    if (!got.res || !got.res.ok || status === 404) {
+      return { skipped: false, missed: true, silo: false, row: null, status };
+    }
+    const json = await got.res.json().catch(() => null);
+    const picked = rowFromRemotePull(json, entryHash);
+    if (picked.silo || !picked.row) {
+      return { skipped: false, missed: true, silo: !!picked.silo, row: null, status };
+    }
+    return { skipped: false, missed: false, silo: false, row: picked.row, status };
+  } catch (err) {
+    return { skipped: false, missed: true, silo: false, row: null, detail: String(err && err.message ? err.message : err) };
   }
 }
 
+function isConstraintError(err) {
+  const msg = String(err && err.message ? err.message : err || "");
+  return /unique|primary key|constraint|SQLITE_CONSTRAINT/i.test(msg);
+}
+
+/** Next position is max(D1, memory)+1. rows.length is not a position. */
+async function nextPosition(env) {
+  const mem = memoryRows(env);
+  const memMax = mem.reduce((max, row) => Math.max(max, Number(row && row.position) || 0), 0);
+  let dbMax = null;
+  if (env && env.DB && typeof env.DB.prepare === "function") {
+    try {
+      const row = await env.DB.prepare(
+        "SELECT COALESCE(MAX(position), 0) AS n FROM lattice_chain /* lattice-next-position */"
+      ).first();
+      if (row && row.n != null && Number.isFinite(Number(row.n))) dbMax = Number(row.n);
+    } catch { /* no lattice table yet; memory is the chain */ }
+  }
+  const base = dbMax == null ? memMax : Math.max(dbMax, memMax);
+  return { position: base + 1, db: dbMax != null };
+}
+
+/**
+ * Write D1 first. A primary-key collision or other D1 failure does not leave
+ * the row only in memory, so the two stores cannot drift.
+ */
 async function persistRow(env, row) {
-  memoryRows(env).push(row);
-  if (!env || !env.DB || typeof env.DB.prepare !== "function") return;
-  try {
-    await env.DB.prepare(
-      "INSERT INTO lattice_chain(entry_hash, document_hash, target, offline, position, lattice_json, created_utc) VALUES(?,?,?,?,?,?,?)"
-    ).bind(
-      row.entry_hash,
-      row.document_hash,
-      row.target,
-      row.offline,
-      row.position,
-      JSON.stringify(row.lattice),
-      row.created_utc,
-    ).run();
-  } catch { /* isolate chain still holds the wrap */ }
+  const mem = memoryRows(env);
+  if (mem.some((item) => Number(item && item.position) === row.position)) {
+    return { ok: false, code: "LATTICE-POSITION-COLLISION" };
+  }
+  const hasDb = !!(env && env.DB && typeof env.DB.prepare === "function");
+  let dbAuthoritative = false;
+  if (hasDb) {
+    try {
+      const probe = await env.DB.prepare(
+        "SELECT COALESCE(MAX(position), 0) AS n FROM lattice_chain /* lattice-persist-probe */"
+      ).first();
+      dbAuthoritative = !!(probe && probe.n != null && Number.isFinite(Number(probe.n)));
+    } catch { dbAuthoritative = false; }
+    try {
+      await env.DB.prepare(
+        "INSERT INTO lattice_chain(entry_hash, document_hash, target, offline, position, lattice_json, created_utc) VALUES(?,?,?,?,?,?,?)"
+      ).bind(
+        row.entry_hash,
+        row.document_hash,
+        row.target,
+        row.offline,
+        row.position,
+        JSON.stringify(row.lattice),
+        row.created_utc,
+      ).run();
+    } catch (err) {
+      if (isConstraintError(err)) return { ok: false, code: "LATTICE-POSITION-COLLISION" };
+      if (dbAuthoritative) return { ok: false, code: "LATTICE-PERSIST-FAILED" };
+    }
+  }
+  mem.push(row);
+  return { ok: true };
 }
 
 /**
@@ -352,6 +495,7 @@ export async function wrapLedgerEntry(env, entry, deps = {}) {
   const offlinePrior = rows.some((r) => r.lattice && r.lattice.offline === true && r.lattice.document_hash === entry_hash);
   const offline = mode === "offline";
   const sync = mode === "sync" || (mode === "online" && offlinePrior);
+  const username = submittingUsername(entry, deps);
   if (!sync) {
     const already = rows.find((r) => r.entry_hash === entry_hash);
     if (already) {
@@ -378,7 +522,7 @@ export async function wrapLedgerEntry(env, entry, deps = {}) {
     block = planLattice({
       document_hash: entry_hash,
       offline,
-      username: offline || sync ? LATTICE_HANDLE : null,
+      username: offline || sync ? username : null,
       rows,
       sync,
     });
@@ -389,25 +533,84 @@ export async function wrapLedgerEntry(env, entry, deps = {}) {
   if (Object.prototype.hasOwnProperty.call(block, "position")) {
     return { ok: false, live: false, code: "LATTICE-POSITION-INSIDE", written: false, policy, rebuilt_from_zero: false };
   }
-  const position = rows.length + 1;
+  const allocated = await nextPosition(env);
   const target = targetForMode(offline ? "offline" : "online");
   const stored = {
     entry_hash,
     document_hash: block.document_hash,
     target,
     offline: block.offline ? 1 : 0,
-    position,
+    position: allocated.position,
     lattice: block,
     created_utc: new Date().toISOString(),
   };
-  await persistRow(env, stored);
-  const remoteBody = { entry_hash, lattice: block, position, target, spec: LATTICE_SPEC };
+  const saved = await persistRow(env, stored);
+  if (!saved.ok) {
+    return {
+      ok: false,
+      live: false,
+      code: saved.code,
+      written: false,
+      policy,
+      rebuilt_from_zero: false,
+      entry_hash,
+    };
+  }
+  const position = stored.position;
+  const remoteBody = {
+    entry_hash,
+    lattice: block,
+    position,
+    target,
+    spec: LATTICE_SPEC,
+    aggregate: true,
+    scope: { ...LATTICE_AGGREGATE_SCOPE },
+  };
+  if (!latticeRemoteEnabled(env)) {
+    const localPulled = await pullLocal(env, entry_hash);
+    const localCheck = checkPulledEntry(entry_hash, localPulled);
+    return {
+      ok: localCheck.ok,
+      live: false,
+      code: localCheck.ok ? "LATTICE-LOCAL" : "LATTICE-PULL-MISS",
+      written: true,
+      direction: { wrap: true, pull: localCheck.ok },
+      target,
+      position,
+      entry_hash,
+      lattice: block,
+      remote: { ok: false, published: false, called: false, code: "LATTICE-REMOTE-SKIPPED", target },
+      pull: localCheck,
+      remote_pull: null,
+      policy,
+      rebuilt_from_zero: false,
+    };
+  }
   const pushed = await pushRemote(env, target, remoteBody, deps);
   const remotePulled = await pullRemote(env, target, entry_hash, deps);
   const localPulled = await pullLocal(env, entry_hash);
   const localCheck = checkPulledEntry(entry_hash, localPulled);
-  const remoteCheck = remotePulled ? checkPulledEntry(entry_hash, remotePulled) : null;
-  const pullOk = localCheck.ok && (!remoteCheck || remoteCheck.ok);
+  const remoteCheck = remotePulled.row ? checkPulledEntry(entry_hash, remotePulled.row) : null;
+  const remoteOk = pushed.ok === true && pushed.published === true && !!(remoteCheck && remoteCheck.ok);
+  if (!remoteOk) {
+    return {
+      ok: false,
+      live: false,
+      code: remotePulled.silo ? "LATTICE-SILO-REFUSED" : "LATTICE-REMOTE-MISS",
+      written: true,
+      direction: { wrap: true, pull: false },
+      target,
+      position,
+      entry_hash,
+      lattice: block,
+      remote: pushed,
+      pull: localCheck,
+      remote_pull: remoteCheck,
+      policy,
+      rebuilt_from_zero: false,
+    };
+  }
+  const pullOk = localCheck.ok && remoteCheck.ok;
   return {
     ok: pullOk,
     live: false,
@@ -428,7 +631,15 @@ export async function wrapLedgerEntry(env, entry, deps = {}) {
 
 export function latticePullBody(row) {
   if (!row) {
-    return { ok: false, live: false, code: "LATTICE-PULL-MISS", rebuilt_from_zero: false, policy: { ...LATTICE_POLICY } };
+    return {
+      ok: false,
+      live: false,
+      code: "LATTICE-PULL-MISS",
+      aggregate: false,
+      silo: false,
+      rebuilt_from_zero: false,
+      policy: { ...LATTICE_POLICY },
+    };
   }
   return {
     ok: true,
@@ -438,6 +649,40 @@ export function latticePullBody(row) {
     position: row.position,
     target: row.target,
     lattice: row.lattice,
+    aggregate: false,
+    silo: false,
+    rebuilt_from_zero: false,
+    policy: { ...LATTICE_POLICY },
+  };
+}
+
+function publicLatticeRow(row) {
+  return {
+    entry_hash: row.entry_hash,
+    position: row.position,
+    target: row.target,
+    lattice: row.lattice,
+  };
+}
+
+export function latticeAggregateBody(rows, entryHash) {
+  const list = (rows || []).filter((row) => row && row.entry_hash).map(publicLatticeRow);
+  const want = String(entryHash || "");
+  const hit = want ? list.find((row) => row.entry_hash === want) : null;
+  const matched = !want || !!hit;
+  return {
+    ok: matched,
+    live: false,
+    code: matched ? "LATTICE-AGGREGATE" : "LATTICE-PULL-MISS",
+    aggregate: true,
+    silo: false,
+    scope: { ...LATTICE_AGGREGATE_SCOPE },
+    rows: list,
+    count: list.length,
+    entry_hash: hit ? hit.entry_hash : (want ? "" : undefined),
+    position: hit ? hit.position : undefined,
+    target: hit ? hit.target : undefined,
+    lattice: hit ? hit.lattice : undefined,
     rebuilt_from_zero: false,
     policy: { ...LATTICE_POLICY },
   };
@@ -461,7 +706,28 @@ export async function handleLatticeHttp(request, env, path) {
     return { status: 405, body: { ok: false, live: false, code: "LATTICE-PULL-GET", policy: { ...LATTICE_POLICY } } };
   }
   const url = new URL(request.url);
+  if (siloParam(url)) {
+    return {
+      status: 400,
+      body: {
+        ok: false,
+        live: false,
+        code: "LATTICE-SILO-REFUSED",
+        aggregate: true,
+        silo: true,
+        scope: { ...LATTICE_AGGREGATE_SCOPE },
+        rebuilt_from_zero: false,
+        policy: { ...LATTICE_POLICY },
+      },
+    };
+  }
   const entry_hash = String(url.searchParams.get("entry_hash") || "");
+  if (wantsAggregate(url)) {
+    const rows = await loadLatticeRows(env);
+    const body = latticeAggregateBody(rows, entry_hash);
+    const missing = !!entry_hash && !body.entry_hash;
+    return { status: missing ? 404 : 200, body };
+  }
   const row = await pullLocal(env, entry_hash);
   const body = latticePullBody(row && row.entry_hash === entry_hash ? row : null);
   return { status: body.ok ? 200 : 404, body };

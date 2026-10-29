@@ -507,10 +507,11 @@ async function publicSteer(env) {
   }
 }
 
-async function appendAndWrap(env, action, payload) {
+async function appendAndWrap(env, action, payload, username) {
   const entry = await appendLedger(env, action, payload);
   try {
-    entry.lattice = await wrapLedgerEntry(env, entry);
+    // Username is the session node id from the worker. A name in the POST body is not read.
+    entry.lattice = await wrapLedgerEntry(env, entry, { username });
   } catch (err) {
     entry.lattice = {
       ok: false,
@@ -681,7 +682,7 @@ export function publicPayload(row) {
   return payload;
 }
 
-export async function processSubmit(env, text) {
+export async function processSubmit(env, text, username) {
   const checked = validateChallengeText(text);
   if (!checked.ok) {
     throw ChallengeRefuse(checked.code, checked.error, checked.status);
@@ -717,7 +718,7 @@ export async function processSubmit(env, text) {
       text_sha256,
       content_sha256: row.content_sha256,
       challenge_preview: ledgerChallengePreview(challenge_text),
-    });
+    }, username);
     const uses = await usesCount(env);
     try { if (uses > 0) await metaSet(env, "uses", String(uses)); } catch { /* keep prior floor */ }
     return { ...row, isolated: true };
@@ -818,7 +819,7 @@ export async function processSubmit(env, text) {
       combined: pending.combined,
       changed_note: pending.changed_note,
       factor_detail_sha256: pending.factor_detail ? hashPayload(pending.factor_detail) : null,
-    });
+    }, username);
   }
   row.rescores = [initial];
   row.latest_rescore = initial;
@@ -839,7 +840,7 @@ export async function processSubmit(env, text) {
     dual_mesh: card.dual,
     paired: card.paired,
     factor_detail_sha256: submitDetail ? hashPayload(submitDetail) : null,
-  });
+  }, username);
   const delta = receiptScoreDelta(row.score_before, score_after);
   await appendAndWrap(env, "SCORE", {
     receipt_id: id,
@@ -853,7 +854,7 @@ export async function processSubmit(env, text) {
     mesh: card.mesh,
     debate: card.debate,
     dual_mesh: card.dual,
-  });
+  }, username);
   if (snap.ready && snap.display != null) {
     await metaSet(env, "triad_display", String(snap.display));
   }
@@ -1407,7 +1408,7 @@ async function handleGodlock(request, env, ctx) {
       }
 
       if (isSubmitPost) {
-        const row = await processSubmit(env, parsedSubmit.text);
+        const row = await processSubmit(env, parsedSubmit.text, nodeId);
         const stats = await gatherStats(env, { wrote, ctx });
         if (wantsJson(request, url)) {
           if (row.isolated === true || row.isolated === 1) {

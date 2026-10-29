@@ -2,7 +2,7 @@
 
 The parent D1 receipt and ledger DELETE procedure is retired.
 
-GodLock.uk wraps each receipt into the lattice hashchain after `appendLedger` and pulls that wrap back by `entry_hash`. Primary online writes address aziel-runtime. Secondary offline writes address aziel-corpus. A username tie-break keeps those from becoming two chains. Deleting `receipts` or `ledger` would break that chain.
+GodLock.uk wraps each receipt into the lattice hashchain after `appendLedger` and pulls that wrap back by `entry_hash`. Primary online writes address aziel-runtime. Secondary offline writes address aziel-corpus. The submitting user's tie-break keeps an offline document on one chain. Deleting `receipts` or `ledger` would break that chain.
 
 Do not run DELETE or a remote D1 execute against `receipts` or `ledger`. This file has no wipe SQL and no wipe command. Application code does not delete those rows.
 

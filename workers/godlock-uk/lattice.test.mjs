@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { hashReceipt } from "./src/engine.js";
 import {
+  LATTICE_AGGREGATE_SCOPE,
   LATTICE_POLICY,
   PRIMARY_TARGET,
   SECONDARY_TARGET,
@@ -70,9 +71,10 @@ describe("bidirectional lattice", () => {
     const off = latticeOfflineSecondary(D, "aziel");
     assert.equal(off, "7e1ea25d11c9c05dbb7844a69f83456fa56c7dbc67cadb913b16459e6e7a1a85");
     const primary = latticePrimary(D, "0".repeat(64));
-    const block = planLattice({ document_hash: D, offline: true, username: "godlock", rows: [] });
+    const block = planLattice({ document_hash: D, offline: true, username: "ada", rows: [] });
     assert.equal(block.offline, true);
-    assert.equal(block.username, "godlock");
+    assert.equal(block.username, "ada");
+    assert.notEqual(block.username, "godlock");
     assert.equal(block.primary, primary);
     assert.equal(Object.prototype.hasOwnProperty.call(block, "position"), false);
     assert.equal(Object.prototype.hasOwnProperty.call(block, "tiebreak"), false);
@@ -100,6 +102,11 @@ describe("bidirectional lattice", () => {
     const wrapped = await wrapLedgerEntry(env, entry);
     assert.equal(wrapped.ok, true);
     assert.equal(wrapped.live, false);
+    assert.equal(wrapped.code, "LATTICE-LOCAL");
+    assert.equal(wrapped.remote.called, false);
+    assert.equal(wrapped.remote.code, "LATTICE-REMOTE-SKIPPED");
+    assert.equal(wrapped.remote.published, false);
+    assert.notEqual(wrapped.code, "LATTICE-WRAP-PULL");
     assert.equal(wrapped.direction.wrap, true);
     assert.equal(wrapped.direction.pull, true);
     assert.equal(wrapped.target, PRIMARY_TARGET);
@@ -130,45 +137,70 @@ describe("bidirectional lattice", () => {
     assert.equal(hashReceipt(receipt), before);
   });
 
-  it("writes offline to aziel-corpus and tie-breaks the same document onto aziel-runtime once", async () => {
+  it("writes offline to aziel-corpus and tie-breaks the submitting user onto aziel-runtime once", async () => {
     const env = { LATTICE_MODE: "offline" };
     const entry = { entry_hash: D };
-    const offline = await wrapLedgerEntry(env, entry);
+    const missing = await wrapLedgerEntry(env, entry);
+    assert.equal(missing.ok, false);
+    assert.equal(missing.code, "LATTICE-USERNAME-ABSENT");
+    assert.equal(missing.written, false);
+    const offline = await wrapLedgerEntry(env, entry, { username: "ada" });
     assert.equal(offline.target, SECONDARY_TARGET);
     assert.equal(offline.lattice.offline, true);
-    assert.equal(offline.lattice.username, "godlock");
+    assert.equal(offline.lattice.username, "ada");
+    assert.notEqual(offline.lattice.username, "godlock");
     assert.equal(offline.pull.ok, true);
     env.LATTICE_MODE = "sync";
-    const synced = await wrapLedgerEntry(env, entry);
+    const synced = await wrapLedgerEntry(env, entry, { username: "ada" });
     assert.equal(synced.ok, true);
     assert.equal(synced.target, PRIMARY_TARGET);
     assert.equal(synced.lattice.offline, false);
     assert.equal(synced.lattice.username, null);
     assert.equal(synced.lattice.tiebreak.status, "synced");
     assert.equal(synced.lattice.tiebreak.offline_secondary, offline.lattice.secondary);
-    const again = await wrapLedgerEntry(env, entry);
+    const again = await wrapLedgerEntry(env, entry, { username: "ada" });
     assert.equal(again.ok, false);
     assert.equal(again.code, "LATTICE-DOUBLE");
     assert.equal(again.written, false);
     assert.equal(again.live, false);
   });
 
-  it("pulls the same entry_hash back from the remote lattice", async () => {
+  it("pulls the same entry_hash back from the remote aggregate lattice", async () => {
     const store = new Map();
     const fetchImpl = async (url, init, target) => {
       const u = new URL(url);
+      assert.ok(u.pathname === "/v1/lattice/wrap" || u.pathname === "/v1/lattice/pull");
       if (init && init.method === "POST") {
         const body = JSON.parse(init.body);
+        assert.equal(body.aggregate, true);
+        assert.equal(body.scope.users, "all");
+        assert.equal(body.scope.mesh, "all");
         store.set(target + ":" + body.entry_hash, body);
         return { ok: true, status: 201, json: async () => ({ ok: true, entry_hash: body.entry_hash }) };
+      }
+      assert.equal(u.pathname, "/v1/lattice/pull");
+      assert.equal(u.searchParams.get("aggregate"), "1");
+      for (const [key, value] of Object.entries(LATTICE_AGGREGATE_SCOPE)) {
+        assert.equal(u.searchParams.get(key), value);
       }
       const entry_hash = u.searchParams.get("entry_hash");
       const body = store.get(target + ":" + entry_hash);
       if (!body) return { ok: false, status: 404, json: async () => ({}) };
-      return { ok: true, status: 200, json: async () => body };
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          ok: true,
+          aggregate: true,
+          scope: { ...LATTICE_AGGREGATE_SCOPE },
+          rows: [body, { entry_hash: "c".repeat(64), position: 9 }],
+        }),
+      };
     };
-    const env = { LATTICE_MODE: "online" };
+    const env = { LATTICE_MODE: "online", LATTICE_REMOTE: "1" };
     const wrapped = await wrapLedgerEntry(env, { entry_hash: E }, { fetch: fetchImpl });
+    assert.equal(wrapped.ok, true);
+    assert.equal(wrapped.code, "LATTICE-WRAP-PULL");
     assert.equal(wrapped.remote.published, true);
     assert.equal(wrapped.remote.target, PRIMARY_TARGET);
     assert.equal(wrapped.remote_pull.ok, true);
@@ -176,6 +208,124 @@ describe("bidirectional lattice", () => {
     assert.equal(wrapped.remote_pull.rebuilt_from_zero, false);
     assert.equal(store.get(PRIMARY_TARGET + ":" + E).position, wrapped.position);
     assert.equal(store.get(PRIMARY_TARGET + ":" + E).lattice.position, undefined);
+  });
+
+  it("does not call AZIEL_RUNTIME unless LATTICE_REMOTE is set", async () => {
+    let calls = 0;
+    const env = {
+      LATTICE_MODE: "online",
+      AZIEL_RUNTIME: {
+        async fetch() {
+          calls += 1;
+          return new Response(JSON.stringify({ ok: true }), { status: 201 });
+        },
+      },
+    };
+    const wrapped = await wrapLedgerEntry(env, { entry_hash: E });
+    assert.equal(calls, 0);
+    assert.equal(wrapped.ok, true);
+    assert.equal(wrapped.code, "LATTICE-LOCAL");
+    assert.equal(wrapped.remote.published, false);
+    assert.equal(wrapped.live, false);
+  });
+
+  it("fails closed when remote wrap or pull is a 404", async () => {
+    const env = { LATTICE_MODE: "online", LATTICE_REMOTE: "1" };
+    const fetchImpl = async () => ({ ok: false, status: 404, json: async () => ({ ok: false }) });
+    const wrapped = await wrapLedgerEntry(env, { entry_hash: E }, { fetch: fetchImpl });
+    assert.equal(wrapped.ok, false);
+    assert.equal(wrapped.code, "LATTICE-REMOTE-MISS");
+    assert.equal(wrapped.written, true);
+    assert.equal(wrapped.live, false);
+    assert.equal(wrapped.direction.pull, false);
+    assert.notEqual(wrapped.code, "LATTICE-WRAP-PULL");
+    assert.equal(wrapped.remote.published, false);
+    const local = await pullLocal(env, E);
+    assert.equal(local.entry_hash, E);
+  });
+
+  it("fails closed when the remote answers with a single-user silo", async () => {
+    const env = { LATTICE_MODE: "online", LATTICE_REMOTE: "1" };
+    const fetchImpl = async (url, init) => {
+      if (init && init.method === "POST") {
+        return { ok: true, status: 201, json: async () => ({ ok: true, entry_hash: E }) };
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ ok: true, entry_hash: E, scope: { ...LATTICE_AGGREGATE_SCOPE, users: "ada" } }),
+      };
+    };
+    const wrapped = await wrapLedgerEntry(env, { entry_hash: E }, { fetch: fetchImpl });
+    assert.equal(wrapped.ok, false);
+    assert.equal(wrapped.code, "LATTICE-SILO-REFUSED");
+    assert.equal(wrapped.written, true);
+    assert.equal(wrapped.live, false);
+  });
+
+  it("does not keep a memory row when the D1 position insert collides", async () => {
+    const env = {
+      LATTICE_MODE: "online",
+      DB: {
+        prepare() {
+          const stmt = {
+            bind() { return stmt; },
+            async all() { return { results: [] }; },
+            async first() { return { n: 3 }; },
+            async run() { throw new Error("UNIQUE constraint failed: lattice_chain.position"); },
+          };
+          return stmt;
+        },
+      },
+    };
+    const wrapped = await wrapLedgerEntry(env, { entry_hash: E });
+    assert.equal(wrapped.ok, false);
+    assert.equal(wrapped.code, "LATTICE-POSITION-COLLISION");
+    assert.equal(wrapped.written, false);
+    assert.equal(wrapped.live, false);
+    assert.equal(await pullLocal(env, E), null);
+    assert.ok(!env.__latticeRows || env.__latticeRows.length === 0);
+  });
+
+  it("allocates the next position from the highest stored position", async () => {
+    const env = { LATTICE_MODE: "online" };
+    env.__latticeRows = [{ entry_hash: "c".repeat(64), position: 5, document_hash: "c".repeat(64), lattice: null }];
+    const wrapped = await wrapLedgerEntry(env, { entry_hash: E });
+    assert.equal(wrapped.ok, true);
+    assert.equal(wrapped.position, 6);
+    assert.equal(env.__latticeRows.length, 2);
+  });
+
+  it("serves an aggregate pull across users and refuses a silo filter", async () => {
+    const env = { LATTICE_MODE: "offline" };
+    await wrapLedgerEntry(env, { entry_hash: D }, { username: "ada" });
+    env.LATTICE_MODE = "online";
+    await wrapLedgerEntry(env, { entry_hash: E }, { username: "bea" });
+    const pull = await handleLatticeHttp(
+      new Request("https://godlock.uk/v1/lattice/pull?aggregate=1&users=all&sites=all&uses=all&hosts=all&access_points=all&nodes=all&mesh=all"),
+      env,
+      "/v1/lattice/pull",
+    );
+    assert.equal(pull.status, 200);
+    assert.equal(pull.body.ok, true);
+    assert.equal(pull.body.live, false);
+    assert.equal(pull.body.aggregate, true);
+    assert.equal(pull.body.silo, false);
+    assert.equal(pull.body.scope.users, "all");
+    assert.equal(pull.body.scope.mesh, "all");
+    assert.equal(pull.body.count, 2);
+    assert.equal(pull.body.rows[0].lattice.username, "ada");
+    assert.equal(pull.body.rows[1].entry_hash, E);
+    const silo = await handleLatticeHttp(
+      new Request("https://godlock.uk/v1/lattice/pull?users=ada"),
+      env,
+      "/v1/lattice/pull",
+    );
+    assert.equal(silo.status, 400);
+    assert.equal(silo.body.ok, false);
+    assert.equal(silo.body.code, "LATTICE-SILO-REFUSED");
+    assert.equal(silo.body.rows, undefined);
+    assert.equal(silo.body.live, false);
   });
 
   it("serves pull on godlock and refuses a public wrap", async () => {

@@ -296,26 +296,87 @@ describe("bidirectional lattice", () => {
     assert.equal(env.__latticeRows.length, 2);
   });
 
-  it("serves an aggregate pull across users and refuses a silo filter", async () => {
-    const env = { LATTICE_MODE: "offline" };
+  it("refuses a public aggregate pull and lists rows only for the operator token", async () => {
+    const secret = "test-operator-token";
+    const env = { LATTICE_MODE: "offline", LATTICE_OPERATOR_TOKEN: secret };
     await wrapLedgerEntry(env, { entry_hash: D }, { username: "ada" });
     env.LATTICE_MODE = "online";
     await wrapLedgerEntry(env, { entry_hash: E }, { username: "bea" });
-    const pull = await handleLatticeHttp(
-      new Request("https://godlock.uk/v1/lattice/pull?aggregate=1&users=all&sites=all&uses=all&hosts=all&access_points=all&nodes=all&mesh=all"),
+    const aggregateUrl = "https://godlock.uk/v1/lattice/pull?aggregate=1&users=all&sites=all&uses=all&hosts=all&access_points=all&nodes=all&mesh=all";
+    const open = await handleLatticeHttp(new Request(aggregateUrl), env, "/v1/lattice/pull");
+    assert.equal(open.status, 401);
+    assert.equal(open.body.ok, false);
+    assert.equal(open.body.live, false);
+    assert.equal(open.body.code, "LATTICE-AGGREGATE-AUTH");
+    assert.equal(open.body.rows, undefined);
+    assert.equal(open.body.count, undefined);
+    assert.equal(JSON.stringify(open.body).includes("ada"), false);
+    assert.equal(JSON.stringify(open.body).includes("username"), false);
+
+    const queryToken = await handleLatticeHttp(
+      new Request(aggregateUrl + "&token=" + secret),
       env,
       "/v1/lattice/pull",
     );
-    assert.equal(pull.status, 200);
-    assert.equal(pull.body.ok, true);
-    assert.equal(pull.body.live, false);
-    assert.equal(pull.body.aggregate, true);
-    assert.equal(pull.body.silo, false);
-    assert.equal(pull.body.scope.users, "all");
-    assert.equal(pull.body.scope.mesh, "all");
-    assert.equal(pull.body.count, 2);
-    assert.equal(pull.body.rows[0].lattice.username, "ada");
-    assert.equal(pull.body.rows[1].entry_hash, E);
+    assert.equal(queryToken.status, 401);
+    assert.equal(queryToken.body.rows, undefined);
+    assert.equal(JSON.stringify(queryToken.body).includes("ada"), false);
+
+    const wrong = await handleLatticeHttp(
+      new Request(aggregateUrl, { headers: { Authorization: "Bearer not-the-token" } }),
+      env,
+      "/v1/lattice/pull",
+    );
+    assert.equal(wrong.status, 401);
+    assert.equal(wrong.body.rows, undefined);
+
+    const unset = await handleLatticeHttp(
+      new Request(aggregateUrl, { headers: { "X-Aziel-Runtime-Token": secret } }),
+      { ...env, LATTICE_OPERATOR_TOKEN: "" },
+      "/v1/lattice/pull",
+    );
+    assert.equal(unset.status, 401);
+    assert.equal(unset.body.rows, undefined);
+
+    const scopeOnly = await handleLatticeHttp(
+      new Request("https://godlock.uk/v1/lattice/pull?users=all&mesh=all"),
+      env,
+      "/v1/lattice/pull",
+    );
+    assert.equal(scopeOnly.status, 401);
+    assert.equal(scopeOnly.body.code, "LATTICE-AGGREGATE-AUTH");
+    assert.equal(scopeOnly.body.rows, undefined);
+
+    const bearer = await handleLatticeHttp(
+      new Request(aggregateUrl, { headers: { Authorization: "Bearer " + secret } }),
+      env,
+      "/v1/lattice/pull",
+    );
+    assert.equal(bearer.status, 200);
+    assert.equal(bearer.body.ok, true);
+    assert.equal(bearer.body.live, false);
+    assert.equal(bearer.body.aggregate, true);
+    assert.equal(bearer.body.silo, false);
+    assert.equal(bearer.body.count, 2);
+    assert.equal(bearer.body.rows[0].lattice.username, "ada");
+    assert.equal(bearer.body.rows[1].entry_hash, E);
+
+    const header = await handleLatticeHttp(
+      new Request(aggregateUrl, { headers: { "X-Aziel-Runtime-Token": secret } }),
+      env,
+      "/v1/lattice/pull",
+    );
+    assert.equal(header.status, 200);
+    assert.equal(header.body.rows[0].lattice.username, "ada");
+
+    const door = await worker.fetch(new Request(aggregateUrl), env);
+    assert.equal(door.status, 401);
+    const doorBody = await door.json();
+    assert.equal(doorBody.code, "LATTICE-AGGREGATE-AUTH");
+    assert.equal(doorBody.live, false);
+    assert.equal(doorBody.rows, undefined);
+    assert.equal(JSON.stringify(doorBody).includes("ada"), false);
+
     const silo = await handleLatticeHttp(
       new Request("https://godlock.uk/v1/lattice/pull?users=ada"),
       env,
@@ -326,6 +387,7 @@ describe("bidirectional lattice", () => {
     assert.equal(silo.body.code, "LATTICE-SILO-REFUSED");
     assert.equal(silo.body.rows, undefined);
     assert.equal(silo.body.live, false);
+    assert.equal(JSON.stringify(silo.body).includes("ada"), false);
   });
 
   it("serves pull on godlock and refuses a public wrap", async () => {

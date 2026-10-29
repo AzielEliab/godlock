@@ -7,7 +7,7 @@ export function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, HEAD, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Aziel-Runtime-Token",
     "Content-Signal": CONTENT_SIGNAL,
   };
 }

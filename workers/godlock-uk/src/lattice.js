@@ -14,6 +14,7 @@
  * live stays false. auto_update, RF, and sat stay off. Cap-7 is not ICANN.
  * Author: Aziel Eliab.
  */
+import { timingSafeEqual } from "node:crypto";
 import { hashPayload } from "./ledger.js";
 
 export const LATTICE_SPEC = "AZRT-DUAL-LATTICE-1.0";
@@ -252,6 +253,70 @@ function siloParam(url) {
 function wantsAggregate(url) {
   if (url.searchParams.get("aggregate") === "1") return true;
   return AGGREGATE_KEYS.some((key) => url.searchParams.get(key) === "all");
+}
+
+/**
+ * Operator secret for an aggregate listing. Wrangler secret LATTICE_OPERATOR_TOKEN.
+ * Header only: Authorization (Bearer or raw) or X-Aziel-Runtime-Token.
+ * A query string or body never carries it. Unset secret fails closed.
+ */
+function operatorSecret(env) {
+  const raw = env && env.LATTICE_OPERATOR_TOKEN;
+  if (typeof raw !== "string") return "";
+  return raw.trim();
+}
+
+function headerOperatorToken(request) {
+  if (!request || !request.headers || typeof request.headers.get !== "function") return "";
+  const auth = request.headers.get("Authorization");
+  const alt = request.headers.get("X-Aziel-Runtime-Token");
+  const fromAuth = auth == null ? "" : bearerOrRaw(String(auth));
+  const fromAlt = alt == null ? "" : String(alt).trim();
+  if (fromAuth && fromAlt && fromAuth !== fromAlt) return "";
+  return fromAuth || fromAlt;
+}
+
+function bearerOrRaw(value) {
+  const trimmed = String(value || "").trim();
+  const bearer = /^Bearer\s+(\S+)\s*$/i.exec(trimmed);
+  if (bearer) return bearer[1];
+  if (/^Bearer\b/i.test(trimmed)) return "";
+  if (/\s/.test(trimmed)) return "";
+  return trimmed;
+}
+
+async function verifyOperatorToken(presented, expected) {
+  const encoder = new TextEncoder();
+  const [providedHash, expectedHash] = await Promise.all([
+    crypto.subtle.digest("SHA-256", encoder.encode(presented)),
+    crypto.subtle.digest("SHA-256", encoder.encode(expected)),
+  ]);
+  const providedBytes = new Uint8Array(providedHash);
+  const expectedBytes = new Uint8Array(expectedHash);
+  if (typeof crypto.subtle.timingSafeEqual === "function") {
+    return crypto.subtle.timingSafeEqual(providedBytes, expectedBytes);
+  }
+  return timingSafeEqual(providedBytes, expectedBytes);
+}
+
+/** True only when the header token matches the configured operator secret. */
+export async function aggregateAuthorized(request, env) {
+  const expected = operatorSecret(env);
+  const presented = headerOperatorToken(request);
+  if (!expected || !presented) return false;
+  return verifyOperatorToken(presented, expected);
+}
+
+export function aggregateAuthRefusal() {
+  return {
+    ok: false,
+    live: false,
+    code: "LATTICE-AGGREGATE-AUTH",
+    aggregate: false,
+    auth: "required",
+    rebuilt_from_zero: false,
+    policy: { ...LATTICE_POLICY },
+  };
 }
 
 /**
@@ -723,6 +788,8 @@ export async function handleLatticeHttp(request, env, path) {
   }
   const entry_hash = String(url.searchParams.get("entry_hash") || "");
   if (wantsAggregate(url)) {
+    const allowed = await aggregateAuthorized(request, env);
+    if (!allowed) return { status: 401, body: aggregateAuthRefusal() };
     const rows = await loadLatticeRows(env);
     const body = latticeAggregateBody(rows, entry_hash);
     const missing = !!entry_hash && !body.entry_hash;

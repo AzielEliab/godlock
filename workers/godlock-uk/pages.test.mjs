@@ -2470,15 +2470,15 @@ describe("receipts UI and public payload", () => {
 });
 
 describe("Hub launch-update parity — Softwares + runtime SoT", () => {
-  it("pins live runtime SoT main ed3350c5 / 2.0.0-rc1", () => {
+  it("pins live runtime SoT main 710fa904 / 2.0.0-rc1", () => {
     assert.equal(RUNTIME_VERSION, "2.0.0-rc1");
-    assert.equal(RUNTIME_GIT_SHA_SHORT, "ed3350c5");
-    assert.equal(RUNTIME_GIT_SHA, "ed3350c57a870c11c36efec11378581e04ec4777");
-    assert.equal(RUNTIME_SOT, "main ed3350c5 / 2.0.0-rc1");
+    assert.equal(RUNTIME_GIT_SHA_SHORT, "710fa904");
+    assert.equal(RUNTIME_GIT_SHA, "710fa904c786e0d84fcc58f4c02800115f7ada9e");
+    assert.equal(RUNTIME_SOT, "main 710fa904 / 2.0.0-rc1");
     const cite = citeDoc();
     assert.equal(cite.runtime_version, "2.0.0-rc1");
     assert.equal(cite.runtime_git_sha, RUNTIME_GIT_SHA);
-    assert.equal(cite.runtime_git_sha_short, "ed3350c5");
+    assert.equal(cite.runtime_git_sha_short, "710fa904");
     assert.equal(cite.runtime_version_id, RUNTIME_VERSION_ID);
     assert.match(cite.runtime_version_id_note, /Not a baked suite constant/);
     assert.equal(cite.trades_runtime_version, "0.4.9");
@@ -2545,8 +2545,8 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
   it("stamps /v1/software and llms with the same SoT and no LIVE shelf flip", () => {
     const body = softwareApiDoc([]);
     assert.equal(body.runtime_version, "2.0.0-rc1");
-    assert.equal(body.runtime_git_sha_short, "ed3350c5");
-    assert.equal(body.runtime_git_sha, "ed3350c57a870c11c36efec11378581e04ec4777");
+    assert.equal(body.runtime_git_sha_short, "710fa904");
+    assert.equal(body.runtime_git_sha, "710fa904c786e0d84fcc58f4c02800115f7ada9e");
     assert.equal(body.runtime_version_id, RUNTIME_VERSION_ID);
     assert.match(body.software_note, /hub-scope/);
     assert.match(body.software_note, /not the suite's 42/);
@@ -2559,8 +2559,8 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(body.runtime_distribution[0].label, "Try on Glama");
     const llms = llmsDoc();
     assert.match(llms, /## Softwares \+ runtime launch readiness/);
-    assert.match(llms, /SoT LIVE: main ed3350c5 \/ 2\.0\.0-rc1/);
-    assert.match(llms, /Published version_id: 8a416c9b-076b-4ed1-bf3a-2baa85b76733/);
+    assert.match(llms, /SoT LIVE: main 710fa904 \/ 2\.0\.0-rc1/);
+    assert.match(llms, /Published version_id: 1de31df3-3e61-4136-897d-11e1a6de8c5f/);
     assert.match(llms, /hub-scope/);
     assert.match(llms, /not the suite's 42/);
     assert.doesNotMatch(llms, /6a3798a|105fa1ee/);
@@ -2571,7 +2571,7 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(llms, /heading → list only/);
     assert.doesNotMatch(llms, /live_ready:\s*true/i);
     const softwareMeta = defaultDescription("software");
-    assert.match(softwareMeta, /ed3350c5/);
+    assert.match(softwareMeta, /710fa904/);
     assert.doesNotMatch(softwareMeta, /6a3798a|105fa1ee/);
     assert.match(defaultDescription("runtime"), /fraggate_call/);
   });

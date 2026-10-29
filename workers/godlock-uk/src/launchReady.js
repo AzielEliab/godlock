@@ -1,9 +1,9 @@
 /**
  * Runtime Softwares launch-readiness cite for godlock.uk.
- * SoT is live aziel-runtime GET /v1/software: main ed3350c5 / 2.0.0-rc1.
- * Deployed git_sha ed3350c57a870c11c36efec11378581e04ec4777 (read 2026-10-24).
+ * SoT is live aziel-runtime GET /v1/software: main 710fa904 / 2.0.0-rc1.
+ * Deployed git_sha 710fa904c786e0d84fcc58f4c02800115f7ada9e (read 2026-10-29).
  * git_sha_source deploy_var. git_sha_tracks_deployed_tip true. deploy_lag null.
- * Published version_id 8a416c9b-076b-4ed1-bf3a-2baa85b76733 (vid 8a416c9b)
+ * Published version_id 1de31df3-3e61-4136-897d-11e1a6de8c5f (vid 1de31df3)
  * is env.CF_VERSION_METADATA.id on that read. It is a serve-time isolate id,
  * not a baked suite constant.
  * Suite 2.0.0-rc1 stays the certification-point freeze. Authority count stays 42
@@ -20,14 +20,14 @@ export const AUTHOR = "Aziel Eliab";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
 export const RUNTIME_VERSION = "2.0.0-rc1";
-/** Deployed GET /v1/software git_sha (read 2026-10-24). Public short stamp is the 8-char tip prefix. */
-export const RUNTIME_GIT_SHA = "ed3350c57a870c11c36efec11378581e04ec4777";
-export const RUNTIME_GIT_SHA_SHORT = "ed3350c5";
+/** Deployed GET /v1/software git_sha (read 2026-10-29). Public short stamp is the 8-char tip prefix. */
+export const RUNTIME_GIT_SHA = "710fa904c786e0d84fcc58f4c02800115f7ada9e";
+export const RUNTIME_GIT_SHA_SHORT = "710fa904";
 /**
- * Published GET /v1/software version_id on the 2026-10-24 read (vid 8a416c9b).
+ * Published GET /v1/software version_id on the 2026-10-29 read (vid 1de31df3).
  * env.CF_VERSION_METADATA.id, read at serve time. Not a baked suite constant.
  */
-export const RUNTIME_VERSION_ID = "8a416c9b-076b-4ed1-bf3a-2baa85b76733";
+export const RUNTIME_VERSION_ID = "1de31df3-3e61-4136-897d-11e1a6de8c5f";
 export const RUNTIME_VERSION_ID_NOTE =
   "Published GET /v1/software version_id for this cite. env.CF_VERSION_METADATA.id, read at serve time. Not a baked suite constant.";
 export const RUNTIME_SOT_BRANCH = "main";

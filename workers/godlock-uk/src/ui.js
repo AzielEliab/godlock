@@ -26,6 +26,7 @@ import {
   parsePublicLivePresence,
 } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
+import { paragraphFrom, visitorResponse } from "./visitorResponse.js";
 import {
   DEBATE_HEADLINE, METHOD_PUBLIC, BIAS_PUBLIC, RESCORE_RULE_PUBLIC, READING_PUBLIC, SCORE_METHOD_URL,
   oldStoredScorePhrase, publishedReading, visitorReceiptLine,
@@ -109,6 +110,9 @@ button,.button{background:var(--gold);color:#14110a;border:0;padding:12px 18px;b
 button.ghost,.button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 0}
 .card,.answer{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+#response{scroll-margin-top:12px}
+.response-text{font-size:17px}
+.response-preview{margin:6px 0;white-space:pre-wrap;word-break:break-word}
 .answer h2{margin:8px 0 10px;font-size:18px}
 .answer .block{margin:12px 0}
 .answer .k{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
@@ -299,7 +303,7 @@ ${ecosystemNav()}
           ta.value="";
           if(j.stats){applyStats(j.stats);}
           if(j.isolated){location.href="/";return;}
-          if(j.id){location.href="/?r="+encodeURIComponent(j.id);return;}
+          if(j.id){location.href="/?r="+encodeURIComponent(j.id)+"#response";return;}
           location.href="/";
         })
         .catch(function(){if(btn){btn.disabled=false;}showError("Submit refused.");});
@@ -506,11 +510,16 @@ function rescoreLine(row) {
 export function priorReceiptItems(rows, { fullChallenge = false } = {}) {
   return (rows || []).map((r) => {
     const challenge = fullChallenge ? challengeBlockText(r) : challengePreview(r);
+    const spoken = visitorResponse(r);
+    const preview = paragraphFrom(spoken, { full: false });
+    const shown = preview.length > 180 ? preview.slice(0, 180) + "…" : preview;
+    const previewLabel = spoken.derived ? `<div class="k">Derived response</div>` : "";
     return `<li>
       <details class="thread" data-receipt-id="${esc(r.id)}">
       <summary><span class="challenge-preview">${esc(challenge)}</span></summary>
       <div class="thread-body" aria-live="polite"><p class="muted">Loading reasoning and receipt…</p></div>
       </details>
+      <div class="response-preview"${spoken.derived ? ` data-derived="true"` : ""}>${previewLabel}${esc(shown)}</div>
       ${rescoreLine(r)}
       <div class="muted">${esc(when(r.created_utc))}</div>
       <a href="/receipt/${esc(r.id)}">Receipt</a></li>`;
@@ -726,6 +735,7 @@ ${statsGrid(s)}
   <div><div class="n" id="stat-residual">${esc(meter.residual)}</div><div class="k">Meter remainder</div></div>
 </div>
 ${steerPanel(s.steer, s)}
+${latestHtml}
 <div class="card">
   <p>${esc(METHOD_PUBLIC)}</p>
   <p>${esc(BIAS_PUBLIC)}</p>
@@ -745,7 +755,6 @@ ${err}
   </div>
 </form>
 ${homeSoftwareLine()}
-${latestHtml}
 <h2>Prior receipts</h2>
 <p class="muted prior-more">Newest ${esc(HOME_PRIOR_LIMIT)}. Every receipt is kept. <a href="${esc(RECEIPTS_PATH)}">Full receipts chain</a>.</p>
 <ul class="prior">${list}</ul>
@@ -798,6 +807,14 @@ export function answerCard(row, latest) {
   const history = Array.isArray(row.rescores) ? row.rescores : [];
   const latestRescore = row.latest_rescore || (history.length ? history[history.length - 1] : null);
   const later = history.filter((item) => item && item.reason && item.reason !== "initial");
+  const spoken = visitorResponse(row);
+  const paragraph = paragraphFrom(spoken, { full: !latest });
+  const summaryText = publicText(row.summary);
+  const explanationText = publicText(row.explanation);
+  const responseLabel = spoken.derived ? "Derived response" : "Response";
+  const derivedNote = spoken.derived
+    ? `<p class="muted">Local scorer at page load. Not stored on the receipt.</p>`
+    : "";
   const reading = publishedReading(row);
   const remainderBit = row.residual != null && row.residual !== ""
     ? " Old stored residual " + row.residual + "%."
@@ -811,11 +828,12 @@ export function answerCard(row, latest) {
   const priorNotes = history.filter((item) => item && item.reason && item.reason !== "initial").map((item) => {
     return `<li>${esc(when(item.created_utc))}: ${esc(item.changed_note || item.reason)}</li>`;
   }).join("");
-  return `<article class="answer">
+  return `<article class="answer" id="response">
     <h2>${esc(title)}</h2>
     <div class="block"><div class="k">Question</div><p class="challenge-text">${esc(challengeBlockText(row))}</p></div>
-    <div class="block"><div class="k">Summary</div><p>${esc(publicText(row.summary))}</p></div>
-    <div class="block"><div class="k">Explanation</div><p>${esc(publicText(row.explanation))}</p></div>
+    <div class="block"${spoken.derived ? ` data-derived="true"` : ""}><div class="k">${esc(responseLabel)}</div>${derivedNote}<p class="response-text">${esc(paragraph)}</p></div>
+    <div class="block"><div class="k">Summary</div><p class="stored-summary">${esc(summaryText)}</p></div>
+    <div class="block"><div class="k">Explanation</div><p class="stored-explanation">${esc(explanationText)}</p></div>
     ${triad}
     ${stored}
     ${priorNotes ? `<div class="block"><div class="k">Rescores</div><ul>${priorNotes}</ul></div>` : ""}

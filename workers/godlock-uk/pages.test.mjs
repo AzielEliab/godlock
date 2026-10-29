@@ -2771,6 +2771,14 @@ describe("home page shows the response", () => {
     return start >= 0 && end > start ? html.slice(start, end) : "";
   }
 
+  function labeledBlock(html, label) {
+    const needle = `<div class="k">${label}</div>`;
+    const start = html.indexOf(needle);
+    if (start < 0) return "";
+    const next = html.indexOf(`<div class="k">`, start + needle.length);
+    return html.slice(start, next > start ? next : html.length);
+  }
+
   it("shows the response for a pinned receipt and for the newest public receipt", async () => {
     const rec = responseEnv();
     const before = rec.rows.map((r) => JSON.stringify({
@@ -2804,14 +2812,26 @@ describe("home page shows the response", () => {
     const home = await homeRes.text();
     const homeAnswer = answerSlice(home);
     assert.match(home, /#response/);
-    assert.ok(home.indexOf('id="response"') < home.indexOf('id="steer"'));
+    assert.ok(home.indexOf('id="stat-current-score"') < home.indexOf('id="response"'));
+    assert.ok(home.indexOf('class="scorebox"') < home.indexOf('id="response"'));
+    assert.ok(home.indexOf('id="steer"') < home.indexOf('id="response"'));
     assert.ok(home.indexOf('id="response"') < home.indexOf('id="challenge-form"'));
     assert.match(homeAnswer, /Functionally specified digital information joined to a translation reader/);
-    assert.match(homeAnswer, /A complete intelligent-design challenge is recorded under the locked protocol/);
-    assert.match(homeAnswer, /class="response-text"/);
-    assert.doesNotMatch(homeAnswer, /Factors that do not apply are omitted/);
+    assert.match(homeAnswer, /Derived response/);
+    assert.match(homeAnswer, /data-derived="true"/);
+    assert.match(homeAnswer, /Local scorer at page load/);
+    const homeDerived = labeledBlock(homeAnswer, "Derived response");
+    assert.match(homeDerived, /A complete intelligent-design challenge is recorded under the locked protocol/);
+    assert.match(homeDerived, /class="response-text"/);
+    assert.doesNotMatch(homeDerived, /Factors that do not apply are omitted/);
+    assert.doesNotMatch(homeDerived, /TRIAD_V3 display/);
+    assert.match(labeledBlock(homeAnswer, "Summary"), /class="stored-summary"/);
+    assert.match(labeledBlock(homeAnswer, "Summary"), /TRIAD_V3 display 31/);
+    assert.match(labeledBlock(homeAnswer, "Explanation"), /class="stored-explanation"/);
+    assert.match(labeledBlock(homeAnswer, "Explanation"), /Factors that do not apply are omitted/);
     assert.match(home, /The input is too thin to weigh/);
     assert.match(home, /class="response-preview"/);
+    assert.match(home, /data-derived="true"/);
     assert.doesNotMatch(home, /ISOLATED SECRET QUESTION/);
 
     const pinnedRes = await worker.fetch(new Request("https://godlock.uk/?r=older", {
@@ -2820,9 +2840,14 @@ describe("home page shows the response", () => {
     const pinned = await pinnedRes.text();
     const pinnedAnswer = answerSlice(pinned);
     assert.match(pinnedAnswer, /Why is the sky blue\?/);
-    assert.match(pinnedAnswer, /The input is too thin to weigh/);
-    assert.doesNotMatch(pinnedAnswer, /A complete intelligent-design challenge is recorded under the locked protocol/);
-    assert.doesNotMatch(pinnedAnswer, /Factors that do not apply are omitted/);
+    assert.match(pinnedAnswer, /Derived response/);
+    const pinnedDerived = labeledBlock(pinnedAnswer, "Derived response");
+    assert.match(pinnedDerived, /The input is too thin to weigh/);
+    assert.doesNotMatch(pinnedDerived, /A complete intelligent-design challenge is recorded under the locked protocol/);
+    assert.doesNotMatch(pinnedDerived, /Factors that do not apply are omitted/);
+    assert.match(labeledBlock(pinnedAnswer, "Summary"), /TRIAD_V3 display 31/);
+    assert.ok(pinned.indexOf('id="stat-current-score"') < pinned.indexOf('id="response"'));
+    assert.ok(pinned.indexOf('id="steer"') < pinned.indexOf('id="response"'));
     assert.ok(pinned.indexOf('id="response"') < pinned.indexOf('id="challenge-form"'));
     assert.match(pinned, /A complete intelligent-design challenge is recorded under the locked protocol/);
 
@@ -2837,8 +2862,16 @@ describe("home page shows the response", () => {
     }), rec.env)).text();
     const receiptAnswer = answerSlice(receipt);
     assert.match(receiptAnswer, /Functionally specified digital information joined to a translation reader/);
-    assert.ok(receiptAnswer.includes(newerParagraph));
-    assert.match(receiptAnswer, /The engine answers Interesting/);
+    assert.match(receiptAnswer, /Derived response/);
+    assert.match(receiptAnswer, /Local scorer at page load/);
+    const receiptDerived = labeledBlock(receiptAnswer, "Derived response");
+    assert.ok(receiptDerived.includes(newerParagraph));
+    assert.match(receiptDerived, /The engine answers Interesting/);
+    assert.match(labeledBlock(receiptAnswer, "Summary"), /TRIAD_V3 display 31/);
+    assert.match(labeledBlock(receiptAnswer, "Summary"), /class="stored-summary"/);
+    assert.doesNotMatch(labeledBlock(receiptAnswer, "Summary"), /A complete intelligent-design challenge is recorded under the locked protocol/);
+    assert.match(labeledBlock(receiptAnswer, "Explanation"), /The score is the published corpus triad/);
+    assert.match(labeledBlock(receiptAnswer, "Explanation"), /Factors that do not apply are omitted/);
     assert.match(receiptAnswer, /No earlier receipt was in a flawless succession/);
 
     const json = await (await worker.fetch(new Request("https://godlock.uk/?format=json", {

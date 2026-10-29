@@ -26,7 +26,7 @@ import {
   parsePublicLivePresence,
 } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
-import { paragraphFrom, responseParagraph, visitorResponse } from "./visitorResponse.js";
+import { paragraphFrom, visitorResponse } from "./visitorResponse.js";
 import {
   DEBATE_HEADLINE, METHOD_PUBLIC, BIAS_PUBLIC, RESCORE_RULE_PUBLIC, READING_PUBLIC, SCORE_METHOD_URL,
   oldStoredScorePhrase, publishedReading, visitorReceiptLine,
@@ -50,13 +50,7 @@ export const CSS = `
 *{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--ink);max-width:100%;overflow-x:hidden}
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;line-height:1.5;overflow-wrap:anywhere;overflow-x:hidden}
-.wrap{max-width:720px;margin:auto;padding:24px 18px 80px;min-width:0;display:flex;flex-direction:column}
-.wrap > *{order:10}
-.wrap > .brandrow{order:1}
-.wrap > .author{order:2}
-.wrap > #response{order:3}
-.wrap > .nav2{order:4}
-.wrap > .ecosystem{order:5}
+.wrap{max-width:720px;margin:auto;padding:24px 18px 80px;min-width:0}
 .brandrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px;min-height:48px}
 .brandmark{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:0 0 40px;box-shadow:0 0 0 1px #0003,0 0 0 1px var(--gold)}
 .brand{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
@@ -170,6 +164,12 @@ export function esc(s) {
 function when(iso) {
   const s = String(iso || "");
   return s ? s.replace("T", " ").replace(/\.\d+Z$/, " UTC").replace(/Z$/, " UTC") : "";
+}
+
+function publicText(s, fallback) {
+  const t = hideInternalDetermination(String(s == null ? "" : s).trim());
+  if (!t || t === "[object Object]") return fallback || "Receipt recorded under the locked protocol.";
+  return t;
 }
 
 export const CHALLENGE_NOT_RETAINED = "challenge text not retained";
@@ -510,14 +510,16 @@ function rescoreLine(row) {
 export function priorReceiptItems(rows, { fullChallenge = false } = {}) {
   return (rows || []).map((r) => {
     const challenge = fullChallenge ? challengeBlockText(r) : challengePreview(r);
-    const preview = responseParagraph(r, { full: false });
+    const spoken = visitorResponse(r);
+    const preview = paragraphFrom(spoken, { full: false });
     const shown = preview.length > 180 ? preview.slice(0, 180) + "…" : preview;
+    const previewLabel = spoken.derived ? `<div class="k">Derived response</div>` : "";
     return `<li>
       <details class="thread" data-receipt-id="${esc(r.id)}">
       <summary><span class="challenge-preview">${esc(challenge)}</span></summary>
       <div class="thread-body" aria-live="polite"><p class="muted">Loading reasoning and receipt…</p></div>
       </details>
-      <div class="response-preview">${esc(shown)}</div>
+      <div class="response-preview"${spoken.derived ? ` data-derived="true"` : ""}>${previewLabel}${esc(shown)}</div>
       ${rescoreLine(r)}
       <div class="muted">${esc(when(r.created_utc))}</div>
       <a href="/receipt/${esc(r.id)}">Receipt</a></li>`;
@@ -726,7 +728,6 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
   const list = priorReceiptItems(shown) || `<p class="muted">No public receipts yet. Submit a question.</p>`;
   return `
 <h1 class="soft-heading">${esc(DEBATE_HEADLINE)}</h1>
-${latestHtml}
 ${statsGrid(s)}
 <p class="muted" id="mesh-status">${esc(meshLine)}</p>
 <div class="scorebox">
@@ -734,6 +735,7 @@ ${statsGrid(s)}
   <div><div class="n" id="stat-residual">${esc(meter.residual)}</div><div class="k">Meter remainder</div></div>
 </div>
 ${steerPanel(s.steer, s)}
+${latestHtml}
 <div class="card">
   <p>${esc(METHOD_PUBLIC)}</p>
   <p>${esc(BIAS_PUBLIC)}</p>
@@ -807,8 +809,12 @@ export function answerCard(row, latest) {
   const later = history.filter((item) => item && item.reason && item.reason !== "initial");
   const spoken = visitorResponse(row);
   const paragraph = paragraphFrom(spoken, { full: !latest });
-  const summaryText = paragraphFrom({ label: "", summary: spoken.summary, explanation: "" }, { full: !latest });
-  const explanationText = paragraphFrom({ label: "", summary: "", explanation: spoken.explanation }, { full: !latest });
+  const summaryText = publicText(row.summary);
+  const explanationText = publicText(row.explanation);
+  const responseLabel = spoken.derived ? "Derived response" : "Response";
+  const derivedNote = spoken.derived
+    ? `<p class="muted">Local scorer at page load. Not stored on the receipt.</p>`
+    : "";
   const reading = publishedReading(row);
   const remainderBit = row.residual != null && row.residual !== ""
     ? " Old stored residual " + row.residual + "%."
@@ -825,9 +831,9 @@ export function answerCard(row, latest) {
   return `<article class="answer" id="response">
     <h2>${esc(title)}</h2>
     <div class="block"><div class="k">Question</div><p class="challenge-text">${esc(challengeBlockText(row))}</p></div>
-    <div class="block"><div class="k">Response</div><p class="response-text">${esc(paragraph)}</p></div>
-    <div class="block"><div class="k">Summary</div><p>${esc(summaryText)}</p></div>
-    <div class="block"><div class="k">Explanation</div><p>${esc(explanationText)}</p></div>
+    <div class="block"${spoken.derived ? ` data-derived="true"` : ""}><div class="k">${esc(responseLabel)}</div>${derivedNote}<p class="response-text">${esc(paragraph)}</p></div>
+    <div class="block"><div class="k">Summary</div><p class="stored-summary">${esc(summaryText)}</p></div>
+    <div class="block"><div class="k">Explanation</div><p class="stored-explanation">${esc(explanationText)}</p></div>
     ${triad}
     ${stored}
     ${priorNotes ? `<div class="block"><div class="k">Rescores</div><ul>${priorNotes}</ul></div>` : ""}

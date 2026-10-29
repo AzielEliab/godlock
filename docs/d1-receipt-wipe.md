@@ -1,87 +1,19 @@
-# Parent-only D1 receipt / ledger wipe
+# Receipt wipe retired
 
-Operator note. **Parent** may clear the public argument history on GodLock.uk. Application code must never wipe or reset counters.
+The parent D1 receipt and ledger DELETE procedure is retired.
 
-GodLock.uk D1 binding: `DB`  
-Database name: `godlock-uk`  
-Database id: `a499ef56-ad02-4431-a3e4-e23f96f500f0`  
-(see `workers/godlock-uk/wrangler.toml`)
+GodLock.uk wraps each receipt into the lattice hashchain after `appendLedger` and pulls that wrap back by `entry_hash`. Primary online writes address aziel-runtime. Secondary offline writes address aziel-corpus. A username tie-break keeps those from becoming two chains. Deleting `receipts` or `ledger` would break that chain.
 
-## What you may wipe
+Do not run DELETE or a remote D1 execute against `receipts` or `ledger`. This file has no wipe SQL and no wipe command. Application code does not delete those rows.
 
-Receipt rows and ledger rows only. That is the public challenge history and the hash chain that cites it.
+## What stays
 
-```sql
--- Snapshot Uses into metadata FIRST. Uses is normally COUNT of
--- ledger SUBMIT/ISOLATE. After DELETE FROM ledger that count would
--- be 0 unless metadata.uses already holds the floor.
-UPDATE metadata
-SET value = (
-  SELECT CAST(MAX(
-    COALESCE((SELECT COUNT(*) FROM ledger WHERE action IN ('SUBMIT', 'ISOLATE')), 0),
-    COALESCE((SELECT CAST(value AS INTEGER) FROM metadata WHERE key = 'uses'), 0)
-  ) AS TEXT)
-)
-WHERE key = 'uses';
+Do not reset Views, the Uses floor, the running score, the downloads cache, heartbeats, download KV, or runtime-uses KV. Those are not the receipt lattice.
 
-DELETE FROM receipts;
-DELETE FROM ledger;
-```
+`workers/godlock-uk/src/index.js` creates tables with `CREATE TABLE IF NOT EXISTS` and `INSERT OR IGNORE` for metadata defaults. It increments `views` on homepage GET. It snapshots Uses into `metadata.uses` when the ledger count is higher. It does not delete receipt rows or ledger rows, and it does not set those counters to zero.
 
-Wrangler (remote production D1):
+`schema.sql` says never UPDATE or DELETE receipt or ledger rows from the app. There is no operator exception.
 
-```bash
-cd workers/godlock-uk
-npx wrangler d1 execute godlock-uk --remote --command "UPDATE metadata SET value = (SELECT CAST(MAX(COALESCE((SELECT COUNT(*) FROM ledger WHERE action IN ('SUBMIT', 'ISOLATE')), 0), COALESCE((SELECT CAST(value AS INTEGER) FROM metadata WHERE key = 'uses'), 0)) AS TEXT)) WHERE key = 'uses'"
-npx wrangler d1 execute godlock-uk --remote --command "DELETE FROM receipts"
-npx wrangler d1 execute godlock-uk --remote --command "DELETE FROM ledger"
-```
+The submit throttle may drop its own expired rows. That table is not a receipt and not the lattice.
 
-Local / preview D1: drop `--remote` or point at the preview database. Confirm the database name before execute.
-
-After wipe, `/verify` walks an empty ledger (valid empty chain). Home prior-receipts and `/receipts` are empty. The public **Receipts** counter is the live `isolated=0` count (same source as Prior), so it goes to 0 after a wipe. **Views, Uses floor, current_score, downloads cache, Nodes / Live Nodes, and download KV are unchanged** if you followed the “do not touch” list below.
-
-**Steer** is not a metadata counter. It is recomputed from public (`isolated=0`) receipt text. A receipt wipe returns Steer to 100% undecided. Do not invent steer keys to wipe; there are none. `current_score` stays.
-
-## What you must not wipe
-
-Do **not** run DELETE/UPDATE that resets these. Do **not** put such SQL in application code.
-
-| Surface | Store | Keys / tables | Why |
-| --- | --- | --- | --- |
-| Views | D1 `metadata` | `key = 'views'` | Homepage view counter |
-| Uses floor | D1 `metadata` | `key = 'uses'` | Durable Uses after a ledger wipe |
-| Current confidence | D1 `metadata` | `key = 'current_score'` | Running score (floor 33.3 · ceiling 99.7) |
-| Downloads cache | D1 `metadata` | `key = 'downloads_cache'` | Last good download-tracker read |
-| Nodes / Live Nodes | D1 `heartbeats` | all rows | site fallback only; suite mesh Nodes/Live Nodes come from `/v1/mesh` |
-| Downloads | KV `DOWNLOADS` on `godlock-download-tracker` | `project\|owner\|repo\|branch\|fork` | Counted gzip downloads |
-| Runtime API uses | KV `RUNTIME_USES` on `godlock-uk` | `runtime_uses\|…` | FragGate / MCP / session log — not product Uses |
-| Submit throttle | D1 `submit_guard` | `kind` + `key` | IP / identical-text window. Not a receipt. Not Uses. App may DELETE expired rows. |
-
-Never:
-
-```sql
--- FORBIDDEN
-DELETE FROM metadata;
-DELETE FROM metadata WHERE key IN ('views', 'uses', 'current_score', 'downloads_cache');
-UPDATE metadata SET value = '0' WHERE key IN ('views', 'uses');
-DELETE FROM heartbeats;
-```
-
-Never against download-tracker KV:
-
-```bash
-# FORBIDDEN — this is the download counter, not the receipt ledger
-npx wrangler kv key delete --binding DOWNLOADS --remote 'godlock|AzielEliab|godlock|main|0'
-npx wrangler kv bulk delete …
-```
-
-Never against godlock-uk `RUNTIME_USES` KV. That log is not the receipt ledger.
-
-## Application law
-
-`workers/godlock-uk/src/index.js` creates tables with `CREATE TABLE IF NOT EXISTS` and `INSERT OR IGNORE` for metadata defaults. It increments `views` on homepage GET. It snapshots Uses into `metadata.uses` when the ledger count is higher. It does **not** DELETE receipts, DELETE ledger, or set counters to zero.
-
-`schema.sql` says never UPDATE or DELETE receipt/ledger rows from the app. This parent wipe is an operator exception for history only.
-
-`--no-persist` on the local Python package is in-memory, not a wipe.
+`--no-persist` on the local Python package is in-memory. It is not a wipe of godlock.uk.

@@ -307,8 +307,12 @@ describe("published reading of stored challenge text", () => {
     assert.equal(count.triad_display_source, "stored_challenge_text");
     assert.equal(count.current_score, 49.5);
     const home = await (await worker.fetch(new Request("https://godlock.uk/"), env)).text();
-    assert.match(home, new RegExp('id="stat-current-score">' + reading.display + "%"));
-    assert.match(home, new RegExp('id="stat-residual">' + (100 - reading.display) + "%"));
+    assert.match(home, new RegExp('id="stat-current-score">' + reading.headline + "%"));
+    assert.match(home, new RegExp('id="stat-residual">' + reading.residual + "%"));
+    assert.match(home, /id="stat-average"/);
+    assert.match(home, /id="stat-mesh"/);
+    assert.match(home, />Last</);
+    assert.match(home, />Mesh</);
     assert.match(home, /TRIAD_V3 display /);
     assert.match(home, /Old stored score/);
     assert.match(home, /Stored challenge text is missing/);

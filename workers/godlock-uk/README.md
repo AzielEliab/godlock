@@ -71,7 +71,7 @@ anon-broadcast is a local communique style tool (text → TTS / desk reel / meta
 
 **Downloads** = download-tracker tally (`total` / `downloads` on `/count` or `/stats`). Read via `DOWNLOAD_TRACKER` service bind, then HTTPS, then the shared DOWNLOADS KV (`godlock|…` keys). Floored by `metadata.downloads_cache`. Never `views + uses`.
 
-Parent-only history wipe (D1 `receipts` + `ledger` only — never counter KV): see `docs/d1-receipt-wipe.md`.
+The receipt/ledger wipe is retired. Do not DELETE `receipts` or `ledger`. See `docs/d1-receipt-wipe.md`.
 
 **Runtime API uses** (`GET /runtime/v1/uses`) is a separate KV-backed host log for proxied FragGate / MCP / session / pull / v1 traffic on this door. SEO static, `GET /runtime/v1/uses`, and GET health/ready do not increment it. It is not the GodLock product Uses ledger. Proxy requests and reverse-proxy responses are stamped `X-Aziel-Runtime-Via: godlock.uk` and `X-Aziel-Runtime-Host` so aziel-runtime `/v1/uses` `by_host` stays distinct.
 

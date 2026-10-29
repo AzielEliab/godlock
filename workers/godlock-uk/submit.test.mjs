@@ -12,6 +12,7 @@ import { sha256hex } from "./src/ledger.js";
 import { hashReceipt } from "./src/engine.js";
 import { homeBody } from "./src/ui.js";
 import { siteOpenApi } from "./src/seo.js";
+import { scoreDebateText, scoreCard, HEADLINE_LABEL } from "./src/debateScore.js";
 
 const VALID =
   "Functionally specified digital information joined to a translation reader is the steel class. Pretty spirals are not a proof.";
@@ -319,9 +320,22 @@ describe("POST /submit still scores one valid challenge", () => {
     assert.equal(j.challenge_text, VALID);
     assert.equal(j.text_sha256, sha256hex(VALID));
     assert.notEqual(j.text_sha256, EMPTY_SHA256);
-    assert.equal(j.label, "Triad");
-    assert.equal(j.triad_display, j.score_after);
-    assert.equal(j.score_after, Math.round(Number(j.triad_combined) * 100));
+    const card = scoreCard(scoreDebateText(VALID, sha256hex(VALID)), VALID);
+    assert.equal(j.label, HEADLINE_LABEL);
+    assert.equal(j.headline, card.headline);
+    assert.equal(j.score_after, card.headline);
+    assert.ok(j.headline >= 25 && j.headline <= 75);
+    assert.equal(j.residual, 100 - j.headline);
+    assert.equal(j.triad_display, card.triad);
+    assert.equal(j.triad_display, Math.round(Number(j.triad_combined) * 100));
+    assert.equal(j.mesh, card.mesh);
+    assert.equal(j.debate, card.debate);
+    assert.equal(j.dual_mesh, card.dual);
+    assert.match(j.percents, /Headline /);
+    assert.match(j.percents, /Triad /);
+    assert.match(j.percents, /Mesh /);
+    assert.match(j.percents, /Debate /);
+    assert.match(j.percents, /Residual /);
     assert.equal(j.rescore.reason, "initial");
     assert.ok(Number.isInteger(j.score_after));
     assert.equal(j.residual, 100 - j.score_after);
@@ -338,7 +352,9 @@ describe("POST /submit still scores one valid challenge", () => {
     assert.equal(j.stats.scales.undecided, 0);
     assert.equal(j.stats.current_score, j.score_after);
     assert.equal(j.stats.residual, j.residual);
-    assert.equal(j.stats.triad_display, j.score_after);
+    assert.equal(j.stats.headline_last, j.headline);
+    assert.equal(j.stats.mesh_score, card.dual);
+    assert.equal(j.stats.triad_display, j.triad_display);
     assert.equal(j.content_sha256, hashReceipt(rec.receipts[0]));
     assert.doesNotMatch(JSON.stringify(j), /INTERNAL_CRITERIA|weighing|bootstrap lock/i);
     const submitEntry = rec.ledger.find((e) => e.action === "SUBMIT");

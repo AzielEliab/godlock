@@ -23,6 +23,7 @@ import {
 import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
 import { handleRuntimeRoot, isRuntimeRequest, runtimeCors } from "./runtimeRoot.js";
 import { appendLedger, verifyLedger, ledgerEntriesForId, sha256hex, publicEntry, hashPayload } from "./ledger.js";
+import { wrapLedgerEntry, handleLatticeHttp } from "./lattice.js";
 import { receiptLedgerAndProof } from "./receiptProof.js";
 import { factorDetail, storedFactorView, factorDetailSealed, ledgerRescoreLines, reasoningSealed, challengeSealed } from "./factorDetail.js";
 import {
@@ -52,11 +53,11 @@ import {
   SOFTWARE_HTML_CACHE_CONTROL,
 } from "./catalog.js";
 import {
-  START, shouldIsolate, clampScore, residualOf, hashReceipt,
+  START, shouldIsolate, residualOf, hashReceipt,
   receiptScoreDelta,
 } from "./engine.js";
 import {
-  TRIAD_LABEL, scoreDebateText, triadSnapshot, debateSummary, debateExplanation, describeRescore, meterRemainder,
+  TRIAD_LABEL, HEADLINE_LABEL, scoreDebateText, triadSnapshot, scoreCard, debateSummary, debateExplanation, describeRescore, meterRemainder,
   publishedReading, newestPublishedMeter,
 } from "./debateScore.js";
 import { affectedPriors } from "./rescore.js";
@@ -155,6 +156,16 @@ async function ensureSchema(env) {
       triad_json TEXT NOT NULL
     )`),
     env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_rescores_receipt ON receipt_rescores(receipt_id, created_utc)"),
+    env.DB.prepare(`CREATE TABLE IF NOT EXISTS lattice_chain (
+      position INTEGER PRIMARY KEY,
+      entry_hash TEXT NOT NULL,
+      document_hash TEXT NOT NULL,
+      target TEXT NOT NULL,
+      offline INTEGER NOT NULL DEFAULT 0,
+      lattice_json TEXT NOT NULL,
+      created_utc TEXT NOT NULL
+    )`),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_lattice_entry ON lattice_chain(entry_hash)"),
   ]);
   try {
     await env.DB.prepare("ALTER TABLE receipts ADD COLUMN challenge_text TEXT").run();
@@ -165,7 +176,8 @@ async function ensureSchema(env) {
   try {
     await env.DB.prepare("CREATE INDEX IF NOT EXISTS idx_heartbeats_last_ms ON heartbeats(last_ms)").run();
   } catch { /* index or column not ready */ }
-  // Floor Uses into metadata so a parent receipt/ledger wipe does not drop the counter.
+  // Floor Uses into metadata when the ledger count is higher.
+  // Receipt and ledger rows are not deleted. The wipe procedure is retired.
   // Never lower views, uses, or download KV.
   try {
     const l = await env.DB.prepare(
@@ -205,7 +217,15 @@ async function metaBump(env, key) {
 async function currentScore(env) {
   const raw = await metaGet(env, "current_score", String(START));
   const n = parseFloat(raw);
-  return clampScore(Number.isFinite(n) ? n : START);
+  if (!Number.isFinite(n)) return START;
+  return Math.round(n * 10) / 10;
+}
+
+async function optionalMetaNumber(env, key) {
+  const raw = await metaGet(env, key, "");
+  if (raw == null || raw === "") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
 }
 
 async function readTriadMeter(env) {
@@ -214,7 +234,15 @@ async function readTriadMeter(env) {
   const n = Number(raw);
   if (!Number.isFinite(n)) return null;
   const display = Math.round(n);
-  return { display, remainder: meterRemainder(display), source: "metadata", receipt_id: null };
+  return {
+    display,
+    remainder: meterRemainder(display),
+    source: "metadata",
+    receipt_id: null,
+    headline: await optionalMetaNumber(env, "current_score"),
+    residual: await optionalMetaNumber(env, "headline_residual"),
+    dual: await optionalMetaNumber(env, "mesh_score"),
+  };
 }
 
 /** Stored metadata meter, else the newest public receipt TRIAD_V3 can score. Does not write. */
@@ -479,11 +507,32 @@ async function publicSteer(env) {
   }
 }
 
+async function appendAndWrap(env, action, payload) {
+  const entry = await appendLedger(env, action, payload);
+  try {
+    entry.lattice = await wrapLedgerEntry(env, entry);
+  } catch (err) {
+    entry.lattice = {
+      ok: false,
+      live: false,
+      written: false,
+      code: "LATTICE-WRAP-FAILED",
+      rebuilt_from_zero: false,
+      detail: String(err && err.message ? err.message : err),
+    };
+  }
+  return entry;
+}
+
 async function gatherStats(env, { wrote, visiting, ctx } = {}) {
   const meter = await publishedMeter(env);
-  const storedMeta = !!(meter && meter.source === "metadata");
-  const score = storedMeta ? meter.display : await currentScore(env);
-  const residual = storedMeta ? meter.remainder : residualOf(score);
+  const score = await currentScore(env);
+  const storedResidual = await optionalMetaNumber(env, "headline_residual");
+  const residual = storedResidual != null ? storedResidual : residualOf(score);
+  const headlineLast = meter && meter.headline != null ? meter.headline : null;
+  const storedAverage = await optionalMetaNumber(env, "score_average");
+  const storedMesh = await optionalMetaNumber(env, "mesh_score");
+  const meshScore = meter && meter.dual != null ? meter.dual : storedMesh;
   const views = parseInt(await metaGet(env, "views", "0"), 10) || 0;
   const [siteNodes, downloads, uses, receipts, meshSnap, steer] = await Promise.all([
     liveNodes(env, { wrote, visiting }),
@@ -519,6 +568,10 @@ async function gatherStats(env, { wrote, visiting, ctx } = {}) {
     receipts,
     current_score: score,
     residual,
+    headline_last: headlineLast,
+    score_average: storedAverage != null ? storedAverage : headlineLast,
+    mesh_score: meshScore,
+    headline_residual: meter && meter.residual != null ? meter.residual : storedResidual,
     triad_display: meter ? meter.display : null,
     meter_remainder: meter ? meter.remainder : null,
     triad_display_source: meter ? meter.source : null,
@@ -615,6 +668,13 @@ export function publicPayload(row) {
       if (reading.ready) {
         payload.triad_display = reading.display;
         payload.triad_combined = reading.combined;
+        payload.headline = reading.headline;
+        payload.mesh = reading.mesh;
+        payload.debate = reading.debate;
+        payload.dual_mesh = reading.dual;
+        payload.paired = reading.paired;
+        payload.headline_residual = reading.residual;
+        payload.percents = reading.percents;
       }
     }
   }
@@ -631,8 +691,7 @@ export async function processSubmit(env, text) {
   const challenge_text = checked.text;
   const text_sha256 = sha256hex(challenge_text);
   const isolated = shouldIsolate(challenge_text) ? 1 : 0;
-  const priorMeterForIsolate = await readTriadMeter(env);
-  const score_before = priorMeterForIsolate ? priorMeterForIsolate.display : await currentScore(env);
+  const score_before = await currentScore(env);
 
   if (isolated) {
     const row = {
@@ -653,7 +712,7 @@ export async function processSubmit(env, text) {
     row.content_sha256 = hashReceipt(row);
     await env.DB.prepare(RECEIPT_INSERT)
       .bind(id, created_utc, text_sha256, challenge_text, row.label, row.summary, row.explanation, row.score_before, row.score_after, row.residual, 1, row.content_sha256).run();
-    await appendLedger(env, "ISOLATE", {
+    await appendAndWrap(env, "ISOLATE", {
       receipt_id: id,
       text_sha256,
       content_sha256: row.content_sha256,
@@ -666,10 +725,11 @@ export async function processSubmit(env, text) {
 
   const review = scoreDebateText(challenge_text, text_sha256);
   const snap = triadSnapshot(review);
+  const card = scoreCard(review, challenge_text);
   const priorMeter = await readTriadMeter(env);
-  const score_after = snap.ready ? snap.display : (priorMeter ? priorMeter.display : score_before);
-  const scored_before = priorMeter ? priorMeter.display : score_after;
-  const residual = snap.ready ? meterRemainder(snap.display) : residualOf(score_after);
+  const score_after = card.headline != null ? card.headline : (priorMeter ? priorMeter.display : score_before);
+  const scored_before = score_before;
+  const residual = card.headline != null ? card.residual : residualOf(score_after);
   const candidates = await rescoreCandidates(env);
   const affected = affectedPriors(challenge_text, candidates, text_sha256);
   const rescoreNotes = [];
@@ -719,8 +779,8 @@ export async function processSubmit(env, text) {
     created_utc,
     text_sha256,
     challenge_text,
-    label: snap.ready ? TRIAD_LABEL : "Unscored",
-    summary: hideInternalDetermination(debateSummary(review)),
+    label: card.headline != null ? HEADLINE_LABEL : (snap.ready ? TRIAD_LABEL : "Unscored"),
+    summary: hideInternalDetermination(debateSummary(review, challenge_text)),
     explanation: hideInternalDetermination(debateExplanation(review, extra)),
     score_before: scored_before,
     score_after,
@@ -747,7 +807,7 @@ export async function processSubmit(env, text) {
   await insertRescore(env, initial);
   for (const pending of pendingRescores) {
     await insertRescore(env, pending);
-    await appendLedger(env, "RESCORE", {
+    await appendAndWrap(env, "RESCORE", {
       receipt_id: pending.receipt_id,
       rescore_id: pending.id,
       caused_by: id,
@@ -762,7 +822,7 @@ export async function processSubmit(env, text) {
   }
   row.rescores = [initial];
   row.latest_rescore = initial;
-  await appendLedger(env, "SUBMIT", {
+  await appendAndWrap(env, "SUBMIT", {
     receipt_id: id,
     label: row.label,
     text_sha256,
@@ -771,23 +831,46 @@ export async function processSubmit(env, text) {
     score_before: row.score_before,
     score_after,
     residual,
+    headline: card.headline,
     triad_display: snap.display,
     triad_combined: snap.combined,
+    mesh: card.mesh,
+    debate: card.debate,
+    dual_mesh: card.dual,
+    paired: card.paired,
     factor_detail_sha256: submitDetail ? hashPayload(submitDetail) : null,
   });
   const delta = receiptScoreDelta(row.score_before, score_after);
-  await appendLedger(env, "SCORE", {
+  await appendAndWrap(env, "SCORE", {
     receipt_id: id,
     score_before: row.score_before,
     score_after,
     residual,
     delta,
+    headline: card.headline,
     triad_display: snap.display,
     triad_schema: snap.schema,
+    mesh: card.mesh,
+    debate: card.debate,
+    dual_mesh: card.dual,
   });
-  if (snap.ready) {
+  if (snap.ready && snap.display != null) {
     await metaSet(env, "triad_display", String(snap.display));
-    await metaSet(env, "current_score", String(snap.display));
+  }
+  if (card.headline != null) {
+    await metaSet(env, "current_score", String(card.headline));
+    await metaSet(env, "headline_residual", String(card.residual));
+    await metaSet(env, "mesh_score", String(card.dual));
+    let average = card.headline;
+    try {
+      const avg = await env.DB.prepare(
+        "SELECT AVG(score_after) AS n FROM receipts WHERE isolated=0 /* headline-average */"
+      ).first();
+      if (avg && avg.n != null && Number.isFinite(Number(avg.n))) {
+        average = Math.round(Number(avg.n) * 10) / 10;
+      }
+    } catch { /* keep this headline as the average */ }
+    await metaSet(env, "score_average", String(average));
   }
   const uses = await usesCount(env);
   try { if (uses > 0) await metaSet(env, "uses", String(uses)); } catch { /* keep prior floor */ }
@@ -907,6 +990,12 @@ async function handleGodlock(request, env, ctx) {
         const hb = await touchHeartbeat(env, request, sessionSeed);
         nodeId = hb.id;
         wrote = hb.wrote;
+      }
+
+      const latticeHttp = await handleLatticeHttp(request, env, path);
+      if (latticeHttp) {
+        if (request.method === "HEAD") return new Response(null, { status: latticeHttp.status, headers: corsHeaders() });
+        return json(latticeHttp.body, latticeHttp.status, extraHeadersFor(nodeId));
       }
 
       if (path === "/internal" || path.startsWith("/internal/")) {

@@ -26,6 +26,27 @@ import worker from "./src/index.js";
 
 const D = "a".repeat(64);
 const E = "b".repeat(64);
+const TOKEN_QUERY_KEYS = ["token", "runtime_token", "RUNTIME_TOKEN", "aziel_runtime_token", "bearer", "access_token", "operator_token", "authorization"];
+const TOKEN_BODY_KEYS = ["token", "runtime_token", "RUNTIME_TOKEN", "aziel_runtime_token", "operator_token", "authorization", "Authorization"];
+
+function assertOperatorHeader(url, init, secret) {
+  const headers = new Headers(init && init.headers);
+  assert.equal(headers.get("Authorization"), "Bearer " + secret);
+  assert.equal(headers.get("X-Aziel-Runtime-Token"), secret);
+  assert.equal(headers.get("X-Aziel-Operator-Token"), secret);
+  for (const key of TOKEN_QUERY_KEYS) assert.equal(url.searchParams.get(key), null);
+}
+
+function assertTokenAbsentFromBody(body) {
+  for (const key of TOKEN_BODY_KEYS) {
+    assert.equal(Object.prototype.hasOwnProperty.call(body, key), false);
+  }
+  if (body.lattice && typeof body.lattice === "object") {
+    for (const key of TOKEN_BODY_KEYS) {
+      assert.equal(Object.prototype.hasOwnProperty.call(body.lattice, key), false);
+    }
+  }
+}
 
 describe("headline is the six-factor average", () => {
   const six = {
@@ -166,15 +187,18 @@ describe("bidirectional lattice", () => {
   });
 
   it("pulls the same entry_hash back from the remote aggregate lattice", async () => {
+    const secret = "test-operator-token";
     const store = new Map();
     const fetchImpl = async (url, init, target) => {
       const u = new URL(url);
       assert.ok(u.pathname === "/v1/lattice/wrap" || u.pathname === "/v1/lattice/pull");
+      assertOperatorHeader(u, init, secret);
       if (init && init.method === "POST") {
         const body = JSON.parse(init.body);
         assert.equal(body.aggregate, true);
         assert.equal(body.scope.users, "all");
         assert.equal(body.scope.mesh, "all");
+        assertTokenAbsentFromBody(body);
         store.set(target + ":" + body.entry_hash, body);
         return { ok: true, status: 201, json: async () => ({ ok: true, entry_hash: body.entry_hash }) };
       }
@@ -197,7 +221,7 @@ describe("bidirectional lattice", () => {
         }),
       };
     };
-    const env = { LATTICE_MODE: "online", LATTICE_REMOTE: "1" };
+    const env = { LATTICE_MODE: "online", LATTICE_REMOTE: "1", LATTICE_OPERATOR_TOKEN: secret };
     const wrapped = await wrapLedgerEntry(env, { entry_hash: E }, { fetch: fetchImpl });
     assert.equal(wrapped.ok, true);
     assert.equal(wrapped.code, "LATTICE-WRAP-PULL");
@@ -208,6 +232,168 @@ describe("bidirectional lattice", () => {
     assert.equal(wrapped.remote_pull.rebuilt_from_zero, false);
     assert.equal(store.get(PRIMARY_TARGET + ":" + E).position, wrapped.position);
     assert.equal(store.get(PRIMARY_TARGET + ":" + E).lattice.position, undefined);
+    assert.equal(JSON.stringify(wrapped).includes(secret), false);
+  });
+
+  it("attaches the operator headers on the runtime service binding", async () => {
+    const secret = "test-operator-token";
+    const seen = [];
+    const env = {
+      LATTICE_MODE: "online",
+      LATTICE_REMOTE: "1",
+      LATTICE_OPERATOR_TOKEN: secret,
+      AZIEL_RUNTIME: {
+        async fetch(req) {
+          const body = req.method === "POST" ? await req.text() : "";
+          seen.push({ method: req.method, url: req.url, headers: req.headers, body });
+          const url = new URL(req.url);
+          if (req.method === "POST") {
+            return new Response(JSON.stringify({ ok: true, entry_hash: E }), {
+              status: 201,
+              headers: { "content-type": "application/json" },
+            });
+          }
+          return new Response(JSON.stringify({
+            ok: true,
+            aggregate: true,
+            scope: { ...LATTICE_AGGREGATE_SCOPE },
+            rows: [{ entry_hash: url.searchParams.get("entry_hash") }],
+          }), { status: 200, headers: { "content-type": "application/json" } });
+        },
+      },
+    };
+    const wrapped = await wrapLedgerEntry(env, { entry_hash: E });
+    assert.equal(wrapped.ok, true);
+    assert.equal(wrapped.code, "LATTICE-WRAP-PULL");
+    assert.equal(seen.length, 2);
+    assert.equal(seen[0].method, "POST");
+    assert.equal(seen[1].method, "GET");
+    for (const call of seen) assertOperatorHeader(new URL(call.url), { headers: call.headers }, secret);
+    assertTokenAbsentFromBody(JSON.parse(seen[0].body));
+    assert.equal(JSON.stringify(wrapped).includes(secret), false);
+  });
+
+  it("does not forge a public wrap when the operator token is missing", async () => {
+    let calls = 0;
+    const env = {
+      LATTICE_MODE: "online",
+      LATTICE_REMOTE: "1",
+      AZIEL_RUNTIME: {
+        async fetch() {
+          calls += 1;
+          return new Response(JSON.stringify({ ok: true }), { status: 201 });
+        },
+      },
+    };
+    const fetchImpl = async () => {
+      calls += 1;
+      return { ok: true, status: 201, json: async () => ({ ok: true }) };
+    };
+    const wrapped = await wrapLedgerEntry(env, { entry_hash: E }, { fetch: fetchImpl });
+    assert.equal(calls, 0);
+    assert.equal(wrapped.ok, false);
+    assert.equal(wrapped.live, false);
+    assert.equal(wrapped.code, "LATTICE-OPERATOR-ABSENT");
+    assert.equal(wrapped.written, true);
+    assert.equal(wrapped.remote.called, false);
+    assert.equal(wrapped.remote.published, false);
+    assert.notEqual(wrapped.code, "LATTICE-WRAP-PULL");
+    const blank = await wrapLedgerEntry(
+      { ...env, LATTICE_OPERATOR_TOKEN: "   ", RUNTIME_TOKEN: "", OPERATOR_TOKEN: " " },
+      { entry_hash: "d".repeat(64) },
+      { fetch: fetchImpl },
+    );
+    assert.equal(blank.code, "LATTICE-OPERATOR-ABSENT");
+    assert.equal(calls, 0);
+  });
+
+  it("sends RUNTIME_TOKEN or OPERATOR_TOKEN when the lattice secret is unset", async () => {
+    const secret = "runtime-shared-token";
+    const seen = [];
+    const fetchImpl = async (url, init) => {
+      seen.push(init);
+      const u = new URL(url);
+      assertOperatorHeader(u, init, secret);
+      if (init && init.method === "POST") {
+        const body = JSON.parse(init.body);
+        assertTokenAbsentFromBody(body);
+        return { ok: true, status: 201, json: async () => ({ ok: true, entry_hash: body.entry_hash }) };
+      }
+      const entry_hash = u.searchParams.get("entry_hash");
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          ok: true,
+          aggregate: true,
+          scope: { ...LATTICE_AGGREGATE_SCOPE },
+          rows: [{ entry_hash }],
+        }),
+      };
+    };
+    const runtime = await wrapLedgerEntry(
+      { LATTICE_MODE: "online", LATTICE_REMOTE: "1", RUNTIME_TOKEN: secret },
+      { entry_hash: E },
+      { fetch: fetchImpl },
+    );
+    assert.equal(runtime.ok, true);
+    assert.equal(runtime.code, "LATTICE-WRAP-PULL");
+    const operator = await wrapLedgerEntry(
+      { LATTICE_MODE: "offline", LATTICE_REMOTE: "1", OPERATOR_TOKEN: secret },
+      { entry_hash: D },
+      { username: "ada", fetch: fetchImpl },
+    );
+    assert.equal(operator.ok, true);
+    assert.equal(operator.code, "LATTICE-WRAP-PULL");
+    assert.equal(operator.target, SECONDARY_TARGET);
+    assert.equal(seen.length, 4);
+    let preferred = "";
+    const prefer = async (url, init) => {
+      preferred = new Headers(init.headers).get("Authorization");
+      const u = new URL(url);
+      if (init && init.method === "POST") {
+        const body = JSON.parse(init.body);
+        return { ok: true, status: 201, json: async () => ({ ok: true, entry_hash: body.entry_hash }) };
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          ok: true,
+          aggregate: true,
+          scope: { ...LATTICE_AGGREGATE_SCOPE },
+          rows: [{ entry_hash: u.searchParams.get("entry_hash") }],
+        }),
+      };
+    };
+    const picked = await wrapLedgerEntry(
+      {
+        LATTICE_MODE: "online",
+        LATTICE_REMOTE: "1",
+        LATTICE_OPERATOR_TOKEN: "lattice-secret",
+        RUNTIME_TOKEN: "runtime-secret",
+        OPERATOR_TOKEN: "operator-secret",
+      },
+      { entry_hash: "e".repeat(64) },
+      { fetch: prefer },
+    );
+    assert.equal(picked.ok, true);
+    assert.equal(preferred, "Bearer lattice-secret");
+  });
+
+  it("keeps a remote 401 fail-closed after the header is attached", async () => {
+    const env = { LATTICE_MODE: "online", LATTICE_REMOTE: "1", LATTICE_OPERATOR_TOKEN: "test-operator-token" };
+    const fetchImpl = async (url, init) => {
+      assertOperatorHeader(new URL(url), init, "test-operator-token");
+      return { ok: false, status: 401, json: async () => ({ ok: false, code: "token_required" }) };
+    };
+    const wrapped = await wrapLedgerEntry(env, { entry_hash: E }, { fetch: fetchImpl });
+    assert.equal(wrapped.ok, false);
+    assert.equal(wrapped.live, false);
+    assert.equal(wrapped.code, "LATTICE-REMOTE-MISS");
+    assert.equal(wrapped.remote.published, false);
+    assert.equal(wrapped.remote.status, 401);
+    assert.notEqual(wrapped.code, "LATTICE-WRAP-PULL");
   });
 
   it("does not call AZIEL_RUNTIME unless LATTICE_REMOTE is set", async () => {
@@ -230,7 +416,7 @@ describe("bidirectional lattice", () => {
   });
 
   it("fails closed when remote wrap or pull is a 404", async () => {
-    const env = { LATTICE_MODE: "online", LATTICE_REMOTE: "1" };
+    const env = { LATTICE_MODE: "online", LATTICE_REMOTE: "1", LATTICE_OPERATOR_TOKEN: "test-operator-token" };
     const fetchImpl = async () => ({ ok: false, status: 404, json: async () => ({ ok: false }) });
     const wrapped = await wrapLedgerEntry(env, { entry_hash: E }, { fetch: fetchImpl });
     assert.equal(wrapped.ok, false);
@@ -245,7 +431,7 @@ describe("bidirectional lattice", () => {
   });
 
   it("fails closed when the remote answers with a single-user silo", async () => {
-    const env = { LATTICE_MODE: "online", LATTICE_REMOTE: "1" };
+    const env = { LATTICE_MODE: "online", LATTICE_REMOTE: "1", LATTICE_OPERATOR_TOKEN: "test-operator-token" };
     const fetchImpl = async (url, init) => {
       if (init && init.method === "POST") {
         return { ok: true, status: 201, json: async () => ({ ok: true, entry_hash: E }) };

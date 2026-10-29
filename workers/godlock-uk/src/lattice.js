@@ -266,6 +266,32 @@ function operatorSecret(env) {
   return raw.trim();
 }
 
+function stringSecret(env, key) {
+  const raw = env && env[key];
+  if (typeof raw !== "string") return "";
+  return raw.trim();
+}
+
+/**
+ * Token for outbound wrap/pull. Same header-only secret this hub already checks
+ * on inbound aggregate reads. RUNTIME_TOKEN, then OPERATOR_TOKEN, fill in when
+ * LATTICE_OPERATOR_TOKEN is unset so a shared Softwares secret still attaches.
+ * Empty means do not call. Never place this value in a query string or JSON body.
+ */
+function outboundOperatorToken(env) {
+  return operatorSecret(env) || stringSecret(env, "RUNTIME_TOKEN") || stringSecret(env, "OPERATOR_TOKEN");
+}
+
+function outboundAuthHeaders(env) {
+  const token = outboundOperatorToken(env);
+  if (!token) return null;
+  return {
+    Authorization: "Bearer " + token,
+    "X-Aziel-Runtime-Token": token,
+    "X-Aziel-Operator-Token": token,
+  };
+}
+
 function headerOperatorToken(request) {
   if (!request || !request.headers || typeof request.headers.get !== "function") return "";
   const auth = request.headers.get("Authorization");
@@ -432,10 +458,19 @@ async function remoteFetch(env, target, url, init, deps) {
 }
 
 async function pushRemote(env, target, body, deps) {
+  const auth = outboundAuthHeaders(env);
+  if (!auth) {
+    return { ok: false, published: false, called: false, code: "LATTICE-OPERATOR-ABSENT", target };
+  }
   const url = originFor(target) + LATTICE_WRAP_PATH;
   const init = {
     method: "POST",
-    headers: { "content-type": "application/json", "User-Agent": "Mozilla/5.0", Accept: "application/json" },
+    headers: {
+      "content-type": "application/json",
+      "User-Agent": "Mozilla/5.0",
+      Accept: "application/json",
+      ...auth,
+    },
     body: JSON.stringify(body),
   };
   try {
@@ -464,8 +499,19 @@ async function pushRemote(env, target, body, deps) {
 }
 
 async function pullRemote(env, target, entryHash, deps) {
+  const auth = outboundAuthHeaders(env);
+  if (!auth) {
+    return { skipped: true, missed: true, silo: false, row: null, code: "LATTICE-OPERATOR-ABSENT" };
+  }
   const url = originFor(target) + LATTICE_PULL_PATH + "?" + aggregateQuery(entryHash);
-  const init = { method: "GET", headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" } };
+  const init = {
+    method: "GET",
+    headers: {
+      "User-Agent": "Mozilla/5.0",
+      Accept: "application/json",
+      ...auth,
+    },
+  };
   try {
     const got = await remoteFetch(env, target, url, init, deps);
     if (got.skipped) return { skipped: true, missed: false, silo: false, row: null };
@@ -645,6 +691,26 @@ export async function wrapLedgerEntry(env, entry, deps = {}) {
       entry_hash,
       lattice: block,
       remote: { ok: false, published: false, called: false, code: "LATTICE-REMOTE-SKIPPED", target },
+      pull: localCheck,
+      remote_pull: null,
+      policy,
+      rebuilt_from_zero: false,
+    };
+  }
+  if (!outboundOperatorToken(env)) {
+    const localPulled = await pullLocal(env, entry_hash);
+    const localCheck = checkPulledEntry(entry_hash, localPulled);
+    return {
+      ok: false,
+      live: false,
+      code: "LATTICE-OPERATOR-ABSENT",
+      written: true,
+      direction: { wrap: true, pull: false },
+      target,
+      position,
+      entry_hash,
+      lattice: block,
+      remote: { ok: false, published: false, called: false, code: "LATTICE-OPERATOR-ABSENT", target },
       pull: localCheck,
       remote_pull: null,
       policy,

@@ -41,5 +41,5 @@ relabel of Layer C), undecided. Frame shares sum to 100. Current confidence
 and residual uncertainty are a separate pair and sum to 100. Ledgers stay
 separate. Steer is not `current_score`. It is not written into the hash chain.
 
-Parent may wipe D1 `receipts` and `ledger` only. Never wipe counter KV
-or `metadata.views` / `metadata.uses`. See `docs/d1-receipt-wipe.md`.
+The receipt and ledger wipe is retired. Do not DELETE `receipts` or `ledger`.
+Never wipe counter KV or `metadata.views` / `metadata.uses`. See `docs/d1-receipt-wipe.md`.

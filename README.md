@@ -90,7 +90,7 @@ PASS means version, author (Aziel Eliab), this-computer-only bind, scoring, hone
 
 ## For researchers
 
-Public reasoning: [docs/Specified_Fit_Not_Pretty_Spirals.md](docs/Specified_Fit_Not_Pretty_Spirals.md). Parent D1 history wipe (receipts/ledger only — never counter KV): [docs/d1-receipt-wipe.md](docs/d1-receipt-wipe.md). Spec: [docs/whitepaper.md](docs/whitepaper.md). Contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
+Public reasoning: [docs/Specified_Fit_Not_Pretty_Spirals.md](docs/Specified_Fit_Not_Pretty_Spirals.md). The receipt/ledger wipe is retired: [docs/d1-receipt-wipe.md](docs/d1-receipt-wipe.md). Spec: [docs/whitepaper.md](docs/whitepaper.md). Contribute: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 MirageGrid / Airlock are *names* such as `grid-07`. They do not hop IPs, speak Tor, or hide origin addresses. `--no-persist` keeps receipts in memory. It is not a wipe. POST `/merge` has no auth because this is a localhost research tool.
 

@@ -5,16 +5,22 @@
  * Public method: https://www.azielcorpuslibrary.net/how-its-scored
  * Author: Aziel Eliab.
  */
-import { reviewDocument, TRIAD_SCHEMA } from "./corpus/review.js";
+import { reviewDocument, TRIAD_SCHEMA, FACTOR_NAMES } from "./corpus/review.js";
 import { visibleChallengeText } from "./challengeText.js";
 import { sha256hex } from "./ledger.js";
 
 export const DEBATE_HEADLINE = "Godlock. The Debate Site of Intelligent Design";
 export const SCORE_METHOD_URL = "https://www.azielcorpuslibrary.net/how-its-scored";
 export const TRIAD_LABEL = "Triad";
+export const HEADLINE_LABEL = "Headline";
+export { FACTOR_NAMES };
+
+/** Uncertainty stays between 25% and 75%. Headline is 100 − uncertainty, so it stays in that band too. */
+export const UNCERTAINTY_FLOOR = 25;
+export const UNCERTAINTY_CAP = 75;
 
 export const METHOD_PUBLIC =
-  "The score is the published corpus triad (TRIAD_V3). Public combined is the mean of factor_i × factor_j over the applicable factors among physics, linguistics, bayesian, truth_formula, CLCE, and SPRE. Display is round(combined × 100) and is not written back into combined. Factors that do not apply are omitted. They are not entered as 0. Cite: "
+  "The headline number is the average of the applicable factors among physics, linguistics, bayesian, truth_formula, CLCE, and SPRE. It is not the triad product. Uncertainty stays between 25% and 75%, so the headline stays between 25% and 75%. The published corpus triad (TRIAD_V3) stays beside that headline. Public combined is the mean of factor_i × factor_j. Display is round(combined × 100) and is not written back into combined. A mesh provenance score and a debate score average into a dual mesh. That dual mesh and the triad display are then scored against each other. Factors that do not apply are omitted. They are not entered as 0. Cite: "
   + SCORE_METHOD_URL + ".";
 
 export const BIAS_PUBLIC =
@@ -30,6 +36,99 @@ export function meterRemainder(display) {
   const n = Math.round(Number(display));
   if (!Number.isFinite(n)) return null;
   return 100 - n;
+}
+
+/** Bound a raw percent so residual uncertainty stays inside 25–75. */
+export function boundHeadline(rawPercent) {
+  const n = Math.round(Number(rawPercent));
+  if (!Number.isFinite(n)) return null;
+  const maxHeadline = 100 - UNCERTAINTY_FLOOR;
+  const minHeadline = 100 - UNCERTAINTY_CAP;
+  return Math.min(maxHeadline, Math.max(minHeadline, n));
+}
+
+/** Arithmetic mean of the applicable six factors, as a bounded headline percent. Not the triad product. */
+export function factorAveragePercent(factors) {
+  const vals = FACTOR_NAMES
+    .map((key) => (factors && factors[key] != null ? Number(factors[key]) : null))
+    .filter((v) => v != null && Number.isFinite(v));
+  if (!vals.length) return null;
+  const mean = vals.reduce((sum, v) => sum + v, 0) / vals.length;
+  return boundHeadline(mean * 100);
+}
+
+/** Share of the six checkers that published a value. Mesh provenance, not the suite node rollup. */
+export function meshProvenancePercent(snap) {
+  const factors = snap && snap.factors ? snap.factors : {};
+  const present = FACTOR_NAMES.filter((key) => factors[key] != null).length;
+  return Math.round((present / FACTOR_NAMES.length) * 100);
+}
+
+const DEBATE_CHECKS = [
+  /\?/,
+  /\b(because|therefore|thus)\b/i,
+  /\b(however|objection|counter|on the other hand)\b/i,
+  /\b(receipt|hash|ledger)\b/i,
+  /\b(design|origin|cause|mapping)\b/i,
+  /\b(not|never|refuse)\b/i,
+];
+
+/** Debate scorer on the submitted text. Separate from TRIAD_V3. */
+export function debateScorerPercent(text) {
+  const body = String(text || "");
+  let hits = 0;
+  for (const re of DEBATE_CHECKS) if (re.test(body)) hits += 1;
+  return Math.round((hits / DEBATE_CHECKS.length) * 100);
+}
+
+export function dualMeshPercent(mesh, debate) {
+  if (mesh == null || debate == null) return null;
+  const a = Number(mesh);
+  const b = Number(debate);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  return Math.round((a + b) / 2);
+}
+
+/** Score the dual mesh and the corpus triad display against each other. */
+export function scoreAgainst(dual, triad) {
+  if (dual == null || triad == null) return null;
+  const a = Number(dual);
+  const b = Number(triad);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
+  return { paired: Math.round((a + b) / 2), gap: Math.abs(a - b) };
+}
+
+export function scoreCard(review, text) {
+  const snap = triadSnapshot(review);
+  const headline = factorAveragePercent(snap.factors);
+  const residual = headline == null ? null : 100 - headline;
+  const mesh = meshProvenancePercent(snap);
+  const debate = debateScorerPercent(text);
+  const dual = dualMeshPercent(mesh, debate);
+  const triad = snap.ready ? snap.display : null;
+  const against = scoreAgainst(dual, triad);
+  return {
+    headline,
+    residual,
+    mesh,
+    debate,
+    dual,
+    triad,
+    paired: against ? against.paired : null,
+    gap: against ? against.gap : null,
+    snap,
+  };
+}
+
+export function percentLine(card) {
+  if (!card) return "";
+  const bits = [];
+  if (card.headline != null) bits.push("Headline " + card.headline + "%");
+  if (card.triad != null) bits.push("Triad " + card.triad + "%");
+  if (card.mesh != null) bits.push("Mesh " + card.mesh + "%");
+  if (card.debate != null) bits.push("Debate " + card.debate + "%");
+  if (card.residual != null) bits.push("Residual " + card.residual + "%");
+  return bits.length ? bits.join(". ") + "." : "";
 }
 
 export function scoreDebateText(text, sha256) {
@@ -107,22 +206,33 @@ export function publishedReading(row) {
   }
   const review = scoreDebateText(text, storedContentSha(row, text));
   const snap = triadSnapshot(review);
+  const card = scoreCard(review, text);
   if (!snap.ready || snap.display == null || snap.combined == null) {
     return {
       status: "unscored",
       ready: false,
       display: null,
       combined: null,
+      headline: card.headline,
       note: "TRIAD_V3 did not publish a combined score for this stored text.",
     };
   }
+  const percents = percentLine(card);
   return {
     status: "ready",
     ready: true,
     display: snap.display,
     combined: snap.combined,
     schema: snap.schema,
-    note: "TRIAD_V3 display " + snap.display + ". Combined " + snap.combined + ". This reading is the published corpus triad on the stored challenge text. The original receipt row was not rewritten.",
+    headline: card.headline,
+    residual: card.residual,
+    mesh: card.mesh,
+    debate: card.debate,
+    dual: card.dual,
+    paired: card.paired,
+    gap: card.gap,
+    percents,
+    note: "TRIAD_V3 display " + snap.display + ". Combined " + snap.combined + ". " + percents + " This reading keeps the published corpus triad beside the headline. The original receipt row was not rewritten.",
   };
 }
 
@@ -137,6 +247,11 @@ export function newestPublishedMeter(rows) {
       return {
         display,
         remainder: meterRemainder(display),
+        headline: reading.headline != null ? reading.headline : null,
+        residual: reading.residual != null ? reading.residual : null,
+        mesh: reading.mesh != null ? reading.mesh : null,
+        debate: reading.debate != null ? reading.debate : null,
+        dual: reading.dual != null ? reading.dual : null,
         receipt_id: row.id || null,
         source: "stored_challenge_text",
       };
@@ -189,10 +304,12 @@ export function visitorReceiptLine(row) {
   return reading.note + " " + old + " " + kept;
 }
 
-export function debateSummary(review) {
+export function debateSummary(review, text) {
   const snap = triadSnapshot(review);
+  const card = scoreCard(review, text);
   if (!snap.ready) return "TRIAD_V3 did not publish a combined score for this text.";
-  return "TRIAD_V3 display " + snap.display + ". Combined " + snap.combined + ". The display is not written back into combined.";
+  const line = percentLine(card);
+  return "Headline " + (card.headline == null ? "none" : card.headline) + ". TRIAD_V3 display " + snap.display + ". Combined " + snap.combined + ". " + line + " The triad display is not written back into combined.";
 }
 
 export function debateExplanation(review, extra) {

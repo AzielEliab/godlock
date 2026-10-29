@@ -358,17 +358,18 @@ ${ecosystemNav()}
     if(recEl&&j.receipts!=null)recEl.textContent=String(j.receipts);
     var scoreEl=document.getElementById("stat-current-score");
     var residualEl=document.getElementById("stat-residual");
+    var averageEl=document.getElementById("stat-average");
+    var meshScoreEl=document.getElementById("stat-mesh");
     function paintMeter(el, value){
       if(!el)return;
       el.textContent=value==null?"—":String(value)+"%";
     }
-    if(j.triad_display!==undefined){
-      paintMeter(scoreEl, j.triad_display);
-      paintMeter(residualEl, j.meter_remainder!=null?j.meter_remainder:(j.triad_display==null?null:(100-Number(j.triad_display))));
-    }else{
-      if(scoreEl&&j.current_score!=null)scoreEl.textContent=String(j.current_score)+"%";
-      if(residualEl&&j.residual!=null)residualEl.textContent=String(j.residual)+"%";
-    }
+    var last=j.headline_last!=null?j.headline_last:(j.current_score!=null?j.current_score:null);
+    var residual=j.headline_residual!=null?j.headline_residual:(j.residual!=null?j.residual:null);
+    paintMeter(scoreEl, last);
+    paintMeter(residualEl, residual);
+    paintMeter(averageEl, j.score_average!=null?j.score_average:last);
+    paintMeter(meshScoreEl, j.mesh_score!=null?j.mesh_score:null);
     if(meshEl&&j.mesh){
       var on=!!j.mesh.enabled;
       var r=j.mesh.rollup||{};
@@ -485,6 +486,20 @@ export function homeSoftwareLine() {
 </section>`;
 }
 
+function siteMeters(stats) {
+  const s = stats || {};
+  const pct = (n) => (n == null || n === "" || !Number.isFinite(Number(n)) ? "—" : String(n) + "%");
+  const unscored = Object.prototype.hasOwnProperty.call(s, "triad_display")
+    && (s.triad_display == null || s.triad_display === "")
+    && (s.headline_last == null || s.headline_last === "");
+  if (unscored) return { last: "—", average: "—", residual: "—", mesh: "—" };
+  const last = s.headline_last != null ? s.headline_last : (s.current_score != null ? s.current_score : 50);
+  const average = s.score_average != null ? s.score_average : last;
+  const residual = s.headline_residual != null ? s.headline_residual : (s.residual != null ? s.residual : 50);
+  const mesh = s.mesh_score != null ? s.mesh_score : null;
+  return { last: pct(last), average: pct(average), residual: pct(residual), mesh: pct(mesh) };
+}
+
 function meterView(stats) {
   const s = stats || {};
   if (Object.prototype.hasOwnProperty.call(s, "triad_display")) {
@@ -593,6 +608,15 @@ export function threadView(j) {
   var st = p.status === "verified" ? "verified" : (p.status === "unverified" ? "unverified" : "missing");
   if (st === "verified" && !(p.receipt_hash && p.prev_hash && p.seal)) st = "unverified";
   out.status = st;
+  if (r.percents) out.receipt.push(["Percents", r.percents]);
+  else {
+    if (r.headline != null) out.receipt.push(["Headline", String(r.headline) + "%"]);
+    if (r.triad_display != null) out.receipt.push(["Triad", String(r.triad_display) + "%"]);
+    if (r.mesh != null) out.receipt.push(["Mesh", String(r.mesh) + "%"]);
+    if (r.debate != null) out.receipt.push(["Debate", String(r.debate) + "%"]);
+    if (r.headline_residual != null) out.receipt.push(["Residual", String(r.headline_residual) + "%"]);
+    else if (r.residual != null) out.receipt.push(["Residual", String(r.residual) + "%"]);
+  }
   out.receipt.push(["Status", st]);
   out.receipt.push(["Receipt hash", p.receipt_hash || "missing"]);
   out.receipt.push(["Prev hash", p.prev_hash || "missing"]);
@@ -716,9 +740,18 @@ function frameBlock(row) {
   return `<div class="block"><div class="k">Frame</div><p>${esc(parts.join(" · "))}</p><p class="muted">One scored input. A split keeps the ledgers separate. Pretty spirals and φ do not add a design share.</p></div>`;
 }
 
+export function siteMeterBox(stats) {
+  const meter = siteMeters(stats);
+  return `<div class="scorebox" id="site-meters">
+  <div><div class="n" id="stat-current-score">${esc(meter.last)}</div><div class="k">Last</div></div>
+  <div><div class="n" id="stat-average">${esc(meter.average)}</div><div class="k">Average</div></div>
+  <div><div class="n" id="stat-residual">${esc(meter.residual)}</div><div class="k">Residual</div></div>
+  <div><div class="n" id="stat-mesh">${esc(meter.mesh)}</div><div class="k">Mesh</div></div>
+</div>`;
+}
+
 export function homeBody({ stats, latest, prior, error, products, extras }) {
   const s = stats || {};
-  const meter = meterView(s);
   const meshLine = meshStatusLine(s.mesh, { live_nodes: s.live_nodes });
   const err = error
     ? `<p class="bad" id="challenge-error">${esc(error)}</p>`
@@ -728,12 +761,9 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
   const list = priorReceiptItems(shown) || `<p class="muted">No public receipts yet. Submit a question.</p>`;
   return `
 <h1 class="soft-heading">${esc(DEBATE_HEADLINE)}</h1>
+${siteMeterBox(s)}
 ${statsGrid(s)}
 <p class="muted" id="mesh-status">${esc(meshLine)}</p>
-<div class="scorebox">
-  <div><div class="n" id="stat-current-score">${esc(meter.score)}</div><div class="k">Triad display</div></div>
-  <div><div class="n" id="stat-residual">${esc(meter.residual)}</div><div class="k">Meter remainder</div></div>
-</div>
 ${steerPanel(s.steer, s)}
 ${latestHtml}
 <div class="card">
@@ -788,6 +818,7 @@ export function receiptsBody({ rows, total, page, pageSize, stats }) {
   const size = Number(pageSize) || RECEIPTS_PAGE_SIZE;
   const pages = Math.max(1, Math.ceil((Number(total) || 0) / size));
   return `
+${siteMeterBox(s)}
 ${statsGrid(s, { receiptsFallback: total })}
 ${steerPanel(s.steer, s)}
 <h1 class="soft-heading">Receipts</h1>
@@ -820,6 +851,9 @@ export function answerCard(row, latest) {
     ? " Old stored residual " + row.residual + "%."
     : "";
   const stored = `<div class="block"><div class="k">Original receipt kept</div><p>${esc(oldStoredScorePhrase(row) + remainderBit)} ${later.length ? "A later rescore did not erase this row." : "This row was not rewritten."}</p></div>`;
+  const percents = reading && reading.percents
+    ? `<div class="block"><div class="k">Percents</div><p>${esc(reading.percents)}</p></div>`
+    : "";
   const triad = reading
     ? `<div class="block"><div class="k">Triad</div><p>${esc(reading.note)}</p></div>`
     : (latestRescore
@@ -834,6 +868,7 @@ export function answerCard(row, latest) {
     <div class="block"${spoken.derived ? ` data-derived="true"` : ""}><div class="k">${esc(responseLabel)}</div>${derivedNote}<p class="response-text">${esc(paragraph)}</p></div>
     <div class="block"><div class="k">Summary</div><p class="stored-summary">${esc(summaryText)}</p></div>
     <div class="block"><div class="k">Explanation</div><p class="stored-explanation">${esc(explanationText)}</p></div>
+    ${percents}
     ${triad}
     ${stored}
     ${priorNotes ? `<div class="block"><div class="k">Rescores</div><ul>${priorNotes}</ul></div>` : ""}

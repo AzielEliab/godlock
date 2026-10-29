@@ -888,7 +888,7 @@ export function identityMachineUrls() {
 export const SPECIFIED_FIT_TITLE = "Specified Fit, Not Pretty Spirals";
 export const SPECIFIED_FIT_MOTTO = "GodLock does not argue. It records, analyzes, hardens, and grows.";
 export const SCORE_METHOD_LINE =
-  "Scores use the published corpus triad (TRIAD_V3). Display is round(combined × 100). No Specified Fit prior is added.";
+  "The headline is the average of the applicable six factors, not the triad product. Uncertainty stays between 25% and 75%. Scores also keep the published corpus triad (TRIAD_V3). Display is round(combined × 100). No Specified Fit prior is added.";
 export const DEBATE_HEADLINE = "Godlock. The Debate Site of Intelligent Design";
 export const ABOUT_PUBLIC_WORK_LEAD =
   "I made this because a debate with no record becomes a pulpit, and a pulpit with no score becomes a private religion. Intelligent design was never the point by itself. The point was whether a claim could stand in the open, be answered, and leave something behind that was not just my voice.";
@@ -1152,7 +1152,7 @@ function identityFaqNode() {
     ["Must a claim stand open and leave a receipt?", "Yes. A claim must stand in the open, be answered, and leave a receipt. The receipt is the argument that survives the speaker. GodLock is a challenge/score product. Person @id https://www.azieleliab.com/#aziel."],
     ["What does document over declare mean?", ABOUT_DOCUMENT_OVER_DECLARE],
     ["What is a claim that cannot be scored?", ABOUT_UNSCORED_CLAIM],
-    ["How does GodLock score?", "GodLock scores a question with the published corpus triad (TRIAD_V3). Display is round(combined × 100). The old Specified Fit prior is not added. Method: https://www.azielcorpuslibrary.net/how-its-scored."],
+    ["How does GodLock score?", "GodLock's headline is the average of the applicable factors among physics, linguistics, bayesian, truth_formula, CLCE, and SPRE. It is not the triad product. Uncertainty stays between 25% and 75%. The published corpus triad (TRIAD_V3) stays beside that headline. A mesh provenance score and a debate score make a dual mesh, then that dual mesh and the triad are scored against each other. Display of the triad is round(combined × 100). The old Specified Fit prior is not added. Method: https://www.azielcorpuslibrary.net/how-its-scored."],
     ["Does GodLock argue?", SPECIFIED_FIT_MOTTO + " GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id https://www.azieleliab.com/#aziel."],
     ["Is He Didn't Jump a second identity?", "He Didn't Jump is a sister archive in the Aziel Eliab ecosystem. Person @id remains https://www.azieleliab.com/#aziel."],
     ["Is Aziel Eliab the same person as Aziel S.?", PUBLISHER_NOT_LOCK + " GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id https://www.azieleliab.com/#aziel."],
@@ -1507,7 +1507,7 @@ export function defaultDescription(kind, runtimeCite) {
   }
   if (kind === "reason") {
     return hideInternalDetermination(
-      "How GodLock is scored. The published corpus triad (TRIAD_V3) is the score. Display is round(combined × 100). No Specified Fit prior is added. Method: https://www.azielcorpuslibrary.net/how-its-scored.",
+      "How GodLock is scored. The headline is the six-factor average, not the triad product. Uncertainty stays between 25% and 75%. The published corpus triad (TRIAD_V3) stays beside the headline. Display is round(combined × 100). No Specified Fit prior is added. Method: https://www.azielcorpuslibrary.net/how-its-scored.",
     );
   }
   if (kind === "software") {

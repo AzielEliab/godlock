@@ -176,7 +176,7 @@ export const PUBLIC_RUNTIME = CANON_HOST + RUNTIME_PATH;
 export const GITHUB_RUNTIME = "https://github.com/AzielEliab/aziel-runtime";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
-/** Live origin GET /v1/health + /v1/runtime.json. SoT main cf11ec24 / 2.0.0-rc1. Changelog stays below the abstract. */
+/** Live origin GET /v1/health + /v1/runtime.json. SoT main ce673365 / 2.0.0-rc1. Changelog stays below the abstract. */
 export const RUNTIME_VERSION = "2.0.0-rc1";
 export { RUNTIME_GIT_SHA, RUNTIME_GIT_SHA_SHORT, RUNTIME_SOT, RUNTIME_VERSION_ID } from "./launchReady.js";
 /** Crawler lead copy after aziel-runtime #146+#148. Designed-purpose only. */

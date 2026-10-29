@@ -352,7 +352,7 @@ describe("godlock-uk SoT mesh outlet", () => {
     assert.equal(cite.runtime_sot_live, false);
     assert.equal(cite.runtime_sot_status, "unreachable");
     const llms = await (await worker.fetch(new Request("https://godlock.uk/llms.txt"), env)).text();
-    assert.match(llms, /SoT last-known: main cf11ec24 \/ 2\.0\.0-rc1/);
+    assert.match(llms, /SoT last-known: main ce673365 \/ 2\.0\.0-rc1/);
     assert.doesNotMatch(llms, /SoT LIVE:/);
   });
 

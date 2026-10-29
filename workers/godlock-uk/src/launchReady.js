@@ -1,9 +1,9 @@
 /**
  * Runtime Softwares launch-readiness cite for godlock.uk.
- * SoT is live aziel-runtime GET /v1/software: main cf11ec24 / 2.0.0-rc1.
- * Deployed git_sha cf11ec248aa360f97d9b049fbf19f95614a27114 (read 2026-10-29).
+ * SoT is live aziel-runtime GET /v1/software: main ce673365 / 2.0.0-rc1.
+ * Deployed git_sha ce673365700d41fc604292ab2b92b1b1ca504016 (read 2026-10-29).
  * git_sha_source deploy_var. git_sha_tracks_deployed_tip true. deploy_lag null.
- * Published version_id 0b17bf2d-c239-40cc-87fd-6cdbf734028f (vid 0b17bf2d)
+ * Published version_id d2958625-7651-4173-8d5b-44f588d2d346 (vid d2958625)
  * is env.CF_VERSION_METADATA.id on that read. It is a serve-time isolate id,
  * not a baked suite constant.
  * Suite 2.0.0-rc1 stays the certification-point freeze. Authority count stays 42
@@ -21,13 +21,13 @@ export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
 export const RUNTIME_VERSION = "2.0.0-rc1";
 /** Deployed GET /v1/software git_sha (read 2026-10-29). Public short stamp is the 8-char tip prefix. */
-export const RUNTIME_GIT_SHA = "cf11ec248aa360f97d9b049fbf19f95614a27114";
-export const RUNTIME_GIT_SHA_SHORT = "cf11ec24";
+export const RUNTIME_GIT_SHA = "ce673365700d41fc604292ab2b92b1b1ca504016";
+export const RUNTIME_GIT_SHA_SHORT = "ce673365";
 /**
- * Published GET /v1/software version_id on the 2026-10-29 read (vid 0b17bf2d).
+ * Published GET /v1/software version_id on the 2026-10-29 read (vid d2958625).
  * env.CF_VERSION_METADATA.id, read at serve time. Not a baked suite constant.
  */
-export const RUNTIME_VERSION_ID = "0b17bf2d-c239-40cc-87fd-6cdbf734028f";
+export const RUNTIME_VERSION_ID = "d2958625-7651-4173-8d5b-44f588d2d346";
 export const RUNTIME_VERSION_ID_NOTE =
   "Published GET /v1/software version_id for this cite. env.CF_VERSION_METADATA.id, read at serve time. Not a baked suite constant.";
 export const RUNTIME_SOT_BRANCH = "main";

@@ -103,7 +103,8 @@ import {
   ChallengeRefuse,
 } from "./challengeText.js";
 import { checkSubmitGuard } from "./submitGuard.js";
-import { handleSotOutlet, isSotOutletPath, loadAppliedCite } from "./sotOutlet.js";
+import { handleSotOutlet, isSotOutletPath, loadAppliedCite, readServeRuntimeCite } from "./sotOutlet.js";
+import { godlockBuildStamp } from "./buildStamp.js";
 
 const NODE_COOKIE = "godlock_node";
 const LEDGER_CHALLENGE_PREVIEW = 160;
@@ -904,6 +905,7 @@ async function healthPayload(env, { wrote, ctx } = {}) {
     github: GITHUB,
     ...extra,
     ...stats,
+    ...godlockBuildStamp(env),
   };
 }
 
@@ -1012,6 +1014,17 @@ async function handleGodlock(request, env, ctx) {
         if (!runtimeCitePromise) runtimeCitePromise = loadAppliedCite(env);
         return runtimeCitePromise;
       };
+      let publishCitePromise = null;
+      const publishRuntimeCite = () => {
+        if (!publishCitePromise) {
+          publishCitePromise = (async () => {
+            const live = await readServeRuntimeCite(env);
+            if (live && live.git_sha) return live;
+            return runtimeCite();
+          })();
+        }
+        return publishCitePromise;
+      };
 
       if (isRuntimeRequest(url.pathname) || isRuntimeRequest(path)) {
         const runtime = await handleRuntimeRoot(request, url, env, ctx);
@@ -1034,7 +1047,7 @@ async function handleGodlock(request, env, ctx) {
         const products = publicSoftwaresList([], { version: RUNTIME_VERSION });
         const runtime = products.find((p) => p && p.slug === "aziel-runtime");
         const sot = await fetchSurvivalSot(env);
-        const pinned = await runtimeCite();
+        const pinned = await publishRuntimeCite();
         return json({
           ...citeDoc(sot, pinned),
           official_softwares: OFFICIAL_SOFTWARES,
@@ -1046,11 +1059,11 @@ async function handleGodlock(request, env, ctx) {
       }
       if (path === "/llms.txt") {
         const sot = await fetchSurvivalSot(env);
-        return new Response(llmsDoc(sot, await runtimeCite()), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+        return new Response(llmsDoc(sot, await publishRuntimeCite()), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/ai.txt") {
         const sot = await fetchSurvivalSot(env);
-        return new Response(aiDoc(sot, await runtimeCite()), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+        return new Response(aiDoc(sot, await publishRuntimeCite()), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/shelves" || path === "/v1/shelves") {
         return json(shelvesDoc());

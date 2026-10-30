@@ -1,11 +1,12 @@
 /**
  * Runtime Softwares launch-readiness cite for godlock.uk.
  * SoT is live aziel-runtime GET /v1/software: main ce673365 / 2.0.0-rc1.
- * Deployed git_sha ce673365700d41fc604292ab2b92b1b1ca504016 (read 2026-10-29).
+ * Deployed git_sha ce673365700d41fc604292ab2b92b1b1ca504016 (read 2026-10-30).
  * git_sha_source deploy_var. git_sha_tracks_deployed_tip true. deploy_lag null.
- * Published version_id d2958625-7651-4173-8d5b-44f588d2d346 (vid d2958625)
- * is env.CF_VERSION_METADATA.id on that read. It is a serve-time isolate id,
- * not a baked suite constant.
+ * Last-known version_id eaf0b54c-1e5b-4d54-a582-25c5cdc09f92 (vid eaf0b54c)
+ * is env.CF_VERSION_METADATA.id on that read. /cite.json and /llms.txt overlay
+ * tip + version_id from the live catalog at serve time. This floor is the
+ * unreachable pin. Cos LIVE restamps it after each Softwares Cos.
  * Suite 2.0.0-rc1 stays the certification-point freeze. Authority count stays 42
  * on that Worker. GodLock hub Softwares is hub-scope (JSON one product row;
  * HTML ItemList numberOfItems 2), not those 42 cards.
@@ -20,16 +21,18 @@ export const AUTHOR = "Aziel Eliab";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
 export const RUNTIME_VERSION = "2.0.0-rc1";
-/** Deployed GET /v1/software git_sha (read 2026-10-29). Public short stamp is the 8-char tip prefix. */
+/** Deployed GET /v1/software git_sha (read 2026-10-30). Public short stamp is the 8-char tip prefix. */
 export const RUNTIME_GIT_SHA = "ce673365700d41fc604292ab2b92b1b1ca504016";
 export const RUNTIME_GIT_SHA_SHORT = "ce673365";
 /**
- * Published GET /v1/software version_id on the 2026-10-29 read (vid d2958625).
- * env.CF_VERSION_METADATA.id, read at serve time. Not a baked suite constant.
+ * Last-known GET /v1/software version_id (read 2026-10-30, vid eaf0b54c).
+ * Floor pin only. Live /cite.json and /llms.txt replace it when the catalog answers.
  */
-export const RUNTIME_VERSION_ID = "d2958625-7651-4173-8d5b-44f588d2d346";
+export const RUNTIME_VERSION_ID = "eaf0b54c-1e5b-4d54-a582-25c5cdc09f92";
 export const RUNTIME_VERSION_ID_NOTE =
-  "Published GET /v1/software version_id for this cite. env.CF_VERSION_METADATA.id, read at serve time. Not a baked suite constant.";
+  "Last-known GET /v1/software version_id (read 2026-10-30, vid eaf0b54c). Floor pin used when the live catalog read does not answer. /cite.json and /llms.txt overlay git_sha, the 8-char tip, and version_id from live GET /v1/software at serve time (service binding https://aziel-runtime/v1/software, then HTTPS). Cos LIVE restamps this floor after each Softwares Cos so an unreachable read does not keep a stale id. env.CF_VERSION_METADATA.id on the runtime Worker. Not a baked suite constant.";
+export const RUNTIME_VERSION_ID_SERVE_NOTE =
+  "Published GET /v1/software version_id read at serve time from the live catalog. env.CF_VERSION_METADATA.id on the runtime Worker. Not a baked suite constant.";
 export const RUNTIME_SOT_BRANCH = "main";
 export const RUNTIME_SOT =
   RUNTIME_SOT_BRANCH + " " + RUNTIME_GIT_SHA_SHORT + " / " + RUNTIME_VERSION;
@@ -69,6 +72,8 @@ export function floorRuntimeCite() {
     git_sha: RUNTIME_GIT_SHA,
     git_sha_short: RUNTIME_GIT_SHA_SHORT,
     version_id: RUNTIME_VERSION_ID,
+    version_id_source: "floor",
+    version_id_note: RUNTIME_VERSION_ID_NOTE,
     cite: RUNTIME_SOT,
     live: true,
     status: "floor",
@@ -196,9 +201,22 @@ export function launchCiteFields(cite) {
   };
   if (sot.version_id) {
     fields.runtime_version_id = sot.version_id;
-    fields.runtime_version_id_note = RUNTIME_VERSION_ID_NOTE;
+    fields.runtime_version_id_source = versionIdSource(sot);
+    fields.runtime_version_id_note = versionIdNote(sot);
   }
   return fields;
+}
+
+export function versionIdSource(sot) {
+  if (sot && sot.version_id_source) return sot.version_id_source;
+  if (sot && sot.source === "serve") return "serve";
+  if (sot && sot.source === "floor") return "floor";
+  return "last-known";
+}
+
+export function versionIdNote(sot) {
+  if (sot && sot.version_id_note) return sot.version_id_note;
+  return versionIdSource(sot) === "serve" ? RUNTIME_VERSION_ID_SERVE_NOTE : RUNTIME_VERSION_ID_NOTE;
 }
 
 export function launchLlmsSection(cite) {
@@ -206,7 +224,7 @@ export function launchLlmsSection(cite) {
   const sot = citeInput(cite);
   const sotLabel = ready.runtime_sot_live ? "SoT LIVE: " : "SoT last-known: ";
   const versionIdLine = sot.version_id
-    ? "Published version_id: " + sot.version_id + ". " + RUNTIME_VERSION_ID_NOTE + "\n"
+    ? "Published version_id: " + sot.version_id + ". " + versionIdNote(sot) + "\n"
     : "";
   return "\n## Softwares + runtime launch readiness\n\n"
     + sotLabel + ready.runtime_sot + ".\n"

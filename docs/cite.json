@@ -16,8 +16,16 @@
     "Archivist (He Didn't Jump / Marion Zioncheck archive)",
     "Open-hardware designer"
   ],
-  "site_blurb": "GodLock is a challenge/score product. Submit a challenge; score it. Answers open with Yes, No, Let's review, or Interesting. Empty/null submit refuses — no spam receipt. Identity is Aziel Eliab only.",
+  "site_blurb": "GodLock is a challenge/score product. Submit a challenge; score it. Answers open with Yes, No, Let's review, or Interesting. Empty/null submit refuses — no spam receipt. An argument that is not relative to intelligent design is not accepted for debate and is not queued (GODLOCK-NOT-RELATIVE). Identity is Aziel Eliab only.",
   "empty_submit_refuse": true,
+  "debate_acceptance": {
+    "rule": "An argument that is not relative to intelligent design is not accepted for debate.",
+    "fail_closed": true,
+    "queued_when_unrelated": false,
+    "scored_when_unrelated": false,
+    "archived_when_unrelated": false,
+    "refuse_code": "GODLOCK-NOT-RELATIVE"
+  },
   "challenge_score_product": true,
   "godlock_is_anonymity_tool": false,
   "sister_sites": {

@@ -387,7 +387,7 @@ describe("POST /submit still scores one valid challenge", () => {
     const first = await postSubmit(rec.env, { text: VALID });
     assert.equal(first.status, 200);
     const earlier = await first.json();
-    const follow = "Please look again at receipt " + earlier.id + ". The mapping is still the question.";
+    const follow = "Please look again at receipt " + earlier.id + ". The genetic code mapping table is still the question.";
     const second = await postSubmit(rec.env, { text: follow });
     assert.equal(second.status, 200);
     const later = await second.json();
@@ -443,6 +443,67 @@ describe("submit anti-spam", () => {
   });
 });
 
+describe("POST /submit refuses arguments that are not relative to intelligent design", () => {
+  const unrelated = "The quarterly earnings of the retail sector beat estimates after the holiday season in London.";
+
+  it("does not queue, score, or archive an unrelated argument", async () => {
+    const rec = submitEnv();
+    const res = await postSubmit(rec.env, { text: unrelated });
+    assert.equal(res.status, 400);
+    const j = await res.json();
+    assert.equal(j.ok, false);
+    assert.equal(j.code, REFUSE.NOT_RELATIVE);
+    assert.equal(j.scored, false);
+    assert.equal(j.archived, false);
+    assert.equal(j.queued, false);
+    assert.equal(j.accepted, false);
+    assert.equal(j.relative_to_intelligent_design, false);
+    assert.match(j.error, /not relative to intelligent design/);
+    assert.match(j.error, /not accepted for debate/);
+    assert.equal(j.id, undefined);
+    assert.equal(rec.receipts.length, 0);
+    assert.equal(rec.ledger.length, 0);
+    assert.equal(rec.metadata.get("uses"), "0");
+  });
+
+  it("repeats the same refusal instead of a duplicate-text code", async () => {
+    const rec = submitEnv();
+    const headers = { "CF-Connecting-IP": "203.0.113.40" };
+    const first = await postSubmit(rec.env, { text: unrelated }, headers);
+    const second = await postSubmit(rec.env, { text: unrelated }, headers);
+    assert.equal(first.status, 400);
+    assert.equal(second.status, 400);
+    assert.equal((await second.json()).code, REFUSE.NOT_RELATIVE);
+    assert.equal(rec.receipts.length, 0);
+  });
+
+  it("still rate-limits a flood of unrelated arguments", async () => {
+    const rec = submitEnv();
+    const headers = { "CF-Connecting-IP": "203.0.113.41" };
+    for (let i = 0; i < SUBMIT_RATE_MAX; i++) {
+      const res = await postSubmit(rec.env, { text: unrelated + " note " + i }, headers);
+      assert.equal(res.status, 400);
+      assert.equal((await res.json()).code, REFUSE.NOT_RELATIVE);
+    }
+    const blocked = await postSubmit(rec.env, { text: unrelated + " overflow" }, headers);
+    assert.equal(blocked.status, 429);
+    assert.equal((await blocked.json()).code, REFUSE.RATE_LIMIT);
+    assert.equal(rec.receipts.length, 0);
+  });
+
+  it("processSubmit throws before any insert", async () => {
+    const rec = submitEnv();
+    await assert.rejects(() => processSubmit(rec.env, unrelated), (err) => {
+      assert.equal(err.code, REFUSE.NOT_RELATIVE);
+      assert.equal(err.queued, false);
+      assert.equal(err.accepted, false);
+      return true;
+    });
+    assert.equal(rec.receipts.length, 0);
+    assert.equal(rec.ledger.length, 0);
+  });
+});
+
 describe("submit docs stay honest", () => {
   it("lists refuse codes on OpenAPI /submit", () => {
     const spec = siteOpenApi();
@@ -450,6 +511,8 @@ describe("submit docs stay honest", () => {
     assert.ok(post.responses["400"]);
     assert.match(post.responses["400"].description, /GODLOCK-NULL-ARG/);
     assert.match(post.responses["400"].description, /GODLOCK-EMPTY-TEXT/);
+    assert.match(post.responses["400"].description, /GODLOCK-NOT-RELATIVE/);
+    assert.match(post.summary, /relative to intelligent design/);
     assert.match(post.responses["429"].description, /GODLOCK-RATE-LIMIT/);
     assert.match(post.responses["429"].description, /GODLOCK-DUP-TEXT/);
   });

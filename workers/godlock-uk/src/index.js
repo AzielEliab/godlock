@@ -103,6 +103,7 @@ import {
   ChallengeRefuse,
 } from "./challengeText.js";
 import { checkSubmitGuard } from "./submitGuard.js";
+import { debateAcceptance } from "./debateAccept.js";
 import { handleSotOutlet, isSotOutletPath, loadAppliedCite, readServeRuntimeCite } from "./sotOutlet.js";
 import { godlockBuildStamp } from "./buildStamp.js";
 
@@ -592,6 +593,9 @@ async function submitRefuseResponse(request, url, refused) {
   if (refused.retryAfter) extra["Retry-After"] = String(refused.retryAfter);
   const body = refuseBody(refused.code, refused.error, {
     retry_after: refused.retryAfter || undefined,
+    queued: refused.queued,
+    accepted: refused.accepted,
+    relative_to_intelligent_design: refused.relative_to_intelligent_design,
   });
   if (wantsJson(request, url)) {
     return json(body, status, extra);
@@ -683,11 +687,23 @@ export function publicPayload(row) {
   return payload;
 }
 
+function throwChallengeRefuse(checked) {
+  const err = ChallengeRefuse(checked.code, checked.error, checked.status);
+  if (checked.queued != null) err.queued = checked.queued;
+  if (checked.accepted != null) err.accepted = checked.accepted;
+  if (checked.relative_to_intelligent_design != null) {
+    err.relative_to_intelligent_design = checked.relative_to_intelligent_design;
+  }
+  throw err;
+}
+
 export async function processSubmit(env, text, username) {
   const checked = validateChallengeText(text);
   if (!checked.ok) {
     throw ChallengeRefuse(checked.code, checked.error, checked.status);
   }
+  const acceptance = debateAcceptance(checked.text);
+  if (!acceptance.ok) throwChallengeRefuse(acceptance);
   const created_utc = new Date().toISOString();
   const id = newId();
   const challenge_text = checked.text;
@@ -978,6 +994,12 @@ async function handleGodlock(request, env, ctx) {
       if (isSubmitPost) {
         parsedSubmit = await readChallengeText(request);
         if (!parsedSubmit.ok) return submitRefuseResponse(request, url, parsedSubmit);
+        const acceptance = debateAcceptance(parsedSubmit.text);
+        if (!acceptance.ok) {
+          const rated = await checkSubmitGuard(env, request, parsedSubmit.text, Date.now(), { recordHash: false });
+          if (!rated.ok) return submitRefuseResponse(request, url, rated);
+          return submitRefuseResponse(request, url, acceptance);
+        }
         const guard = await checkSubmitGuard(env, request, parsedSubmit.text);
         if (!guard.ok) return submitRefuseResponse(request, url, guard);
       }

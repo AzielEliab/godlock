@@ -6,7 +6,7 @@ Official site: https://www.azieleliab.com/
 
 ## What GodLock is
 
-GodLock is a challenge/score product. Submit a challenge; score it. Answers open with Yes, No, Let's review, or Interesting. Empty/null submit refuses — no spam receipt. Identity is Aziel Eliab only.
+GodLock is a challenge/score product. Submit a challenge; score it. Answers open with Yes, No, Let's review, or Interesting. Empty/null submit refuses — no spam receipt. An argument that is not relative to intelligent design is not accepted for debate and is not queued (GODLOCK-NOT-RELATIVE). Identity is Aziel Eliab only.
 Growth-ON. Never invent. NO-LIE.
 
 ## How to verify

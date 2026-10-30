@@ -29,6 +29,7 @@ SITE_BLURB = (
     "GodLock is a challenge/score product. Submit a challenge; score it. "
     "Answers open with Yes, No, Let's review, or Interesting. "
     "Empty/null submit refuses — no spam receipt. "
+    "An argument that is not relative to intelligent design is not accepted for debate and is not queued (GODLOCK-NOT-RELATIVE). "
     "Identity is Aziel Eliab only."
 )
 
@@ -349,6 +350,10 @@ def test_cite_json_graph():
     ]
     assert CITE["site_blurb"] == SITE_BLURB
     assert CITE["empty_submit_refuse"] is True
+    assert CITE["debate_acceptance"]["fail_closed"] is True
+    assert CITE["debate_acceptance"]["queued_when_unrelated"] is False
+    assert CITE["debate_acceptance"]["refuse_code"] == "GODLOCK-NOT-RELATIVE"
+    assert "live" not in CITE["debate_acceptance"]
     assert CITE["challenge_score_product"] is True
     assert CITE["godlock_is_anonymity_tool"] is False
     assert CITE["sister_sites"] == SISTER_SITES

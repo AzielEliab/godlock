@@ -784,6 +784,10 @@ describe("AZindex identity machine", () => {
     const cite = citeDoc();
     assert.equal(cite.site_blurb, GODLOCK_SITE_BLURB);
     assert.equal(cite.empty_submit_refuse, true);
+    assert.equal(cite.debate_acceptance.fail_closed, true);
+    assert.equal(cite.debate_acceptance.queued_when_unrelated, false);
+    assert.equal(cite.debate_acceptance.refuse_code, "GODLOCK-NOT-RELATIVE");
+    assert.equal("live" in cite.debate_acceptance, false);
     assert.equal(cite.challenge_score_product, true);
     assert.equal(cite.godlock_is_anonymity_tool, false);
     assert.deepEqual(cite.sister_sites, SISTER_SITES);
@@ -808,7 +812,10 @@ describe("AZindex identity machine", () => {
     const mission = wellKnownAzielDoc();
     assert.equal(mission.site_blurb, GODLOCK_SITE_BLURB);
     assert.equal(mission.empty_submit_refuse, true);
+    assert.equal(mission.debate_acceptance.refuse_code, "GODLOCK-NOT-RELATIVE");
     assert.equal(mission.mission.empty_submit_refuse, true);
+    assert.equal(mission.mission.debate_acceptance.refuse_code, "GODLOCK-NOT-RELATIVE");
+    assert.equal("live" in mission.debate_acceptance, false);
     assert.equal(mission.mission.challenge_score_product, true);
     assert.deepEqual(mission.sister_sites, SISTER_SITES);
     assert.equal(mission.ecosystem.runtime, SISTER_SITES.runtime);

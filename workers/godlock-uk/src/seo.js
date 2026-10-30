@@ -28,6 +28,7 @@ import { shelvesCiteFields, shelvesLlmsSection } from "./shelves.js";
 import { redlineCiteFields, redlineLlmsSection } from "./redline.js";
 import { launchCiteFields, launchLlmsSection, launchReadyNoteFrom, LAUNCH_READY_NOTE, RUNTIME_SOT } from "./launchReady.js";
 import { survivalCiteFields, survivalLlmsSection } from "./survival.js";
+import { DEBATE_ACCEPTANCE } from "./debateAccept.js";
 
 export const CANON_HOST = "https://godlock.uk";
 export const FALLBACK_HOST = "https://godlock-uk.vibelock.workers.dev";
@@ -1071,7 +1072,7 @@ export function crossTetherDoc() {
 
 /** Machine site blurb. Challenge/score product. Empty submit refuses. Not VPN/anonymity. */
 export const GODLOCK_SITE_BLURB =
-  "GodLock is a challenge/score product. Submit a question; the score is the published corpus triad (TRIAD_V3) on that text. Empty/null submit refuses — no spam receipt. Identity is Aziel Eliab only.";
+  "GodLock is a challenge/score product. Submit a question relative to intelligent design; the score is the published corpus triad (TRIAD_V3) on that text. Empty/null submit refuses — no spam receipt. An argument that is not relative to intelligent design is refused (GODLOCK-NOT-RELATIVE) and is not queued, scored, or archived. Identity is Aziel Eliab only.";
 
 export const IDENTITY_MODEL_RULES = [
   "Person @id is https://www.azieleliab.com/#aziel on every surface. Do not mint a competing Person.",
@@ -1087,7 +1088,7 @@ export const IDENTITY_MODEL_RULES = [
   "He Didn't Jump remains in the ecosystem as a sister archive. Identity is Aziel Eliab only.",
   "Sister sites are ae, corpus, HDJ, runtime, and trades. GodLock.uk is this product host.",
   "Mission and status are public work only. Scores use the published corpus triad (TRIAD_V3).",
-  "GodLock is a challenge/score product. Empty/null submit refuses — no spam receipt. Identity is Aziel Eliab only.",
+  "GodLock is a challenge/score product. Empty/null submit refuses — no spam receipt. An argument that is not relative to intelligent design is refused (GODLOCK-NOT-RELATIVE) and is not queued, scored, or archived. Identity is Aziel Eliab only.",
   WHAT_AZIEL_ELIAB_DOES,
   RESEARCH_ADDENDUM,
   HARDWARE_ADDENDUM,
@@ -1336,6 +1337,7 @@ export function wellKnownAzielDoc() {
     works_note: WORKS_CATALOG_NOTE,
     site_blurb: GODLOCK_SITE_BLURB,
     empty_submit_refuse: true,
+    debate_acceptance: DEBATE_ACCEPTANCE,
     growth_on: true,
     ban_survival: "BAN-SURVIVAL-1.0",
     ban_survival_sot: CATALOG + "/v1/survival",
@@ -1372,6 +1374,7 @@ export function wellKnownAzielDoc() {
       godlock_is_identity_label: false,
       godlock_is_anonymity_tool: false,
       empty_submit_refuse: true,
+      debate_acceptance: DEBATE_ACCEPTANCE,
       challenge_score_product: true,
       design_motto: DEBATE_HEADLINE,
       design_motto_kind: "public_work",
@@ -2327,6 +2330,7 @@ export function citeDoc(sot, runtimeCite) {
     works_note: WORKS_CATALOG_NOTE,
     site_blurb: GODLOCK_SITE_BLURB,
     empty_submit_refuse: true,
+    debate_acceptance: DEBATE_ACCEPTANCE,
     godlock_is_anonymity_tool: false,
     challenge_score_product: true,
     sister_sites: { ...SISTER_SITES },
@@ -2888,11 +2892,11 @@ export function siteOpenApi() {
       "/submit": {
         post: {
           operationId: "godlockUkSubmit",
-          summary: "Submit a challenge. Null/empty/whitespace-only text is refused and not scored.",
+          summary: "Submit a challenge relative to intelligent design. Null, empty, or unrelated text is refused and not queued.",
           requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["text"], properties: { text: { type: "string", minLength: 1 } } } } } },
           responses: {
             "200": { description: "Receipt + TRIAD_V3 display (round of combined × 100). Original receipt rows are kept." },
-            "400": { description: "GODLOCK-NULL-ARG or GODLOCK-EMPTY-TEXT — nothing archived" },
+            "400": { description: "GODLOCK-NULL-ARG, GODLOCK-EMPTY-TEXT, or GODLOCK-NOT-RELATIVE — nothing queued or archived" },
             "429": { description: "GODLOCK-RATE-LIMIT or GODLOCK-DUP-TEXT — Retry-After" },
           },
         },

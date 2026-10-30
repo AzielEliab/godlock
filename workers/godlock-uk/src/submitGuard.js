@@ -52,7 +52,8 @@ async function cleanupGuard(env, nowMs) {
   } catch { /* first run */ }
 }
 
-export async function checkSubmitGuard(env, request, text, nowMs = Date.now()) {
+export async function checkSubmitGuard(env, request, text, nowMs = Date.now(), opts = {}) {
+  const recordHash = !opts || opts.recordHash !== false;
   const fingerprint = submitFingerprint(request);
   const textSha256 = sha256hex(String(text));
   await cleanupGuard(env, nowMs);
@@ -73,17 +74,19 @@ export async function checkSubmitGuard(env, request, text, nowMs = Date.now()) {
     }
   }
 
-  const hashRow = await readGuard(env, "hash", textSha256);
-  if (hashRow && (nowMs - Number(hashRow.last_ms || 0)) < SUBMIT_DUP_WINDOW_MS) {
-    return {
-      ok: false,
-      code: REFUSE.DUP_TEXT,
-      error: DUP_MSG,
-      status: 429,
-      retryAfter: retryAfterSec(hashRow.last_ms, SUBMIT_DUP_WINDOW_MS, nowMs),
-      fingerprint,
-      text_sha256: textSha256,
-    };
+  if (recordHash) {
+    const hashRow = await readGuard(env, "hash", textSha256);
+    if (hashRow && (nowMs - Number(hashRow.last_ms || 0)) < SUBMIT_DUP_WINDOW_MS) {
+      return {
+        ok: false,
+        code: REFUSE.DUP_TEXT,
+        error: DUP_MSG,
+        status: 429,
+        retryAfter: retryAfterSec(hashRow.last_ms, SUBMIT_DUP_WINDOW_MS, nowMs),
+        fingerprint,
+        text_sha256: textSha256,
+      };
+    }
   }
 
   const ipCount = ipRow && (nowMs - Number(ipRow.last_ms || 0)) < SUBMIT_RATE_WINDOW_MS
@@ -91,7 +94,7 @@ export async function checkSubmitGuard(env, request, text, nowMs = Date.now()) {
     : 1;
   try {
     await writeGuard(env, "ip", fingerprint, nowMs, ipCount);
-    await writeGuard(env, "hash", textSha256, nowMs, 1);
+    if (recordHash) await writeGuard(env, "hash", textSha256, nowMs, 1);
   } catch { /* schema not ready; submit itself needs D1 */ }
 
   return { ok: true, fingerprint, text_sha256: textSha256 };

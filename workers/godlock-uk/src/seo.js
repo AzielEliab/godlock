@@ -109,6 +109,31 @@ export const WHO_PATH = "/who";
 export const WHY_IS_PATH = "/why-aziel-eliab.txt";
 export const WHY_PATH = "/why";
 export const VERIFY_PATH = "/verify";
+/** Pretty path for the Aziel handles tab. Not a redirect to /AzielEliab. */
+export const AZIEL_HANDLES_PATH = "/aziel";
+/** Public doors list. Handles on this site match that page. */
+export const DOORS_URL = "https://www.azieleliab.com/doors";
+export const UNSEAL_DOOR = "https://timetounsealthebook.net/";
+/** Cap-7 is a design name. It is not an ICANN registration and not a public egress address. */
+export const CAP7_PUBLIC =
+  "Cap-7 is not an ICANN registration and is not a public egress address.";
+/** Paid satellite stays held. This copy does not buy a domain, change DNS, or spend. */
+export const PAID_SAT_PUBLIC = "Paid satellite stays HELD.";
+/** Pattern stays unpublished as LIVE until those three gates clear. Draft until then. */
+export const PATTERN_HOLD_PUBLIC =
+  "Not LIVE until Dual CLEAR, Aziel merge OK, and Cos.";
+/** Same-origin tabs. Each one is a path crawlers can fetch. Hashes are not the crawl path. */
+export const TAB_PATHS = [
+  { href: "/", label: "Engine" },
+  { href: REASON_PATH, label: "Reason" },
+  { href: SOFTWARE_PATH, label: "Softwares" },
+  { href: RUNTIME_PATH, label: "Runtime" },
+  { href: RECEIPTS_PATH, label: "Receipts" },
+  { href: VERIFY_PATH, label: "Verify" },
+  { href: DONATE_PATH, label: "Donate" },
+  { href: AZIEL_ELIAB_PATH, label: "Aziel Eliab" },
+  { href: AZIEL_HANDLES_PATH, label: "Aziel" },
+];
 export const COUNT_PATH = "/count";
 export const HELP_PATH = "/help.txt";
 export const HELP_PATH_UPPER = "/HELP.txt";
@@ -129,6 +154,7 @@ export const HASH_PATH_EQUIVALENTS = [
   ["reason", REASON_PATH],
   ["verify", VERIFY_PATH],
   ["AzielEliab", AZIEL_ELIAB_PATH],
+  ["aziel", AZIEL_HANDLES_PATH],
   ["why", WHY_PATH],
   ["aziel-eliab", AZIEL_ELIAB_PATH],
   ["azieleliab", AZIEL_ELIAB_PATH],
@@ -237,6 +263,27 @@ export const TRADES_GITHUB = "https://github.com/AzielEliab/trades-runtime";
 export const TRADES_DOWNLOAD = TRADES_WORKER + "/download";
 export const TRADES_OPENAPI = TRADES_WORKER + "/openapi.json";
 export const TRADES_MCP = TRADES_WORKER + "/mcp";
+/**
+ * Public doors. Same list as azieleliab.com/doors, plus this site's handles tab
+ * and the Unseal door. He Didn't Jump is a handle, not a Live Node.
+ */
+export const AZIEL_HANDLES = [
+  { id: "official", label: "azieleliab.com", href: AZIEL_OFFICIAL },
+  { id: "github", label: "GitHub", href: AUTHOR_GITHUB },
+  { id: "github-secondary", label: "Secondary source", href: GITHUB_SECONDARY },
+  { id: "corpus", label: "Corpus", href: LIBRARY_HOME },
+  { id: "corpus-aziel", label: "Corpus · AzielEliab", href: LIBRARY_AZIEL },
+  { id: "godlock", label: "GodLock", href: CANON_HOST + "/" },
+  { id: "hedidntjump", label: HEDIDNTJUMP_LABEL, href: HEDIDNTJUMP },
+  { id: "runtime-hub", label: "Runtime", href: HUB_RUNTIME_URL },
+  { id: "runtime", label: "Official Runtime", href: CATALOG + "/" },
+  { id: "glama", label: "Try on Glama", href: GLAMA_RUNTIME },
+  { id: "trades", label: TRADES_NAME, href: TRADES_WORKER + "/" },
+  { id: "trades-mcp", label: "Trades-Runtime MCP", href: TRADES_MCP },
+  { id: "x", label: "X " + X_HANDLE, href: X_URL },
+  { id: "unseal", label: "TimeToUnsealTheBook", href: UNSEAL_DOOR },
+  { id: "handles", label: "GodLock handles", href: CANON_HOST + AZIEL_HANDLES_PATH },
+];
 export const TRADES_CITE = TRADES_WORKER + "/cite.json";
 export const TRADES_LLMS = TRADES_WORKER + "/llms.txt";
 export const TRADES_HEALTH = TRADES_WORKER + "/v1/health";
@@ -1412,6 +1459,7 @@ export function documentTitle(title, kind) {
   if (kind === "home" || title === SITE) return "Godlock. The Debate Site of Intelligent Design";
   if (kind === "software") return SITE + " Softwares";
   if (kind === "aziel") return "About " + AUTHOR + " — " + SITE;
+  if (kind === "handles") return "Aziel handles — " + SITE;
   if (kind === "reason") return "How GodLock is scored — " + SITE;
   if (kind === "verify") return "Verify — " + SITE;
   if (kind === "donate") return "Donate — " + SITE;
@@ -1508,6 +1556,12 @@ export function defaultDescription(kind, runtimeCite) {
       "GodLock public HTTPS engine. Living publisher Aziel Eliab. Godlock. The Debate Site of Intelligent Design. Scores use the published corpus triad (TRIAD_V3). Identity is Aziel Eliab only. GodLock is a debate and score product. Aziel Elroi Eliab is SEO alternateName only.",
     );
   }
+  if (kind === "handles") {
+    return hideInternalDetermination(
+      "Public handles for Aziel Eliab. Same doors as " + DOORS_URL + ". He Didn't Jump is a handle, not a Live Node. "
+      + CAP7_PUBLIC + " " + PAID_SAT_PUBLIC + " " + PATTERN_HOLD_PUBLIC,
+    );
+  }
   if (kind === "reason") {
     return hideInternalDetermination(
       "How GodLock is scored. The headline is the six-factor average, not the triad product. Uncertainty stays between 25% and 75%. The published corpus triad (TRIAD_V3) stays beside the headline. Display is round(combined × 100). No Specified Fit prior is added. Method: https://www.azielcorpuslibrary.net/how-its-scored.",
@@ -1550,6 +1604,7 @@ export function defaultDescription(kind, runtimeCite) {
 
 function defaultKeywords(kind) {
   if (kind === "aziel") return "Aziel Eliab, GodLock, TRIAD_V3, receipt, intelligent design debate, About Aziel Eliab";
+  if (kind === "handles") return "Aziel Eliab handles, GodLock, azieleliab.com doors, He Didn't Jump";
   if (kind === "reason") return "TRIAD_V3, Aziel Eliab, GodLock, how it's scored, corpus triad";
   if (kind === "donate") return "Donate, Aziel Eliab, GodLock, Bitcoin, Ethereum, Litecoin, XRP, Dogecoin";
   if (kind === "receipts") return "GodLock receipts, hash-chained ledger, TRIAD_V3, Aziel Eliab, debate";
@@ -1704,7 +1759,7 @@ function jsonLd(title, path, description, kind, products) {
   const software = godlockSoftwareNode();
   const who = personRef();
   const graph = [website, software, person, personLocalStub()];
-  if (kind !== "aziel" && kind !== "reason" && kind !== "verify" && kind !== "receipt" && kind !== "receipts" && kind !== "donate" && kind !== "notfound") {
+  if (kind !== "aziel" && kind !== "handles" && kind !== "reason" && kind !== "verify" && kind !== "receipt" && kind !== "receipts" && kind !== "donate" && kind !== "notfound") {
     graph.push(runtimeSoftwareNode(person, products), runtimeWebApiNode(person));
   }
   if (kind === "home") {
@@ -1757,6 +1812,31 @@ function jsonLd(title, path, description, kind, products) {
       name: "How GodLock is scored",
       url: CANON_HOST + REASON_PATH,
       author: who,
+    });
+  }
+  if (kind === "handles") {
+    const crumbs = breadcrumbList(CANON_HOST + AZIEL_HANDLES_PATH + "#breadcrumb", [
+      { name: SITE, item: CANON_HOST + "/" },
+      { name: "Aziel handles", item: CANON_HOST + AZIEL_HANDLES_PATH },
+    ]);
+    graph.push(crumbs, {
+      "@type": "WebPage",
+      "@id": CANON_HOST + AZIEL_HANDLES_PATH + "#page",
+      name: "Aziel handles",
+      url: CANON_HOST + AZIEL_HANDLES_PATH,
+      description: defaultDescription("handles"),
+      isPartOf: { "@id": website["@id"] },
+      author: who,
+      mainEntity: {
+        "@type": "ItemList",
+        name: "Aziel Eliab handles",
+        itemListElement: AZIEL_HANDLES.map((h, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: h.label,
+          url: h.href,
+        })),
+      },
     });
   }
   if (kind === "aziel") {
@@ -2057,6 +2137,7 @@ export const PUBLIC_ALLOW = [
   "/receipts",
   "/receipt/",
   "/AzielEliab",
+  "/aziel",
   "/cite.json",
   "/llms.txt",
   "/ai.txt",
@@ -2135,7 +2216,10 @@ export function robotsTxt() {
     "# MCP discovery: /.well-known/mcp.json /mcp.json → POST /runtime/mcp.",
     "# IndexNow: " + INDEXNOW_WELL_KNOWN_PATH + " " + INDEXNOW_KEY_PATH + ".",
     "# GodLock product surface. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.",
-    "# Homepage hashes (#software #runtime #receipts #donate #reason #verify #AzielEliab) map to real paths.",
+    "# Paths are not hash-only. Tabs: / /reason /software /runtime /receipts /verify /donate /AzielEliab /aziel.",
+    "# Homepage hashes (#software #runtime #receipts #donate #reason #verify #AzielEliab #aziel) map to those paths.",
+    "# Growth-ON. Allow: /.",
+    "# Cap-7 is not an ICANN name. Paid satellite stays HELD. Not LIVE until Dual CLEAR, Aziel merge OK, and Cos.",
     "# Softwares HTML: /software. Catalog JSON: /v1/software. Door: /runtime.",
     "# Same-origin mesh: GET /v1/mesh and /v1/mesh/status (read-only suite presence). GET never enables. SPLIT THE WIRES. COLD-COPY SURVIVAL. REHEAL refuse. Phoenix local only — die-with-pull does not bring godlock.uk back. No neighbor talk-back-to-health.",
     "# INGEST-AS-RECEIPT-1.0: first-screen SHA-256 + stable IDs + canonical URL. Many indexes, one tip. Cite, don't merge. Growth-ON.",
@@ -2186,6 +2270,7 @@ export async function sitemapXml(env, extras = {}) {
   add(CANON_HOST + "/", "1.0", "daily");
   add(CANON_HOST + SOFTWARE_PATH, "0.95", "daily");
   add(CANON_HOST + AZIEL_ELIAB_PATH, "0.95", "weekly");
+  add(CANON_HOST + AZIEL_HANDLES_PATH, "0.9", "weekly");
   add(CANON_HOST + "/verify", "0.85", "daily");
   add(CANON_HOST + RECEIPTS_PATH, "0.85", "daily");
   add(CANON_HOST + DONATE_PATH, "0.7", "monthly");
@@ -2336,6 +2421,18 @@ export function citeDoc(sot, runtimeCite) {
     sister_sites: { ...SISTER_SITES },
     sister_sites_note: SISTER_SITES_NOTE,
     ecosystem: ecosystemLinks(),
+    tab_paths: TAB_PATHS.map((t) => CANON_HOST + (t.href === "/" ? "/" : t.href)),
+    paths_not_hash_only: true,
+    aziel_handle_list: AZIEL_HANDLES.map((h) => ({ label: h.label, href: h.href })),
+    aziel_handles_note: "Same public doors as " + DOORS_URL + ". He Didn't Jump is a handle, not a Live Node.",
+    doors: DOORS_URL,
+    cap7_is_icann: false,
+    cap7_note: CAP7_PUBLIC,
+    paid_satellite: "HELD",
+    pattern_live: false,
+    pattern_live_gate: "Dual CLEAR + Aziel merge OK + Cos",
+    growth: "ON",
+    crawl: "Allow",
     alternateName: AUTHOR_AKA,
     pen_name: AUTHOR_PEN,
     title_aka: AUTHOR_TITLE,
@@ -2346,6 +2443,7 @@ export function citeDoc(sot, runtimeCite) {
       home: CANON_HOST + "/",
       software: CANON_HOST + SOFTWARE_PATH,
       aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,
+      aziel_handles: CANON_HOST + AZIEL_HANDLES_PATH,
       verify: CANON_HOST + "/verify",
       receipts: CANON_HOST + RECEIPTS_PATH,
       donate: CANON_HOST + DONATE_PATH,
@@ -2562,6 +2660,7 @@ export function citeDoc(sot, runtimeCite) {
     specified_fit: CANON_HOST + REASON_PATH,
     reason: CANON_HOST + REASON_PATH,
     aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,
+    aziel_handles: CANON_HOST + AZIEL_HANDLES_PATH,
     aziel_corpus_library: LIBRARY_AZIEL,
     library: LIBRARY + "/",
     library_aziel_eliab: LIBRARY_AZIEL,
@@ -2573,6 +2672,20 @@ export function citeDoc(sot, runtimeCite) {
     limitation: hideInternalDetermination(BANNER),
     how_to_cite: "Eliab, Aziel. (2026). GodLock [Software]. Apache-2.0. " + CANON_HOST + "/",
   };
+}
+
+export function pathsAndHandlesLlmsSection() {
+  const paths = TAB_PATHS.map((t) => "- " + CANON_HOST + (t.href === "/" ? "/" : t.href)).join("\n");
+  const handles = AZIEL_HANDLES.map((h) => "- " + h.href).join("\n");
+  return "Growth-ON. Allow: /\n\n"
+    + "Paths (not hash-only):\n\n"
+    + paths + "\n\n"
+    + "Handles, same public doors as " + DOORS_URL + " :\n\n"
+    + handles + "\n\n"
+    + "He Didn't Jump is a handle. It is not a Live Node.\n"
+    + "Cap-7: not an ICANN name. Paid satellite stays HELD.\n"
+    + PATTERN_HOLD_PUBLIC + "\n"
+    + "Person: " + AZIEL_PERSON_ID + "\n\n";
 }
 
 export function llmsDoc(sot, runtimeCite) {
@@ -2597,6 +2710,7 @@ export function llmsDoc(sot, runtimeCite) {
     + "GitHub: " + GITHUB + "\n"
     + "Download: " + DOWNLOAD + "\n"
     + "License: Apache-2.0\n\n"
+    + pathsAndHandlesLlmsSection()
     + hideInternalDetermination(BANNER) + "\n\n"
     + "GodLock is a challenge/score product. Identity is Aziel Eliab.\n"
     + GODLOCK_SITE_BLURB + "\n"
@@ -2675,6 +2789,7 @@ export function llmsDoc(sot, runtimeCite) {
     + "Softwares: " + CANON_HOST + SOFTWARE_PATH + "\n"
     + "Official Softwares listing: " + OFFICIAL_SOFTWARES + "\n"
     + "About Aziel Eliab: " + CANON_HOST + AZIEL_ELIAB_PATH + "\n"
+    + "Aziel handles: " + CANON_HOST + AZIEL_HANDLES_PATH + "\n"
     + "How it is scored: " + CANON_HOST + REASON_PATH + "\n"
     + "Verify: " + CANON_HOST + "/verify\n"
     + "Receipts: " + CANON_HOST + RECEIPTS_PATH + "\n"
@@ -2903,6 +3018,7 @@ export function siteOpenApi() {
       },
       "/reason": { get: { operationId: "godlockUkReason", summary: "How GodLock is scored (published corpus TRIAD_V3)", responses: { "200": { description: "HTML or JSON" } } } },
       "/AzielEliab": { get: { operationId: "godlockUkAzielEliab", summary: "About Aziel Eliab — living publisher of GodLock (challenge/score product)", responses: { "200": { description: "HTML or JSON" } } } },
+      "/aziel": { get: { operationId: "godlockUkAzielHandles", summary: "Aziel handles — public doors. Cap-7 is not ICANN. Paid satellite stays HELD. Not LIVE until Dual CLEAR, Aziel merge OK, and Cos.", responses: { "200": { description: "HTML or JSON" } } } },
       "/runtime": { get: { operationId: "godlockUkRuntime", summary: "Same-origin Aziel Runtime FragGate door", responses: { "200": { description: "OK" } } } },
       "/who": { get: { operationId: "godlockUkWho", summary: "Who is Aziel Eliab — HTML; 15:20 lock on machine FAQ / person / who-is", responses: { "200": { description: "HTML" } } } },
       "/who-is": { get: { operationId: "godlockUkWhoIsAlias", summary: "308 to /who-is-aziel-eliab.txt", responses: { "308": { description: "Permanent redirect" } } } },

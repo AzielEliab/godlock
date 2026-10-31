@@ -17,7 +17,8 @@ import { randomBytes } from "node:crypto";
 import { json, html, corsHeaders, stampContentSignal, wantsJson, readCookie } from "./http.js";
 import {
   page, homeBody, verifyBody, receiptBody, receiptsBody, azielEliabBody, azielEliabText,
-  whoPageHtml, reasonBody, reasonText, softwareBody, donateBody, AZIEL_ELIAB_PATH, REASON_PATH, SOFTWARE_PATH, DONATE_PATH,
+  azielHandlesBody, azielHandlesText,
+  whoPageHtml, reasonBody, reasonText, softwareBody, donateBody, AZIEL_ELIAB_PATH, AZIEL_HANDLES_PATH, REASON_PATH, SOFTWARE_PATH, DONATE_PATH,
   RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE,
 } from "./ui.js";
 import { donateDoc, DONATE_RAILS, donateQrIdFromPath } from "./donate.js";
@@ -34,6 +35,7 @@ import {
   BRAND_MARK_PATH,
   personJsonLd, identityJsonLd, graphJsonLd, worksDoc, whoIsAzielEliabTxt, whyAzielEliabTxt, wellKnownAzielDoc,
   AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE, WHO_PATH, WHY_IS_PATH,
+  AZIEL_HANDLES, CAP7_PUBLIC, PAID_SAT_PUBLIC, PATTERN_HOLD_PUBLIC, DOORS_URL,
   WHAT_AZIEL_ELIAB_DOES, WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
   RESEARCH_ADDENDUM, HARDWARE_ADDENDUM, WHITESTONE_ADDENDUM, WHITESTONE_URL, WHITESTONE_NAME, WHITESTONE_ONE_LINE,
   THE_ARK_ADDENDUM, THE_ARK_ONE_LINE, ARK_NAME, ARK_SLUG, ARK_GITHUB, ARK_STATS, ARK_COUNT, CORPUS_MASTER_RECORDS,
@@ -1337,6 +1339,35 @@ async function handleGodlock(request, env, ctx) {
           }, 200, extraHeadersFor(nodeId));
         }
         return html(page("How GodLock is scored", reasonBody({ stats }), { path: REASON_PATH, kind: "reason" }), {
+          extraHeaders: extraHeadersFor(nodeId),
+        });
+      }
+
+      if (path === AZIEL_HANDLES_PATH) {
+        if (wantsJson(request, url)) {
+          return json({
+            ok: true,
+            product: "GodLock",
+            site: "godlock.uk",
+            author: AUTHOR,
+            title: "Aziel handles",
+            path: AZIEL_HANDLES_PATH,
+            identity: AUTHOR,
+            person_id: AZIEL_PERSON_ID,
+            doors: DOORS_URL,
+            handles: AZIEL_HANDLES,
+            he_didnt_jump_is_live_node: false,
+            cap7_is_icann: false,
+            cap7_note: CAP7_PUBLIC,
+            paid_satellite: "HELD",
+            pattern_live: false,
+            pattern_live_gate: "Dual CLEAR + Aziel merge OK + Cos",
+            growth: "ON",
+            crawl: "Allow",
+            text: azielHandlesText(),
+          }, 200, extraHeadersFor(nodeId));
+        }
+        return html(page("Aziel", azielHandlesBody(), { path: AZIEL_HANDLES_PATH, kind: "handles" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

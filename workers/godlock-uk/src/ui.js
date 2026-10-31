@@ -6,8 +6,9 @@ import {
   headMeta, documentTitle, BANNER, DOWNLOAD, GITHUB, CANON_HOST, LIBRARY_AZIEL,
   HEDIDNTJUMP, HEDIDNTJUMP_LABEL, BRAND_MARK_PATH, AZIEL_OFFICIAL, OFFICIAL_SOFTWARES,
   SOFTWARE_SSOT, SOFTWARE_SSOT_FALLBACK,
-  AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
+  AZIEL_ELIAB_PATH, AZIEL_HANDLES_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
   DONATE_PATH, RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE,
+  TAB_PATHS, AZIEL_HANDLES, DOORS_URL, CAP7_PUBLIC, PAID_SAT_PUBLIC, PATTERN_HOLD_PUBLIC,
   runtimeDistribution, ecosystemLinks,
   SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO,
   ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM,
@@ -65,6 +66,8 @@ body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:0;lin
 .ecosystem ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 14px}
 .ecosystem a.secondary{color:var(--muted);font-weight:400}
 footer .ecosystem{margin:16px 0 0}
+.handles{display:flex;flex-wrap:wrap;gap:8px 14px;margin:0 0 12px;padding:0;list-style:none}
+.handles a{font-weight:700}
 .about-aziel,.about-aziel p,.about-prose,.about-sign{color:var(--royal)}
 .about-aziel h1,.about-aziel h2{color:var(--royal)}
 .about-aziel a{color:var(--royal)}
@@ -205,18 +208,11 @@ function pillClass(label) {
   return "review";
 }
 
-export { AZIEL_ELIAB_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH, DONATE_PATH, RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE };
+export { AZIEL_ELIAB_PATH, AZIEL_HANDLES_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH, DONATE_PATH, RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE };
 
 export function navItems() {
   return [
-    { href: "/", label: "Engine" },
-    { href: REASON_PATH, label: "Reason" },
-    { href: SOFTWARE_PATH, label: "Softwares" },
-    { href: RUNTIME_PATH, label: "Runtime" },
-    { href: RECEIPTS_PATH, label: "Receipts" },
-    { href: "/verify", label: "Verify" },
-    { href: DONATE_PATH, label: "Donate" },
-    { href: AZIEL_ELIAB_PATH, label: "Aziel Eliab", aziel: true },
+    ...TAB_PATHS.map((it) => ({ ...it, aziel: it.href === AZIEL_ELIAB_PATH || it.href === AZIEL_HANDLES_PATH })),
     { href: LIBRARY_AZIEL, label: "Aziel Corpus Library", aziel: true },
     { href: HEDIDNTJUMP, label: HEDIDNTJUMP_LABEL, aziel: true },
   ];
@@ -257,6 +253,15 @@ export function ecosystemNav() {
   return `<nav class="ecosystem" aria-label="Aziel Eliab ecosystem"><p>Part of the Aziel Eliab ecosystem</p><ul>${items}</ul></nav>`;
 }
 
+export function siteFooter() {
+  const paths = TAB_PATHS.map((t) => `<a href="${esc(t.href)}">${esc(t.href)}</a>`).join(" · ");
+  return `<footer id="godlock-site-footer">Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(RECEIPTS_PATH)}">Receipts</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(AZIEL_HANDLES_PATH)}">Aziel handles</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="/cite.json">cite.json</a> · <a href="/llms.txt">llms.txt</a> · <a href="/ai.txt">ai.txt</a> · <a href="/sitemap.xml">sitemap</a> · <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache-2.0</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
+${ecosystemNav()}
+<p>Paths: ${paths}. Growth-ON. Allow.</p>
+<p>${esc(CAP7_PUBLIC)} ${esc(PAID_SAT_PUBLIC)} ${esc(PATTERN_HOLD_PUBLIC)} He Didn't Jump is a handle, not a Live Node.</p>
+</footer>`;
+}
+
 export function page(title, body, { path, kind, extraHeaders, indexable, products, runtimeCite } = {}) {
   const p = path || "/";
   const docTitle = documentTitle(title, kind);
@@ -266,9 +271,7 @@ ${brandRow()}
 ${topNav(p)}
 ${ecosystemNav()}
 ${body}
-<footer>Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(RECEIPTS_PATH)}">Receipts</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
-${ecosystemNav()}
-</footer>
+${siteFooter()}
 </div>
 <script>
 (function(){
@@ -931,6 +934,24 @@ export function azielEliabText() {
   return AZIEL_MANIFESTO.join("\n\n") + "\n\n" + AZIEL_SIGNATURE + "\n";
 }
 
+export function azielHandlesBody() {
+  const items = AZIEL_HANDLES.map((h) => `<li><a href="${esc(h.href)}">${esc(h.label)}</a></li>`).join("");
+  return `<section class="about-aziel" id="aziel-handles"><div class="card about-prose">
+<h2>Handles</h2>
+<p>Public identity on this page is Aziel Eliab. The handles below are the public doors listed on <a href="${esc(DOORS_URL)}">azieleliab.com</a>. Each site keeps its own receipt tip. He Didn't Jump is a handle, not a Live Node.</p>
+<ul class="handles">${items}</ul>
+<p class="muted">${esc(CAP7_PUBLIC)} ${esc(PAID_SAT_PUBLIC)} ${esc(PATTERN_HOLD_PUBLIC)}</p>
+<p><a href="${esc(AZIEL_ELIAB_PATH)}">About Aziel Eliab</a></p>
+</div></section>`;
+}
+
+export function azielHandlesText() {
+  return "Handles\n\nPublic identity on this page is Aziel Eliab.\n\n"
+    + AZIEL_HANDLES.map((h) => h.label + " " + h.href).join("\n")
+    + "\n\nHe Didn't Jump is a handle, not a Live Node.\n"
+    + CAP7_PUBLIC + "\n" + PAID_SAT_PUBLIC + "\n" + PATTERN_HOLD_PUBLIC + "\n";
+}
+
 /** Visible /who lock page. Standalone HTML so view-source body contains the lock line. */
 export function whoPageHtml() {
   const faq = {
@@ -1012,8 +1033,9 @@ ${JSON.stringify(faq)}
 <body>
 <main>
 <h1>Who is Aziel Eliab</h1>
-<p>${esc(IDENTITY_ANSWER)}</p>
+<p>Public identity on this page is Aziel Eliab. GodLock is a product name. Handles are listed at <a href="${esc(AZIEL_HANDLES_PATH)}">/aziel</a>.</p>
 </main>
+${siteFooter()}
 </body>
 </html>
 `;

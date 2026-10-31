@@ -179,7 +179,7 @@ describe("Aziel Eliab page chrome", () => {
     assert.ok(text.endsWith("— Aziel Eliab\n"));
   });
 
-  it("orders nav Engine | Reason | Softwares | Runtime | Receipts | Verify | Donate | Aziel Eliab | Aziel Corpus Library | He Didn't Jump", () => {
+  it("orders nav Engine | Reason | Softwares | Runtime | Receipts | Verify | Donate | Aziel Eliab | Aziel | Aziel Corpus Library | He Didn't Jump", () => {
     const nav = topNav("/verify");
     assert.match(
       nav,
@@ -187,7 +187,7 @@ describe("Aziel Eliab page chrome", () => {
     );
     assert.match(
       nav,
-      /href="\/verify"[^>]*>Verify<\/a><span class="sep">\|<\/span><a href="\/donate">Donate<\/a><span class="sep">\|<\/span><a href="\/AzielEliab" class="aziel">Aziel Eliab<\/a><span class="sep">\|<\/span><a href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab" class="aziel">Aziel Corpus Library<\/a><span class="sep">\|<\/span><a href="https:\/\/www\.hedidntjump\.com\/" class="aziel">He Didn't Jump<\/a>/,
+      /href="\/verify"[^>]*>Verify<\/a><span class="sep">\|<\/span><a href="\/donate">Donate<\/a><span class="sep">\|<\/span><a href="\/AzielEliab" class="aziel">Aziel Eliab<\/a><span class="sep">\|<\/span><a href="\/aziel" class="aziel">Aziel<\/a><span class="sep">\|<\/span><a href="https:\/\/www\.azielcorpuslibrary\.net\/AzielEliab" class="aziel">Aziel Corpus Library<\/a><span class="sep">\|<\/span><a href="https:\/\/www\.hedidntjump\.com\/" class="aziel">He Didn't Jump<\/a>/,
     );
     assert.match(CSS, /--royal:#6b3fa0/);
     assert.match(CSS, /--royal-deep:#4a2870/);
@@ -2235,7 +2235,7 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.doesNotMatch(software, /Part of the Aziel Eliab ecosystem/);
     const html = page("Software", software, { path: "/software", kind: "software" });
     assert.match(html, /<nav class="nav2">[\s\S]*?<nav class="ecosystem"/);
-    assert.match(html, /<footer>[\s\S]*Part of the Aziel Eliab ecosystem/);
+    assert.match(html, /<footer[\s\S]*Part of the Aziel Eliab ecosystem/);
     const between = html.match(/<h2 class="soft-heading">Softwares<\/h2>([\s\S]*?)<div class="soft-grid">/);
     assert.ok(between);
     assert.doesNotMatch(between[1], /Part of the Aziel Eliab ecosystem/);
@@ -3022,5 +3022,83 @@ describe("home page shows the response", () => {
     }));
     assert.deepEqual(after, before);
     assert.equal(rec.writes.some((q) => /UPDATE receipts|INSERT INTO receipts|DELETE FROM receipts/i.test(q)), false);
+  });
+});
+
+describe("Aziel handles pretty paths", () => {
+  const tabs = ["/", "/reason", "/software", "/receipts", "/verify", "/donate", "/AzielEliab", "/aziel", "/who"];
+
+  function visible(html) {
+    return String(html).replace(/^[\s\S]*<body>/i, "").replace(/<\/body>[\s\S]*$/i, "").replace(/<script[\s\S]*?<\/script>/gi, "");
+  }
+
+  it("serves /aziel with handles, footer, and no visible 15:20 lock", async () => {
+    const res = await worker.fetch(new Request("https://godlock.uk/aziel"), mockEnv());
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, /<title>Aziel handles — GodLock<\/title>/);
+    assert.match(html, /rel="canonical" href="https:\/\/godlock\.uk\/aziel"/);
+    assert.match(html, /<h2>Handles<\/h2>/);
+    assert.match(html, /href="https:\/\/www\.azieleliab\.com\/">azieleliab\.com<\/a>/);
+    assert.match(html, /href="https:\/\/x\.com\/AzielEliab">X @AzielEliab<\/a>/);
+    assert.match(html, /href="https:\/\/timetounsealthebook\.net\/">TimeToUnsealTheBook<\/a>/);
+    assert.match(html, /He Didn't Jump is a handle, not a Live Node/);
+    assert.match(html, /Cap-7 is not an ICANN registration/);
+    assert.match(html, /Paid satellite stays HELD/);
+    assert.match(html, /Not LIVE until Dual CLEAR, Aziel merge OK, and Cos/);
+    assert.match(html, /id="godlock-site-footer"/);
+    assert.match(html, /Part of the Aziel Eliab ecosystem/);
+    assert.match(html, /Growth-ON\. Allow/);
+    assert.doesNotMatch(visible(html), /1 Chronicles 15:20/);
+    assert.doesNotMatch(visible(html), /<p class="identity-lock"/);
+    const json = await (await worker.fetch(new Request("https://godlock.uk/aziel?format=json"), mockEnv())).json();
+    assert.equal(json.path, "/aziel");
+    assert.equal(json.cap7_is_icann, false);
+    assert.equal(json.paid_satellite, "HELD");
+    assert.equal(json.pattern_live, false);
+    assert.equal(json.he_didnt_jump_is_live_node, false);
+  });
+
+  it("keeps a footer and a unique canonical on every tab", async () => {
+    for (const path of tabs) {
+      const res = await worker.fetch(new Request("https://godlock.uk" + path), mockEnv());
+      assert.equal(res.status, 200, path);
+      const html = await res.text();
+      assert.match(html, /id="godlock-site-footer"/, path);
+      assert.match(html, /Part of the Aziel Eliab ecosystem/, path);
+      assert.match(html, /href="\/llms\.txt"/, path);
+      assert.doesNotMatch(visible(html), /1 Chronicles 15:20/, path);
+      if (path !== "/who") {
+        const expected = "https://godlock.uk" + path;
+        assert.match(html, new RegExp('rel="canonical" href="' + expected.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + '"'), path);
+      }
+    }
+  });
+
+  it("lists pretty paths and handles for crawlers", async () => {
+    const llms = llmsDoc();
+    assert.match(llms, /Paths \(not hash-only\)/);
+    assert.match(llms, /https:\/\/godlock\.uk\/aziel/);
+    assert.match(llms, /Handles, same public doors as https:\/\/www\.azieleliab\.com\/doors/);
+    assert.match(llms, /He Didn't Jump is a handle\. It is not a Live Node/);
+    assert.match(llms, /Cap-7: not an ICANN name\. Paid satellite stays HELD/);
+    assert.match(llms, /Growth-ON\. Allow: \//);
+    assert.equal(aiDoc(), llms);
+    const robots = robotsTxt();
+    assert.match(robots, /Allow: \//);
+    assert.match(robots, /Allow: \/aziel/);
+    assert.match(robots, /Growth-ON/);
+    const xml = await sitemapXml();
+    assert.ok(xml.includes("https://godlock.uk/aziel"));
+    assert.ok(xml.includes("https://godlock.uk/AzielEliab"));
+    assert.ok(xml.includes("https://godlock.uk/receipts"));
+    const cite = citeDoc();
+    assert.equal(cite.cap7_is_icann, false);
+    assert.equal(cite.paid_satellite, "HELD");
+    assert.equal(cite.pattern_live, false);
+    assert.equal(cite.growth, "ON");
+    assert.equal(cite.crawl, "Allow");
+    assert.ok(cite.tab_paths.includes("https://godlock.uk/aziel"));
+    assert.ok(cite.aziel_handle_list.some((h) => h.href === "https://www.hedidntjump.com/"));
   });
 });

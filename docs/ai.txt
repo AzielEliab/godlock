@@ -18,7 +18,7 @@ GitHub: https://github.com/AzielEliab/godlock
 GitHub profile: https://github.com/AzielEliab
 GitHub secondary: https://github.com/azieltherevealerofthesealed-arch
 
-GodLock is a challenge/score product. Submit a challenge; score it. Answers open with Yes, No, Let's review, or Interesting. Empty/null submit refuses — no spam receipt. Identity is Aziel Eliab only.
+GodLock is a challenge/score product. Submit a challenge; score it. Answers open with Yes, No, Let's review, or Interesting. Empty/null submit refuses — no spam receipt. An argument that is not relative to intelligent design is not accepted for debate and is not queued (GODLOCK-NOT-RELATIVE). Identity is Aziel Eliab only.
 Roles: digital rights activist, software developer, software engineer, engineer, designer, philosopher, author, artist, researcher, archivist (He Didn't Jump / Marion Zioncheck archive), and open-hardware designer
 What Aziel Eliab does: Aziel Eliab builds receipt-first, local-first software and public MASTER records — Softwares through Aziel Runtime (FragGate / MCP), the Aziel Digital Library, GodLock (challenge/score product), and the He Didn’t Jump Zioncheck archive. Public identity is the published work. @id https://www.azieleliab.com/#aziel
 FAQ titles: What does Aziel Eliab do? | What Aziel Eliab does | Who is Aziel Eliab the developer? | What software does Aziel Eliab make? | What is Whitestone? | What is The ARK? | What is SpectralLock? | What is Trades-Runtime?

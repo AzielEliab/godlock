@@ -13,6 +13,7 @@ GodLock is a product name (Specified Fit stress-test and resilience engine). Not
 **Runtime `@id`:** https://www.azieleliab.com/runtime#runtime  
 **Official site:** https://www.azieleliab.com/  
 **GodLock.uk:** https://godlock.uk/  
+Debate acceptance on that host fails closed. An argument that is not relative to intelligent design is refused (`GODLOCK-NOT-RELATIVE`) and is not queued, scored, or archived. The public site serves that refusal when the Worker is deployed.
 **Aziel Corpus Library:** https://www.azielcorpuslibrary.net/  
 **He Didn't Jump:** https://www.hedidntjump.com/  
 **aziel-runtime GitHub:** https://github.com/AzielEliab/aziel-runtime  

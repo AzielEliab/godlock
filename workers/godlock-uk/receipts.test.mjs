@@ -161,23 +161,16 @@ describe("processSubmit stores challenge text", () => {
     assert.equal(payload.challenge_preview, PUBLIC_CHALLENGE.slice(0, 160));
   });
 
-  it("stores isolated challenge text off the public feed", async () => {
+  it("refuses unrelated text and does not queue an isolated row", async () => {
     const rec = recordingEnv();
-    const row = await processSubmit(rec.env, ISOLATE_CHALLENGE);
-    assert.equal(row.isolated, true);
-    assert.equal(row.challenge_text, ISOLATE_CHALLENGE);
-    assert.equal(row.text_sha256, sha256hex(ISOLATE_CHALLENGE));
-    assert.equal(rec.receipts.length, 1);
-    assert.equal(Number(rec.receipts[0].isolated), 1);
-    const publicRows = rec.receipts.filter((r) => !Number(r.isolated));
-    assert.equal(publicRows.length, 0);
-    const isolate = rec.ledger.find((e) => e.action === "ISOLATE");
-    assert.ok(isolate);
-    const payload = JSON.parse(isolate.payload_json);
-    assert.equal(payload.text_sha256, row.text_sha256);
-    assert.equal(payload.content_sha256, row.content_sha256);
-    const uses = rec.ledger.filter((e) => e.action === "SUBMIT" || e.action === "ISOLATE").length;
-    assert.equal(uses, 1);
+    await assert.rejects(() => processSubmit(rec.env, ISOLATE_CHALLENGE), (err) => {
+      assert.equal(err.refused, true);
+      assert.equal(err.code, "GODLOCK-NOT-RELATIVE");
+      assert.equal(err.queued, false);
+      return true;
+    });
+    assert.equal(rec.receipts.length, 0);
+    assert.equal(rec.ledger.length, 0);
   });
 });
 
@@ -240,7 +233,21 @@ describe("receipt HTML/JSON and prior list", () => {
 
   it("keeps isolated receipts off the public receipt page and prior feed", async () => {
     const rec = recordingEnv();
-    const row = await processSubmit(rec.env, ISOLATE_CHALLENGE);
+    const row = {
+      id: "iso-legacy",
+      created_utc: "2026-01-01T00:00:00.000Z",
+      text_sha256: sha256hex(ISOLATE_CHALLENGE),
+      challenge_text: ISOLATE_CHALLENGE,
+      label: "Isolated",
+      summary: "Isolated locally. Not scored. Not shown on the public feed.",
+      explanation: "",
+      score_before: 50,
+      score_after: 50,
+      residual: 50,
+      isolated: 1,
+      content_sha256: "legacy-isolated",
+    };
+    rec.receipts.push(row);
     const htmlRes = await worker.fetch(
       new Request("https://godlock.uk/receipt/" + row.id, {
         headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },

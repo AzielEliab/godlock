@@ -19,7 +19,7 @@ GodLock records a test on this computer and saves a receipt you can check.
 
 ## Websites
 
-**Primary public site:** [https://godlock.uk](https://godlock.uk) — Worker UI shows the Aziel Eliab rose-star brand mark top-left. Softwares stays GodLock-first (not a Digital Library clone). Identity is Aziel Eliab only.
+**Primary public site:** [https://godlock.uk](https://godlock.uk) — Worker UI shows the Aziel Eliab rose-star brand mark top-left. Softwares stays GodLock-first (not a Digital Library clone). Debate acceptance fails closed: an argument that is not relative to intelligent design is refused (`GODLOCK-NOT-RELATIVE`) and is not queued, scored, or archived. Identity is Aziel Eliab only.
 
 Part of the **Aziel Eliab** ecosystem (official hub, sister library, sister archive, this engine, runtime, kernel):
 

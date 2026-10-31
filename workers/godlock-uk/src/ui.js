@@ -26,6 +26,7 @@ import {
   parsePublicLivePresence,
 } from "./mesh.js";
 import { hideInternalDetermination } from "./publicCopy.js";
+import { DEBATE_ACCEPT_PUBLIC } from "./debateAccept.js";
 import { paragraphFrom, visitorResponse } from "./visitorResponse.js";
 import {
   DEBATE_HEADLINE, METHOD_PUBLIC, BIAS_PUBLIC, RESCORE_RULE_PUBLIC, READING_PUBLIC, SCORE_METHOD_URL,
@@ -774,7 +775,8 @@ ${latestHtml}
 </div>
 ${err}
 <form class="challenge" id="challenge-form" method="post" action="/submit">
-  <textarea id="challenge" name="text" maxlength="8000" required placeholder="Ask a question. The score is the published triad on this text."></textarea>
+  <p class="muted" id="debate-acceptance">${esc(DEBATE_ACCEPT_PUBLIC)}</p>
+  <textarea id="challenge" name="text" maxlength="8000" required placeholder="An argument relative to intelligent design. Unrelated text is not accepted."></textarea>
   <div class="actions">
     <button type="submit">Submit</button>
     <a class="button ghost" href="/verify">Verify</a>

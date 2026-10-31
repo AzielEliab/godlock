@@ -50,15 +50,8 @@ export const STEER_LABELS = Object.freeze({
   undecided: "Undecided / Let's review / other",
 });
 
-export const STEER_NOTE_PUBLIC =
-  "Layer C (cosmology, including fine-tuning and multiverse replies) and Layer B (biology, code+reader) are separate ledgers. Cosmology does not spend biological capital. Biology does not settle the Big Bang. Came from nothing does not spend either ledger. GodLock records, analyzes, hardens, and grows. It does not sermonize.";
-
-/** Public muted note. Two planes, each a whole. Came from nothing is inside the Steer whole. */
-export const STEER_BALANCE_NOTE =
-  "Balance: Steer frames are one vote plane and sum to 100. Came from nothing is the creatio-ex-nihilo / something-from-nothing share on that plane, adjacent to Big Bang language, not a second 0–100. Triad display and meter remainder are a separate pair and sum to 100 when a TRIAD_V3 display is present.";
-
 export const STEER_METHOD =
-  "Each non-isolated public receipt is one input. Frames are keyword classes the engine already uses: Layer B code+reader, specified-fit wording, specified complexity, and other biological design objects; the simulation hypothesis (not a bare computer simulation); Layer C big bang, standard cosmology, cosmic microwave background, fine-tuning, anthropic reasoning, and multiverse replies; Came from nothing, the creatio-ex-nihilo / something-from-nothing claim (ex nihilo, came from nothing, something from nothing, universe from nothing). Came from nothing is a frame on this vote plane. It is not derived by relabeling Layer C. A physics-ledger receipt without that language stays standard cosmology. Creationism as a label does not cast this share. Pretty spirals and φ do not add a design share. Intelligent-design wording on a cosmology-only or spiral-only text does not spend the biology ledger. A receipt that hits more than one frame splits its one vote equally. Shares are those votes over the scored public receipts, in percent to one decimal, largest-remainder rounded so they sum to 100. Equal remainders break toward the earlier frame in the published order; that 0.1 is rounding, not a preference. The leader follows the exact vote, so an equal vote stays a tie even when the printed percents differ by 0.1. An empty archive is 100% undecided. Rows with no retained challenge text count as undecided. Isolated rows and refused empty submits are excluded. Steer is the mix of challenges. Triad display is a separate meter: round(combined × 100) from the published corpus triad. Meter remainder is 100 − display. That pair is not a Steer share. Came from nothing is one Steer share, not a free-floating second score.";
+  "Each non-isolated public receipt is one input. Frames are keyword classes the engine already uses: Layer B code+reader, specified-fit wording, specified complexity, and other biological design objects; the simulation hypothesis (not a bare computer simulation); Layer C big bang, standard cosmology, cosmic microwave background, fine-tuning, anthropic reasoning, and multiverse replies; Came from nothing, the creatio-ex-nihilo / something-from-nothing claim (ex nihilo, came from nothing, something from nothing, universe from nothing). Came from nothing is a frame on this vote plane. It is not derived by relabeling Layer C. A physics-ledger receipt without that language stays standard cosmology. Creationism as a label does not cast this share. Pretty spirals and φ do not add a design share. Intelligent-design wording on a cosmology-only or spiral-only text does not spend the biology ledger. A receipt that hits more than one frame splits its one vote equally. Shares are those votes over the scored public receipts, in percent to one decimal, largest-remainder rounded so they sum to 100. Equal remainders break toward the earlier frame in the published order; that 0.1 is rounding, not a preference. The leader follows the exact vote, so an equal vote stays a tie even when the printed percents differ by 0.1. An empty archive is 100% undecided. Rows with no retained challenge text count as undecided. Isolated rows and refused empty submits are excluded. Came from nothing is one Steer share, not a free-floating second score.";
 
 /** Biological object / Specified Fit steel vocabulary. Not φ. Not cosmology. */
 const BIO_OBJECT_RE = /code\s*\+\s*reader|code\s*\/\s*reader|code-plus-reader|code\s+and\s+(?:the\s+)?reader|codon|genetic\s+code|mapping\s+table|translation\s*(?:\/|\+)?\s*reader|translation\s+system|flagell\w*|ribosom\w*|\bDNA\b|\bRNA\b|\bprotein\b|nucleotide|amino\s+acid|specified\s+fit|specified\s+complexity|specified\s+information|functionally\s+specified|semantic\s+mapping|functional\s+information|irreducible\s+complexity|digital\s+sequence/i;
@@ -95,6 +88,26 @@ export function hitsBiologicalDesign(text) {
   if (isSpiralOnlyChallenge(t)) return false;
   if (BIO_OBJECT_RE.test(t)) return true;
   if (ID_PHRASE_RE.test(t) && !hitsSimulationHypothesis(t) && !hitsStandardCosmology(t)) return true;
+  return false;
+}
+
+/**
+ * Debate acceptance. Fail-closed.
+ * Operator rule: if an argument is not relative to intelligent design, it is not accepted.
+ * True only for a biological design object, or explicit intelligent-design /
+ * design-flaw / watchmaker language (including when Steer still files the
+ * receipt on another frame). Cosmology, simulation, ex nihilo, spirals, and
+ * unscoped text are false unless they also make that argument.
+ * Empty text is false; the empty refusal stays a separate code.
+ * This predicate does not mark anything LIVE. Cap-7 is not ICANN. Paid satellite stays HELD.
+ */
+const DESIGN_DISPUTE_RE = /\bintelligent\s*design\b|\bdesign[- ]flaw\b|\bwatchmaker\b|\birreducible\s+complexity\b/i;
+
+export function isIntelligentDesignArgument(text) {
+  const t = String(text || "");
+  if (!t.trim()) return false;
+  if (hitsBiologicalDesign(t)) return true;
+  if (DESIGN_DISPUTE_RE.test(t)) return true;
   return false;
 }
 
@@ -212,8 +225,6 @@ function steerDocument(scales, inputs, units) {
     split: "equal",
     empty: inputs === 0,
     method: STEER_METHOD,
-    note: STEER_NOTE_PUBLIC,
-    balance: STEER_BALANCE_NOTE,
     floor: 33.3,
     ceiling: 99.7,
   };
@@ -234,7 +245,6 @@ export function unavailableSteer() {
     empty: null,
     method: STEER_METHOD,
     note: "Steer could not be read from the public receipt archive. No share is shown.",
-    balance: STEER_BALANCE_NOTE,
     floor: 33.3,
     ceiling: 99.7,
   };

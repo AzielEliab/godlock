@@ -308,6 +308,88 @@ describe("POST /submit refuses empty/null and does not archive", () => {
   });
 });
 
+describe("debate acceptance refuses non-intelligent-design arguments", () => {
+  const COSMO = "Fine-tuning of the cosmic constants in the big bang is a physics-ledger question.";
+  const SIM = "Bostrom's simulation hypothesis says we are in a simulation.";
+  const NIHIL = "The claim is that the universe came from nothing.";
+  const DESIGN_FLAW = "The design-flaw objection is that the inference is circular and not a proof.";
+  const COSMO_ID = "Fine-tuning shows intelligent design of the constants.";
+
+  async function refused(text) {
+    const rec = submitEnv();
+    const res = await postSubmit(rec.env, { text });
+    assert.equal(res.status, 400);
+    const j = await res.json();
+    assert.equal(j.ok, false);
+    assert.equal(j.code, REFUSE.NOT_INTELLIGENT_DESIGN);
+    assert.equal(j.scored, false);
+    assert.equal(j.archived, false);
+    assert.match(j.error, /not relative to intelligent design/);
+    assert.equal(j.id, undefined);
+    assert.equal(rec.receipts.length, 0);
+    assert.equal(rec.ledger.length, 0);
+    assert.equal(rec.metadata.get("uses"), "0");
+    return rec;
+  }
+
+  it("refuses cosmology, simulation, ex nihilo, and gibberish before any archive", async () => {
+    await refused(COSMO);
+    await refused(SIM);
+    await refused(NIHIL);
+    await refused("aaaaaaaaaa");
+    await refused("The weather in Lisbon is mild in October and the tram is late.");
+  });
+
+  it("processSubmit throws and does not insert a non-intelligent-design argument", async () => {
+    const rec = submitEnv();
+    await assert.rejects(() => processSubmit(rec.env, COSMO), (err) => {
+      assert.equal(err.refused, true);
+      assert.equal(err.code, REFUSE.NOT_INTELLIGENT_DESIGN);
+      return true;
+    });
+    assert.equal(rec.receipts.length, 0);
+    assert.equal(rec.ledger.length, 0);
+  });
+
+  it("shows the refusal on the HTML form and does not archive", async () => {
+    const rec = submitEnv();
+    const res = await worker.fetch(new Request("https://godlock.uk/submit", {
+      method: "POST",
+      headers: {
+        Accept: "text/html",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Mozilla/5.0",
+      },
+      body: "text=" + encodeURIComponent(COSMO),
+    }), rec.env);
+    assert.equal(res.status, 400);
+    const html = await res.text();
+    assert.match(html, /id="challenge-error"/);
+    assert.match(html, /not relative to intelligent design/);
+    assert.doesNotMatch(html, /does not sermonize/);
+    assert.doesNotMatch(html, /Meter remainder/);
+    assert.doesNotMatch(html, /one vote plane/);
+    assert.equal(rec.receipts.length, 0);
+  });
+
+  it("still accepts a design-flaw argument and an intelligent-design claim on cosmology", async () => {
+    const flaw = submitEnv();
+    const flawRes = await postSubmit(flaw.env, { text: DESIGN_FLAW });
+    assert.equal(flawRes.status, 200);
+    const flawJson = await flawRes.json();
+    assert.equal(flawJson.ok, true);
+    assert.equal(flaw.receipts.length, 1);
+
+    const cosmo = submitEnv();
+    const cosmoRes = await postSubmit(cosmo.env, { text: COSMO_ID });
+    assert.equal(cosmoRes.status, 200);
+    const cosmoJson = await cosmoRes.json();
+    assert.equal(cosmoJson.ok, true);
+    assert.equal(cosmoJson.classification.primary, "standard_cosmology");
+    assert.equal(cosmo.receipts.length, 1);
+  });
+});
+
 describe("POST /submit still scores one valid challenge", () => {
   it("archives a real challenge and scores it with TRIAD_V3", async () => {
     const rec = submitEnv();
@@ -387,7 +469,7 @@ describe("POST /submit still scores one valid challenge", () => {
     const first = await postSubmit(rec.env, { text: VALID });
     assert.equal(first.status, 200);
     const earlier = await first.json();
-    const follow = "Please look again at receipt " + earlier.id + ". The mapping is still the question.";
+    const follow = "Please look again at receipt " + earlier.id + ". The genetic code and its translation reader are still the intelligent-design question.";
     const second = await postSubmit(rec.env, { text: follow });
     assert.equal(second.status, 200);
     const later = await second.json();
@@ -450,6 +532,8 @@ describe("submit docs stay honest", () => {
     assert.ok(post.responses["400"]);
     assert.match(post.responses["400"].description, /GODLOCK-NULL-ARG/);
     assert.match(post.responses["400"].description, /GODLOCK-EMPTY-TEXT/);
+    assert.match(post.responses["400"].description, /GODLOCK-NOT-INTELLIGENT-DESIGN/);
+    assert.match(post.summary, /intelligent-design argument/);
     assert.match(post.responses["429"].description, /GODLOCK-RATE-LIMIT/);
     assert.match(post.responses["429"].description, /GODLOCK-DUP-TEXT/);
   });

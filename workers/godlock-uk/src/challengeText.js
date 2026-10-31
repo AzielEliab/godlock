@@ -10,10 +10,15 @@ export const CHALLENGE_KEYS = ["text", "challenge", "body"];
 export const REFUSE = {
   NULL_ARG: "GODLOCK-NULL-ARG",
   EMPTY_TEXT: "GODLOCK-EMPTY-TEXT",
+  NOT_INTELLIGENT_DESIGN: "GODLOCK-NOT-INTELLIGENT-DESIGN",
   RATE_LIMIT: "GODLOCK-RATE-LIMIT",
   DUP_TEXT: "GODLOCK-DUP-TEXT",
   TEXT_TOO_LARGE: "GODLOCK-TEXT-TOO-LARGE",
 };
+
+/** Fail-closed debate gate. Not a LIVE flag. Cap-7 is not ICANN. Paid satellite stays HELD. */
+export const NOT_INTELLIGENT_DESIGN_ERROR =
+  "This argument is not relative to intelligent design. GodLock accepts intelligent-design arguments for debate. Nothing was scored or archived.";
 
 const EMPTY_MSG = "Challenge text is empty. Nothing was scored or archived.";
 const NULL_MSG = "Challenge text is null or missing. Nothing was scored or archived.";
@@ -59,6 +64,16 @@ export function validateChallengeText(value) {
     return { ok: false, code: REFUSE.EMPTY_TEXT, error: EMPTY_MSG, status: 400 };
   }
   return { ok: true, text: value };
+}
+
+/** Refusal body for a non-intelligent-design argument. Caller decides the predicate. */
+export function intelligentDesignRefusal() {
+  return {
+    ok: false,
+    code: REFUSE.NOT_INTELLIGENT_DESIGN,
+    error: NOT_INTELLIGENT_DESIGN_ERROR,
+    status: 400,
+  };
 }
 
 function firstOwnChallenge(obj) {

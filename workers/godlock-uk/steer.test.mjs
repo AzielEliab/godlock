@@ -4,7 +4,6 @@ import worker, { publicPayload } from "./src/index.js";
 import { hashReceipt } from "./src/engine.js";
 import { homeBody, reasonBody, steerPanel, page } from "./src/ui.js";
 import {
-  STEER_BALANCE_NOTE,
   STEER_FRAME_IDS,
   STEER_METHOD,
   aggregateSteer,
@@ -12,6 +11,7 @@ import {
   formatSteerPercent,
   hitsBiologicalDesign,
   hitsCameFromNothing,
+  isIntelligentDesignArgument,
   scalesFromUnits,
   unavailableSteer,
 } from "./src/steer.js";
@@ -38,6 +38,25 @@ function sumScales(scales) {
 function row(text, extra) {
   return { challenge_text: text, isolated: 0, label: "Interesting", ...(extra || {}) };
 }
+
+describe("intelligent-design debate gate", () => {
+  it("accepts a biological design object and an explicit design-flaw claim", () => {
+    assert.equal(isIntelligentDesignArgument(BIO), true);
+    assert.equal(isIntelligentDesignArgument("The design-flaw objection is that the inference is circular."), true);
+    assert.equal(isIntelligentDesignArgument(COSMO_ID_WORDS), true);
+    assert.equal(isIntelligentDesignArgument(SPIRAL), true);
+  });
+
+  it("rejects cosmology, simulation, ex nihilo, and unscoped text", () => {
+    assert.equal(isIntelligentDesignArgument(COSMO), false);
+    assert.equal(isIntelligentDesignArgument(SIM), false);
+    assert.equal(isIntelligentDesignArgument(NIHIL), false);
+    assert.equal(isIntelligentDesignArgument(CREATIONISM), false);
+    assert.equal(isIntelligentDesignArgument("The weather in Lisbon is mild in October."), false);
+    assert.equal(isIntelligentDesignArgument(""), false);
+    assert.equal(isIntelligentDesignArgument("   "), false);
+  });
+});
 
 describe("steer classification", () => {
   it("keeps biology, simulation, and cosmology on separate frames", () => {
@@ -100,8 +119,9 @@ describe("steer aggregate", () => {
     assert.equal(steer.scales.undecided, 100);
     assert.equal(steer.scales.intelligent_design, 0);
     assert.equal(sumScales(steer.scales), 100);
-    assert.match(steer.note, /separate ledgers/);
-    assert.match(steer.note, /does not sermonize/);
+    assert.equal("note" in steer, false);
+    assert.equal("balance" in steer, false);
+    assert.doesNotMatch(steer.method, /does not sermonize|Meter remainder|one vote plane/);
     assert.doesNotMatch(steer.method, /INTERNAL_CRITERIA|weighing|bootstrap lock|salt/i);
     assert.match(STEER_METHOD, /largest-remainder/);
   });
@@ -142,10 +162,12 @@ describe("steer aggregate", () => {
     const html = steerPanel(steer, { current_score: 50, residual: 50 });
     assert.match(html, /No share is shown/);
     assert.doesNotMatch(html, /id="steer-pct-undecided"/);
-    assert.match(html, /id="steer-current-score">50%/);
-    assert.match(html, /id="steer-residual">50%/);
-    assert.match(html, /id="steer-balance"/);
-    assert.match(html, /one vote plane and sum to 100/);
+    assert.doesNotMatch(html, /id="steer-current-score"/);
+    assert.doesNotMatch(html, /id="steer-residual"/);
+    assert.doesNotMatch(html, /id="steer-balance"/);
+    assert.doesNotMatch(html, /one vote plane and sum to 100/);
+    assert.doesNotMatch(html, /does not sermonize/);
+    assert.doesNotMatch(html, /Meter remainder/);
     assert.doesNotMatch(html, /id="steer-pct-came_from_nothing"/);
   });
 
@@ -226,7 +248,7 @@ describe("came from nothing", () => {
     assert.equal(steer.scales.undecided, 0);
     assert.equal(sumScales(steer.scales), 100);
     assert.equal(steer.sums_to, 100);
-    assert.equal(steer.balance, STEER_BALANCE_NOTE);
+    assert.equal("balance" in steer, false);
     assert.match(steer.method, /not a free-floating second score/);
     assert.match(steer.method, /not derived by relabeling Layer C/);
     const empty = aggregateSteer([]);
@@ -250,7 +272,10 @@ describe("came from nothing", () => {
     assert.match(html, /id="steer-bar-came_from_nothing" style="width:50%"/);
     assert.match(html, /id="steer-pct-standard_cosmology">50%/);
     assert.match(html, /var ids=\["intelligent_design","multi_simulation","standard_cosmology","came_from_nothing","undecided"\]/);
-    assert.match(html, /Came from nothing does not spend either ledger/);
+    assert.doesNotMatch(html, /Came from nothing does not spend either ledger/);
+    assert.doesNotMatch(html, /does not sermonize/);
+    assert.doesNotMatch(html, /Meter remainder/);
+    assert.doesNotMatch(html, /one vote plane/);
   });
 
   it("keeps confidence and residual a separate pair that sums to 100", () => {
@@ -373,16 +398,17 @@ describe("steer public surfaces", () => {
     assert.match(html, /Came from nothing/);
     assert.match(html, /id="steer-pct-came_from_nothing">0%/);
     assert.match(html, /id="steer-bar-came_from_nothing" style="width:0%"/);
-    assert.match(html, /id="steer-balance"/);
-    assert.match(html, /one vote plane and sum to 100/);
-    assert.match(html, /separate pair and sum to 100/);
-    assert.match(html, /these two sum to 100/);
+    assert.doesNotMatch(html, /id="steer-balance"/);
+    assert.doesNotMatch(html, /one vote plane and sum to 100/);
+    assert.doesNotMatch(html, /separate pair and sum to 100/);
+    assert.doesNotMatch(html, /these two sum to 100/);
     assert.match(html, /Undecided \/ Let's review \/ other/);
     assert.match(html, /id="steer-pct-intelligent_design">50%/);
     assert.match(html, /id="steer-pct-multi_simulation">50%/);
     assert.match(html, /id="steer-bar-intelligent_design" style="width:50%"/);
-    assert.match(html, /separate ledgers/);
-    assert.match(html, /does not sermonize/);
+    assert.doesNotMatch(html, /separate ledgers/);
+    assert.doesNotMatch(html, /does not sermonize/);
+    assert.doesNotMatch(html, /scored public challenges/);
     assert.match(html, /Frame/);
     assert.match(html, /100% of this receipt/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|weighing|bootstrap lock/);
@@ -403,7 +429,9 @@ describe("steer public surfaces", () => {
     assert.equal(count.scales.standard_cosmology, 0);
     assert.equal(count.scales.came_from_nothing, 0);
     assert.equal(count.scales.undecided, 0);
-    assert.equal(count.steer.balance, STEER_BALANCE_NOTE);
+    assert.equal("balance" in count.steer, false);
+    assert.equal("note" in count.steer, false);
+    assert.doesNotMatch(JSON.stringify(count.steer), /does not sermonize|Meter remainder|one vote plane/);
     assert.equal(Math.round((count.current_score + count.residual) * 10) / 10, 100);
     assert.equal(count.steer.inputs, 2);
     assert.equal(count.steer.sums_to, 100);
@@ -412,8 +440,11 @@ describe("steer public surfaces", () => {
     const home = await (await worker.fetch(new Request("https://godlock.uk/"), env)).text();
     assert.match(home, /id="steer-leader">Steering toward: Tied:/);
     assert.match(home, /class="scorebox"/);
-    assert.match(home, /Triad display/);
-    assert.match(home, /Meter remainder/);
+    assert.doesNotMatch(home, /Triad display/);
+    assert.doesNotMatch(home, /Meter remainder/);
+    assert.doesNotMatch(home, /does not sermonize/);
+    assert.doesNotMatch(home, /one vote plane/);
+    assert.doesNotMatch(home, /scored public challenges/);
     assert.doesNotMatch(home, /Current confidence/);
     assert.doesNotMatch(home, /Residual uncertainty/);
 
@@ -470,7 +501,9 @@ describe("steer public surfaces", () => {
     assert.match(home, /Steering toward: Undecided \/ Let's review \/ other/);
     assert.match(home, /Came from nothing/);
     assert.match(home, /id="steer-pct-came_from_nothing">0%/);
-    assert.match(home, /No scored public challenges yet/);
+    assert.doesNotMatch(home, /No scored public challenges yet/);
+    assert.doesNotMatch(home, /does not sermonize/);
+    assert.doesNotMatch(home, /Meter remainder/);
     assert.match(home, /id="stat-current-score">—</);
     assert.match(home, /id="stat-residual">—</);
   });

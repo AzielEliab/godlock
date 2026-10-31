@@ -34,8 +34,6 @@ import {
 import {
   STEER_FRAME_IDS,
   STEER_LABELS,
-  STEER_NOTE_PUBLIC,
-  STEER_BALANCE_NOTE,
   classifyChallenge,
   formatSteerPercent,
 } from "./steer.js";
@@ -396,17 +394,6 @@ ${ecosystemNav()}
     var toward=st&&st.steering_toward;
     var leadEl=document.getElementById("steer-leader");
     if(leadEl&&toward)leadEl.textContent="Steering toward: "+toward;
-    var inputsEl=document.getElementById("steer-inputs");
-    if(inputsEl&&st&&st.inputs!=null)inputsEl.textContent=String(st.inputs);
-    var cEl=document.getElementById("steer-current-score");
-    var rEl=document.getElementById("steer-residual");
-    if(j.triad_display!==undefined){
-      if(cEl)cEl.textContent=j.triad_display==null?"—":String(j.triad_display)+"%";
-      if(rEl)rEl.textContent=j.meter_remainder==null?(j.triad_display==null?"—":String(100-Number(j.triad_display))+"%"):String(j.meter_remainder)+"%";
-    }else{
-      if(cEl&&j.current_score!=null)cEl.textContent=String(j.current_score)+"%";
-      if(rEl&&j.residual!=null)rEl.textContent=String(j.residual)+"%";
-    }
     if(!scales)return;
     var ids=${JSON.stringify(STEER_FRAME_IDS)};
     var leaders={};
@@ -498,21 +485,6 @@ function siteMeters(stats) {
   const residual = s.headline_residual != null ? s.headline_residual : (s.residual != null ? s.residual : 50);
   const mesh = s.mesh_score != null ? s.mesh_score : null;
   return { last: pct(last), average: pct(average), residual: pct(residual), mesh: pct(mesh) };
-}
-
-function meterView(stats) {
-  const s = stats || {};
-  if (Object.prototype.hasOwnProperty.call(s, "triad_display")) {
-    if (s.triad_display == null || s.triad_display === "") {
-      return { ready: false, score: "—", residual: "—" };
-    }
-    const display = Number(s.triad_display);
-    const remainder = s.meter_remainder != null ? Number(s.meter_remainder) : (100 - display);
-    return { ready: true, score: display + "%", residual: remainder + "%" };
-  }
-  const score = s.current_score != null ? s.current_score : 50;
-  const residual = s.residual != null ? s.residual : 50;
-  return { ready: true, score: score + "%", residual: residual + "%" };
 }
 
 function rescoreLine(row) {
@@ -692,15 +664,12 @@ export function statsGrid(stats, { receiptsFallback } = {}) {
 </div>`;
 }
 
-export function steerPanel(steer, stats) {
-  const meter = meterView(stats);
-  const confidence = `<p class="muted">Triad display <span id="steer-current-score">${esc(meter.score)}</span> · Meter remainder <span id="steer-residual">${esc(meter.residual)}</span> · these two sum to 100 when a TRIAD_V3 display is present. The remainder is 100 − display. It is not a corpus factor. A number here is a TRIAD_V3 display. It is not the old stored score.</p>`;
-  const balance = `<p class="muted" id="steer-balance">${esc(STEER_BALANCE_NOTE)}</p>`;
+export function steerPanel(steer) {
   if (!steer || steer.available === false || !steer.scales) {
     const note = steer && steer.note
       ? steer.note
-      : "Steer is the share of scored public challenges. No share is shown on this view.";
-    return `<section class="steer" id="steer" aria-label="Steer"><h2>Steer</h2><p class="muted">${esc(note)}</p>${confidence}${balance}<p class="muted">${esc(STEER_NOTE_PUBLIC)}</p></section>`;
+      : "No share is shown on this view.";
+    return `<section class="steer" id="steer" aria-label="Steer"><h2>Steer</h2><p class="muted">${esc(note)}</p></section>`;
   }
   const leaders = new Set(steer.leaders || []);
   const ranked = STEER_FRAME_IDS
@@ -714,17 +683,10 @@ export function steerPanel(steer, stats) {
       <div class="steer-track" role="presentation"><div class="steer-bar" id="steer-bar-${esc(row.id)}" style="width:${esc(pct)}%"></div></div>
     </li>`;
   }).join("");
-  const countLine = steer.inputs
-    ? `<p class="muted"><span id="steer-inputs">${esc(steer.inputs)}</span> scored public challenges. Steer shares, including Came from nothing, sum to 100 at one decimal. An equal vote stays a tie when rounding prints 0.1 apart. Steer is the mix of those challenges. The triad display is a separate meter.</p>`
-    : `<p class="muted" id="steer-inputs">No scored public challenges yet. The scale stays undecided until a receipt is classified. Came from nothing stays 0 until a receipt names that claim.</p>`;
   return `<section class="steer" id="steer" aria-label="Steer">
   <h2>Steer</h2>
   <p class="steer-leader" id="steer-leader">Steering toward: ${esc(steer.steering_toward || "")}</p>
   <ol class="steer-list" id="steer-list">${rows}</ol>
-  ${countLine}
-  ${confidence}
-  ${balance}
-  <p class="muted">${esc(STEER_NOTE_PUBLIC)}</p>
 </section>`;
 }
 
@@ -774,7 +736,7 @@ ${latestHtml}
 </div>
 ${err}
 <form class="challenge" id="challenge-form" method="post" action="/submit">
-  <textarea id="challenge" name="text" maxlength="8000" required placeholder="Ask a question. The score is the published triad on this text."></textarea>
+  <textarea id="challenge" name="text" maxlength="8000" required placeholder="An intelligent-design argument. Other arguments are refused and not scored."></textarea>
   <div class="actions">
     <button type="submit">Submit</button>
     <a class="button ghost" href="/verify">Verify</a>

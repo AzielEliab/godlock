@@ -43,3 +43,11 @@ separate. Steer is not `current_score`. It is not written into the hash chain.
 
 The receipt and ledger wipe is retired. Do not DELETE `receipts` or `ledger`.
 Never wipe counter KV or `metadata.views` / `metadata.uses`. See `docs/d1-receipt-wipe.md`.
+
+## Debate acceptance (fail-closed)
+
+Operator rule: if an argument is not relative to intelligent design, it is not accepted for debate.
+
+`POST /submit` and `processSubmit` refuse with `GODLOCK-NOT-INTELLIGENT-DESIGN` (HTTP 400). Nothing is scored or archived. An accepted argument is a biological design object (`hitsBiologicalDesign`) or explicit intelligent-design / design-flaw / watchmaker language (`isIntelligentDesignArgument` in `src/steer.js`). Cosmology, simulation, ex nihilo, spirals, and unscoped text stay refused unless they also make that argument.
+
+This gate is not LIVE. Do not mark LIVE until Dual CLEAR + Aziel merge OK + Cos. Cap-7 is not ICANN. Paid satellite stays HELD (`LATTICE_POLICY.sat` false, `LATTICE_POLICY.live` false, `cap7_is_icann` false).

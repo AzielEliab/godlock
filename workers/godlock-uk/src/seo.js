@@ -2888,11 +2888,11 @@ export function siteOpenApi() {
       "/submit": {
         post: {
           operationId: "godlockUkSubmit",
-          summary: "Submit a challenge. Null/empty/whitespace-only text is refused and not scored.",
+          summary: "Submit an intelligent-design argument. Null/empty text, and any argument that is not relative to intelligent design, is refused and not scored.",
           requestBody: { required: true, content: { "application/json": { schema: { type: "object", required: ["text"], properties: { text: { type: "string", minLength: 1 } } } } } },
           responses: {
             "200": { description: "Receipt + TRIAD_V3 display (round of combined × 100). Original receipt rows are kept." },
-            "400": { description: "GODLOCK-NULL-ARG or GODLOCK-EMPTY-TEXT — nothing archived" },
+            "400": { description: "GODLOCK-NULL-ARG, GODLOCK-EMPTY-TEXT, or GODLOCK-NOT-INTELLIGENT-DESIGN — nothing archived" },
             "429": { description: "GODLOCK-RATE-LIMIT or GODLOCK-DUP-TEXT — Retry-After" },
           },
         },

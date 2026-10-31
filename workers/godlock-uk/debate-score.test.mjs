@@ -97,7 +97,9 @@ describe("debate page", () => {
     assert.match(html, /id="stat-current-score">42%/);
     assert.match(html, /id="stat-residual">58%/);
     assert.match(html, /id="steer"/);
-    assert.match(html, /Triad display/);
+    assert.doesNotMatch(html, /Triad display/);
+    assert.doesNotMatch(html, /Meter remainder/);
+    assert.doesNotMatch(html, /does not sermonize/);
     assert.doesNotMatch(html, /floor 33\.3/);
     assert.doesNotMatch(html, /Specified Fit, Not Pretty Spirals/);
     assert.match(html, /not a claim that bias is impossible/);
@@ -162,8 +164,10 @@ describe("published reading of stored challenge text", () => {
     assert.match(html, /triad reading/);
     assert.match(html, /stored challenge text is missing, that row is not scored/i);
     assert.doesNotMatch(html, /Not yet rescored/);
-    assert.match(html, new RegExp('id="steer-current-score">' + reading.display + "%"));
-    assert.match(html, new RegExp('id="steer-residual">' + (100 - reading.display) + "%"));
+    assert.doesNotMatch(html, /id="steer-current-score"/);
+    assert.doesNotMatch(html, /id="steer-residual"/);
+    assert.doesNotMatch(html, /Meter remainder/);
+    assert.doesNotMatch(html, /does not sermonize/);
     assert.equal(reading.display + (100 - reading.display), 100);
   });
 

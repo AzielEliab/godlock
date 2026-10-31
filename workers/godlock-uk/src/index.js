@@ -61,7 +61,7 @@ import {
   publishedReading, newestPublishedMeter,
 } from "./debateScore.js";
 import { affectedPriors } from "./rescore.js";
-import { aggregateSteer, classifyChallenge, unavailableSteer } from "./steer.js";
+import { aggregateSteer, classifyChallenge, unavailableSteer, isIntelligentDesignArgument } from "./steer.js";
 import {
   PRESENCE_TTL_MS,
   liveNodeCountFromDb,
@@ -101,6 +101,7 @@ import {
   validateChallengeText,
   refuseBody,
   ChallengeRefuse,
+  intelligentDesignRefusal,
 } from "./challengeText.js";
 import { checkSubmitGuard } from "./submitGuard.js";
 import { handleSotOutlet, isSotOutletPath, loadAppliedCite } from "./sotOutlet.js";
@@ -682,10 +683,20 @@ export function publicPayload(row) {
   return payload;
 }
 
+/** Fail-closed. An argument that is not relative to intelligent design is not accepted. */
+export function debateAcceptance(text) {
+  if (isIntelligentDesignArgument(text)) return { ok: true };
+  return intelligentDesignRefusal();
+}
+
 export async function processSubmit(env, text, username) {
   const checked = validateChallengeText(text);
   if (!checked.ok) {
     throw ChallengeRefuse(checked.code, checked.error, checked.status);
+  }
+  const gate = debateAcceptance(checked.text);
+  if (!gate.ok) {
+    throw ChallengeRefuse(gate.code, gate.error, gate.status);
   }
   const created_utc = new Date().toISOString();
   const id = newId();
@@ -978,6 +989,8 @@ async function handleGodlock(request, env, ctx) {
         if (!parsedSubmit.ok) return submitRefuseResponse(request, url, parsedSubmit);
         const guard = await checkSubmitGuard(env, request, parsedSubmit.text);
         if (!guard.ok) return submitRefuseResponse(request, url, guard);
+        const gate = debateAcceptance(parsedSubmit.text);
+        if (!gate.ok) return submitRefuseResponse(request, url, gate);
       }
       const humanViewer = isHumanSiteViewer(request);
       const presencePath = isSitePresencePath(path, request.method, {

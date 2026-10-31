@@ -57,6 +57,12 @@ describe("human help / addendum text", () => {
     assert.ok(text.includes(GODLOCK_SITE_BLURB));
     assert.ok(text.includes(AZIEL_PERSON_ID));
     assert.match(text, /How to verify/);
+    assert.match(text, /Debate acceptance/);
+    assert.match(text, /GODLOCK-NOT-INTELLIGENT-DESIGN/);
+    assert.match(text, /fails closed/);
+    assert.doesNotMatch(text, /does not sermonize/);
+    assert.doesNotMatch(text, /Meter remainder/);
+    assert.doesNotMatch(text, /one vote plane/);
     assert.match(text, /https:\/\/godlock\.uk\/verify/);
     assert.match(text, /https:\/\/godlock\.uk\/receipts/);
     assert.match(text, /GodLock-first/);

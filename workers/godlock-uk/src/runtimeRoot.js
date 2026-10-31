@@ -10,7 +10,7 @@ import {
   runtimeWebApiNode, personNode, defaultDescription, runtimeDistribution,
   ecosystemLinks, personRef, AZIEL_PERSON_ID, HUB_RUNTIME_ID, runtimeEntitySameAs,
 } from "./seo.js";
-import { navItems } from "./ui.js";
+import { navItems, siteFooter } from "./ui.js";
 import {
   handleRuntimeUses,
   isRuntimeUsesPath,
@@ -175,13 +175,24 @@ export function runtimeChromeNav() {
   return `<nav aria-label="GodLock" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;font:14px/1.45 system-ui,sans-serif;margin:0 0 .75rem;padding:0 0 .85rem;border-bottom:1px solid #2a3140;overflow-wrap:anywhere"><a href="/" style="color:#efe6d6;font-weight:800;text-decoration:none;margin-right:.75rem">GodLock</a>${links}</nav><nav aria-label="Aziel Eliab ecosystem" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font:13px/1.45 system-ui,sans-serif;margin:0 0 .85rem;color:#9aa3b2;overflow-wrap:anywhere"><p style="margin:0 0 4px;flex:1 1 100%">Part of the Aziel Eliab ecosystem</p>${eco}</nav><div id="godlock-runtime-dist" aria-label="Aziel Runtime distribution" style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 1.2rem">${dist}</div>`;
 }
 
+function injectRuntimeFooter(html) {
+  if (/id="godlock-site-footer"/.test(html)) return html;
+  const foot = siteFooter();
+  if (/<\/body>/i.test(html)) return html.replace(/<\/body>/i, foot + "</body>");
+  return html + foot;
+}
+
 function injectRuntimeChrome(html) {
   const chrome = runtimeChromeNav();
-  if (/id="godlock-runtime-chrome"/.test(html)) return html;
-  if (/<body[^>]*>/i.test(html)) {
-    return html.replace(/<body([^>]*)>/i, `<body$1><div id="godlock-runtime-chrome">${chrome}</div>`);
+  let out = html;
+  if (!/id="godlock-runtime-chrome"/.test(out)) {
+    if (/<body[^>]*>/i.test(out)) {
+      out = out.replace(/<body([^>]*)>/i, `<body$1><div id="godlock-runtime-chrome">${chrome}</div>`);
+    } else {
+      out = `<div id="godlock-runtime-chrome">${chrome}</div>` + out;
+    }
   }
-  return `<div id="godlock-runtime-chrome">${chrome}</div>` + html;
+  return injectRuntimeFooter(out);
 }
 
 function unique(list) {

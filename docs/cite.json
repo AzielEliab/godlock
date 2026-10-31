@@ -4235,5 +4235,26 @@
         "description": "UI-software side of the AZ triad. White paper https://www.azielcorpuslibrary.net/record/AZDOC-EB7454682E74"
       }
     ]
-  }
+  },
+  "tab_paths": [
+    "https://godlock.uk/",
+    "https://godlock.uk/reason",
+    "https://godlock.uk/software",
+    "https://godlock.uk/runtime",
+    "https://godlock.uk/receipts",
+    "https://godlock.uk/verify",
+    "https://godlock.uk/donate",
+    "https://godlock.uk/AzielEliab",
+    "https://godlock.uk/aziel"
+  ],
+  "paths_not_hash_only": true,
+  "doors": "https://www.azieleliab.com/doors",
+  "aziel_handles_note": "Same public doors as https://www.azieleliab.com/doors. He Didn't Jump is a handle, not a Live Node.",
+  "cap7_is_icann": false,
+  "cap7_note": "Cap-7 is not an ICANN registration and is not a public egress address.",
+  "paid_satellite": "HELD",
+  "pattern_live": false,
+  "pattern_live_gate": "Dual CLEAR + Aziel merge OK + Cos",
+  "growth": "ON",
+  "crawl": "Allow"
 }

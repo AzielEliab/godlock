@@ -80,7 +80,7 @@ import {
   IDENTITY_SAME_AS,
 } from "./src/seo.js";
 import worker, { publicPayload } from "./src/index.js";
-import { CONTENT_SIGNAL } from "./src/http.js";
+import { CONTENT_SIGNAL, HTML_CSP } from "./src/http.js";
 import { responseParagraph, visitorResponse } from "./src/visitorResponse.js";
 import {
   CATALOG_FALLBACK_PRODUCTS,
@@ -129,7 +129,7 @@ import {
   SPECTRALLOCK_GITHUB, SPECTRALLOCK_REFUSE, SPECTRALLOCK_ADDENDUM,
 } from "./src/seo.js";
 
-function mockEnv() {
+function mockEnv(extra = {}) {
   const stmt = {
     bind() {
       return stmt;
@@ -154,6 +154,7 @@ function mockEnv() {
       },
     },
     MESH_PROBE_ORIGIN: false,
+    ...extra,
   };
 }
 
@@ -2486,7 +2487,12 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(cite.runtime_git_sha, RUNTIME_GIT_SHA);
     assert.equal(cite.runtime_git_sha_short, "ce673365");
     assert.equal(cite.runtime_version_id, RUNTIME_VERSION_ID);
+    assert.equal(cite.runtime_version_id, "eaf0b54c-1e5b-4d54-a582-25c5cdc09f92");
+    assert.equal(cite.runtime_version_id_source, "floor");
+    assert.match(cite.runtime_version_id_note, /Last-known/);
+    assert.match(cite.runtime_version_id_note, /Cos LIVE restamps/);
     assert.match(cite.runtime_version_id_note, /Not a baked suite constant/);
+    assert.doesNotMatch(cite.runtime_version_id, /d2958625/);
     assert.equal(cite.trades_runtime_version, "0.4.9");
     assert.match(cite.software_suite, /hub-scope/);
     assert.match(cite.software_suite, /not the suite's 42/);
@@ -2566,7 +2572,9 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     const llms = llmsDoc();
     assert.match(llms, /## Softwares \+ runtime launch readiness/);
     assert.match(llms, /SoT LIVE: main ce673365 \/ 2\.0\.0-rc1/);
-    assert.match(llms, /Published version_id: d2958625-7651-4173-8d5b-44f588d2d346/);
+    assert.match(llms, new RegExp("Published version_id: " + RUNTIME_VERSION_ID.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.match(llms, /Last-known GET \/v1\/software version_id/);
+    assert.doesNotMatch(llms, /d2958625/);
     assert.match(llms, /hub-scope/);
     assert.match(llms, /not the suite's 42/);
     assert.doesNotMatch(llms, /6a3798a|105fa1ee/);
@@ -2580,6 +2588,65 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.match(softwareMeta, /ce673365/);
     assert.doesNotMatch(softwareMeta, /6a3798a|105fa1ee/);
     assert.match(defaultDescription("runtime"), /fraggate_call/);
+  });
+
+  it("overlays /cite.json and /llms.txt from live GET /v1/software and ignores cards", async () => {
+    const vid = "11111111-2222-4333-8444-555555555555";
+    const sha = "ce673365700d41fc604292ab2b92b1b1ca504016";
+    let urls = [];
+    const env = mockEnv({
+      AZIEL_RUNTIME: {
+        async fetch(req) {
+          urls.push(String(req && req.url ? req.url : req));
+          if (urls.some((u) => u.includes("/download"))) throw new Error("download counter path touched");
+          return new Response(JSON.stringify({
+            ok: true,
+            author: "Aziel Eliab",
+            identity: "Aziel Eliab",
+            version: "2.0.0-rc1",
+            git_sha: sha,
+            version_id: vid,
+            count: 42,
+            software: [{ slug: "not-a-godlock-card" }],
+          }), { status: 200, headers: { "content-type": "application/json" } });
+        },
+      },
+    });
+    const cite = await (await worker.fetch(new Request("https://godlock.uk/cite.json"), env)).json();
+    assert.equal(cite.runtime_version_id, vid);
+    assert.equal(cite.runtime_version_id_source, "serve");
+    assert.match(cite.runtime_version_id_note, /read at serve time/);
+    assert.equal(cite.runtime_git_sha, sha);
+    assert.equal(cite.runtime_git_sha_short, "ce673365");
+    assert.equal(cite.runtime_sot, "main ce673365 / 2.0.0-rc1");
+    assert.equal(cite.runtime_sot_live, true);
+    assert.deepEqual(cite.software_slugs, ["aziel-runtime"]);
+    assert.ok(!cite.software_slugs.includes("not-a-godlock-card"));
+    assert.doesNotMatch(cite.runtime_version_id, /d2958625|105fa1ee/);
+    const llms = await (await worker.fetch(new Request("https://godlock.uk/llms.txt"), env)).text();
+    assert.match(llms, new RegExp("Published version_id: " + vid));
+    assert.match(llms, /read at serve time from the live catalog/);
+    assert.doesNotMatch(llms, /d2958625/);
+    assert.ok(urls.every((u) => u.includes("/v1/software") && !u.includes("/download")));
+    const ai = await (await worker.fetch(new Request("https://godlock.uk/ai.txt"), env)).text();
+    assert.equal(ai, llms);
+
+    const refused = mockEnv({
+      AZIEL_RUNTIME: {
+        async fetch() {
+          return new Response(JSON.stringify({
+            author: "Aziel Eliab",
+            version: "2.0.0-rc1",
+            git_sha: sha,
+            version_id: "105fa1ee",
+          }), { status: 200, headers: { "content-type": "application/json" } });
+        },
+      },
+    });
+    const floorCite = await (await worker.fetch(new Request("https://godlock.uk/cite.json"), refused)).json();
+    assert.equal(floorCite.runtime_version_id, RUNTIME_VERSION_ID);
+    assert.equal(floorCite.runtime_version_id_source, "floor");
+    assert.doesNotMatch(JSON.stringify(floorCite.runtime_version_id), /105fa1ee/);
   });
 });
 
@@ -2634,10 +2701,23 @@ describe("crawler discovery — canonical host, HEAD, Content-Signal, cite Perso
     assert.match(head.headers.get("content-type"), /text\/html/);
     assert.equal(get.headers.get("Content-Signal"), CONTENT_SIGNAL);
     assert.equal(head.headers.get("Content-Signal"), CONTENT_SIGNAL);
+    assert.equal(get.headers.get("Strict-Transport-Security"), "max-age=31536000; includeSubDomains");
+    assert.equal(head.headers.get("Strict-Transport-Security"), "max-age=31536000; includeSubDomains");
+    assert.equal(get.headers.get("Content-Security-Policy"), HTML_CSP);
+    assert.match(HTML_CSP, /default-src 'none'/);
+    assert.match(HTML_CSP, /script-src 'unsafe-inline'/);
+    assert.match(HTML_CSP, /style-src 'unsafe-inline'/);
+    assert.match(HTML_CSP, /frame-ancestors 'none'/);
+    assert.equal(get.headers.get("X-Content-Type-Options"), "nosniff");
+    assert.equal(get.headers.get("X-Frame-Options"), "DENY");
+    assert.equal(get.headers.get("Referrer-Policy"), "no-referrer");
     const html = await get.text();
     const headHtml = await head.text();
     assert.match(html, /<title>Godlock\. The Debate Site of Intelligent Design<\/title>/);
     assert.match(headHtml, /<title>Godlock\. The Debate Site of Intelligent Design<\/title>/);
+    assert.match(html, /<style>/);
+    assert.match(html, /<script>/);
+    assert.doesNotMatch(html, /<script src=/);
     const visible = html.replace(/<script[\s\S]*?<\/script>/gi, "");
     assert.doesNotMatch(visible, /1 Chronicles 15:20/);
     assert.doesNotMatch(visible, /class="identity-lock"/);
@@ -2658,6 +2738,8 @@ describe("crawler discovery — canonical host, HEAD, Content-Signal, cite Perso
     const citeRes = await worker.fetch(new Request("https://godlock.uk/cite.json"), mockEnv());
     assert.equal(citeRes.status, 200);
     assert.equal(citeRes.headers.get("Content-Signal"), CONTENT_SIGNAL);
+    assert.equal(citeRes.headers.get("Content-Security-Policy"), null);
+    assert.equal(citeRes.headers.get("Strict-Transport-Security"), null);
     const cite = await citeRes.json();
     assert.equal(cite.person["@type"], "Person");
     assert.equal(cite.person["@id"], "https://www.azieleliab.com/#aziel");
@@ -2686,6 +2768,46 @@ describe("crawler discovery — canonical host, HEAD, Content-Signal, cite Perso
     }
     assert.ok(!xml.includes("llms-full.txt"));
     assert.equal(aiDoc(), llmsDoc());
+  });
+
+  it("exposes godlock git_sha and version_id on /health and does not invent them", async () => {
+    const bare = await (await worker.fetch(new Request("https://godlock.uk/health", {
+      headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
+    }), mockEnv())).json();
+    assert.equal(bare.ok, true);
+    assert.equal(bare.git_sha, null);
+    assert.equal(bare.git_sha_short, null);
+    assert.equal(bare.git_sha_source, "unset");
+    assert.match(bare.git_sha_note, /does not invent a sha/);
+    assert.equal(bare.version_id, null);
+    assert.equal(bare.version_id_source, "unset");
+    assert.match(bare.version_id_note, /does not invent an id/);
+    assert.equal(bare.site, "godlock.uk");
+
+    const sha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    const vid = "eaf0b54c-1e5b-4d54-a582-25c5cdc09f92";
+    const stamped = await (await worker.fetch(new Request("https://godlock.uk/health", {
+      headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
+    }), mockEnv({
+      GODLOCK_GIT_SHA: sha.toUpperCase(),
+      CF_VERSION_METADATA: { id: vid, tag: "not-a-sha" },
+    }))).json();
+    assert.equal(stamped.git_sha, sha);
+    assert.equal(stamped.git_sha_short, "bbbbbbbb");
+    assert.equal(stamped.git_sha_source, "deploy_var");
+    assert.match(stamped.git_sha_note, /Not the Softwares runtime tip/);
+    assert.equal(stamped.version_id, vid);
+    assert.equal(stamped.version_id_source, "cf_version_metadata");
+    assert.match(stamped.version_id_note, /CF_VERSION_METADATA\.id/);
+
+    const tagged = await (await worker.fetch(new Request("https://godlock.uk/health", {
+      headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
+    }), mockEnv({
+      CF_VERSION_METADATA: { id: vid, tag: sha },
+    }))).json();
+    assert.equal(tagged.git_sha, sha);
+    assert.equal(tagged.git_sha_source, "cf_version_metadata.tag");
+    assert.equal(tagged.version_id, vid);
   });
 });
 

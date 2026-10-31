@@ -181,11 +181,12 @@ describe("godlock-uk SoT mesh outlet", () => {
 
     const cite = await (await worker.fetch(new Request("https://godlock.uk/cite.json"), env)).json();
     assert.equal(cite.runtime_git_sha, NEXT_SHA);
-    assert.equal(cite.runtime_git_sha_short, "aaaaaaa");
+    assert.equal(cite.runtime_git_sha_short, "aaaaaaaa");
     assert.equal(cite.runtime_version, NEXT_VERSION);
-    assert.equal(cite.runtime_sot, "main aaaaaaa / " + NEXT_VERSION);
+    assert.equal(cite.runtime_sot, "main aaaaaaaa / " + NEXT_VERSION);
     assert.equal(cite.runtime_sot_live, true);
     assert.equal(cite.runtime_version_id, undefined);
+    assert.equal(cite.runtime_version_id_source, undefined);
     assert.equal(cite.identity, "Aziel Eliab");
     assert.doesNotMatch(JSON.stringify(cite), new RegExp(UNEXPOSED_VERSION_ID));
 
@@ -208,7 +209,7 @@ describe("godlock-uk SoT mesh outlet", () => {
     assert.doesNotMatch(html, new RegExp(UNEXPOSED_VERSION_ID));
 
     const llms = await (await worker.fetch(new Request("https://godlock.uk/llms.txt"), env)).text();
-    assert.match(llms, /SoT LIVE: main aaaaaaa \/ 9\.9\.9-test/);
+    assert.match(llms, /SoT LIVE: main aaaaaaaa \/ 9\.9\.9-test/);
     assert.doesNotMatch(llms, /Ask Jeeves/);
   });
 

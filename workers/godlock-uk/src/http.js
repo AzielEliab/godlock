@@ -31,6 +31,25 @@ export function cacheHeaders() {
   };
 }
 
+/**
+ * HTML security headers matched to aziel-runtime Worker HTML (read 2026-10-30).
+ * GodLock pages ship inline scripts (challenge submit, heartbeat, thread expand,
+ * donate copy) and a <style> block, plus JSON-LD script tags. No external script
+ * src. script-src and style-src stay 'unsafe-inline' so those blocks run.
+ * frame-ancestors 'none' with X-Frame-Options DENY. JSON routes do not use this set.
+ */
+export const HTML_CSP = "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'unsafe-inline'; worker-src 'self'; style-src 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https:; font-src 'self'";
+
+export function htmlSecurityHeaders() {
+  return {
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    "Content-Security-Policy": HTML_CSP,
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+  };
+}
+
 export function json(body, status = 200, extraHeaders) {
   return new Response(JSON.stringify(body, null, 2), {
     status,
@@ -51,6 +70,7 @@ export function html(pageBody, { status = 200, extraHeaders } = {}) {
       ...corsHeaders(),
       ...cacheHeaders(),
       ...(extraHeaders || {}),
+      ...htmlSecurityHeaders(),
     },
   });
 }

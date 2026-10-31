@@ -23,7 +23,11 @@
  */
 import { json } from "./http.js";
 import { ZERO, hashPayload } from "./ledger.js";
-import { floorRuntimeCite } from "./launchReady.js";
+import {
+  floorRuntimeCite,
+  RUNTIME_GIT_SHA_SHORT,
+  RUNTIME_VERSION_ID_SERVE_NOTE,
+} from "./launchReady.js";
 
 export const SOT_SYNC_SPEC = "SOT-SYNC-1.0";
 export const SOT_SYNC_OP = "sot_sync";
@@ -590,6 +594,47 @@ async function finishUnreachable({ used, gate, dir, before, beforeCite, previous
     http: 200,
     note: UNREACHABLE_NOTE,
   });
+}
+
+/**
+ * Publish cite for /cite.json and /llms.txt.
+ * Prefer a live GET /v1/software (the same catalog /runtime/v1/software proxies).
+ * Public tip prefix is 8 characters, matching the floor stamp. Outlet receipts stay 7.
+ * Returns null when the live read is off or does not answer. Caller keeps last-known.
+ */
+export async function readServeRuntimeCite(env) {
+  const hasBinding = !!(env && env.AZIEL_RUNTIME && typeof env.AZIEL_RUNTIME.fetch === "function");
+  const injected = env && typeof env.SOT_FETCH === "function" ? env.SOT_FETCH : null;
+  if (!hasBinding && !injected) return null;
+  const probeOrigin = !(env && env.MESH_PROBE_ORIGIN === false);
+  const deps = { timeoutMs: 4000 };
+  if (injected) deps.fetch = injected;
+  else if (!probeOrigin) deps.fetch = async () => new Response(null, { status: 599 });
+  const pulled = await pullAuthority(env, deps);
+  if (!pulled.ok || !pulled.doc) return null;
+  const parsed = parseSotDocument(pulled.doc);
+  if (!parsed.ok || !parsed.cite || !parsed.cite.git_sha) return null;
+  const sha = parsed.cite.git_sha;
+  const tipLen = RUNTIME_GIT_SHA_SHORT.length;
+  const short = sha.slice(0, tipLen);
+  const version = parsed.cite.version;
+  const version_id = parsed.cite.version_id || null;
+  return {
+    branch: "main",
+    version,
+    git_sha: sha,
+    git_sha_short: short,
+    version_id,
+    version_id_source: version_id ? "serve" : "absent",
+    version_id_note: version_id ? RUNTIME_VERSION_ID_SERVE_NOTE : null,
+    cite: "main " + short + " / " + version,
+    live: true,
+    status: "live",
+    source: "serve",
+    via: pulled.via || null,
+    author: AUTHOR,
+    identity: AUTHOR,
+  };
 }
 
 export async function loadAppliedCite(env) {

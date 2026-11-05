@@ -2220,6 +2220,11 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
       ["Aziel Runtime", "https://aziel-runtime.vibelock.workers.dev/", true],
       ["Try on Glama", "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime", false],
       ["Trades-Runtime", "https://trades-runtime.vibelock.workers.dev/", true],
+      ["GodLock.uk", "https://godlock.uk/", false],
+      ["Softwares", "https://www.azieleliab.com/software", false],
+      ["Furnace Isn't Free", "https://www.furnaceisntfree.com/", false],
+      ["Furnace Isn't Free · Aziel", "https://furnaceisntfree.com/aziel/", false],
+      ["TimeToUnsealTheBook", "https://www.timetounsealthebook.net", false],
     ]);
     const eco = ecosystemNav();
     assert.match(eco, /Part of the Aziel Eliab ecosystem/);
@@ -2230,6 +2235,9 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
     assert.match(eco, /href="https:\/\/aziel-runtime\.vibelock\.workers\.dev\/" class="secondary">Aziel Runtime<\/a>/);
     assert.match(eco, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
     assert.match(eco, /href="https:\/\/trades-runtime\.vibelock\.workers\.dev\/" class="secondary">Trades-Runtime<\/a>/);
+    assert.match(eco, /href="https:\/\/www\.furnaceisntfree\.com\/">Furnace Isn't Free<\/a>/);
+    assert.match(eco, /href="https:\/\/furnaceisntfree\.com\/aziel\/">Furnace Isn't Free · Aziel<\/a>/);
+    assert.match(eco, /href="https:\/\/www\.timetounsealthebook\.net">TimeToUnsealTheBook<\/a>/);
     const software = softwareBody({ products: [] });
     assert.match(software, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.doesNotMatch(software, /Part of the Aziel Eliab ecosystem/);
@@ -3041,7 +3049,10 @@ describe("Aziel handles pretty paths", () => {
     assert.match(html, /<h2>Handles<\/h2>/);
     assert.match(html, /href="https:\/\/www\.azieleliab\.com\/">azieleliab\.com<\/a>/);
     assert.match(html, /href="https:\/\/x\.com\/AzielEliab">X @AzielEliab<\/a>/);
-    assert.match(html, /href="https:\/\/timetounsealthebook\.net\/">TimeToUnsealTheBook<\/a>/);
+    assert.match(html, /href="https:\/\/www\.furnaceisntfree\.com\/">https:\/\/www\.furnaceisntfree\.com\/<\/a>/);
+    assert.match(html, /href="https:\/\/furnaceisntfree\.com\/aziel\/">https:\/\/furnaceisntfree\.com\/aziel\/<\/a>/);
+    assert.match(html, /href="https:\/\/www\.timetounsealthebook\.net">https:\/\/www\.timetounsealthebook\.net<\/a>/);
+    assert.match(html, /href="https:\/\/www\.timetounsealthebook\.net">TimeToUnsealTheBook<\/a>/);
     assert.match(html, /He Didn't Jump is a handle, not a Live Node/);
     assert.match(html, /Cap-7 is not an ICANN registration/);
     assert.match(html, /Paid satellite stays HELD/);
@@ -3056,7 +3067,15 @@ describe("Aziel handles pretty paths", () => {
     assert.equal(json.cap7_is_icann, false);
     assert.equal(json.paid_satellite, "HELD");
     assert.equal(json.pattern_live, false);
+    assert.equal(json.pattern_live_gate, "Dual CLEAR + Aziel merge OK + Cos");
     assert.equal(json.he_didnt_jump_is_live_node, false);
+    assert.deepEqual(json.official_aziel_sites.map((s) => s.href), [
+      "https://www.furnaceisntfree.com/",
+      "https://furnaceisntfree.com/aziel/",
+      "https://www.timetounsealthebook.net",
+    ]);
+    assert.ok(json.sister_mesh.includes("https://aziel-runtime.vibelock.workers.dev/"));
+    assert.ok(json.sister_mesh.includes("https://www.azieleliab.com/software"));
   });
 
   it("keeps a footer and a unique canonical on every tab", async () => {
@@ -3067,6 +3086,17 @@ describe("Aziel handles pretty paths", () => {
       assert.match(html, /id="godlock-site-footer"/, path);
       assert.match(html, /Part of the Aziel Eliab ecosystem/, path);
       assert.match(html, /href="\/llms\.txt"/, path);
+      assert.match(html, /href="https:\/\/www\.azieleliab\.com\/"/, path);
+      assert.match(html, /href="https:\/\/www\.azielcorpuslibrary\.net\/"/, path);
+      assert.match(html, /href="https:\/\/godlock\.uk\/"/, path);
+      assert.match(html, /href="https:\/\/www\.hedidntjump\.com\/"/, path);
+      assert.match(html, /href="https:\/\/www\.azieleliab\.com\/software"/, path);
+      assert.match(html, /href="https:\/\/aziel-runtime\.vibelock\.workers\.dev\/"/, path);
+      assert.match(html, /href="https:\/\/www\.furnaceisntfree\.com\/"/, path);
+      assert.match(html, /href="https:\/\/furnaceisntfree\.com\/aziel\/"/, path);
+      assert.match(html, /href="https:\/\/www\.timetounsealthebook\.net"/, path);
+      assert.match(html, /Cap-7 is not an ICANN registration/, path);
+      assert.match(html, /Paid satellite stays HELD/, path);
       assert.doesNotMatch(visible(html), /1 Chronicles 15:20/, path);
       if (path !== "/who") {
         const expected = "https://godlock.uk" + path;
@@ -3090,6 +3120,9 @@ describe("Aziel handles pretty paths", () => {
     assert.match(robots, /Growth-ON/);
     const xml = await sitemapXml();
     assert.ok(xml.includes("https://godlock.uk/aziel"));
+    assert.ok(xml.includes("https://www.furnaceisntfree.com/"));
+    assert.ok(xml.includes("https://furnaceisntfree.com/aziel/"));
+    assert.ok(xml.includes("https://www.timetounsealthebook.net"));
     assert.ok(xml.includes("https://godlock.uk/AzielEliab"));
     assert.ok(xml.includes("https://godlock.uk/receipts"));
     const cite = citeDoc();
@@ -3100,5 +3133,14 @@ describe("Aziel handles pretty paths", () => {
     assert.equal(cite.crawl, "Allow");
     assert.ok(cite.tab_paths.includes("https://godlock.uk/aziel"));
     assert.ok(cite.aziel_handle_list.some((h) => h.href === "https://www.hedidntjump.com/"));
+    assert.ok(cite.aziel_handle_list.some((h) => h.href === "https://www.furnaceisntfree.com/"));
+    assert.ok(cite.aziel_handle_list.some((h) => h.href === "https://furnaceisntfree.com/aziel/"));
+    assert.ok(cite.aziel_handle_list.some((h) => h.href === "https://www.timetounsealthebook.net"));
+    assert.equal(cite.pattern_live, false);
+    assert.equal(cite.cap7_is_icann, false);
+    assert.equal(cite.paid_satellite, "HELD");
+    assert.equal(cite.debate_acceptance.refuse_code, "GODLOCK-NOT-RELATIVE");
+    assert.ok(cite.sister_mesh.includes("https://aziel-runtime.vibelock.workers.dev/"));
+    assert.match(llms, /Official Aziel sites: https:\/\/www\.furnaceisntfree\.com\/ · https:\/\/furnaceisntfree\.com\/aziel\/ · https:\/\/www\.timetounsealthebook\.net/);
   });
 });

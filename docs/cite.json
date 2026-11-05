@@ -33,9 +33,12 @@
     "corpus": "https://www.azielcorpuslibrary.net/",
     "hdj": "https://www.hedidntjump.com/",
     "runtime": "https://aziel-runtime.vibelock.workers.dev/",
-    "trades": "https://trades-runtime.vibelock.workers.dev/"
+    "trades": "https://trades-runtime.vibelock.workers.dev/",
+    "furnace": "https://www.furnaceisntfree.com/",
+    "furnace_aziel": "https://furnaceisntfree.com/aziel/",
+    "unseal": "https://www.timetounsealthebook.net"
   },
-  "sister_sites_note": "Sister sites: ae https://www.azieleliab.com/ · corpus https://www.azielcorpuslibrary.net/ · HDJ https://www.hedidntjump.com/ · runtime https://aziel-runtime.vibelock.workers.dev/ · trades https://trades-runtime.vibelock.workers.dev/",
+  "sister_sites_note": "Sister sites: ae https://www.azieleliab.com/ · corpus https://www.azielcorpuslibrary.net/ · HDJ https://www.hedidntjump.com/ · runtime https://aziel-runtime.vibelock.workers.dev/ · trades https://trades-runtime.vibelock.workers.dev/ · furnace https://www.furnaceisntfree.com/ · furnace-aziel https://furnaceisntfree.com/aziel/ · unseal https://www.timetounsealthebook.net",
   "person_id": "https://www.azieleliab.com/#aziel",
   "publisher": "Aziel Eliab",
   "living_publisher": true,
@@ -48,6 +51,9 @@
     "https://www.azielcorpuslibrary.net/",
     "https://godlock.uk/",
     "https://www.hedidntjump.com/",
+    "https://www.furnaceisntfree.com/",
+    "https://furnaceisntfree.com/aziel/",
+    "https://www.timetounsealthebook.net",
     "https://x.com/AzielEliab"
   ],
   "sameAs_refuse": [
@@ -229,7 +235,10 @@
       "corpus": "https://www.azielcorpuslibrary.net/",
       "hdj": "https://www.hedidntjump.com/",
       "runtime": "https://aziel-runtime.vibelock.workers.dev/",
-      "trades": "https://trades-runtime.vibelock.workers.dev/"
+      "trades": "https://trades-runtime.vibelock.workers.dev/",
+      "furnace": "https://www.furnaceisntfree.com/",
+      "furnace_aziel": "https://furnaceisntfree.com/aziel/",
+      "unseal": "https://www.timetounsealthebook.net"
     },
     "github": "https://github.com/AzielEliab",
     "github_repo": "https://github.com/AzielEliab/godlock",
@@ -613,6 +622,21 @@
       "id": "fraggate",
       "label": "FragGate kernel",
       "href": "https://github.com/AzielEliab/fraggate"
+    },
+    {
+      "id": "furnace",
+      "label": "Furnace Isn't Free",
+      "href": "https://www.furnaceisntfree.com/"
+    },
+    {
+      "id": "furnace-aziel",
+      "label": "Furnace Isn't Free · Aziel",
+      "href": "https://furnaceisntfree.com/aziel/"
+    },
+    {
+      "id": "unseal",
+      "label": "TimeToUnsealTheBook",
+      "href": "https://www.timetounsealthebook.net"
     }
   ],
   "ai_clients": [

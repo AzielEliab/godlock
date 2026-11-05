@@ -16,6 +16,8 @@ GodLock is a product name (Specified Fit stress-test and resilience engine). Not
 Debate acceptance on that host fails closed. An argument that is not relative to intelligent design is refused (`GODLOCK-NOT-RELATIVE`) and is not queued, scored, or archived. The public site serves that refusal when the Worker is deployed.
 **Aziel Corpus Library:** https://www.azielcorpuslibrary.net/  
 **He Didn't Jump:** https://www.hedidntjump.com/  
+**Furnace Isn't Free:** https://www.furnaceisntfree.com/ · Aziel door https://furnaceisntfree.com/aziel/  
+**Time to Unseal the Book:** https://www.timetounsealthebook.net  
 **aziel-runtime GitHub:** https://github.com/AzielEliab/aziel-runtime  
 **FragGate kernel:** https://github.com/AzielEliab/fraggate (FG-0.1)
 

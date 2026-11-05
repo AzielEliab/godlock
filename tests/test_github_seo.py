@@ -39,6 +39,9 @@ SISTER_SITES = {
     "hdj": "https://www.hedidntjump.com/",
     "runtime": "https://aziel-runtime.vibelock.workers.dev/",
     "trades": "https://trades-runtime.vibelock.workers.dev/",
+    "furnace": "https://www.furnaceisntfree.com/",
+    "furnace_aziel": "https://furnaceisntfree.com/aziel/",
+    "unseal": "https://www.timetounsealthebook.net",
 }
 
 HEBREW_DEFINITION = (
@@ -461,6 +464,13 @@ def test_cite_json_graph():
     assert "https://aziel-runtime.vibelock.workers.dev/" in hrefs
     assert "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime" in hrefs
     assert "https://github.com/AzielEliab/fraggate" in hrefs
+    assert "https://www.furnaceisntfree.com/" in hrefs
+    assert "https://furnaceisntfree.com/aziel/" in hrefs
+    assert "https://www.timetounsealthebook.net" in hrefs
+    for text in (LLMS, AI):
+        assert "https://www.furnaceisntfree.com/" in text
+        assert "https://furnaceisntfree.com/aziel/" in text
+        assert "https://www.timetounsealthebook.net" in text
 
 
 def test_pyproject_discovery_urls():

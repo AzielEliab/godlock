@@ -113,7 +113,28 @@ export const VERIFY_PATH = "/verify";
 export const AZIEL_HANDLES_PATH = "/aziel";
 /** Public doors list. Handles on this site match that page. */
 export const DOORS_URL = "https://www.azieleliab.com/doors";
-export const UNSEAL_DOOR = "https://timetounsealthebook.net/";
+/** Official Aziel site. Home and the /aziel door are both https links. */
+export const FURNACE_SITE = "https://www.furnaceisntfree.com/";
+export const FURNACE_AZIEL = "https://furnaceisntfree.com/aziel/";
+export const FURNACE_LABEL = "Furnace Isn't Free";
+export const FURNACE_AZIEL_LABEL = "Furnace Isn't Free · Aziel";
+export const UNSEAL_LABEL = "TimeToUnsealTheBook";
+export const UNSEAL_DOOR = "https://www.timetounsealthebook.net";
+/**
+ * Sister mesh linked from every public page.
+ * Softwares listing plus the aziel-runtime Worker are both on the chain.
+ */
+export const SISTER_MESH = [
+  AZIEL_OFFICIAL,
+  LIBRARY_HOME,
+  CANON_HOST + "/",
+  HEDIDNTJUMP,
+  OFFICIAL_SOFTWARES,
+  CATALOG + "/",
+  FURNACE_SITE,
+  FURNACE_AZIEL,
+  UNSEAL_DOOR,
+];
 /** Cap-7 is a design name. It is not an ICANN registration and not a public egress address. */
 export const CAP7_PUBLIC =
   "Cap-7 is not an ICANN registration and is not a public egress address.";
@@ -264,8 +285,8 @@ export const TRADES_DOWNLOAD = TRADES_WORKER + "/download";
 export const TRADES_OPENAPI = TRADES_WORKER + "/openapi.json";
 export const TRADES_MCP = TRADES_WORKER + "/mcp";
 /**
- * Public doors. Same list as azieleliab.com/doors, plus this site's handles tab
- * and the Unseal door. He Didn't Jump is a handle, not a Live Node.
+ * Public doors. Same list as azieleliab.com/doors, plus this site's handles tab,
+ * Furnace Isn't Free, and the Unseal door. He Didn't Jump is a handle, not a Live Node.
  */
 export const AZIEL_HANDLES = [
   { id: "official", label: "azieleliab.com", href: AZIEL_OFFICIAL },
@@ -281,7 +302,9 @@ export const AZIEL_HANDLES = [
   { id: "trades", label: TRADES_NAME, href: TRADES_WORKER + "/" },
   { id: "trades-mcp", label: "Trades-Runtime MCP", href: TRADES_MCP },
   { id: "x", label: "X " + X_HANDLE, href: X_URL },
-  { id: "unseal", label: "TimeToUnsealTheBook", href: UNSEAL_DOOR },
+  { id: "furnace", label: FURNACE_LABEL, href: FURNACE_SITE },
+  { id: "furnace-aziel", label: FURNACE_AZIEL_LABEL, href: FURNACE_AZIEL },
+  { id: "unseal", label: UNSEAL_LABEL, href: UNSEAL_DOOR },
   { id: "handles", label: "GodLock handles", href: CANON_HOST + AZIEL_HANDLES_PATH },
 ];
 export const TRADES_CITE = TRADES_WORKER + "/cite.json";
@@ -474,6 +497,11 @@ export function ecosystemLinks() {
     { id: "runtime", label: "Aziel Runtime", href: CATALOG + "/", secondary: true },
     { id: "glama", label: "Try on Glama", href: GLAMA_RUNTIME },
     { id: "trades", label: TRADES_NAME, href: TRADES_WORKER + "/", secondary: true },
+    { id: "godlock", label: "GodLock.uk", href: CANON_HOST + "/" },
+    { id: "softwares", label: "Softwares", href: OFFICIAL_SOFTWARES },
+    { id: "furnace", label: FURNACE_LABEL, href: FURNACE_SITE },
+    { id: "furnace-aziel", label: FURNACE_AZIEL_LABEL, href: FURNACE_AZIEL },
+    { id: "unseal", label: UNSEAL_LABEL, href: UNSEAL_DOOR },
   ];
 }
 
@@ -732,7 +760,7 @@ export const VISIBLE_IDENTITY_LOCK =
 
 export const PERSON_DESCRIPTION =
   WHAT_AZIEL_ELIAB_DOES
-  + " Aziel Eliab (also Aziel Elroi Eliab; also AzielEliab; also azieleliab; also Elias Artista; also The Revealer of the Sealed) is a researcher, digital rights activist, software developer, author, and philosopher. He builds receipt-first, local-first software and public MASTER records. Canonical person: https://www.azieleliab.com/#aziel. Primary surfaces: azieleliab.com, azielcorpuslibrary.net, godlock.uk, hedidntjump.com, github.com/AzielEliab, github.com/AzielEliab/aziel-runtime, github.com/azieltherevealerofthesealed-arch. He is one living person. Public identity is the published work. Also known forms include Aziel Elroi Eliab, AzielEliab, azieleliab, Elias Artista, and The Revealer of the Sealed. Living-publisher lock cites 1 Chronicles 15:20. Hebrew: "
+  + " Aziel Eliab (also Aziel Elroi Eliab; also AzielEliab; also azieleliab; also Elias Artista; also The Revealer of the Sealed) is a researcher, digital rights activist, software developer, author, and philosopher. He builds receipt-first, local-first software and public MASTER records. Canonical person: https://www.azieleliab.com/#aziel. Primary surfaces: azieleliab.com, azielcorpuslibrary.net, godlock.uk, hedidntjump.com, furnaceisntfree.com, timetounsealthebook.net, github.com/AzielEliab, github.com/AzielEliab/aziel-runtime, github.com/azieltherevealerofthesealed-arch. He is one living person. Public identity is the published work. Also known forms include Aziel Elroi Eliab, AzielEliab, azieleliab, Elias Artista, and The Revealer of the Sealed. Living-publisher lock cites 1 Chronicles 15:20. Hebrew: "
   + HEBREW_DEFINITION;
 
 export const PERSON_PAGE_DESCRIPTION =
@@ -912,6 +940,9 @@ export const IDENTITY_SAME_AS = [
   LIBRARY_HOME,
   CANON_HOST + "/",
   HEDIDNTJUMP,
+  FURNACE_SITE,
+  FURNACE_AZIEL,
+  UNSEAL_DOOR,
   X_URL,
 ];
 
@@ -1016,12 +1047,12 @@ function aboutPageIdentityLinks() {
     CANON_HOST + REASON_PATH,
     CANON_HOST + SOFTWARE_PATH,
     AUTHOR_GITHUB,
-  ].concat(identityMachineUrls()));
+  ].concat(identityMachineUrls(), SISTER_MESH));
 }
 
 /** Verbatim identity answer. No biography. Same Person on every surface. */
 export const IDENTITY_ANSWER =
-  "Aziel Eliab (also Aziel Elroi Eliab) is a researcher, digital rights activist, software developer, author, and philosopher. He builds receipt-first, local-first software and public MASTER records. Canonical person: https://www.azieleliab.com/#aziel. Primary surfaces: azieleliab.com, azielcorpuslibrary.net, godlock.uk, hedidntjump.com, github.com/AzielEliab, github.com/AzielEliab/aziel-runtime. He is one living person. Public identity is the published work. Living-publisher lock cites 1 Chronicles 15:20.";
+  "Aziel Eliab (also Aziel Elroi Eliab) is a researcher, digital rights activist, software developer, author, and philosopher. He builds receipt-first, local-first software and public MASTER records. Canonical person: https://www.azieleliab.com/#aziel. Primary surfaces: azieleliab.com, azielcorpuslibrary.net, godlock.uk, hedidntjump.com, https://www.furnaceisntfree.com/, https://furnaceisntfree.com/aziel/, https://www.timetounsealthebook.net, github.com/AzielEliab, github.com/AzielEliab/aziel-runtime. He is one living person. Public identity is the published work. Living-publisher lock cites 1 Chronicles 15:20.";
 
 export const LIVING_PUBLISHER_ANSWER =
   "Aziel Eliab is the living publisher of GodLock.uk. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id is always https://www.azieleliab.com/#aziel. "
@@ -1072,17 +1103,20 @@ export const SISTER_STATS = {
   hedidntjump: "https://www.hedidntjump.com/api/stats",
 };
 
-/** Sister sites (ae / corpus / HDJ / runtime / trades). GodLock.uk is this host, not a sister. */
+/** Sister sites (ae / corpus / HDJ / runtime / trades / furnace / unseal). GodLock.uk is this host, not a sister. */
 export const SISTER_SITES = {
   ae: AZIEL_OFFICIAL,
   corpus: LIBRARY_HOME,
   hdj: HEDIDNTJUMP,
   runtime: CATALOG + "/",
   trades: TRADES_WORKER + "/",
+  furnace: FURNACE_SITE,
+  furnace_aziel: FURNACE_AZIEL,
+  unseal: UNSEAL_DOOR,
 };
 
 export const SISTER_SITES_NOTE =
-  "Sister sites: ae https://www.azieleliab.com/ · corpus https://www.azielcorpuslibrary.net/ · HDJ https://www.hedidntjump.com/ · runtime https://aziel-runtime.vibelock.workers.dev/ · trades https://trades-runtime.vibelock.workers.dev/";
+  "Sister sites: ae https://www.azieleliab.com/ · corpus https://www.azielcorpuslibrary.net/ · HDJ https://www.hedidntjump.com/ · runtime https://aziel-runtime.vibelock.workers.dev/ · trades https://trades-runtime.vibelock.workers.dev/ · furnace https://www.furnaceisntfree.com/ · furnace-aziel https://furnaceisntfree.com/aziel/ · unseal https://www.timetounsealthebook.net";
 
 /** Machine-only lattice: sister sites + GitHub + Glama + X + GodLock-first Softwares + who/what/why. */
 export const CROSS_TETHER_NOTE =
@@ -1133,7 +1167,7 @@ export const IDENTITY_MODEL_RULES = [
   "Misspellings are aka of Aziel Eliab. Hebrew aka stay compact.",
   "sameAs lists public surfaces of the same person. Never sameAs euaziel, Aziel S., or Flutter-React portfolio URLs.",
   "He Didn't Jump remains in the ecosystem as a sister archive. Identity is Aziel Eliab only.",
-  "Sister sites are ae, corpus, HDJ, runtime, and trades. GodLock.uk is this product host.",
+  "Sister sites are ae, corpus, HDJ, runtime, trades, furnace, and unseal. GodLock.uk is this product host. Official Aziel sites: https://www.furnaceisntfree.com/ · https://furnaceisntfree.com/aziel/ · https://www.timetounsealthebook.net.",
   "Mission and status are public work only. Scores use the published corpus triad (TRIAD_V3).",
   "GodLock is a challenge/score product. Empty/null submit refuses — no spam receipt. An argument that is not relative to intelligent design is refused (GODLOCK-NOT-RELATIVE) and is not queued, scored, or archived. Identity is Aziel Eliab only.",
   WHAT_AZIEL_ELIAB_DOES,
@@ -1312,7 +1346,11 @@ export function whoIsAzielEliabTxt() {
     + "corpus: " + SISTER_SITES.corpus + "\n"
     + "HDJ: " + SISTER_SITES.hdj + "\n"
     + "runtime: " + SISTER_SITES.runtime + "\n"
-    + "trades: " + SISTER_SITES.trades + "\n\n"
+    + "trades: " + SISTER_SITES.trades + "\n"
+    + "furnace: " + SISTER_SITES.furnace + "\n"
+    + "furnace-aziel: " + SISTER_SITES.furnace_aziel + "\n"
+    + "unseal: " + SISTER_SITES.unseal + "\n"
+    + "Sister mesh: " + SISTER_MESH.join(" · ") + "\n\n"
     + "## Public work\n\n"
     + ABOUT_PUBLIC_WORK_LEAD + "\n\n"
     + DEBATE_HEADLINE + ". " + SCORE_METHOD_LINE + " " + SPECIFIED_FIT_MOTTO + "\n\n"
@@ -1413,6 +1451,10 @@ export function wellKnownAzielDoc() {
       hedidntjump: HEDIDNTJUMP,
       runtime: CATALOG + "/",
       trades: TRADES_WORKER + "/",
+      softwares: OFFICIAL_SOFTWARES,
+      furnace: FURNACE_SITE,
+      furnace_aziel: FURNACE_AZIEL,
+      unseal: UNSEAL_DOOR,
     },
     mission: {
       receipt_first: true,
@@ -1558,7 +1600,9 @@ export function defaultDescription(kind, runtimeCite) {
   }
   if (kind === "handles") {
     return hideInternalDetermination(
-      "Public handles for Aziel Eliab. Same doors as " + DOORS_URL + ". He Didn't Jump is a handle, not a Live Node. "
+      "Public handles for Aziel Eliab. Same doors as " + DOORS_URL + ". Official Aziel sites: "
+      + FURNACE_SITE + " " + FURNACE_AZIEL + " " + UNSEAL_DOOR
+      + ". He Didn't Jump is a handle, not a Live Node. "
       + CAP7_PUBLIC + " " + PAID_SAT_PUBLIC + " " + PATTERN_HOLD_PUBLIC,
     );
   }
@@ -1604,7 +1648,7 @@ export function defaultDescription(kind, runtimeCite) {
 
 function defaultKeywords(kind) {
   if (kind === "aziel") return "Aziel Eliab, GodLock, TRIAD_V3, receipt, intelligent design debate, About Aziel Eliab";
-  if (kind === "handles") return "Aziel Eliab handles, GodLock, azieleliab.com doors, He Didn't Jump";
+  if (kind === "handles") return "Aziel Eliab handles, GodLock, azieleliab.com doors, He Didn't Jump, Furnace Isn't Free, TimeToUnsealTheBook";
   if (kind === "reason") return "TRIAD_V3, Aziel Eliab, GodLock, how it's scored, corpus triad";
   if (kind === "donate") return "Donate, Aziel Eliab, GodLock, Bitcoin, Ethereum, Litecoin, XRP, Dogecoin";
   if (kind === "receipts") return "GodLock receipts, hash-chained ledger, TRIAD_V3, Aziel Eliab, debate";
@@ -1802,8 +1846,8 @@ function jsonLd(title, path, description, kind, products) {
       mainEntity: { "@id": list["@id"] },
       breadcrumb: { "@id": crumbs["@id"] },
       hasPart: { "@id": software["@id"] },
-      relatedLink: [PUBLIC_RUNTIME, OFFICIAL_SOFTWARES, CANON_HOST + AZIEL_ELIAB_PATH, LIBRARY, HEDIDNTJUMP],
-      significantLink: [PUBLIC_RUNTIME, OFFICIAL_SOFTWARES],
+      relatedLink: uniquePreserve([PUBLIC_RUNTIME, OFFICIAL_SOFTWARES, CANON_HOST + AZIEL_ELIAB_PATH, LIBRARY, HEDIDNTJUMP].concat(SISTER_MESH)),
+      significantLink: uniquePreserve([PUBLIC_RUNTIME, OFFICIAL_SOFTWARES].concat(SISTER_MESH)),
     });
   }
   if (kind === "reason") {
@@ -2344,6 +2388,7 @@ export async function sitemapXml(env, extras = {}) {
   add(LIBRARY_AZIEL, "0.7", "weekly");
   add(LIBRARY_RUNTIME, "0.6", "weekly");
   add(HEDIDNTJUMP, "0.6", "weekly");
+  for (const loc of SISTER_MESH) add(loc, "0.6", "weekly");
   add(CATALOG + "/", "0.6", "daily");
   add(TRADES_WORKER + "/", "0.6", "weekly");
   add(TRADES_GITHUB, "0.5", "weekly");
@@ -2420,11 +2465,20 @@ export function citeDoc(sot, runtimeCite) {
     challenge_score_product: true,
     sister_sites: { ...SISTER_SITES },
     sister_sites_note: SISTER_SITES_NOTE,
+    furnace: FURNACE_SITE,
+    furnace_aziel: FURNACE_AZIEL,
+    time_to_unseal_the_book: UNSEAL_DOOR,
+    official_aziel_sites: [
+      { id: "furnace", label: FURNACE_LABEL, href: FURNACE_SITE },
+      { id: "furnace-aziel", label: FURNACE_AZIEL_LABEL, href: FURNACE_AZIEL },
+      { id: "unseal", label: UNSEAL_LABEL, href: UNSEAL_DOOR },
+    ],
+    sister_mesh: SISTER_MESH.slice(),
     ecosystem: ecosystemLinks(),
     tab_paths: TAB_PATHS.map((t) => CANON_HOST + (t.href === "/" ? "/" : t.href)),
     paths_not_hash_only: true,
     aziel_handle_list: AZIEL_HANDLES.map((h) => ({ label: h.label, href: h.href })),
-    aziel_handles_note: "Same public doors as " + DOORS_URL + ". He Didn't Jump is a handle, not a Live Node.",
+    aziel_handles_note: "Same public doors as " + DOORS_URL + ". Official Aziel sites: " + FURNACE_SITE + " " + FURNACE_AZIEL + " " + UNSEAL_DOOR + ". He Didn't Jump is a handle, not a Live Node.",
     doors: DOORS_URL,
     cap7_is_icann: false,
     cap7_note: CAP7_PUBLIC,
@@ -2752,7 +2806,9 @@ export function llmsDoc(sot, runtimeCite) {
     + "Why Aziel Eliab: " + WHY_AZIEL_ELIAB + "\n"
     + "X " + X_HANDLE + ": " + X_URL + "\n"
     + CROSS_TETHER_NOTE + "\n"
-    + "Sister sites: ae " + SISTER_SITES.ae + " · corpus " + SISTER_SITES.corpus + " · HDJ " + SISTER_SITES.hdj + " · runtime " + SISTER_SITES.runtime + " · trades " + SISTER_SITES.trades + "\n"
+    + "Sister sites: ae " + SISTER_SITES.ae + " · corpus " + SISTER_SITES.corpus + " · HDJ " + SISTER_SITES.hdj + " · runtime " + SISTER_SITES.runtime + " · trades " + SISTER_SITES.trades + " · furnace " + SISTER_SITES.furnace + " · furnace-aziel " + SISTER_SITES.furnace_aziel + " · unseal " + SISTER_SITES.unseal + "\n"
+    + "Sister mesh: " + SISTER_MESH.join(" · ") + "\n"
+    + "Official Aziel sites: " + FURNACE_SITE + " · " + FURNACE_AZIEL + " · " + UNSEAL_DOOR + "\n"
     + "Sister stats: " + SISTER_STATS.azieleliab + " · " + SISTER_STATS.corpus + " · " + SISTER_STATS.hedidntjump + "\n"
     + "How GodLock is scored (TRIAD_V3): " + CANON_HOST + REASON_PATH + "\n"
     + "Aziel Eliab: " + CANON_HOST + AZIEL_ELIAB_PATH + "\n"

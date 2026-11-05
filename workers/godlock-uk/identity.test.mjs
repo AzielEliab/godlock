@@ -283,6 +283,9 @@ describe("AZindex identity machine", () => {
       LIBRARY_HOME,
       CANON_HOST + "/",
       HEDIDNTJUMP,
+      "https://www.furnaceisntfree.com/",
+      "https://furnaceisntfree.com/aziel/",
+      "https://www.timetounsealthebook.net",
       X_URL,
     ]);
     assert.deepEqual(IDENTITY_SAME_AS, person.sameAs);
@@ -770,11 +773,17 @@ describe("AZindex identity machine", () => {
       hdj: HEDIDNTJUMP,
       runtime: "https://aziel-runtime.vibelock.workers.dev/",
       trades: "https://trades-runtime.vibelock.workers.dev/",
+      furnace: "https://www.furnaceisntfree.com/",
+      furnace_aziel: "https://furnaceisntfree.com/aziel/",
+      unseal: "https://www.timetounsealthebook.net",
     });
     assert.match(SISTER_SITES_NOTE, /Sister sites: ae /);
     assert.match(SISTER_SITES_NOTE, /HDJ /);
     assert.match(SISTER_SITES_NOTE, /runtime /);
     assert.match(SISTER_SITES_NOTE, /trades /);
+    assert.match(SISTER_SITES_NOTE, /furnace https:\/\/www\.furnaceisntfree\.com\//);
+    assert.match(SISTER_SITES_NOTE, /furnace-aziel https:\/\/furnaceisntfree\.com\/aziel\//);
+    assert.match(SISTER_SITES_NOTE, /unseal https:\/\/www\.timetounsealthebook\.net/);
 
     const person = personJsonLd();
     assert.deepEqual(person.jobTitle, AZINDEX_PERSON_JOB_TITLE);

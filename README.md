@@ -26,6 +26,8 @@ Part of the **Aziel Eliab** ecosystem (official hub, sister library, sister arch
 - **Official site:** https://www.azieleliab.com/
 - **Aziel Corpus Library:** https://www.azielcorpuslibrary.net/ — Aziel Eliab https://www.azielcorpuslibrary.net/AzielEliab
 - **He Didn't Jump:** https://www.hedidntjump.com/ — An Aziel Eliab Project (sister archive door, not a Softwares card)
+- **Furnace Isn't Free:** https://www.furnaceisntfree.com/ — Aziel door https://furnaceisntfree.com/aziel/
+- **Time to Unseal the Book:** https://www.timetounsealthebook.net
 - **GodLock.uk (this engine):** https://godlock.uk
 - **Aziel Eliab on GodLock:** https://godlock.uk/AzielEliab
 - **X @AzielEliab:** https://x.com/AzielEliab

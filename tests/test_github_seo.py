@@ -361,6 +361,45 @@ def test_cite_json_graph():
     assert CITE["godlock_is_anonymity_tool"] is False
     assert CITE["sister_sites"] == SISTER_SITES
     assert "ae https://www.azieleliab.com/" in CITE["sister_sites_note"]
+    assoc = CITE["search_engine_association"]
+    assert assoc["aziel_ok"] is True
+    assert assoc["dual_clear_prs"] is True
+    assert assoc["person_id"] == "https://www.azieleliab.com/#aziel"
+    assert assoc["decryption_complete"] is False
+    assert assoc["indexnow_ping"] is False
+    assert assoc["dns"] is False
+    assert assoc["google_search_console"] is False
+    assert assoc["cap7_is_icann"] is False
+    assert assoc["paid_satellite"] == "HELD"
+    assert assoc["pattern_live"] is False
+    assert assoc["visible_html"] is False
+    assert assoc["radios_remain_off"] is True
+    assert assoc["sites"]["softwares"] == "https://www.azieleliab.com/software"
+    assert assoc["sites"]["ae"] == "https://www.azieleliab.com/"
+    assert assoc["sites"]["corpus"] == "https://www.azielcorpuslibrary.net/"
+    assert assoc["sites"]["furnace"] == "https://www.furnaceisntfree.com/"
+    assert assoc["sites"]["unseal"] == "https://www.timetounsealthebook.net"
+    assert assoc["sites"]["hdj"] == "https://www.hedidntjump.com/"
+    assert assoc["sites"]["godlock"] == "https://godlock.uk/"
+    assert "https://www.azieleliab.com/software" in CITE["sameAs_lattice"]
+    assert "https://www.azieleliab.com/runtime/" in CITE["sameAs_lattice"]
+    assert "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime" in CITE["sameAs_lattice"]
+    assert "https://godlock.uk/software" in CITE["sameAs_lattice"]
+    assert CITE["search_engine_association"]["sites"]["runtime"] == "https://www.azieleliab.com/runtime/"
+    assert CITE["search_engine_association"]["tip_match"]["claimed"] is False
+    assert CITE["search_engine_association"]["tip_match"]["named_cos_live"] == "a4ada6d7"
+    assert CITE["search_engine_association"]["tip_match"]["named_vid"] == "9594790d"
+    assert CITE["runtime_git_sha_short"] == "ce673365"
+    assert CITE["runtime_version_id"] == "eaf0b54c-1e5b-4d54-a582-25c5cdc09f92"
+    for text in (LLMS, AI):
+        assert "Search-engine association" in text
+        assert "decryption_complete false" in text
+        assert "No IndexNow ping" in text
+        assert "https://www.azieleliab.com/software" in text
+        assert "https://www.furnaceisntfree.com/" in text
+        assert "https://www.timetounsealthebook.net" in text
+        assert "Remain-OFF" not in text
+    assert "ae https://www.azieleliab.com/" in CITE["sister_sites_note"]
     assert "HDJ https://www.hedidntjump.com/" in CITE["sister_sites_note"]
     assert CITE["what_aziel_eliab_does"] == (
         "Aziel Eliab builds receipt-first, local-first software and public MASTER records — "

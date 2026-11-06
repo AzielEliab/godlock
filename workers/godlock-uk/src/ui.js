@@ -13,7 +13,7 @@ import {
   runtimeDistribution, ecosystemLinks,
   SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO,
   ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM,
-  VISIBLE_IDENTITY_LOCK, IDENTITY_ANSWER, personNode,
+  VISIBLE_IDENTITY_LOCK, IDENTITY_ANSWER, personNode, identityAssociationLinks,
   WHAT_AZIEL_ELIAB_DOES, WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
   RESEARCH_FAQ_TITLE, RESEARCH_ADDENDUM,
   HARDWARE_FAQ_TITLE, HARDWARE_ADDENDUM,
@@ -1000,6 +1000,7 @@ export function whoPageHtml() {
 <title>Who is Aziel Eliab</title>
 <meta name="description" content="${esc(VISIBLE_IDENTITY_LOCK)}">
 <link rel="canonical" href="https://www.azieleliab.com/who">
+${identityAssociationLinks().join("")}
 <link rel="alternate" type="application/ld+json" href="/person.jsonld" title="person.jsonld">
 <script type="application/ld+json">
 ${JSON.stringify(personNode())}

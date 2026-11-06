@@ -13,6 +13,7 @@ import {
   GLAMA_RUNTIME,
   HEDIDNTJUMP,
   HUB_RUNTIME_ID,
+  HUB_RUNTIME_URL,
   HUB_GODLOCK_TOOL_ID,
   IDENTITY_ANSWER,
   IDENTITY_MODEL_RULES,
@@ -80,6 +81,9 @@ import {
   GODLOCK_SITE_BLURB,
   SISTER_SITES,
   SISTER_SITES_NOTE,
+  SEARCH_ENGINE_SITES,
+  SEARCH_ENGINE_ASSOCIATION_NOTE,
+  searchEngineAssociation,
   COUNT_PATH,
   WHAT_AZIEL_ELIAB_DOES,
   WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
@@ -279,9 +283,12 @@ describe("AZindex identity machine", () => {
       AUTHOR_GITHUB,
       GITHUB_SECONDARY,
       GLAMA_RUNTIME,
+      HUB_RUNTIME_URL + "/",
       AZIEL_OFFICIAL,
+      "https://www.azieleliab.com/software",
       LIBRARY_HOME,
       CANON_HOST + "/",
+      CANON_HOST + "/software",
       HEDIDNTJUMP,
       "https://www.furnaceisntfree.com/",
       "https://furnaceisntfree.com/aziel/",
@@ -1173,5 +1180,100 @@ describe("AZindex identity machine", () => {
     const names = faq.mainEntity.map((q) => q.name);
     assert.ok(names.includes("Why Aziel Eliab?"));
     assert.ok(names.includes("Why does Aziel Eliab keep looking?"));
+  });
+
+  it("associates Aziel Eliab and aliases with godlock and sister sites on machine surfaces only", async () => {
+    const assoc = searchEngineAssociation();
+    assert.equal(assoc.ok, true);
+    assert.equal(assoc.aziel_ok, true);
+    assert.equal(assoc.dual_clear_prs, true);
+    assert.equal(assoc.person_id, "https://www.azieleliab.com/#aziel");
+    assert.equal(assoc.name, AUTHOR);
+    assert.deepEqual(assoc.aliases, identityAlternateNames());
+    assert.ok(assoc.aliases.includes("Aziel Elroi Eliab"));
+    assert.ok(assoc.aliases.includes("Elias Artista"));
+    assert.ok(assoc.aliases.includes("The Revealer of The Sealed"));
+    assert.ok(assoc.aliases.includes("עזיאל אל ראי אליאב"));
+    assert.deepEqual(assoc.sites, SEARCH_ENGINE_SITES);
+    assert.deepEqual(assoc.sisters, ["softwares", "ae", "corpus", "furnace", "unseal", "hdj"]);
+    assert.equal(assoc.sites.softwares, "https://www.azieleliab.com/software");
+    assert.equal(assoc.sites.softwares_godlock, "https://godlock.uk/software");
+    assert.equal(assoc.sites.ae, "https://www.azieleliab.com/");
+    assert.equal(assoc.sites.runtime, "https://www.azieleliab.com/runtime/");
+    assert.equal(assoc.sites.corpus, "https://www.azielcorpuslibrary.net/");
+    assert.equal(assoc.sites.furnace, "https://www.furnaceisntfree.com/");
+    assert.equal(assoc.sites.furnace_aziel, "https://furnaceisntfree.com/aziel/");
+    assert.equal(assoc.sites.unseal, "https://www.timetounsealthebook.net");
+    assert.equal(assoc.sites.hdj, "https://www.hedidntjump.com/");
+    assert.equal(assoc.sites.godlock, "https://godlock.uk/");
+    assert.equal(assoc.note, SEARCH_ENGINE_ASSOCIATION_NOTE);
+    assert.equal(assoc.indexnow_ping, false);
+    assert.equal(assoc.dns, false);
+    assert.equal(assoc.google_search_console, false);
+    assert.equal(assoc.decryption_complete, false);
+    assert.equal(assoc.cap7_is_icann, false);
+    assert.equal(assoc.paid_satellite, "HELD");
+    assert.equal(assoc.pattern_live, false);
+    assert.equal(assoc.visible_html, false);
+    assert.equal(assoc.radios_remain_off, true);
+    assert.equal(assoc.tip_match.claimed, false);
+    assert.equal(assoc.tip_match.named_cos_live, "a4ada6d7");
+    assert.equal(assoc.tip_match.named_vid, "9594790d");
+    assert.equal(assoc.tip_match.floor_sot, "main ce673365 / 2.0.0-rc1");
+    assert.equal(assoc.person_id, "https://www.azieleliab.com/#aziel");
+    assert.ok(IDENTITY_SAME_AS.includes("https://www.azieleliab.com/runtime/"));
+    assert.ok(IDENTITY_SAME_AS.includes(GLAMA_RUNTIME));
+    assert.equal(citeDoc().search_engine_association.decryption_complete, false);
+    assert.equal(wellKnownAzielDoc().search_engine_association.indexnow_ping, false);
+    assert.equal(crossTetherDoc().search_engine_association.dns, false);
+    const robots = robotsTxt();
+    assert.match(robots, /Aziel OK for this association/);
+    assert.match(robots, /No IndexNow ping/);
+    assert.match(robots, /decryption_complete false/);
+    assert.match(robots, /Softwares https:\/\/www\.azieleliab\.com\/software/);
+    assert.doesNotMatch(robots, /Remain-OFF/);
+    const xml = await sitemapXml({});
+    assert.match(xml, /decryption_complete false/);
+    assert.ok(xml.includes("<loc>https://www.azieleliab.com/software</loc>"));
+    assert.ok(xml.includes("<loc>https://www.azieleliab.com/runtime/</loc>"));
+    assert.ok(xml.includes("<loc>https://www.azieleliab.com/</loc>"));
+    assert.ok(xml.includes("<loc>https://www.azielcorpuslibrary.net/</loc>"));
+    assert.ok(xml.includes("<loc>https://www.furnaceisntfree.com/</loc>"));
+    assert.ok(xml.includes("<loc>https://furnaceisntfree.com/aziel/</loc>"));
+    assert.ok(xml.includes("<loc>https://www.timetounsealthebook.net</loc>"));
+    assert.ok(xml.includes("<loc>https://www.hedidntjump.com/</loc>"));
+    assert.ok(xml.includes("<loc>https://godlock.uk/software</loc>"));
+    const llms = llmsDoc();
+    assert.match(llms, /## Search-engine association/);
+    assert.ok(llms.includes(SEARCH_ENGINE_ASSOCIATION_NOTE));
+    assert.match(llms, /decryption_complete: false/);
+    assert.doesNotMatch(llms, /Remain-OFF/);
+    assert.doesNotMatch(llms, /Steering toward/);
+    const graph = graphJsonLd();
+    const site = graph["@graph"].find((n) => n["@id"] === CANON_HOST + "/#website");
+    const mentioned = (site.mentions || []).map((n) => n.url);
+    for (const url of Object.values(SEARCH_ENGINE_SITES)) {
+      if (url === CANON_HOST + "/") continue;
+      assert.ok(mentioned.includes(url), url);
+      const node = site.mentions.find((n) => n.url === url);
+      assert.deepEqual(node.author, { "@id": "https://www.azieleliab.com/#aziel" });
+    }
+    const home = await fetchPath("/");
+    const homeHtml = await home.text();
+    const visible = homeHtml.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<head[\s\S]*?<\/head>/gi, "");
+    assert.doesNotMatch(visible, /<p class="identity-lock"/);
+    assert.doesNotMatch(visible, /Search-engine association/);
+    assert.match(homeHtml, /rel="author" href="https:\/\/www\.azieleliab\.com\/#aziel"/);
+    assert.match(homeHtml, /rel="me" href="https:\/\/www\.azieleliab\.com\/runtime\/"/);
+    assert.match(homeHtml, /rel="me" href="https:\/\/www\.azieleliab\.com\/software"/);
+    assert.match(homeHtml, /rel="me" href="https:\/\/www\.furnaceisntfree\.com\/"/);
+    assert.match(homeHtml, /rel="me" href="https:\/\/www\.timetounsealthebook\.net"/);
+    assert.match(homeHtml, /rel="me" href="https:\/\/www\.hedidntjump\.com\/"/);
+    const who = await fetchPath("/who");
+    const whoHtml = await who.text();
+    const whoVisible = whoHtml.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<head[\s\S]*?<\/head>/gi, "");
+    assert.doesNotMatch(whoVisible, /<p class="identity-lock"/);
+    assert.doesNotMatch(whoVisible, /Search-engine association/);
+    assert.match(whoHtml, /rel="me" href="https:\/\/www\.azielcorpuslibrary\.net\/"/);
   });
 });

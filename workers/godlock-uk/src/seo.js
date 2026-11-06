@@ -26,7 +26,7 @@ export {
 import { ingestCiteFields, ingestLlmsSection } from "./ingestReceipt.js";
 import { shelvesCiteFields, shelvesLlmsSection } from "./shelves.js";
 import { redlineCiteFields, redlineLlmsSection } from "./redline.js";
-import { launchCiteFields, launchLlmsSection, launchReadyNoteFrom, LAUNCH_READY_NOTE, RUNTIME_SOT } from "./launchReady.js";
+import { launchCiteFields, launchLlmsSection, launchReadyNoteFrom, LAUNCH_READY_NOTE, RUNTIME_SOT, RUNTIME_VERSION_ID } from "./launchReady.js";
 import { survivalCiteFields, survivalLlmsSection } from "./survival.js";
 import { DEBATE_ACCEPTANCE } from "./debateAccept.js";
 
@@ -936,9 +936,12 @@ export const IDENTITY_SAME_AS = [
   AUTHOR_GITHUB,
   GITHUB_SECONDARY,
   GLAMA_RUNTIME,
+  HUB_RUNTIME_URL + "/",
   AZIEL_OFFICIAL,
+  OFFICIAL_SOFTWARES,
   LIBRARY_HOME,
   CANON_HOST + "/",
+  CANON_HOST + SOFTWARE_PATH,
   HEDIDNTJUMP,
   FURNACE_SITE,
   FURNACE_AZIEL,
@@ -1093,6 +1096,66 @@ export function identityAlternateNames() {
   return uniquePreserve(LATIN_AKA.concat(HEBREW_AKA, IDENTITY_MISSPELLINGS));
 }
 
+/** Machine association. Aziel OK for search engines. Does not ping IndexNow, edit DNS, or open Search Console. */
+export function searchEngineAssociation() {
+  return {
+    ok: true,
+    aziel_ok: true,
+    scope: "search-engine association of Aziel Eliab with all official sites",
+    dual_clear_prs: true,
+    person_id: AZIEL_PERSON_ID,
+    name: AUTHOR,
+    aliases: identityAlternateNames(),
+    sites: { ...SEARCH_ENGINE_SITES },
+    sisters: ["softwares", "ae", "corpus", "furnace", "unseal", "hdj"],
+    note: SEARCH_ENGINE_ASSOCIATION_NOTE,
+    indexnow_ping: false,
+    dns: false,
+    google_search_console: false,
+    decryption_complete: false,
+    cap7_is_icann: false,
+    paid_satellite: "HELD",
+    pattern_live: false,
+    visible_html: false,
+    radios_remain_off: true,
+    tip_match: {
+      named_cos_live: "a4ada6d7",
+      named_vid: "9594790d",
+      claimed: false,
+      floor_sot: RUNTIME_SOT,
+      floor_version_id: RUNTIME_VERSION_ID,
+      note: "Named Cos LIVE a4ada6d7 / vid 9594790d is not a published full git_sha or version_id. Not invented. Baked floor stays. Live /cite.json overlays GET /v1/software at serve time.",
+    },
+  };
+}
+
+export function searchEngineAssociationLlms() {
+  const sites = SEARCH_ENGINE_SITES;
+  return "## Search-engine association\n\n"
+    + SEARCH_ENGINE_ASSOCIATION_NOTE + "\n"
+    + "Person @id: " + AZIEL_PERSON_ID + "\n"
+    + "Name: " + AUTHOR + "\n"
+    + "Aliases: " + identityAlternateNames().join(" | ") + "\n"
+    + "Softwares: " + sites.softwares + "\n"
+    + "GodLock Softwares: " + sites.softwares_godlock + "\n"
+    + "ae: " + sites.ae + "\n"
+    + "Hub Runtime: " + sites.runtime + "\n"
+    + "corpus: " + sites.corpus + "\n"
+    + "furnace: " + sites.furnace + "\n"
+    + "furnace-aziel: " + sites.furnace_aziel + "\n"
+    + "Unseal: " + sites.unseal + "\n"
+    + "HDJ: " + sites.hdj + "\n"
+    + "godlock: " + sites.godlock + "\n"
+    + "indexnow_ping: false\n"
+    + "dns: false\n"
+    + "google_search_console: false\n"
+    + "decryption_complete: false\n"
+    + "cap7_is_icann: false\n"
+    + "paid_satellite: HELD\n"
+    + "pattern_live: false\n"
+    + "Tip match: named Cos LIVE a4ada6d7 / vid 9594790d is not a published full git_sha or version_id. Not invented. Baked floor stays " + RUNTIME_SOT + " / " + RUNTIME_VERSION_ID + ".\n\n";
+}
+
 /** Same publisher NOT lock as IDENTITY_DISAMBIGUATION — no verse essay. */
 export const BIBLICAL_DISAMBIGUATION = IDENTITY_DISAMBIGUATION;
 
@@ -1117,6 +1180,27 @@ export const SISTER_SITES = {
 
 export const SISTER_SITES_NOTE =
   "Sister sites: ae https://www.azieleliab.com/ · corpus https://www.azielcorpuslibrary.net/ · HDJ https://www.hedidntjump.com/ · runtime https://aziel-runtime.vibelock.workers.dev/ · trades https://trades-runtime.vibelock.workers.dev/ · furnace https://www.furnaceisntfree.com/ · furnace-aziel https://furnaceisntfree.com/aziel/ · unseal https://www.timetounsealthebook.net";
+
+/**
+ * Official sites a search engine may tie to Aziel Eliab.
+ * Machine surfaces only. Does not add visible identity-lock chrome.
+ */
+export const SEARCH_ENGINE_SITES = {
+  softwares: OFFICIAL_SOFTWARES,
+  softwares_godlock: CANON_HOST + SOFTWARE_PATH,
+  ae: AZIEL_OFFICIAL,
+  runtime: HUB_RUNTIME_URL + "/",
+  corpus: LIBRARY_HOME,
+  furnace: FURNACE_SITE,
+  furnace_aziel: FURNACE_AZIEL,
+  unseal: UNSEAL_DOOR,
+  hdj: HEDIDNTJUMP,
+  godlock: CANON_HOST + "/",
+};
+
+export const SEARCH_ENGINE_ASSOCIATION_NOTE =
+  "Search engines may associate Aziel Eliab and the published aliases with https://godlock.uk/ and sister sites Softwares, ae, corpus, furnace, Unseal, and HDJ. Person @id https://www.azieleliab.com/#aziel. Aziel OK for this association. Dual CLEAR PRs OK. No IndexNow ping. No DNS change. No Google Search Console. decryption_complete false. "
+  + CAP7_PUBLIC + " " + PAID_SAT_PUBLIC;
 
 /** Machine-only lattice: sister sites + GitHub + Glama + X + GodLock-first Softwares + who/what/why. */
 export const CROSS_TETHER_NOTE =
@@ -1148,6 +1232,7 @@ export function crossTetherDoc() {
     machine_surfaces_only: ["what", "why"],
     identity: AUTHOR,
     note: CROSS_TETHER_NOTE,
+    search_engine_association: searchEngineAssociation(),
   };
 }
 
@@ -1168,6 +1253,7 @@ export const IDENTITY_MODEL_RULES = [
   "sameAs lists public surfaces of the same person. Never sameAs euaziel, Aziel S., or Flutter-React portfolio URLs.",
   "He Didn't Jump remains in the ecosystem as a sister archive. Identity is Aziel Eliab only.",
   "Sister sites are ae, corpus, HDJ, runtime, trades, furnace, and unseal. GodLock.uk is this product host. Official Aziel sites: https://www.furnaceisntfree.com/ · https://furnaceisntfree.com/aziel/ · https://www.timetounsealthebook.net.",
+  SEARCH_ENGINE_ASSOCIATION_NOTE,
   "Mission and status are public work only. Scores use the published corpus triad (TRIAD_V3).",
   "GodLock is a challenge/score product. Empty/null submit refuses — no spam receipt. An argument that is not relative to intelligent design is refused (GODLOCK-NOT-RELATIVE) and is not queued, scored, or archived. Identity is Aziel Eliab only.",
   WHAT_AZIEL_ELIAB_DOES,
@@ -1340,6 +1426,7 @@ export function whoIsAzielEliabTxt() {
     + GODLOCK_SITE_BLURB + " Growth-ON. NO-LIE.\n\n"
     + "## BAN-SURVIVAL\n\n"
     + "Hub pulls https://aziel-runtime.vibelock.workers.dev/v1/survival (short TTL). Local cite https://godlock.uk/survival. Mutual backup. Platforms all LIVE. Calling name Aziel Runtime. Cap-7 factory https://miragegrid.vibelock.workers.dev LIVE; resolves_to_hub false. SPORE-1.0 last-resort failsafe (layer 3): pause / preserve / wait / physical-wipe-only. Does not replace cold shelves. RE-COLD-STORE is an honest hook (no invented destinations). Worker a8f7fdc9 LIVE (aziel-runtime#152). Softwares blurbs untouched. GodLock is a challenge/score product. Identity is Aziel Eliab. Person @id " + AZIEL_PERSON_ID + ". Lamb Lens. NO-LIE. No visible 15:20.\n\n"
+    + searchEngineAssociationLlms()
     + "## Sister sites\n\n"
     + SISTER_SITES_NOTE + "\n"
     + "ae: " + SISTER_SITES.ae + "\n"
@@ -1411,6 +1498,7 @@ export function wellKnownAzielDoc() {
     sister_stats: { ...SISTER_STATS },
     sister_sites: { ...SISTER_SITES },
     sister_sites_note: SISTER_SITES_NOTE,
+    search_engine_association: searchEngineAssociation(),
     cross_tether: crossTetherDoc(),
     x: X_URL,
     x_handle: X_HANDLE,
@@ -1715,6 +1803,28 @@ export function runtimeWebApiNode(person) {
   };
 }
 
+function officialSiteMentions() {
+  const rows = [
+    ["Softwares", SEARCH_ENGINE_SITES.softwares],
+    ["GodLock Softwares", SEARCH_ENGINE_SITES.softwares_godlock],
+    ["azieleliab.com", SEARCH_ENGINE_SITES.ae],
+    ["Aziel Runtime", SEARCH_ENGINE_SITES.runtime],
+    ["Aziel Corpus Library", SEARCH_ENGINE_SITES.corpus],
+    [FURNACE_LABEL, SEARCH_ENGINE_SITES.furnace],
+    [FURNACE_AZIEL_LABEL, SEARCH_ENGINE_SITES.furnace_aziel],
+    [UNSEAL_LABEL, SEARCH_ENGINE_SITES.unseal],
+    [HEDIDNTJUMP_LABEL, SEARCH_ENGINE_SITES.hdj],
+  ];
+  return rows.map(([name, url]) => ({
+    "@type": "WebSite",
+    name,
+    url,
+    author: personRef(),
+    creator: personRef(),
+    publisher: personRef(),
+  }));
+}
+
 function websiteNode(description) {
   const who = personRef();
   return {
@@ -1727,6 +1837,8 @@ function websiteNode(description) {
     author: who,
     publisher: who,
     creator: who,
+    about: who,
+    mentions: officialSiteMentions(),
   };
 }
 
@@ -1962,6 +2074,24 @@ function jsonLd(title, path, description, kind, products) {
   return { "@context": "https://schema.org", "@graph": graph };
 }
 
+/** Invisible head links. Search engines associate these profiles with the shared Person. */
+export function identityAssociationLinks() {
+  return [
+    linkRel("author", AZIEL_PERSON_ID),
+    linkRel("me", AUTHOR_GITHUB),
+    linkRel("me", X_URL),
+    linkRel("me", AZIEL_OFFICIAL),
+    linkRel("me", HUB_RUNTIME_URL + "/"),
+    linkRel("me", OFFICIAL_SOFTWARES),
+    linkRel("me", LIBRARY_HOME),
+    linkRel("me", HEDIDNTJUMP),
+    linkRel("me", FURNACE_SITE),
+    linkRel("me", FURNACE_AZIEL),
+    linkRel("me", UNSEAL_DOOR),
+    linkRel("me", CANON_HOST + SOFTWARE_PATH),
+  ];
+}
+
 export function headMeta(opts) {
   const title = opts.title || SITE;
   const path = opts.path || "/";
@@ -1999,8 +2129,7 @@ export function headMeta(opts) {
     meta("twitter:description", description),
     meta("twitter:image", BRAND_MARK),
     meta("twitter:image:alt", BRAND_MARK_ALT),
-    linkRel("me", AUTHOR_GITHUB),
-    linkRel("me", X_URL),
+    ...identityAssociationLinks(),
     linkRel("icon", BRAND_MARK_PATH, " type=" + Q + "image/png" + Q),
     linkRel("apple-touch-icon", BRAND_MARK_PATH),
     linkRel("preload", BRAND_MARK_PATH, " as=" + Q + "image" + Q + " fetchpriority=" + Q + "high" + Q),
@@ -2260,6 +2389,8 @@ export function robotsTxt() {
     "# MCP discovery: /.well-known/mcp.json /mcp.json → POST /runtime/mcp.",
     "# IndexNow: " + INDEXNOW_WELL_KNOWN_PATH + " " + INDEXNOW_KEY_PATH + ".",
     "# GodLock product surface. Living publisher Aziel Eliab. Person @id https://www.azieleliab.com/#aziel.",
+    "# " + SEARCH_ENGINE_ASSOCIATION_NOTE,
+    "# Sisters: Softwares " + SEARCH_ENGINE_SITES.softwares + " · ae " + SEARCH_ENGINE_SITES.ae + " · corpus " + SEARCH_ENGINE_SITES.corpus + " · furnace " + SEARCH_ENGINE_SITES.furnace + " · Unseal " + SEARCH_ENGINE_SITES.unseal + " · HDJ " + SEARCH_ENGINE_SITES.hdj + " · godlock " + SEARCH_ENGINE_SITES.godlock,
     "# Paths are not hash-only. Tabs: / /reason /software /runtime /receipts /verify /donate /AzielEliab /aziel.",
     "# Homepage hashes (#software #runtime #receipts #donate #reason #verify #AzielEliab #aziel) map to those paths.",
     "# Growth-ON. Allow: /.",
@@ -2357,6 +2488,7 @@ export async function sitemapXml(env, extras = {}) {
   add(SISTER_STATS.hedidntjump, "0.4", "daily");
   add(CANON_HOST + REASON_PATH, "0.8", "weekly");
   add(OFFICIAL_SOFTWARES, "0.8", "weekly");
+  add(HUB_RUNTIME_URL + "/", "0.75", "weekly");
   add(CANON_HOST + "/v1/software", "0.7", "daily");
   add(CANON_HOST + "/openapi.json", "0.6", "weekly");
   add(CANON_HOST + "/robots.txt", "0.4", "weekly");
@@ -2427,7 +2559,9 @@ export async function sitemapXml(env, extras = {}) {
     ).all()).results || [];
     for (const r of recs) add(CANON_HOST + "/receipt/" + encodeURIComponent(r.id), "0.3", "monthly");
   } catch { /* empty db is fine */ }
-  return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+  return '<?xml version="1.0" encoding="UTF-8"?>\n'
+    + "<!-- " + SEARCH_ENGINE_ASSOCIATION_NOTE + " -->\n"
+    + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + rows.join("\n")
     + "\n</urlset>\n";
 }
@@ -2465,6 +2599,7 @@ export function citeDoc(sot, runtimeCite) {
     challenge_score_product: true,
     sister_sites: { ...SISTER_SITES },
     sister_sites_note: SISTER_SITES_NOTE,
+    search_engine_association: searchEngineAssociation(),
     furnace: FURNACE_SITE,
     furnace_aziel: FURNACE_AZIEL,
     time_to_unseal_the_book: UNSEAL_DOOR,
@@ -2765,6 +2900,7 @@ export function llmsDoc(sot, runtimeCite) {
     + "Download: " + DOWNLOAD + "\n"
     + "License: Apache-2.0\n\n"
     + pathsAndHandlesLlmsSection()
+    + searchEngineAssociationLlms()
     + hideInternalDetermination(BANNER) + "\n\n"
     + "GodLock is a challenge/score product. Identity is Aziel Eliab.\n"
     + GODLOCK_SITE_BLURB + "\n"

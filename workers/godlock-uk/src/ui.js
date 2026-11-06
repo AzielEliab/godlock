@@ -37,8 +37,6 @@ import {
 import {
   STEER_FRAME_IDS,
   STEER_LABELS,
-  STEER_NOTE_PUBLIC,
-  STEER_BALANCE_NOTE,
   classifyChallenge,
   formatSteerPercent,
 } from "./steer.js";
@@ -415,17 +413,6 @@ ${siteFooter()}
     var toward=st&&st.steering_toward;
     var leadEl=document.getElementById("steer-leader");
     if(leadEl&&toward)leadEl.textContent="Steering toward: "+toward;
-    var inputsEl=document.getElementById("steer-inputs");
-    if(inputsEl&&st&&st.inputs!=null)inputsEl.textContent=String(st.inputs);
-    var cEl=document.getElementById("steer-current-score");
-    var rEl=document.getElementById("steer-residual");
-    if(j.triad_display!==undefined){
-      if(cEl)cEl.textContent=j.triad_display==null?"—":String(j.triad_display)+"%";
-      if(rEl)rEl.textContent=j.meter_remainder==null?(j.triad_display==null?"—":String(100-Number(j.triad_display))+"%"):String(j.meter_remainder)+"%";
-    }else{
-      if(cEl&&j.current_score!=null)cEl.textContent=String(j.current_score)+"%";
-      if(rEl&&j.residual!=null)rEl.textContent=String(j.residual)+"%";
-    }
     if(!scales)return;
     var ids=${JSON.stringify(STEER_FRAME_IDS)};
     var leaders={};
@@ -517,21 +504,6 @@ function siteMeters(stats) {
   const residual = s.headline_residual != null ? s.headline_residual : (s.residual != null ? s.residual : 50);
   const mesh = s.mesh_score != null ? s.mesh_score : null;
   return { last: pct(last), average: pct(average), residual: pct(residual), mesh: pct(mesh) };
-}
-
-function meterView(stats) {
-  const s = stats || {};
-  if (Object.prototype.hasOwnProperty.call(s, "triad_display")) {
-    if (s.triad_display == null || s.triad_display === "") {
-      return { ready: false, score: "—", residual: "—" };
-    }
-    const display = Number(s.triad_display);
-    const remainder = s.meter_remainder != null ? Number(s.meter_remainder) : (100 - display);
-    return { ready: true, score: display + "%", residual: remainder + "%" };
-  }
-  const score = s.current_score != null ? s.current_score : 50;
-  const residual = s.residual != null ? s.residual : 50;
-  return { ready: true, score: score + "%", residual: residual + "%" };
 }
 
 function rescoreLine(row) {
@@ -711,15 +683,12 @@ export function statsGrid(stats, { receiptsFallback } = {}) {
 </div>`;
 }
 
-export function steerPanel(steer, stats) {
-  const meter = meterView(stats);
-  const confidence = `<p class="muted">Triad display <span id="steer-current-score">${esc(meter.score)}</span> · Meter remainder <span id="steer-residual">${esc(meter.residual)}</span> · these two sum to 100 when a TRIAD_V3 display is present. The remainder is 100 − display. It is not a corpus factor. A number here is a TRIAD_V3 display. It is not the old stored score.</p>`;
-  const balance = `<p class="muted" id="steer-balance">${esc(STEER_BALANCE_NOTE)}</p>`;
+export function steerPanel(steer) {
   if (!steer || steer.available === false || !steer.scales) {
     const note = steer && steer.note
       ? steer.note
-      : "Steer is the share of scored public challenges. No share is shown on this view.";
-    return `<section class="steer" id="steer" aria-label="Steer"><h2>Steer</h2><p class="muted">${esc(note)}</p>${confidence}${balance}<p class="muted">${esc(STEER_NOTE_PUBLIC)}</p></section>`;
+      : "No share is shown on this view.";
+    return `<section class="steer" id="steer" aria-label="Steer"><h2>Steer</h2><p class="muted">${esc(note)}</p></section>`;
   }
   const leaders = new Set(steer.leaders || []);
   const ranked = STEER_FRAME_IDS
@@ -733,17 +702,10 @@ export function steerPanel(steer, stats) {
       <div class="steer-track" role="presentation"><div class="steer-bar" id="steer-bar-${esc(row.id)}" style="width:${esc(pct)}%"></div></div>
     </li>`;
   }).join("");
-  const countLine = steer.inputs
-    ? `<p class="muted"><span id="steer-inputs">${esc(steer.inputs)}</span> scored public challenges. Steer shares, including Came from nothing, sum to 100 at one decimal. An equal vote stays a tie when rounding prints 0.1 apart. Steer is the mix of those challenges. The triad display is a separate meter.</p>`
-    : `<p class="muted" id="steer-inputs">No scored public challenges yet. The scale stays undecided until a receipt is classified. Came from nothing stays 0 until a receipt names that claim.</p>`;
   return `<section class="steer" id="steer" aria-label="Steer">
   <h2>Steer</h2>
   <p class="steer-leader" id="steer-leader">Steering toward: ${esc(steer.steering_toward || "")}</p>
   <ol class="steer-list" id="steer-list">${rows}</ol>
-  ${countLine}
-  ${confidence}
-  ${balance}
-  <p class="muted">${esc(STEER_NOTE_PUBLIC)}</p>
 </section>`;
 }
 
@@ -783,7 +745,7 @@ export function homeBody({ stats, latest, prior, error, products, extras }) {
 ${siteMeterBox(s)}
 ${statsGrid(s)}
 <p class="muted" id="mesh-status">${esc(meshLine)}</p>
-${steerPanel(s.steer, s)}
+${steerPanel(s.steer)}
 ${latestHtml}
 <div class="card">
   <p>${esc(METHOD_PUBLIC)}</p>
@@ -840,7 +802,7 @@ export function receiptsBody({ rows, total, page, pageSize, stats }) {
   return `
 ${siteMeterBox(s)}
 ${statsGrid(s, { receiptsFallback: total })}
-${steerPanel(s.steer, s)}
+${steerPanel(s.steer)}
 <h1 class="soft-heading">Receipts</h1>
 <p>Public questions and the hash-chained receipt list. Questions stay in the store. This list shows the triad reading. It is the published TRIAD_V3 reading of each stored challenge text. The old stored score is labeled as the old number. If the stored challenge text is missing, that row is not scored. A rescored receipt says what changed and that the earlier receipt was rescored. Original receipt rows are kept.</p>
 <p class="muted"><a href="${esc(REASON_PATH)}">How it is scored</a> · <a href="/">Ask a question</a>.</p>
@@ -917,7 +879,7 @@ export function verifyBody({ report, paste }) {
 
 export function reasonBody({ stats } = {}) {
   const s = stats || {};
-  return `${steerPanel(s.steer, s)}<section class="about-aziel" id="how-scored"><div class="card about-prose">
+  return `${steerPanel(s.steer)}<section class="about-aziel" id="how-scored"><div class="card about-prose">
   <h2>How GodLock is scored</h2>
   <p><strong>Aziel Eliab</strong></p>
   <p>${esc(DEBATE_HEADLINE)}</p>
@@ -1123,5 +1085,5 @@ export function receiptBody({ id, row, entries, stats }) {
     return `<article class="card"><p class="muted">#${esc(e.sequence)} · ${esc(e.action)} · ${esc(when(e.timestamp_utc))}</p><p class="hash">entry ${esc(e.entry_hash)}</p><p class="hash muted">prev ${esc(e.previous_hash)}</p><pre class="verify">${esc(JSON.stringify(e.payload, null, 2))}</pre></article>`;
   }).join("");
   const s = stats || {};
-  return `${answerCard(row, false)}${steerPanel(s.steer, s)}${chain || ""}<p class="actions"><a class="button" href="/">Back</a></p>`;
+  return `${answerCard(row, false)}${steerPanel(s.steer)}${chain || ""}<p class="actions"><a class="button" href="/">Back</a></p>`;
 }

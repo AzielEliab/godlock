@@ -183,19 +183,22 @@ describe("godlock-uk SoT mesh outlet", () => {
     assert.ok(!urls.some((u) => u.includes("/download")));
 
     const cite = await (await worker.fetch(new Request("https://godlock.uk/cite.json"), env)).json();
-    assert.equal(cite.runtime_git_sha, NEXT_SHA);
-    assert.equal(cite.runtime_git_sha_short, "aaaaaaaa");
-    assert.equal(cite.runtime_version, NEXT_VERSION);
-    assert.equal(cite.runtime_sot, "main aaaaaaaa / " + NEXT_VERSION);
-    assert.equal(cite.runtime_sot_live, true);
+    assert.equal(cite.runtime_live, null);
+    assert.equal(cite.runtime_git_sha, null);
+    assert.equal(cite.runtime_sot_live, false);
+    assert.equal(cite.runtime_observation.status, "lag");
+    assert.equal(cite.runtime_expected.git_sha, NEXT_SHA);
+    assert.equal(cite.runtime_expected.live, false);
+    assert.equal(cite.runtime_expected.version, NEXT_VERSION);
     assert.equal(cite.runtime_version_id, undefined);
     assert.equal(cite.runtime_version_id_source, undefined);
     assert.equal(cite.identity, "Aziel Eliab");
-    assert.doesNotMatch(JSON.stringify(cite), new RegExp(UNEXPOSED_VERSION_ID));
+    assert.doesNotMatch(JSON.stringify(cite.runtime_live), new RegExp(UNEXPOSED_VERSION_ID));
 
     const software = await (await worker.fetch(new Request("https://godlock.uk/v1/software"), env)).json();
-    assert.equal(software.runtime_git_sha_short, "aaaaaaaa");
-    assert.equal(software.runtime_version, NEXT_VERSION);
+    assert.equal(software.runtime_git_sha_short, null);
+    assert.equal(software.runtime_sot_live, false);
+    assert.equal(software.runtime_version, "2.0.0-rc1");
     assert.equal(software.product_count, 1);
     assert.equal(software.suite_count, 1);
     assert.equal(software.cloned_suite, false);
@@ -205,14 +208,17 @@ describe("godlock-uk SoT mesh outlet", () => {
     const html = await (await worker.fetch(new Request("https://godlock.uk/software", {
       headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
     }), env)).text();
-    assert.match(html, /SoT LIVE main aaaaaaaa \/ 9\.9\.9-test/);
+    assert.match(html, /expected main aaaaaaa \/ 9\.9\.9-test \(not a live tip\)/);
+    assert.doesNotMatch(html, /SoT LIVE main aaaaaaa/);
     assert.match(html, /id="godlock"/);
     assert.ok(html.indexOf('id="godlock"') < html.indexOf('id="aziel-runtime"'));
     assert.doesNotMatch(html, /Ask Jeeves/);
     assert.doesNotMatch(html, new RegExp(UNEXPOSED_VERSION_ID));
 
     const llms = await (await worker.fetch(new Request("https://godlock.uk/llms.txt"), env)).text();
-    assert.match(llms, /SoT LIVE: main aaaaaaaa \/ 9\.9\.9-test/);
+    assert.match(llms, /Expected: main aaaaaaa \/ 9\.9\.9-test/);
+    assert.match(llms, /Live tip: none/);
+    assert.doesNotMatch(llms, /SoT LIVE:/);
     assert.doesNotMatch(llms, /Ask Jeeves/);
   });
 

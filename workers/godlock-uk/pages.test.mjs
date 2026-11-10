@@ -2625,6 +2625,8 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
             identity: "Aziel Eliab",
             version: "2.0.0-rc1",
             git_sha: sha,
+            git_sha_source: "deploy_var",
+            git_sha_tracks_deployed_tip: true,
             version_id: vid,
             count: 42,
             software: [{ slug: "not-a-godlock-card" }],

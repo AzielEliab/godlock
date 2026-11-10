@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import worker from "./src/index.js";
 import { observationFromDocument } from "./src/runtimeObserve.js";
-import { deployTipAllowsLive, parseSotDocument, RUNTIME_DEPLOY_LAG } from "./src/sotOutlet.js";
+import { deployTipAllowsLive, healthTipAllowsLive, parseSotDocument, RUNTIME_DEPLOY_LAG } from "./src/sotOutlet.js";
 import { RUNTIME_GIT_SHA, RUNTIME_SOT, RUNTIME_VERSION_ID } from "./src/launchReady.js";
 import {
   shelvesDoc,
@@ -49,6 +49,8 @@ function healthDoc(extra = {}) {
     identity: "Aziel Eliab",
     version: "2.0.0-rc1",
     git_sha: LIVE_SHA,
+    git_sha_source: "deploy_var",
+    git_sha_tracks_deployed_tip: true,
     version_id: LIVE_VID,
     ...extra,
   };
@@ -295,10 +297,51 @@ describe("runtime cite observation", () => {
     assert.equal(deployTipAllowsLive({ git_sha_source: "build_meta", git_sha_tracks_deployed_tip: true, deploy_lag: null }).ok, false);
     assert.equal(deployTipAllowsLive({ git_sha_source: "catalog_extra" }).ok, false);
     assert.equal(deployTipAllowsLive({}).ok, true);
-    assert.equal(deployTipAllowsLive({ git_sha_tracks_deployed_tip: true, deploy_lag: null }).ok, true);
-    assert.equal(deployTipAllowsLive({ git_sha_source: "deploy_var", git_sha_tracks_deployed_tip: true, deploy_lag: null }).ok, true);
-    assert.equal(deployTipAllowsLive({ git_sha_tracks_deployed_tip: true }).legacy, false);
+    assert.equal(deployTipAllowsLive({ git_sha_tracks_deployed_tip: true }).ok, true);
     assert.equal(deployTipAllowsLive({ deploy_lag: null }).ok, true);
+    assert.equal(deployTipAllowsLive({ git_sha_source: "deploy_var" }).ok, true);
+    assert.equal(parseSotDocument({
+      author: "Aziel Eliab",
+      version: "2.0.0-rc1",
+      git_sha: BUILD_SHA,
+    }).ok, true);
+
+    const base = { author: "Aziel Eliab", identity: "Aziel Eliab", version: "2.0.0-rc1", git_sha: BUILD_SHA };
+    const clock = { observed_at: "2026-11-10T03:00:00.000Z", attempted_at: "2026-11-10T03:00:00.000Z", source_date: SOURCE_DATE };
+    for (const partial of [
+      {},
+      { git_sha_tracks_deployed_tip: true },
+      { deploy_lag: null },
+      { git_sha_source: "deploy_var" },
+      { git_sha_source: "deploy_var", git_sha_tracks_deployed_tip: true, deploy_lag: null },
+      { git_sha_tracks_deployed_tip: "true" },
+      { git_sha_tracks_deployed_tip: 1 },
+      { git_sha_tracks_deployed_tip: false },
+      { git_sha_source: "build_meta" },
+      { git_sha_source: "build_meta", git_sha_tracks_deployed_tip: false },
+      { deploy_lag: "deploy lag" },
+      { deploy_lag: "" },
+      { deploy_lag: false },
+    ]) {
+      assert.equal(healthTipAllowsLive({ ...base, ...partial }).ok, false, JSON.stringify(partial));
+      const obs = observationFromDocument({ ...base, ...partial }, clock);
+      assert.equal(obs.status, "lag", JSON.stringify(partial));
+      assert.equal(obs.current, false);
+      assert.equal(obs.git_sha, BUILD_SHA);
+      assert.equal(obs.observed_at, "2026-11-10T03:00:00.000Z");
+    }
+    const genuine = {
+      ...base,
+      git_sha: CURRENT_SHA,
+      git_sha_source: "deploy_var",
+      git_sha_tracks_deployed_tip: true,
+    };
+    assert.equal(Object.prototype.hasOwnProperty.call(genuine, "deploy_lag"), false);
+    assert.equal(healthTipAllowsLive(genuine).ok, true);
+    const liveObs = observationFromDocument(genuine, clock);
+    assert.equal(liveObs.status, "current");
+    assert.equal(liveObs.git_sha, CURRENT_SHA);
+    assert.equal(liveObs.observed_at, "2026-11-10T03:00:00.000Z");
 
     let now = Date.parse("2026-11-10T03:00:00.000Z");
     let mode = "lag";
@@ -319,7 +362,6 @@ describe("runtime cite observation", () => {
           git_sha: CURRENT_SHA,
           git_sha_source: "deploy_var",
           git_sha_tracks_deployed_tip: true,
-          deploy_lag: null,
         }, 200, { date: SOURCE_DATE });
       }, []),
     });

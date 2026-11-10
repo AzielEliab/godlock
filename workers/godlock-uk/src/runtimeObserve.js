@@ -8,9 +8,11 @@
  *
  * Floor, observation, expected, and live tip stay distinct.
  * A stale, unavailable, timed-out, malformed, or deploy-lag read does not become the live tip.
- * Deploy evidence follows aziel-runtime softwareMeta: a live tip requires
- * git_sha_tracks_deployed_tip true, deploy_lag null, and git_sha_source deploy_var
- * when that field is present. Documents that omit all three stay eligible.
+ * Since runtime 15ef5e6, GET /v1/health copies git_sha_source and
+ * git_sha_tracks_deployed_tip and does not copy deploy_lag. A live tip is
+ * source deploy_var, tracks strictly true, and no deploy_lag key.
+ * Omitted or partial keys stay an observation. An outlet push that omits
+ * them can still seal an expectation, and that expectation is not the live tip.
  * The floor pin is not rewritten from this read.
  */
 import {
@@ -19,7 +21,7 @@ import {
   RUNTIME_GIT_SHA_SHORT,
   RUNTIME_SOT_BRANCH,
 } from "./launchReady.js";
-import { RUNTIME_DEPLOY_LAG, loadAppliedCite, parseSotDocument } from "./sotOutlet.js";
+import { RUNTIME_DEPLOY_LAG, healthTipAllowsLive, loadAppliedCite, parseSotDocument } from "./sotOutlet.js";
 
 export const RUNTIME_HEALTH_BINDING = "https://aziel-runtime/v1/health";
 export const RUNTIME_HEALTH_HTTPS = "https://aziel-runtime.vibelock.workers.dev/v1/health";
@@ -117,30 +119,43 @@ async function fetchHealth(fetcher, url, ms) {
   }
 }
 
+function lagObservation(seen, meta, code, note, status) {
+  const attempted = meta && meta.attempted_at;
+  const sha = seen && seen.git_sha ? seen.git_sha : null;
+  const short = sha ? sha.slice(0, RUNTIME_GIT_SHA_SHORT.length) : null;
+  const version = seen && seen.version ? seen.version : null;
+  return emptyObservation(status, {
+    attempted_at: attempted || null,
+    observed_at: (meta && meta.observed_at) || attempted || null,
+    source_date: (meta && meta.source_date) || null,
+    source: (meta && meta.source) || null,
+    http_status: meta && meta.http_status != null ? meta.http_status : null,
+    git_sha: sha,
+    git_sha_short: short,
+    version,
+    version_id: seen && seen.version_id ? seen.version_id : null,
+    cite: sha && version ? (RUNTIME_SOT_BRANCH + " " + short + " / " + version) : null,
+    current: false,
+    code,
+    note,
+  });
+}
+
 export function observationFromDocument(doc, meta) {
   const parsed = parseSotDocument(doc);
   const attempted = meta && meta.attempted_at;
   if (!parsed.ok) {
     const lag = parsed.code === RUNTIME_DEPLOY_LAG;
     const seen = lag && parsed.observed && parsed.observed.git_sha ? parsed.observed : null;
-    const short = seen ? seen.git_sha.slice(0, RUNTIME_GIT_SHA_SHORT.length) : null;
-    return emptyObservation(lag ? "lag" : "malformed", {
-      attempted_at: attempted || null,
-      observed_at: lag ? ((meta && meta.observed_at) || attempted || null) : null,
-      source_date: (meta && meta.source_date) || null,
-      source: (meta && meta.source) || null,
-      http_status: meta && meta.http_status != null ? meta.http_status : null,
-      git_sha: seen ? seen.git_sha : null,
-      git_sha_short: short,
-      version: seen ? seen.version : null,
-      version_id: seen && seen.version_id ? seen.version_id : null,
-      cite: seen ? (RUNTIME_SOT_BRANCH + " " + short + " / " + seen.version) : null,
-      current: false,
-      code: parsed.code || "SOT-BAD-DOC",
-      note: lag
-        ? "GET /v1/health named a git_sha that does not track the deployed tip. The observation time is this read. Not a live tip."
-        : (parsed.message || "GET /v1/health did not publish a cite. Live tip not stamped."),
-    });
+    return lagObservation(seen, meta, parsed.code || "SOT-BAD-DOC", lag
+      ? "GET /v1/health named a git_sha that does not track the deployed tip. The observation time is this read. Not a live tip."
+      : (parsed.message || "GET /v1/health did not publish a cite. Live tip not stamped."), lag ? "lag" : "malformed");
+  }
+  const health = healthTipAllowsLive(doc);
+  if (!health.ok) {
+    return lagObservation(parsed.cite, meta, health.code || RUNTIME_DEPLOY_LAG,
+      "GET /v1/health is a live tip only when git_sha_source is deploy_var and git_sha_tracks_deployed_tip is true, with deploy_lag absent. This read is not that shape.",
+      "lag");
   }
   const sha = parsed.cite.git_sha;
   const short = sha.slice(0, RUNTIME_GIT_SHA_SHORT.length);

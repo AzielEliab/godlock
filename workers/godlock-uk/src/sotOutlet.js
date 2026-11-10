@@ -51,14 +51,15 @@ export const SOT_BAD_JSON = "SOT-BAD-JSON";
 export const SOT_METHOD = "SOT-METHOD";
 export const SOT_UNREACHABLE = "SOT-UNREACHABLE";
 /**
- * Health/catalog deploy evidence is not a current tip.
- * aziel-runtime softwareMeta sets git_sha_tracks_deployed_tip true only when
- * git_sha_source is deploy_var, and sets deploy_lag null only in that case.
- * Any other present value is deploy lag (build_meta, catalog_extra, cf tag).
+ * Health deploy evidence is not a current tip.
+ * Since aziel-runtime 15ef5e6 (2026-10-11, HEALTH-BUILD-STAMP-1.0), GET /v1/health
+ * copies git_sha, git_sha_source, and git_sha_tracks_deployed_tip from softwareMeta.
+ * It does not copy deploy_lag. A live health tip is source deploy_var, tracks
+ * strictly true, and no deploy_lag key. build_meta and tracks false are not live.
  */
 export const RUNTIME_DEPLOY_LAG = "RUNTIME-DEPLOY-LAG";
 export const RUNTIME_DEPLOY_LAG_NOTE =
-  "GET /v1/health named a git_sha that does not track the deployed tip. git_sha_tracks_deployed_tip must be true, deploy_lag must be null, and git_sha_source, when present, must be deploy_var. Live tip not stamped.";
+  "GET /v1/health did not show a deployed tip. A live health tip requires git_sha_source deploy_var and git_sha_tracks_deployed_tip true, with deploy_lag absent. Live tip not stamped.";
 
 export const CONFIRM_CONSENT_NOTE =
   "confirm is consent to apply this SoT cite. It is not tenant auth and it does not upgrade isolation.";
@@ -228,18 +229,23 @@ function claimsUnexposed(doc) {
   return fields.some((v) => v != null && String(v).toLowerCase().includes(UNEXPOSED_VERSION_ID));
 }
 
+function hasOwn(doc, key) {
+  return !!doc && Object.prototype.hasOwnProperty.call(doc, key);
+}
+
 /**
- * Current-tip evidence from a health or software document.
- * Absent flags stay eligible: older documents and outlet pushes did not carry them.
- * A present flag that is not the deploy_var contract is not a live tip.
+ * Outlet documents may omit deploy fields. That only means the push is not
+ * explicit lag. It is not permission to publish a live tip.
+ * A present tracks value other than true, a present deploy_lag other than null,
+ * or a present git_sha_source other than deploy_var is explicit lag and is refused.
  */
 export function deployTipAllowsLive(doc) {
   if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
     return { ok: false, code: SOT_BAD_DOC };
   }
-  const hasTracks = Object.prototype.hasOwnProperty.call(doc, "git_sha_tracks_deployed_tip");
-  const hasLag = Object.prototype.hasOwnProperty.call(doc, "deploy_lag");
-  const hasSource = Object.prototype.hasOwnProperty.call(doc, "git_sha_source");
+  const hasTracks = hasOwn(doc, "git_sha_tracks_deployed_tip");
+  const hasLag = hasOwn(doc, "deploy_lag");
+  const hasSource = hasOwn(doc, "git_sha_source");
   if (!hasTracks && !hasLag && !hasSource) return { ok: true, legacy: true };
   if (hasTracks && doc.git_sha_tracks_deployed_tip !== true) {
     return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "git_sha_tracks_deployed_tip" };
@@ -251,6 +257,27 @@ export function deployTipAllowsLive(doc) {
     return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "git_sha_source" };
   }
   return { ok: true, legacy: false };
+}
+
+/**
+ * Live health shape only. GET /v1/health has carried git_sha_source and
+ * git_sha_tracks_deployed_tip since 15ef5e6 and does not copy deploy_lag.
+ * Missing or partial keys are not a current tip.
+ */
+export function healthTipAllowsLive(doc) {
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "document" };
+  }
+  if (hasOwn(doc, "deploy_lag")) {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "deploy_lag" };
+  }
+  if (!hasOwn(doc, "git_sha_source") || doc.git_sha_source !== "deploy_var") {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "git_sha_source" };
+  }
+  if (!hasOwn(doc, "git_sha_tracks_deployed_tip") || doc.git_sha_tracks_deployed_tip !== true) {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "git_sha_tracks_deployed_tip" };
+  }
+  return { ok: true, field: null };
 }
 
 export function parseSotDocument(doc) {

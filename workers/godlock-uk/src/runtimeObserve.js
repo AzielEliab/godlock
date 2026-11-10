@@ -7,7 +7,10 @@
  * No mesh, download, or per-card fanout.
  *
  * Floor, observation, expected, and live tip stay distinct.
- * A stale, unavailable, timed-out, or malformed read does not become the live tip.
+ * A stale, unavailable, timed-out, malformed, or deploy-lag read does not become the live tip.
+ * Deploy evidence follows aziel-runtime softwareMeta: a live tip requires
+ * git_sha_tracks_deployed_tip true, deploy_lag null, and git_sha_source deploy_var
+ * when that field is present. Documents that omit all three stay eligible.
  * The floor pin is not rewritten from this read.
  */
 import {
@@ -16,7 +19,7 @@ import {
   RUNTIME_GIT_SHA_SHORT,
   RUNTIME_SOT_BRANCH,
 } from "./launchReady.js";
-import { loadAppliedCite, parseSotDocument } from "./sotOutlet.js";
+import { RUNTIME_DEPLOY_LAG, loadAppliedCite, parseSotDocument } from "./sotOutlet.js";
 
 export const RUNTIME_HEALTH_BINDING = "https://aziel-runtime/v1/health";
 export const RUNTIME_HEALTH_HTTPS = "https://aziel-runtime.vibelock.workers.dev/v1/health";
@@ -118,13 +121,25 @@ export function observationFromDocument(doc, meta) {
   const parsed = parseSotDocument(doc);
   const attempted = meta && meta.attempted_at;
   if (!parsed.ok) {
-    return emptyObservation("malformed", {
+    const lag = parsed.code === RUNTIME_DEPLOY_LAG;
+    const seen = lag && parsed.observed && parsed.observed.git_sha ? parsed.observed : null;
+    const short = seen ? seen.git_sha.slice(0, RUNTIME_GIT_SHA_SHORT.length) : null;
+    return emptyObservation(lag ? "lag" : "malformed", {
       attempted_at: attempted || null,
+      observed_at: lag ? ((meta && meta.observed_at) || attempted || null) : null,
       source_date: (meta && meta.source_date) || null,
       source: (meta && meta.source) || null,
       http_status: meta && meta.http_status != null ? meta.http_status : null,
+      git_sha: seen ? seen.git_sha : null,
+      git_sha_short: short,
+      version: seen ? seen.version : null,
+      version_id: seen && seen.version_id ? seen.version_id : null,
+      cite: seen ? (RUNTIME_SOT_BRANCH + " " + short + " / " + seen.version) : null,
+      current: false,
       code: parsed.code || "SOT-BAD-DOC",
-      note: parsed.message || "GET /v1/health did not publish a cite. Live tip not stamped.",
+      note: lag
+        ? "GET /v1/health named a git_sha that does not track the deployed tip. The observation time is this read. Not a live tip."
+        : (parsed.message || "GET /v1/health did not publish a cite. Live tip not stamped."),
     });
   }
   const sha = parsed.cite.git_sha;

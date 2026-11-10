@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import worker from "./src/index.js";
 import { observationFromDocument } from "./src/runtimeObserve.js";
+import { deployTipAllowsLive, parseSotDocument, RUNTIME_DEPLOY_LAG } from "./src/sotOutlet.js";
 import { RUNTIME_GIT_SHA, RUNTIME_SOT, RUNTIME_VERSION_ID } from "./src/launchReady.js";
 import {
   shelvesDoc,
@@ -16,6 +17,8 @@ import {
 } from "./src/shelves.js";
 import { memoryStore } from "./src/sotOutlet.js";
 
+const BUILD_SHA = "e2159d5b06916717f711e43a40b5c3b8de732365";
+const CURRENT_SHA = "abcdef0123456789abcdef0123456789abcdef01";
 const LIVE_SHA = "5e6fc284868b4e87ae5782c85c6025dd912db5cc";
 const LIVE_SHORT = "5e6fc284";
 const LIVE_VID = "210395ed-89f2-4f0b-be4e-6f5a164652e4";
@@ -257,6 +260,132 @@ describe("runtime cite observation", () => {
     assert.equal(body.runtime_live, null);
     assert.equal(body.runtime_git_sha, null);
     assert.notEqual(body.runtime_expected.git_sha, body.runtime_floor.git_sha);
+  });
+
+  it("does not promote build_meta deploy lag, and still accepts a deploy_var tip", async () => {
+    const lagDoc = {
+      ok: true,
+      author: "Aziel Eliab",
+      identity: "Aziel Eliab",
+      version: "2.0.0-rc1",
+      git_sha: BUILD_SHA,
+      git_sha_source: "build_meta",
+      git_sha_tracks_deployed_tip: false,
+      deploy_lag: "deploy lag",
+    };
+    assert.equal(deployTipAllowsLive(lagDoc).ok, false);
+    assert.equal(parseSotDocument(lagDoc).code, RUNTIME_DEPLOY_LAG);
+    const seen = observationFromDocument(lagDoc, {
+      observed_at: "2026-11-10T03:00:00.000Z",
+      attempted_at: "2026-11-10T03:00:00.000Z",
+      source_date: SOURCE_DATE,
+    });
+    assert.equal(seen.status, "lag");
+    assert.equal(seen.current, false);
+    assert.equal(seen.git_sha, BUILD_SHA);
+    assert.equal(seen.observed_at, "2026-11-10T03:00:00.000Z");
+    assert.equal(seen.source_date, SOURCE_DATE);
+
+    assert.equal(deployTipAllowsLive({ git_sha_tracks_deployed_tip: false }).ok, false);
+    assert.equal(deployTipAllowsLive({ git_sha_tracks_deployed_tip: "true" }).ok, false);
+    assert.equal(deployTipAllowsLive({ git_sha_tracks_deployed_tip: 1 }).ok, false);
+    assert.equal(deployTipAllowsLive({ deploy_lag: "deploy lag" }).ok, false);
+    assert.equal(deployTipAllowsLive({ deploy_lag: "" }).ok, false);
+    assert.equal(deployTipAllowsLive({ deploy_lag: false }).ok, false);
+    assert.equal(deployTipAllowsLive({ git_sha_source: "build_meta", git_sha_tracks_deployed_tip: true, deploy_lag: null }).ok, false);
+    assert.equal(deployTipAllowsLive({ git_sha_source: "catalog_extra" }).ok, false);
+    assert.equal(deployTipAllowsLive({}).ok, true);
+    assert.equal(deployTipAllowsLive({ git_sha_tracks_deployed_tip: true, deploy_lag: null }).ok, true);
+    assert.equal(deployTipAllowsLive({ git_sha_source: "deploy_var", git_sha_tracks_deployed_tip: true, deploy_lag: null }).ok, true);
+    assert.equal(deployTipAllowsLive({ git_sha_tracks_deployed_tip: true }).legacy, false);
+    assert.equal(deployTipAllowsLive({ deploy_lag: null }).ok, true);
+
+    let now = Date.parse("2026-11-10T03:00:00.000Z");
+    let mode = "lag";
+    const urls = [];
+    const env = mockEnv({
+      RUNTIME_NOW_MS: () => now,
+      RUNTIME_OBSERVE_NEGATIVE_TTL_MS: 1000,
+      SOT_STORE: memoryStore(),
+      AZIEL_RUNTIME: binding(() => {
+        urls.push("health");
+        if (mode === "lag") {
+          return jsonResponse(lagDoc, 200, { date: SOURCE_DATE });
+        }
+        return jsonResponse({
+          author: "Aziel Eliab",
+          identity: "Aziel Eliab",
+          version: "2.0.0-rc1",
+          git_sha: CURRENT_SHA,
+          git_sha_source: "deploy_var",
+          git_sha_tracks_deployed_tip: true,
+          deploy_lag: null,
+        }, 200, { date: SOURCE_DATE });
+      }, []),
+    });
+    const sealed = await (await worker.fetch(new Request("https://godlock.uk/v1/sot/push", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        confirm: true,
+        outlet_id: "godlock-uk",
+        author: "Aziel Eliab",
+        git_sha: "cccccccccccccccccccccccccccccccccccccccc",
+        version: "2.0.0-rc1",
+      }),
+    }), env)).json();
+    assert.equal(sealed.applied, true);
+
+    const refused = await (await worker.fetch(new Request("https://godlock.uk/v1/sot/push", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        confirm: true,
+        outlet_id: "godlock-uk",
+        author: "Aziel Eliab",
+        ...lagDoc,
+      }),
+    }), env)).json();
+    assert.equal(refused.ok, false);
+    assert.equal(refused.code, RUNTIME_DEPLOY_LAG);
+    assert.equal(refused.applied, false);
+
+    const body = await cite(env);
+    assert.equal(body.runtime_observation.status, "lag");
+    assert.equal(body.runtime_observation.git_sha, BUILD_SHA);
+    assert.equal(body.runtime_observation.observed_at, "2026-11-10T03:00:00.000Z");
+    assert.equal(body.runtime_observation.source_date, SOURCE_DATE);
+    assert.equal(body.runtime_live, null);
+    assert.equal(body.runtime_git_sha, null);
+    assert.equal(body.runtime_sot_live, false);
+    assert.equal(body.runtime_version_id, undefined);
+    assert.equal(body.runtime_floor.git_sha, RUNTIME_GIT_SHA);
+    assert.equal(body.runtime_floor.read_at, "2026-10-30");
+    assert.equal(body.runtime_floor.live, false);
+    assert.equal(body.runtime_expected.git_sha, "cccccccccccccccccccccccccccccccccccccccc");
+    assert.equal(body.runtime_expected.live, false);
+    assert.notEqual(body.runtime_expected.git_sha, BUILD_SHA);
+
+    now += 500;
+    const cached = await cite(env);
+    assert.equal(cached.runtime_observation.status, "lag");
+    assert.equal(cached.runtime_observation.observed_at, "2026-11-10T03:00:00.000Z");
+    assert.equal(cached.runtime_live, null);
+    assert.equal(urls.length, 1);
+
+    mode = "current";
+    now += 2000;
+    const current = await cite(env);
+    assert.equal(current.runtime_observation.status, "current");
+    assert.equal(current.runtime_live.live, true);
+    assert.equal(current.runtime_live.git_sha, CURRENT_SHA);
+    assert.equal(current.runtime_live.version_id, null);
+    assert.equal(current.runtime_live.observed_at, new Date(now).toISOString());
+    assert.equal(current.runtime_live.source_date, SOURCE_DATE);
+    assert.equal(current.runtime_live.matches_floor, false);
+    assert.equal(current.runtime_floor.git_sha, RUNTIME_GIT_SHA);
+    assert.equal(current.runtime_expected.git_sha, "cccccccccccccccccccccccccccccccccccccccc");
+    assert.equal(urls.length, 2);
   });
 
   it("classifies a non-object health document as malformed", () => {

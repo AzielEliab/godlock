@@ -50,6 +50,15 @@ export const SOT_BAD_DOC = "SOT-BAD-DOC";
 export const SOT_BAD_JSON = "SOT-BAD-JSON";
 export const SOT_METHOD = "SOT-METHOD";
 export const SOT_UNREACHABLE = "SOT-UNREACHABLE";
+/**
+ * Health/catalog deploy evidence is not a current tip.
+ * aziel-runtime softwareMeta sets git_sha_tracks_deployed_tip true only when
+ * git_sha_source is deploy_var, and sets deploy_lag null only in that case.
+ * Any other present value is deploy lag (build_meta, catalog_extra, cf tag).
+ */
+export const RUNTIME_DEPLOY_LAG = "RUNTIME-DEPLOY-LAG";
+export const RUNTIME_DEPLOY_LAG_NOTE =
+  "GET /v1/health named a git_sha that does not track the deployed tip. git_sha_tracks_deployed_tip must be true, deploy_lag must be null, and git_sha_source, when present, must be deploy_var. Live tip not stamped.";
 
 export const CONFIRM_CONSENT_NOTE =
   "confirm is consent to apply this SoT cite. It is not tenant auth and it does not upgrade isolation.";
@@ -219,6 +228,31 @@ function claimsUnexposed(doc) {
   return fields.some((v) => v != null && String(v).toLowerCase().includes(UNEXPOSED_VERSION_ID));
 }
 
+/**
+ * Current-tip evidence from a health or software document.
+ * Absent flags stay eligible: older documents and outlet pushes did not carry them.
+ * A present flag that is not the deploy_var contract is not a live tip.
+ */
+export function deployTipAllowsLive(doc) {
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
+    return { ok: false, code: SOT_BAD_DOC };
+  }
+  const hasTracks = Object.prototype.hasOwnProperty.call(doc, "git_sha_tracks_deployed_tip");
+  const hasLag = Object.prototype.hasOwnProperty.call(doc, "deploy_lag");
+  const hasSource = Object.prototype.hasOwnProperty.call(doc, "git_sha_source");
+  if (!hasTracks && !hasLag && !hasSource) return { ok: true, legacy: true };
+  if (hasTracks && doc.git_sha_tracks_deployed_tip !== true) {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "git_sha_tracks_deployed_tip" };
+  }
+  if (hasLag && doc.deploy_lag !== null) {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "deploy_lag" };
+  }
+  if (hasSource && doc.git_sha_source !== "deploy_var") {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "git_sha_source" };
+  }
+  return { ok: true, legacy: false };
+}
+
 export function parseSotDocument(doc) {
   if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
     return { ok: false, code: SOT_BAD_DOC, message: "SoT document must be an object." };
@@ -243,6 +277,15 @@ export function parseSotDocument(doc) {
   }
   const rawVid = doc.version_id != null ? doc.version_id : doc.runtime_version_id;
   const version_id = rawVid == null || String(rawVid).trim() === "" ? null : String(rawVid).trim();
+  const deploy = deployTipAllowsLive(doc);
+  if (!deploy.ok) {
+    return {
+      ok: false,
+      code: RUNTIME_DEPLOY_LAG,
+      message: RUNTIME_DEPLOY_LAG_NOTE,
+      observed: { git_sha, version, version_id },
+    };
+  }
   const git_sha_short = git_sha.slice(0, 7);
   const cite = version_id
     ? "main " + git_sha_short + " / version_id " + version_id + " / " + version

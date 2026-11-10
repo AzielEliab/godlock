@@ -43,6 +43,31 @@ export const ARCHIVE_ORG_ZIP_202609 = "https://archive.org/download/aziel-lockse
 export const ARCHIVE_ORG_ZIP_ALT_202609 = "https://archive.org/download/aziel-lockset-tip_202609/aziel-lockset-tip%202.zip";
 export const FRAMAGIT_TIP_PACK_URL = null;
 export const FRAMAGIT_REFUSE = "CNS-NO-FORGE-MIRROR";
+/** lockset.json bytes retrieved 2026-11-10 from Codeberg and archive.org. Not a live-shelf claim. */
+export const LOCKSET_JSON_SHA256 = "1f9187193273d18c85de445bb587ec6a60fae9fe6ab4ec7ccb58cf0978bc017f";
+export const TIP_PACK_BYTES = 30720;
+export const FRAMAGIT_DEPOSIT = Object.freeze({
+  required: true,
+  live: false,
+  url: null,
+  status: "slot",
+  refuse: FRAMAGIT_REFUSE,
+  blocks_plane_b: "CNS-PLANE-B-ALL-TARGETS",
+  source_repo: CODEBERG_TIP_PACK_URL,
+  source_archive: ARCHIVE_ORG_TIP_PACK_URL,
+  files: Object.freeze(["aziel-tip-pack.tar", "SHA256SUMS", "lockset.json", "verify-airgap.sh"]),
+  pack_file: "aziel-tip-pack.tar",
+  pack_sha256: CODEBERG_TIP_PACK,
+  pack_bytes_observed: TIP_PACK_BYTES,
+  pack_bytes_observed_at: "2026-11-10",
+  lockset_file: "lockset.json",
+  lockset_sha256: LOCKSET_JSON_SHA256,
+  lockset_tip: LOCKSET_TIP,
+  sha256sums_lists_pack: false,
+  zenodo: false,
+  gitflic_is_target: false,
+  verify: "Copy aziel-tip-pack.tar, SHA256SUMS, lockset.json, and verify-airgap.sh from the Codeberg tip-pack (archive.org item aziel-lockset-tip returned the same tar bytes on 2026-11-10). sha256sum aziel-tip-pack.tar must equal the pack_sha256 (30720 bytes on that read). sha256sum lockset.json must equal lockset_sha256. SHA256SUMS does not list the tar; run sha256sum -c SHA256SUMS for the inner files and hash the tar on its own. Upload those four files to a Framagit project you control. Record a URL here only after an independent GET returns those same bytes. This slot stays SLOT. Zenodo is not a deposit path. GitFlic is not a target.",
+});
 export const PLANE_B_WORKING_TARGETS = Object.freeze(["codeberg", "archive.org", "framagit"]);
 export const PLANE_B_ALL_TARGETS = "CNS-PLANE-B-ALL-TARGETS";
 export const ZENODO_REFUSE = "CNS-ZENODO-NOT-LIVE";
@@ -452,7 +477,8 @@ export function shelvesDoc() {
           lockset_shelf: true,
           refuse: FRAMAGIT_REFUSE,
           live_ready: false,
-          reason: "Framagit is the third Plane B LIVE-promotion target (CNS-PLANE-B-ALL-TARGETS = Codeberg + archive.org + Framagit). No verified URL in-repo. SLOT CNS-NO-FORGE-MIRROR. Do not invent a URL. No LIVE flip.",
+          deposit: FRAMAGIT_DEPOSIT,
+          reason: "Framagit is the third Plane B LIVE-promotion target (CNS-PLANE-B-ALL-TARGETS = Codeberg + archive.org + Framagit). No verified URL in-repo. SLOT CNS-NO-FORGE-MIRROR. Deposit the Codeberg tip-pack bytes and match pack_sha256 before any URL is recorded. Do not invent a URL. No LIVE flip.",
         },
         {
           id: "plane-b-gitflic-ru-tip-pack",
@@ -649,7 +675,7 @@ export function shelvesLlmsSection() {
     + "Lamb Lens: Corpus is the public Lamb Lens shelf. GodLock does not fan Corpus.\n"
     + "Growth-ON.\n"
     + "Plane A: 5 published surfaces / 2 family radii (cloudflare + github). One CF/GitHub tunnel, not five shelves.\n"
-    + "Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg tip-pack " + CODEBERG_TIP_PACK + " SLOT (hash-verify PASS). archive.org " + ARCHIVE_ORG_TIP_PACK_URL + " PASS and " + ARCHIVE_ORG_TIP_PACK_202609_URL + " PASS (same blast_radius archive-org; one working_targets kind; independent_live_count stays 1). Framagit url null. SLOT " + FRAMAGIT_REFUSE + ". No LIVE flip. LIVE only when all three pass (" + PLANE_B_ALL_TARGETS + ").\n"
+    + "Plane B ALL-TARGETS: codeberg + archive.org + framagit. Codeberg tip-pack " + CODEBERG_TIP_PACK + " SLOT (hash-verify PASS). archive.org " + ARCHIVE_ORG_TIP_PACK_URL + " PASS and " + ARCHIVE_ORG_TIP_PACK_202609_URL + " PASS (same blast_radius archive-org; one working_targets kind; independent_live_count stays 1). Framagit url null. SLOT " + FRAMAGIT_REFUSE + ". Deposit requires aziel-tip-pack.tar sha256 " + CODEBERG_TIP_PACK + " and lockset.json sha256 " + LOCKSET_JSON_SHA256 + " before a URL is recorded. No LIVE flip. LIVE only when all three pass (" + PLANE_B_ALL_TARGETS + ").\n"
     + "doi null. Do not invent a DOI.\n"
     + "Plane C: USB airgap SLOT until " + PLANE_C_ATTEST + ". No LIVE flip.\n"
     + "Cap-7: design_of hubs; resolves_to_hub: false; name_may_change: true; public_icann: false. GodLock design_of " + CANON_HOST + "/.\n"

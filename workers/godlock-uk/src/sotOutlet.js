@@ -294,12 +294,15 @@ function publicCurrent(state) {
   const floor = floorRuntimeCite();
   const cite = state && state.cite ? state.cite : floor;
   const status = state && state.status ? state.status : floor.status;
-  const live = state ? state.live !== false : floor.live;
+  const live = status === "live" && !!state && state.live !== false;
   return {
     status,
-    live: status === "unreachable" ? false : live,
+    live,
+    role: live ? "live" : status,
+    current: live,
     source: (state && state.source) || floor.source,
     kept: status === "unreachable" ? "last-known" : null,
+    read_at: status === "floor" ? floor.read_at : null,
     observed_at: (state && state.observed_at) || null,
     attempted_at: (state && state.attempted_at) || null,
     observed_count: cite.observed_count != null ? cite.observed_count : null,
@@ -645,6 +648,8 @@ export async function loadAppliedCite(env) {
     live: state.status === "unreachable" ? false : state.live !== false,
     status: state.status || "live",
     source: state.source || "pull",
+    observed_at: state.observed_at || null,
+    attempted_at: state.attempted_at || null,
   };
 }
 

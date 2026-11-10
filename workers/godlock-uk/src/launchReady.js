@@ -1,15 +1,14 @@
 /**
  * Runtime Softwares launch-readiness cite for godlock.uk.
- * SoT is live aziel-runtime GET /v1/software: main ce673365 / 2.0.0-rc1.
- * Deployed git_sha ce673365700d41fc604292ab2b92b1b1ca504016 (read 2026-10-30).
- * git_sha_source deploy_var. git_sha_tracks_deployed_tip true. deploy_lag null.
- * Last-known version_id eaf0b54c-1e5b-4d54-a582-25c5cdc09f92 (vid eaf0b54c)
- * is env.CF_VERSION_METADATA.id on that read. /cite.json and /llms.txt overlay
- * tip + version_id from the live catalog at serve time. This floor is the
- * unreachable pin. Cos LIVE restamps it after each Softwares Cos.
- * Suite 2.0.0-rc1 stays the certification-point freeze. Authority count stays 42
- * on that Worker. GodLock hub Softwares is hub-scope (JSON one product row;
- * HTML ItemList numberOfItems 2), not those 42 cards.
+ * Floor pin, read 2026-10-30: main ce673365 / 2.0.0-rc1,
+ * git_sha ce673365700d41fc604292ab2b92b1b1ca504016,
+ * version_id eaf0b54c-1e5b-4d54-a582-25c5cdc09f92 (vid eaf0b54c).
+ * The floor is not the live tip and is not restamped when a read fails.
+ * /cite.json, /llms.txt, and Softwares HTML publish four distinct values:
+ * floor, observation, expected, and live tip. The live tip is only a fresh
+ * GET /v1/health observation. Suite 2.0.0-rc1 stays the certification-point freeze.
+ * Authority count stays 42 on that Worker. GodLock hub Softwares is hub-scope
+ * (JSON one product row; HTML ItemList numberOfItems 2), not those 42 cards.
  * 105fa1ee was the 2026-09-18 isolate label for git 6a3798a. It is not this tip.
  * Ask Jeeves is not a Softwares slug. Suite help stays FragGate aziel-corpus jeeves.
  * Cite only. Do not invent LIVE shelves, or a GodLock VPN identity.
@@ -21,18 +20,19 @@ export const AUTHOR = "Aziel Eliab";
 export const RUNTIME_NAME = "Aziel Runtime";
 export const RUNTIME_SLUG = "aziel-runtime";
 export const RUNTIME_VERSION = "2.0.0-rc1";
-/** Deployed GET /v1/software git_sha (read 2026-10-30). Public short stamp is the 8-char tip prefix. */
+/** Floor git_sha read 2026-10-30. Public short stamp is the 8-char tip prefix. Not the live tip. */
 export const RUNTIME_GIT_SHA = "ce673365700d41fc604292ab2b92b1b1ca504016";
 export const RUNTIME_GIT_SHA_SHORT = "ce673365";
+export const RUNTIME_FLOOR_READ_AT = "2026-10-30";
 /**
- * Last-known GET /v1/software version_id (read 2026-10-30, vid eaf0b54c).
- * Floor pin only. Live /cite.json and /llms.txt replace it when the catalog answers.
+ * Floor version_id read 2026-10-30 (vid eaf0b54c).
+ * Not copied into the live tip when GET /v1/health does not answer.
  */
 export const RUNTIME_VERSION_ID = "eaf0b54c-1e5b-4d54-a582-25c5cdc09f92";
 export const RUNTIME_VERSION_ID_NOTE =
-  "Last-known GET /v1/software version_id (read 2026-10-30, vid eaf0b54c). Floor pin used when the live catalog read does not answer. /cite.json and /llms.txt overlay git_sha, the 8-char tip, and version_id from live GET /v1/software at serve time (service binding https://aziel-runtime/v1/software, then HTTPS). Cos LIVE restamps this floor after each Softwares Cos so an unreachable read does not keep a stale id. env.CF_VERSION_METADATA.id on the runtime Worker. Not a baked suite constant.";
+  "Floor version_id read 2026-10-30 (vid eaf0b54c). This pin is not the current live tip. A missed, stale, timed-out, or malformed GET /v1/health does not copy it forward. env.CF_VERSION_METADATA.id on the runtime Worker. Not a baked suite constant.";
 export const RUNTIME_VERSION_ID_SERVE_NOTE =
-  "Published GET /v1/software version_id read at serve time from the live catalog. env.CF_VERSION_METADATA.id on the runtime Worker. Not a baked suite constant.";
+  "version_id from GET /v1/health at the observation time. env.CF_VERSION_METADATA.id on the runtime Worker. Not a baked suite constant.";
 export const RUNTIME_SOT_BRANCH = "main";
 export const RUNTIME_SOT =
   RUNTIME_SOT_BRANCH + " " + RUNTIME_GIT_SHA_SHORT + " / " + RUNTIME_VERSION;
@@ -75,29 +75,41 @@ export function floorRuntimeCite() {
     version_id_source: "floor",
     version_id_note: RUNTIME_VERSION_ID_NOTE,
     cite: RUNTIME_SOT,
-    live: true,
+    live: false,
+    current: false,
+    role: "floor",
     status: "floor",
     source: "floor",
+    read_at: RUNTIME_FLOOR_READ_AT,
     author: AUTHOR,
     identity: AUTHOR,
   };
 }
 
+function sotPhrase(cite) {
+  const prov = provenanceOf(cite);
+  if (prov.live) {
+    return "SoT LIVE " + prov.live.cite + " observed " + prov.live.observed_at;
+  }
+  const floor = "SoT floor " + prov.floor.cite + " (read " + prov.floor.read_at + ")";
+  if (prov.expected && prov.expected.cite) {
+    return floor + "; expected " + prov.expected.cite + " (not a live tip)";
+  }
+  return floor + "; live tip not confirmed";
+}
+
 export function launchReadyNoteFrom(cite) {
-  const c = cite && cite.cite ? cite : floorRuntimeCite();
-  const version = c.version || RUNTIME_VERSION;
-  const sot = c.cite || RUNTIME_SOT;
-  return RUNTIME_NAME + " " + version + " (" + sot + ") launch readiness: "
+  const prov = provenanceOf(cite);
+  const version = (prov.live && prov.live.version) || RUNTIME_VERSION;
+  return RUNTIME_NAME + " " + version + " (" + sotPhrase(cite) + ") launch readiness: "
     + LAUNCH_SURFACES.join(" + ")
     + ". GodLock is a challenge/score product. Identity is Aziel Eliab. "
     + "Identity Aziel Eliab only. Prefer Try on Glama. Lamb Lens. NO-LIE. Growth-ON.";
 }
 
 export function launchReadyHtmlNoteFrom(cite) {
-  const c = cite && cite.cite ? cite : floorRuntimeCite();
-  const version = c.version || RUNTIME_VERSION;
-  const sot = c.cite || RUNTIME_SOT;
-  return RUNTIME_NAME + " " + version + " launch readiness (SoT " + sot
+  const version = (provenanceOf(cite).live && provenanceOf(cite).live.version) || RUNTIME_VERSION;
+  return RUNTIME_NAME + " " + version + " launch readiness (" + sotPhrase(cite)
     + "): human UI + MCP fraggate_call + FragGate sole door + mesh/AZVPN (HTTPS/WS REAL; WireGuard/OpenVPN SLOT) "
     + "+ radios channel cites worker_hardware:false + suite pack /download. "
     + "GodLock is a challenge/score product. Identity is Aziel Eliab. Identity Aziel Eliab only. "
@@ -115,17 +127,104 @@ export function runtimeSot() {
     version_id: RUNTIME_VERSION_ID,
     branch: RUNTIME_SOT_BRANCH,
     cite: RUNTIME_SOT,
-    live: true,
+    live: false,
+    current: false,
+    role: "floor",
+    status: "floor",
+    read_at: RUNTIME_FLOOR_READ_AT,
   };
 }
 
-function citeInput(cite) {
-  return cite && cite.git_sha && cite.cite ? cite : floorRuntimeCite();
+export function emptyObservation(status, extra) {
+  return {
+    role: "observation",
+    status: status || "not-read",
+    current: false,
+    live: false,
+    git_sha: null,
+    git_sha_short: null,
+    version: null,
+    version_id: null,
+    cite: null,
+    observed_at: null,
+    attempted_at: null,
+    source_date: null,
+    source: null,
+    http_status: null,
+    refresh_status: null,
+    refresh_attempted_at: null,
+    code: null,
+    note: "No live tip is stamped from this observation.",
+    ...(extra || {}),
+  };
+}
+
+/** Static documents and callers that pass a serve cite or a full provenance bundle. */
+export function provenanceOf(cite) {
+  if (cite && cite.role === "provenance" && cite.floor && cite.observation) {
+    return {
+      role: "provenance",
+      floor: cite.floor,
+      observation: cite.observation,
+      expected: cite.expected || null,
+      live: cite.live && cite.live.git_sha ? cite.live : null,
+    };
+  }
+  const floor = floorRuntimeCite();
+  if (cite && cite.git_sha && cite.source === "serve" && cite.status === "current" && cite.live === true && cite.observed_at) {
+    const live = {
+      role: "live",
+      live: true,
+      current: true,
+      branch: cite.branch || RUNTIME_SOT_BRANCH,
+      version: cite.version,
+      git_sha: cite.git_sha,
+      git_sha_short: cite.git_sha_short,
+      version_id: cite.version_id || null,
+      cite: cite.cite,
+      observed_at: cite.observed_at,
+      source_date: cite.source_date || null,
+      source: cite.via || cite.source || "serve",
+      matches_floor: cite.git_sha === floor.git_sha,
+      matches_expected: null,
+    };
+    return {
+      role: "provenance",
+      floor,
+      observation: {
+        ...emptyObservation("current"),
+        status: "current",
+        current: true,
+        git_sha: live.git_sha,
+        git_sha_short: live.git_sha_short,
+        version: live.version,
+        version_id: live.version_id,
+        cite: live.cite,
+        observed_at: live.observed_at,
+        attempted_at: live.observed_at,
+        source_date: live.source_date,
+        source: live.source,
+        note: "Fresh GET /v1/health observation.",
+      },
+      expected: null,
+      live,
+    };
+  }
+  return {
+    role: "provenance",
+    floor,
+    observation: emptyObservation("not-read", {
+      note: "This response did not read GET /v1/health. The floor is not stamped as the live tip.",
+    }),
+    expected: null,
+    live: null,
+  };
 }
 
 export function launchReadiness(cite) {
-  const sot = citeInput(cite);
-  const note = cite && cite.git_sha ? launchReadyNoteFrom(sot) : LAUNCH_READY_NOTE;
+  const prov = provenanceOf(cite);
+  const sot = prov.live || prov.floor;
+  const note = launchReadyNoteFrom(cite && (cite.role === "provenance" || cite.git_sha) ? cite : undefined);
   return {
     ok: true,
     spec: "AZRT-WORKER-LAUNCH-1.0",
@@ -135,11 +234,11 @@ export function launchReadiness(cite) {
     runtime: RUNTIME_NAME,
     runtime_slug: RUNTIME_SLUG,
     runtime_version: sot.version || RUNTIME_VERSION,
-    runtime_git_sha: sot.git_sha,
-    runtime_git_sha_short: sot.git_sha_short,
-    runtime_sot: sot.cite,
-    runtime_sot_live: sot.live !== false,
-    runtime_sot_status: sot.status || "floor",
+    runtime_git_sha: prov.live ? prov.live.git_sha : null,
+    runtime_git_sha_short: prov.live ? prov.live.git_sha_short : null,
+    runtime_sot: prov.live ? prov.live.cite : null,
+    runtime_sot_live: !!prov.live,
+    runtime_sot_status: prov.live ? "current" : (prov.observation.status || "not-read"),
     door: DOOR,
     kernel: FRAGGATE_KERNEL,
     fraggate_call: FRAGGATE_CALL,
@@ -176,15 +275,37 @@ export function launchReadiness(cite) {
 }
 
 export function launchCiteFields(cite) {
+  const prov = provenanceOf(cite);
   const ready = launchReadiness(cite);
-  const sot = citeInput(cite);
+  const live = prov.live;
   const fields = {
-    runtime_git_sha: sot.git_sha,
-    runtime_git_sha_short: sot.git_sha_short,
-    runtime_sot: sot.cite,
-    runtime_sot_branch: sot.branch || RUNTIME_SOT_BRANCH,
-    runtime_sot_live: sot.live !== false,
-    runtime_sot_status: sot.status || "floor",
+    runtime_floor: {
+      role: "floor",
+      live: false,
+      current: false,
+      cite: prov.floor.cite,
+      git_sha: prov.floor.git_sha,
+      git_sha_short: prov.floor.git_sha_short,
+      version: prov.floor.version,
+      version_id: prov.floor.version_id,
+      read_at: prov.floor.read_at,
+      source: "floor",
+      note: prov.floor.version_id_note,
+    },
+    runtime_observation: prov.observation,
+    runtime_expected: prov.expected,
+    runtime_live: live,
+    runtime_git_sha: live ? live.git_sha : null,
+    runtime_git_sha_short: live ? live.git_sha_short : null,
+    runtime_sot: live ? live.cite : null,
+    runtime_sot_branch: RUNTIME_SOT_BRANCH,
+    runtime_sot_live: !!live,
+    runtime_sot_status: live ? "current" : (prov.observation.status || "not-read"),
+    runtime_floor_git_sha: prov.floor.git_sha,
+    runtime_floor_git_sha_short: prov.floor.git_sha_short,
+    runtime_floor_sot: prov.floor.cite,
+    runtime_floor_version_id: prov.floor.version_id,
+    runtime_floor_read_at: prov.floor.read_at,
     worker_hardware: ready.radios.worker_hardware,
     invented_hardware: ready.radios.invented_hardware,
     suite_download: ready.suite_download,
@@ -199,10 +320,11 @@ export function launchCiteFields(cite) {
     fraggate_sole_door: ready.fraggate_sole_door,
     mcp_fraggate_call: ready.mcp_fraggate_call,
   };
-  if (sot.version_id) {
-    fields.runtime_version_id = sot.version_id;
-    fields.runtime_version_id_source = versionIdSource(sot);
-    fields.runtime_version_id_note = versionIdNote(sot);
+  if (live && live.version_id) {
+    fields.runtime_version_id = live.version_id;
+    fields.runtime_version_id_source = "serve";
+    fields.runtime_version_id_note = RUNTIME_VERSION_ID_SERVE_NOTE
+      + " Observed at " + (live.observed_at || "unspecified") + ".";
   }
   return fields;
 }
@@ -219,15 +341,49 @@ export function versionIdNote(sot) {
   return versionIdSource(sot) === "serve" ? RUNTIME_VERSION_ID_SERVE_NOTE : RUNTIME_VERSION_ID_NOTE;
 }
 
+export function runtimeProvenanceText(cite) {
+  const prov = provenanceOf(cite);
+  const obs = prov.observation || emptyObservation("not-read");
+  const lines = [
+    "Floor: " + prov.floor.cite + " / version_id " + prov.floor.version_id
+      + " (read " + prov.floor.read_at + "). Floor is not a live tip.",
+    "Observation: " + obs.status
+      + (obs.observed_at ? " observed " + obs.observed_at : "")
+      + (obs.attempted_at && obs.attempted_at !== obs.observed_at ? " attempted " + obs.attempted_at : "")
+      + (obs.source_date ? " source_date " + obs.source_date : "")
+      + ".",
+  ];
+  if (obs.git_sha && obs.status !== "current") {
+    lines.push("Observation tip: " + obs.git_sha + " is not current.");
+  }
+  if (obs.refresh_status) {
+    lines.push("Refresh: " + obs.refresh_status
+      + (obs.refresh_attempted_at ? " at " + obs.refresh_attempted_at : "") + ".");
+  }
+  if (prov.expected && prov.expected.git_sha) {
+    lines.push("Expected: " + (prov.expected.cite || prov.expected.git_sha)
+      + (prov.expected.observed_at ? " sealed " + prov.expected.observed_at : "")
+      + ". Expected is not the live tip.");
+  } else {
+    lines.push("Expected: none. No sealed expectation is copied into the live tip.");
+  }
+  if (prov.live) {
+    lines.push("Live tip: " + prov.live.cite + " observed " + prov.live.observed_at + ".");
+  } else {
+    lines.push("Live tip: none. A failed, stale, or missing read is not stamped as current.");
+  }
+  return lines.join("\n") + "\n";
+}
+
 export function launchLlmsSection(cite) {
   const ready = launchReadiness(cite);
-  const sot = citeInput(cite);
-  const sotLabel = ready.runtime_sot_live ? "SoT LIVE: " : "SoT last-known: ";
-  const versionIdLine = sot.version_id
-    ? "Published version_id: " + sot.version_id + ". " + versionIdNote(sot) + "\n"
+  const prov = provenanceOf(cite);
+  const versionIdLine = prov.live && prov.live.version_id
+    ? "Published version_id: " + prov.live.version_id + ". " + RUNTIME_VERSION_ID_SERVE_NOTE
+      + " Observed at " + prov.live.observed_at + ".\n"
     : "";
   return "\n## Softwares + runtime launch readiness\n\n"
-    + sotLabel + ready.runtime_sot + ".\n"
+    + runtimeProvenanceText(cite)
     + versionIdLine
     + ready.note + "\n"
     + "Human UI: yes. MCP door: " + FRAGGATE_CALL + ". FragGate is THE single door (" + FRAGGATE_KERNEL + ").\n"
@@ -241,7 +397,7 @@ export function launchLlmsSection(cite) {
 }
 
 export function launchReadyHtml(cite) {
-  const note = cite && cite.git_sha ? launchReadyHtmlNoteFrom(cite) : LAUNCH_READY_HTML_NOTE;
+  const note = cite ? launchReadyHtmlNoteFrom(cite) : LAUNCH_READY_HTML_NOTE;
   return `<p class="muted launch-ready">${escapeHtml(note)}</p>`;
 }
 

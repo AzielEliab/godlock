@@ -502,6 +502,100 @@ describe("POST /submit refuses arguments that are not relative to intelligent de
     assert.equal(rec.receipts.length, 0);
     assert.equal(rec.ledger.length, 0);
   });
+
+  it("refuses off-topic uses of designer, watchmaker, fine-tuning, and creationist", async () => {
+    const cases = [
+      "The designer of the iPhone changed the holiday market in London this quarter after the earnings report.",
+      "The watchmaker repaired the clock on Baker Street before the evening concert.",
+      "Fine-tuning the guitar before the concert in London took the whole afternoon and the audience waited.",
+      "The creationist bakery sold bread in London after the holiday rush.",
+      "intelligent design aaaaaaaaaa",
+      "The quarterly earnings of the retail sector beat estimates. Intelligent design. The holiday season in London was busy.",
+    ];
+    for (const text of cases) {
+      const rec = submitEnv();
+      const res = await postSubmit(rec.env, { text });
+      assert.equal(res.status, 400, text);
+      const j = await res.json();
+      assert.equal(j.ok, false, text);
+      assert.equal(j.code, REFUSE.NOT_RELATIVE, text);
+      assert.equal(j.queued, false, text);
+      assert.equal(j.scored, false, text);
+      assert.equal(j.archived, false, text);
+      assert.equal(j.accepted, false, text);
+      assert.equal(j.relative_to_intelligent_design, false, text);
+      assert.equal(j.id, undefined, text);
+      assert.equal(rec.receipts.length, 0, text);
+      assert.equal(rec.ledger.length, 0, text);
+    }
+  });
+
+  it("refuses the same argument on POST / and on the challenge and body keys", async () => {
+    const text = "The watchmaker repaired the clock on Baker Street before the evening concert.";
+    for (const body of [{ text }, { challenge: text }, { body: text }]) {
+      const rec = submitEnv();
+      const res = await worker.fetch(new Request("https://godlock.uk/", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "User-Agent": "Mozilla/5.0",
+        },
+        body: JSON.stringify(body),
+      }), rec.env);
+      assert.equal(res.status, 400);
+      const j = await res.json();
+      assert.equal(j.code, REFUSE.NOT_RELATIVE);
+      assert.equal(rec.receipts.length, 0);
+      assert.equal(rec.ledger.length, 0);
+    }
+  });
+
+  it("shows the refusal on an HTML form post and does not archive", async () => {
+    const rec = submitEnv();
+    const text = "Fine-tuning the guitar before the concert in London took the whole afternoon and the audience waited.";
+    const res = await worker.fetch(new Request("https://godlock.uk/submit", {
+      method: "POST",
+      headers: {
+        Accept: "text/html",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Mozilla/5.0",
+      },
+      body: "text=" + encodeURIComponent(text),
+    }), rec.env);
+    assert.equal(res.status, 400);
+    assert.match(res.headers.get("Content-Security-Policy") || "", /default-src 'none'/);
+    const html = await res.text();
+    assert.match(html, /id="challenge-error"/);
+    assert.match(html, /not relative to intelligent design/);
+    assert.match(html, /not accepted for debate/);
+    assert.match(html, /GODLOCK-NOT-RELATIVE/);
+    assert.match(html, /Nothing was queued, scored, or archived/);
+    assert.equal(rec.receipts.length, 0);
+    assert.equal(rec.ledger.length, 0);
+  });
+
+  it("accepts an HTML form post that is relative and still hash-chains it", async () => {
+    const rec = submitEnv();
+    const res = await worker.fetch(new Request("https://godlock.uk/", {
+      method: "POST",
+      headers: {
+        Accept: "text/html",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "Mozilla/5.0",
+      },
+      body: "text=" + encodeURIComponent(VALID),
+    }), rec.env);
+    assert.equal(res.status, 303);
+    assert.match(res.headers.get("Location") || "", /\/\?r=/);
+    assert.equal(rec.receipts.length, 1);
+    assert.equal(rec.receipts[0].challenge_text, VALID);
+    const submit = rec.ledger.find((e) => e.action === "SUBMIT");
+    assert.ok(submit);
+    const payload = JSON.parse(submit.payload_json);
+    assert.equal(payload.text_sha256, sha256hex(VALID));
+    assert.equal(payload.debate, scoreCard(scoreDebateText(VALID, sha256hex(VALID)), VALID).debate);
+  });
 });
 
 describe("submit docs stay honest", () => {

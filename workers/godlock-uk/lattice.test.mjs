@@ -626,6 +626,80 @@ describe("bidirectional lattice", () => {
     assert.equal(JSON.stringify(aggregate.body).includes("ada"), false);
   });
 
+  it("wraps then pulls the same entry both ways without a public username or a live flag", async () => {
+    const secret = "test-operator-token";
+    const env = { LATTICE_MODE: "offline", LATTICE_OPERATOR_TOKEN: secret };
+    const wrapped = await wrapLedgerEntry(env, { entry_hash: D }, { username: "ada" });
+    assert.equal(wrapped.ok, true);
+    assert.equal(wrapped.live, false);
+    assert.equal(wrapped.lattice.username, "ada");
+    const url = "https://godlock.uk/v1/lattice/pull?entry_hash=" + D;
+    const pub = await worker.fetch(new Request(url), env);
+    assert.equal(pub.status, 200);
+    const pubBody = await pub.json();
+    assert.equal(pubBody.entry_hash, D);
+    assert.equal(pubBody.entry_hash, wrapped.pull.entry_hash);
+    assert.equal(pubBody.live, false);
+    assert.equal(pubBody.rebuilt_from_zero, false);
+    assert.equal(Object.prototype.hasOwnProperty.call(pubBody.lattice, "username"), false);
+    assert.equal(JSON.stringify(pubBody).includes("ada"), false);
+    const stored = await pullLocal(env, D);
+    assert.equal(stored.lattice.username, "ada");
+    assert.equal(stored.entry_hash, pubBody.entry_hash);
+
+    const op = await worker.fetch(new Request(url, { headers: { Authorization: "Bearer " + secret } }), env);
+    const opBody = await op.json();
+    assert.equal(op.status, 200);
+    assert.equal(opBody.entry_hash, D);
+    assert.equal(opBody.live, false);
+    assert.equal(opBody.lattice.username, "ada");
+
+    const calls = [];
+    const remote = await wrapLedgerEntry(
+      { LATTICE_MODE: "online", LATTICE_REMOTE: "1", LATTICE_OPERATOR_TOKEN: secret },
+      { entry_hash: E },
+      {
+        fetch: async (remoteUrl, init) => {
+          calls.push(init.method);
+          assertOperatorHeader(new URL(remoteUrl), init, secret);
+          if (init.method === "POST") {
+            const sent = JSON.parse(init.body);
+            assert.equal(sent.entry_hash, E);
+            assert.equal(sent.lattice.username, null);
+            assertTokenAbsentFromBody(sent);
+            return { ok: true, status: 201, json: async () => ({ ok: true, entry_hash: E }) };
+          }
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              ok: true,
+              aggregate: true,
+              scope: { ...LATTICE_AGGREGATE_SCOPE },
+              rows: [{ entry_hash: E, lattice: { username: "hidden-on-public" } }],
+            }),
+          };
+        },
+      },
+    );
+    assert.equal(calls.join(","), "POST,GET");
+    assert.equal(remote.ok, true);
+    assert.equal(remote.live, false);
+    assert.equal(remote.code, "LATTICE-WRAP-PULL");
+    assert.equal(remote.pull.entry_hash, E);
+    assert.equal(remote.remote_pull.ok, true);
+    const remotePub = await worker.fetch(new Request("https://godlock.uk/v1/lattice/pull?entry_hash=" + E), {
+      LATTICE_MODE: "online",
+      LATTICE_OPERATOR_TOKEN: secret,
+      __latticeRows: [{ entry_hash: E, position: remote.position, target: PRIMARY_TARGET, lattice: remote.lattice }],
+    });
+    const remotePubBody = await remotePub.json();
+    assert.equal(remotePubBody.entry_hash, E);
+    assert.equal(remotePubBody.live, false);
+    assert.equal(JSON.stringify(remotePubBody).includes("hidden-on-public"), false);
+    assert.equal(JSON.stringify(remote).includes(secret), false);
+  });
+
   it("serves pull on godlock and refuses a public wrap", async () => {
     const env = { LATTICE_MODE: "online" };
     await wrapLedgerEntry(env, { entry_hash: E });

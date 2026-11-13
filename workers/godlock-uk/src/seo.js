@@ -26,7 +26,7 @@ export {
 import { ingestCiteFields, ingestLlmsSection } from "./ingestReceipt.js";
 import { shelvesCiteFields, shelvesLlmsSection } from "./shelves.js";
 import { redlineCiteFields, redlineLlmsSection } from "./redline.js";
-import { launchCiteFields, launchLlmsSection, launchReadyNoteFrom, LAUNCH_READY_NOTE, RUNTIME_SOT, RUNTIME_VERSION_ID } from "./launchReady.js";
+import { launchCiteFields, launchLlmsSection, launchReadyNoteFrom, runtimeProvenanceText, LAUNCH_READY_NOTE, RUNTIME_SOT, RUNTIME_VERSION_ID } from "./launchReady.js";
 import { survivalCiteFields, survivalLlmsSection } from "./survival.js";
 import { DEBATE_ACCEPTANCE } from "./debateAccept.js";
 
@@ -1124,7 +1124,7 @@ export function searchEngineAssociation() {
       claimed: false,
       floor_sot: RUNTIME_SOT,
       floor_version_id: RUNTIME_VERSION_ID,
-      note: "Named Cos LIVE a4ada6d7 / vid 9594790d is not a published full git_sha or version_id. Not invented. Baked floor stays. Live /cite.json overlays GET /v1/software at serve time.",
+      note: "Named Cos LIVE a4ada6d7 / vid 9594790d is not a published full git_sha or version_id. Not invented. The floor stays a dated pin and is not the live tip. Live /cite.json reads GET /v1/health at serve time and stamps a live tip only when that observation is current.",
     },
   };
 }
@@ -1153,7 +1153,7 @@ export function searchEngineAssociationLlms() {
     + "cap7_is_icann: false\n"
     + "paid_satellite: HELD\n"
     + "pattern_live: false\n"
-    + "Tip match: named Cos LIVE a4ada6d7 / vid 9594790d is not a published full git_sha or version_id. Not invented. Baked floor stays " + RUNTIME_SOT + " / " + RUNTIME_VERSION_ID + ".\n\n";
+    + "Tip match: named Cos LIVE a4ada6d7 / vid 9594790d is not a published full git_sha or version_id. Not invented. Floor pin " + RUNTIME_SOT + " / " + RUNTIME_VERSION_ID + " is not the live tip. A live tip is a current GET /v1/health observation only.\n\n";
 }
 
 /** Same publisher NOT lock as IDENTITY_DISAMBIGUATION — no verse essay. */
@@ -1677,7 +1677,9 @@ export function isIndexCrawler(ua) {
 }
 
 export function defaultDescription(kind, runtimeCite) {
-  const launchNote = runtimeCite && runtimeCite.cite ? launchReadyNoteFrom(runtimeCite) : LAUNCH_READY_NOTE;
+  const launchNote = runtimeCite && (runtimeCite.cite || runtimeCite.role === "provenance")
+    ? launchReadyNoteFrom(runtimeCite)
+    : LAUNCH_READY_NOTE;
   const suiteVersion = runtimeCite && runtimeCite.version ? runtimeCite.version : RUNTIME_VERSION;
   if (kind === "verify") return hideInternalDetermination("Verify the public GodLock.uk hash-chained ledger. Append-only receipts. Author Aziel Eliab.");
   if (kind === "receipt") return hideInternalDetermination("A GodLock.uk receipt. Append-only. Author Aziel Eliab.");
@@ -2843,7 +2845,9 @@ export function citeDoc(sot, runtimeCite) {
     sameAs: runtimeSameAs(),
     related: runtimeSameAs(),
     door: "fraggate",
-    runtime_version: (runtimeCite && runtimeCite.version) || RUNTIME_VERSION,
+    runtime_version: (runtimeCite && runtimeCite.live && runtimeCite.live.version)
+      || (runtimeCite && runtimeCite.version)
+      || RUNTIME_VERSION,
     ...launchCiteFields(runtimeCite),
     kernel: FRAGGATE_KERNEL,
     specified_fit: CANON_HOST + REASON_PATH,
@@ -2878,8 +2882,10 @@ export function pathsAndHandlesLlmsSection() {
 }
 
 export function llmsDoc(sot, runtimeCite) {
-  const suiteVersion = (runtimeCite && runtimeCite.version) || RUNTIME_VERSION;
-  const suiteSot = (runtimeCite && runtimeCite.cite) || RUNTIME_SOT;
+  const suiteVersion = (runtimeCite && runtimeCite.live && runtimeCite.live.version)
+    || (runtimeCite && runtimeCite.version)
+    || RUNTIME_VERSION;
+  const liveCite = runtimeCite && runtimeCite.live && runtimeCite.live.cite;
   return "# GodLock\n\n"
     + "Author: Aziel Eliab\n"
     + "Also known as: " + machineAkaLine() + "\n"
@@ -3042,8 +3048,9 @@ export function llmsDoc(sot, runtimeCite) {
     + "## Runtime (FragGate door)\n\n"
     + RUNTIME_ABSTRACT + "\n\n"
     + "Live version: " + suiteVersion + " (certification-point freeze). "
-    + ((runtimeCite && runtimeCite.live === false) ? "SoT last-known: " : "SoT LIVE: ")
-    + suiteSot + ". Changelog stays below this abstract.\n"
+    + (liveCite ? "SoT LIVE: " + liveCite + ". " : "Live tip: none. ")
+    + "Changelog stays below this abstract.\n"
+    + runtimeProvenanceText(runtimeCite)
     + "Try on Glama: " + GLAMA_RUNTIME + " (verified listing AzielEliab/aziel-runtime)\n"
     + "Official Runtime: " + PUBLIC_RUNTIME + "\n"
     + "Source on GitHub: " + GITHUB_RUNTIME + "\n"

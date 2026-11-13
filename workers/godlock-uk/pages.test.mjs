@@ -2485,28 +2485,36 @@ describe("receipts UI and public payload", () => {
 });
 
 describe("Hub launch-update parity — Softwares + runtime SoT", () => {
-  it("pins live runtime SoT main ce673365 / 2.0.0-rc1", () => {
+  it("pins the runtime floor and does not call it the live tip", () => {
     assert.equal(RUNTIME_VERSION, "2.0.0-rc1");
     assert.equal(RUNTIME_GIT_SHA_SHORT, "ce673365");
     assert.equal(RUNTIME_GIT_SHA, "ce673365700d41fc604292ab2b92b1b1ca504016");
     assert.equal(RUNTIME_SOT, "main ce673365 / 2.0.0-rc1");
     const cite = citeDoc();
     assert.equal(cite.runtime_version, "2.0.0-rc1");
-    assert.equal(cite.runtime_git_sha, RUNTIME_GIT_SHA);
-    assert.equal(cite.runtime_git_sha_short, "ce673365");
-    assert.equal(cite.runtime_version_id, RUNTIME_VERSION_ID);
-    assert.equal(cite.runtime_version_id, "eaf0b54c-1e5b-4d54-a582-25c5cdc09f92");
-    assert.equal(cite.runtime_version_id_source, "floor");
-    assert.match(cite.runtime_version_id_note, /Last-known/);
-    assert.match(cite.runtime_version_id_note, /Cos LIVE restamps/);
-    assert.match(cite.runtime_version_id_note, /Not a baked suite constant/);
-    assert.doesNotMatch(cite.runtime_version_id, /d2958625/);
+    assert.equal(cite.runtime_git_sha, null);
+    assert.equal(cite.runtime_git_sha_short, null);
+    assert.equal(cite.runtime_sot, null);
+    assert.equal(cite.runtime_live, null);
+    assert.equal(cite.runtime_expected, null);
+    assert.equal(cite.runtime_observation.status, "not-read");
+    assert.equal(cite.runtime_floor.git_sha, RUNTIME_GIT_SHA);
+    assert.equal(cite.runtime_floor.git_sha_short, "ce673365");
+    assert.equal(cite.runtime_floor.version_id, RUNTIME_VERSION_ID);
+    assert.equal(cite.runtime_floor.version_id, "eaf0b54c-1e5b-4d54-a582-25c5cdc09f92");
+    assert.equal(cite.runtime_floor.live, false);
+    assert.equal(cite.runtime_floor.read_at, "2026-10-30");
+    assert.match(cite.runtime_floor.note, /not the current live tip/);
+    assert.match(cite.runtime_floor.note, /Not a baked suite constant/);
+    assert.doesNotMatch(cite.runtime_floor.version_id, /d2958625/);
+    assert.equal(cite.runtime_version_id, undefined);
     assert.equal(cite.trades_runtime_version, "0.4.9");
     assert.match(cite.software_suite, /hub-scope/);
     assert.match(cite.software_suite, /not the suite's 42/);
     assert.equal(cite.software_product_count, null);
-    assert.equal(cite.runtime_sot, RUNTIME_SOT);
-    assert.equal(cite.runtime_sot_live, true);
+    assert.equal(cite.runtime_floor_sot, RUNTIME_SOT);
+    assert.equal(cite.runtime_sot_live, false);
+    assert.equal(cite.runtime_sot_status, "not-read");
     assert.equal(cite.worker_hardware, false);
     assert.equal(cite.invented_hardware, false);
     assert.equal(cite.godlock_is_vpn, false);
@@ -2565,9 +2573,11 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
   it("stamps /v1/software and llms with the same SoT and no LIVE shelf flip", () => {
     const body = softwareApiDoc([]);
     assert.equal(body.runtime_version, "2.0.0-rc1");
-    assert.equal(body.runtime_git_sha_short, "ce673365");
-    assert.equal(body.runtime_git_sha, "ce673365700d41fc604292ab2b92b1b1ca504016");
-    assert.equal(body.runtime_version_id, RUNTIME_VERSION_ID);
+    assert.equal(body.runtime_git_sha_short, null);
+    assert.equal(body.runtime_git_sha, null);
+    assert.equal(body.runtime_sot_live, false);
+    assert.equal(body.runtime_floor.git_sha, "ce673365700d41fc604292ab2b92b1b1ca504016");
+    assert.equal(body.runtime_floor.version_id, RUNTIME_VERSION_ID);
     assert.match(body.software_note, /hub-scope/);
     assert.match(body.software_note, /not the suite's 42/);
     assert.equal(body.trades_runtime.version, "0.4.9");
@@ -2579,9 +2589,11 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     assert.equal(body.runtime_distribution[0].label, "Try on Glama");
     const llms = llmsDoc();
     assert.match(llms, /## Softwares \+ runtime launch readiness/);
-    assert.match(llms, /SoT LIVE: main ce673365 \/ 2\.0\.0-rc1/);
-    assert.match(llms, new RegExp("Published version_id: " + RUNTIME_VERSION_ID.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-    assert.match(llms, /Last-known GET \/v1\/software version_id/);
+    assert.match(llms, /Floor: main ce673365 \/ 2\.0\.0-rc1/);
+    assert.match(llms, /Live tip: none/);
+    assert.doesNotMatch(llms, /SoT LIVE:/);
+    assert.match(llms, new RegExp(RUNTIME_VERSION_ID.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.match(llms, /Floor is not a live tip/);
     assert.doesNotMatch(llms, /d2958625/);
     assert.match(llms, /hub-scope/);
     assert.match(llms, /not the suite's 42/);
@@ -2613,6 +2625,8 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
             identity: "Aziel Eliab",
             version: "2.0.0-rc1",
             git_sha: sha,
+            git_sha_source: "deploy_var",
+            git_sha_tracks_deployed_tip: true,
             version_id: vid,
             count: 42,
             software: [{ slug: "not-a-godlock-card" }],
@@ -2623,19 +2637,31 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
     const cite = await (await worker.fetch(new Request("https://godlock.uk/cite.json"), env)).json();
     assert.equal(cite.runtime_version_id, vid);
     assert.equal(cite.runtime_version_id_source, "serve");
-    assert.match(cite.runtime_version_id_note, /read at serve time/);
+    assert.match(cite.runtime_version_id_note, /GET \/v1\/health/);
+    assert.match(cite.runtime_version_id_note, /Observed at /);
     assert.equal(cite.runtime_git_sha, sha);
     assert.equal(cite.runtime_git_sha_short, "ce673365");
     assert.equal(cite.runtime_sot, "main ce673365 / 2.0.0-rc1");
     assert.equal(cite.runtime_sot_live, true);
+    assert.equal(cite.runtime_sot_status, "current");
+    assert.equal(cite.runtime_live.git_sha, sha);
+    assert.equal(cite.runtime_live.live, true);
+    assert.equal(cite.runtime_live.role, "live");
+    assert.equal(cite.runtime_floor.role, "floor");
+    assert.equal(cite.runtime_floor.git_sha, RUNTIME_GIT_SHA);
+    assert.equal(cite.runtime_floor.version_id, RUNTIME_VERSION_ID);
+    assert.equal(cite.runtime_observation.status, "current");
+    assert.ok(cite.runtime_observation.observed_at);
     assert.deepEqual(cite.software_slugs, ["aziel-runtime"]);
     assert.ok(!cite.software_slugs.includes("not-a-godlock-card"));
     assert.doesNotMatch(cite.runtime_version_id, /d2958625|105fa1ee/);
     const llms = await (await worker.fetch(new Request("https://godlock.uk/llms.txt"), env)).text();
     assert.match(llms, new RegExp("Published version_id: " + vid));
-    assert.match(llms, /read at serve time from the live catalog/);
+    assert.match(llms, /GET \/v1\/health/);
+    assert.match(llms, /Observed at /);
     assert.doesNotMatch(llms, /d2958625/);
-    assert.ok(urls.every((u) => u.includes("/v1/software") && !u.includes("/download")));
+    assert.ok(urls.some((u) => u.includes("/v1/health")));
+    assert.ok(urls.every((u) => !u.includes("/download") && !u.includes("/v1/software") && !u.includes("/v1/mesh")));
     const ai = await (await worker.fetch(new Request("https://godlock.uk/ai.txt"), env)).text();
     assert.equal(ai, llms);
 
@@ -2652,9 +2678,18 @@ describe("Hub launch-update parity — Softwares + runtime SoT", () => {
       },
     });
     const floorCite = await (await worker.fetch(new Request("https://godlock.uk/cite.json"), refused)).json();
-    assert.equal(floorCite.runtime_version_id, RUNTIME_VERSION_ID);
-    assert.equal(floorCite.runtime_version_id_source, "floor");
-    assert.doesNotMatch(JSON.stringify(floorCite.runtime_version_id), /105fa1ee/);
+    assert.equal(floorCite.runtime_version_id, undefined);
+    assert.equal(floorCite.runtime_live, null);
+    assert.equal(floorCite.runtime_sot_live, false);
+    assert.equal(floorCite.runtime_observation.status, "malformed");
+    assert.equal(floorCite.runtime_floor.version_id, RUNTIME_VERSION_ID);
+    assert.equal(floorCite.runtime_git_sha, null);
+    assert.equal(JSON.stringify(floorCite.runtime_live), "null");
+    assert.doesNotMatch(JSON.stringify({
+      version_id: floorCite.runtime_version_id ?? null,
+      live: floorCite.runtime_live,
+      git_sha: floorCite.runtime_git_sha,
+    }), /105fa1ee/);
   });
 });
 

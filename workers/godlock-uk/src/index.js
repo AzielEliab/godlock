@@ -108,7 +108,8 @@ import {
 } from "./challengeText.js";
 import { checkSubmitGuard } from "./submitGuard.js";
 import { debateAcceptance } from "./debateAccept.js";
-import { handleSotOutlet, isSotOutletPath, loadAppliedCite, readServeRuntimeCite } from "./sotOutlet.js";
+import { handleSotOutlet, isSotOutletPath } from "./sotOutlet.js";
+import { loadRuntimeProvenance } from "./runtimeObserve.js";
 import { godlockBuildStamp } from "./buildStamp.js";
 
 const NODE_COOKIE = "godlock_node";
@@ -1035,21 +1036,10 @@ async function handleGodlock(request, env, ctx) {
         return handleSotOutlet(request, env, path);
       }
 
-      let runtimeCitePromise = null;
-      const runtimeCite = () => {
-        if (!runtimeCitePromise) runtimeCitePromise = loadAppliedCite(env);
-        return runtimeCitePromise;
-      };
-      let publishCitePromise = null;
-      const publishRuntimeCite = () => {
-        if (!publishCitePromise) {
-          publishCitePromise = (async () => {
-            const live = await readServeRuntimeCite(env);
-            if (live && live.git_sha) return live;
-            return runtimeCite();
-          })();
-        }
-        return publishCitePromise;
+      let provenancePromise = null;
+      const runtimeProvenance = () => {
+        if (!provenancePromise) provenancePromise = loadRuntimeProvenance(env);
+        return provenancePromise;
       };
 
       if (isRuntimeRequest(url.pathname) || isRuntimeRequest(path)) {
@@ -1073,23 +1063,23 @@ async function handleGodlock(request, env, ctx) {
         const products = publicSoftwaresList([], { version: RUNTIME_VERSION });
         const runtime = products.find((p) => p && p.slug === "aziel-runtime");
         const sot = await fetchSurvivalSot(env);
-        const pinned = await publishRuntimeCite();
+        const pinned = await runtimeProvenance();
         return json({
           ...citeDoc(sot, pinned),
           official_softwares: OFFICIAL_SOFTWARES,
           software_product_count: products.length,
           software_slugs: products.map((p) => p.slug),
           software_source: "godlock-uk",
-          runtime_version: citeRuntimeVersion((pinned && pinned.version) || (runtime && runtime.version) || RUNTIME_VERSION),
+          runtime_version: citeRuntimeVersion((pinned.live && pinned.live.version) || (runtime && runtime.version) || RUNTIME_VERSION),
         });
       }
       if (path === "/llms.txt") {
         const sot = await fetchSurvivalSot(env);
-        return new Response(llmsDoc(sot, await publishRuntimeCite()), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+        return new Response(llmsDoc(sot, await runtimeProvenance()), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/ai.txt") {
         const sot = await fetchSurvivalSot(env);
-        return new Response(aiDoc(sot, await publishRuntimeCite()), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
+        return new Response(aiDoc(sot, await runtimeProvenance()), { headers: { "Content-Type": "text/plain; charset=utf-8", ...corsHeaders() } });
       }
       if (path === "/shelves" || path === "/v1/shelves") {
         return json(shelvesDoc());
@@ -1429,13 +1419,13 @@ async function handleGodlock(request, env, ctx) {
             headers: { Location: SOFTWARE_PATH, ...corsHeaders(), ...extraHeadersFor(nodeId) },
           });
         }
-        const pinned = await runtimeCite();
-        return json(softwareApiDoc([], { source: "godlock-uk", version: (pinned && pinned.version) || RUNTIME_VERSION, runtimeCite: pinned }), 200, extraHeadersFor(nodeId));
+        const pinned = await loadRuntimeProvenance(env);
+        return json(softwareApiDoc([], { source: "godlock-uk", version: (pinned.live && pinned.live.version) || RUNTIME_VERSION, runtimeCite: pinned }), 200, extraHeadersFor(nodeId));
       }
 
       if (path === SOFTWARE_PATH) {
-        const pinned = await runtimeCite();
-        const extras = { version: (pinned && pinned.version) || RUNTIME_VERSION, source: "godlock-uk", runtimeCite: pinned };
+        const pinned = await loadRuntimeProvenance(env, { block: false });
+        const extras = { version: (pinned.live && pinned.live.version) || RUNTIME_VERSION, source: "godlock-uk", runtimeCite: pinned };
         const products = publicSoftwaresHtmlList([], extras);
         if (wantsJson(request, url)) {
           return json({
@@ -1515,13 +1505,13 @@ async function handleGodlock(request, env, ctx) {
         const pinnedOk = !!(rid && latest && latest.id === rid);
         const priorFiltered = (pinnedOk ? prior.filter((p) => p.id !== latest.id) : prior).slice(0, HOME_PRIOR_LIMIT);
         if (wantsJson(request, url)) {
-          const pinned = await runtimeCite();
+          const pinned = await loadRuntimeProvenance(env, { block: false });
           return json({
             ok: true,
             stats,
             latest: latest ? publicPayload(latest) : null,
             receipts: priorFiltered.map(publicPayload),
-            software: softwareApiDoc([], { source: "godlock-uk", version: (pinned && pinned.version) || RUNTIME_VERSION, runtimeCite: pinned }),
+            software: softwareApiDoc([], { source: "godlock-uk", version: (pinned.live && pinned.live.version) || RUNTIME_VERSION, runtimeCite: pinned }),
             ingest_as_receipt: ingestPublicDoc(),
             re_expand_from_archive: reExpandPublicDoc(),
           });

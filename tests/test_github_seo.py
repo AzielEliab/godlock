@@ -389,8 +389,13 @@ def test_cite_json_graph():
     assert CITE["search_engine_association"]["tip_match"]["claimed"] is False
     assert CITE["search_engine_association"]["tip_match"]["named_cos_live"] == "a4ada6d7"
     assert CITE["search_engine_association"]["tip_match"]["named_vid"] == "9594790d"
-    assert CITE["runtime_git_sha_short"] == "ce673365"
-    assert CITE["runtime_version_id"] == "eaf0b54c-1e5b-4d54-a582-25c5cdc09f92"
+    assert CITE["runtime_git_sha_short"] is None
+    assert CITE["runtime_sot_live"] is False
+    assert CITE["runtime_live"] is None
+    assert CITE["runtime_floor_git_sha_short"] == "ce673365"
+    assert CITE["runtime_floor_version_id"] == "eaf0b54c-1e5b-4d54-a582-25c5cdc09f92"
+    assert CITE["runtime_floor"]["live"] is False
+    assert CITE["runtime_floor"]["read_at"] == "2026-10-30"
     for text in (LLMS, AI):
         assert "Search-engine association" in text
         assert "decryption_complete false" in text

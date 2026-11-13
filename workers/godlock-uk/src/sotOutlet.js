@@ -50,6 +50,16 @@ export const SOT_BAD_DOC = "SOT-BAD-DOC";
 export const SOT_BAD_JSON = "SOT-BAD-JSON";
 export const SOT_METHOD = "SOT-METHOD";
 export const SOT_UNREACHABLE = "SOT-UNREACHABLE";
+/**
+ * Health deploy evidence is not a current tip.
+ * Since aziel-runtime 15ef5e6 (2026-10-11, HEALTH-BUILD-STAMP-1.0), GET /v1/health
+ * copies git_sha, git_sha_source, and git_sha_tracks_deployed_tip from softwareMeta.
+ * It does not copy deploy_lag. A live health tip is source deploy_var, tracks
+ * strictly true, and no deploy_lag key. build_meta and tracks false are not live.
+ */
+export const RUNTIME_DEPLOY_LAG = "RUNTIME-DEPLOY-LAG";
+export const RUNTIME_DEPLOY_LAG_NOTE =
+  "GET /v1/health did not show a deployed tip. A live health tip requires git_sha_source deploy_var and git_sha_tracks_deployed_tip true, with deploy_lag absent. Live tip not stamped.";
 
 export const CONFIRM_CONSENT_NOTE =
   "confirm is consent to apply this SoT cite. It is not tenant auth and it does not upgrade isolation.";
@@ -219,6 +229,57 @@ function claimsUnexposed(doc) {
   return fields.some((v) => v != null && String(v).toLowerCase().includes(UNEXPOSED_VERSION_ID));
 }
 
+function hasOwn(doc, key) {
+  return !!doc && Object.prototype.hasOwnProperty.call(doc, key);
+}
+
+/**
+ * Outlet documents may omit deploy fields. That only means the push is not
+ * explicit lag. It is not permission to publish a live tip.
+ * A present tracks value other than true, a present deploy_lag other than null,
+ * or a present git_sha_source other than deploy_var is explicit lag and is refused.
+ */
+export function deployTipAllowsLive(doc) {
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
+    return { ok: false, code: SOT_BAD_DOC };
+  }
+  const hasTracks = hasOwn(doc, "git_sha_tracks_deployed_tip");
+  const hasLag = hasOwn(doc, "deploy_lag");
+  const hasSource = hasOwn(doc, "git_sha_source");
+  if (!hasTracks && !hasLag && !hasSource) return { ok: true, legacy: true };
+  if (hasTracks && doc.git_sha_tracks_deployed_tip !== true) {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "git_sha_tracks_deployed_tip" };
+  }
+  if (hasLag && doc.deploy_lag !== null) {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "deploy_lag" };
+  }
+  if (hasSource && doc.git_sha_source !== "deploy_var") {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "git_sha_source" };
+  }
+  return { ok: true, legacy: false };
+}
+
+/**
+ * Live health shape only. GET /v1/health has carried git_sha_source and
+ * git_sha_tracks_deployed_tip since 15ef5e6 and does not copy deploy_lag.
+ * Missing or partial keys are not a current tip.
+ */
+export function healthTipAllowsLive(doc) {
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "document" };
+  }
+  if (hasOwn(doc, "deploy_lag")) {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "deploy_lag" };
+  }
+  if (!hasOwn(doc, "git_sha_source") || doc.git_sha_source !== "deploy_var") {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "git_sha_source" };
+  }
+  if (!hasOwn(doc, "git_sha_tracks_deployed_tip") || doc.git_sha_tracks_deployed_tip !== true) {
+    return { ok: false, code: RUNTIME_DEPLOY_LAG, field: "git_sha_tracks_deployed_tip" };
+  }
+  return { ok: true, field: null };
+}
+
 export function parseSotDocument(doc) {
   if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
     return { ok: false, code: SOT_BAD_DOC, message: "SoT document must be an object." };
@@ -243,6 +304,15 @@ export function parseSotDocument(doc) {
   }
   const rawVid = doc.version_id != null ? doc.version_id : doc.runtime_version_id;
   const version_id = rawVid == null || String(rawVid).trim() === "" ? null : String(rawVid).trim();
+  const deploy = deployTipAllowsLive(doc);
+  if (!deploy.ok) {
+    return {
+      ok: false,
+      code: RUNTIME_DEPLOY_LAG,
+      message: RUNTIME_DEPLOY_LAG_NOTE,
+      observed: { git_sha, version, version_id },
+    };
+  }
   const git_sha_short = git_sha.slice(0, 7);
   const cite = version_id
     ? "main " + git_sha_short + " / version_id " + version_id + " / " + version
@@ -294,12 +364,15 @@ function publicCurrent(state) {
   const floor = floorRuntimeCite();
   const cite = state && state.cite ? state.cite : floor;
   const status = state && state.status ? state.status : floor.status;
-  const live = state ? state.live !== false : floor.live;
+  const live = status === "live" && !!state && state.live !== false;
   return {
     status,
-    live: status === "unreachable" ? false : live,
+    live,
+    role: live ? "live" : status,
+    current: live,
     source: (state && state.source) || floor.source,
     kept: status === "unreachable" ? "last-known" : null,
+    read_at: status === "floor" ? floor.read_at : null,
     observed_at: (state && state.observed_at) || null,
     attempted_at: (state && state.attempted_at) || null,
     observed_count: cite.observed_count != null ? cite.observed_count : null,
@@ -645,6 +718,8 @@ export async function loadAppliedCite(env) {
     live: state.status === "unreachable" ? false : state.live !== false,
     status: state.status || "live",
     source: state.source || "pull",
+    observed_at: state.observed_at || null,
+    attempted_at: state.attempted_at || null,
   };
 }
 

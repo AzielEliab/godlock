@@ -604,7 +604,8 @@ async function submitRefuseResponse(request, url, refused) {
   if (wantsJson(request, url)) {
     return json(body, status, extra);
   }
-  return html(page("GodLock", homeBody({ stats: {}, error: refused.error }), { path: "/", kind: "home" }), {
+  const visibleError = refused.code ? refused.error + " (" + refused.code + ")" : refused.error;
+  return html(page("GodLock", homeBody({ stats: {}, error: visibleError }), { path: "/", kind: "home" }), {
     status,
     extraHeaders: extra,
   });

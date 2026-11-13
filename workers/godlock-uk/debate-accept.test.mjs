@@ -20,8 +20,15 @@ const RELATIVE = [
   "Irreducible complexity of the bacterial flagellum is a design claim.",
   "Natural selection after a replicator exists does not write the genetic code.",
   "Who designed the designer of the genetic code?",
+  "Who designed the designer?",
   "Creationism is a label, not a codon table.",
   "Phi equals 1.618 so God designed physics.",
+  "Paley's watch on the heath implies a watchmaker.",
+  "The inverted retina is a design flaw in the vertebrate eye.",
+  "The designer of the universe left a signature in the constants.",
+  "The Blind Watchmaker is a reply to the design argument, not a shop.",
+  "Intelligent design explains the origin of biological information better than chance because the pattern is specified in the genetic code.",
+  "The anthropic principle is the usual companion to fine-tuning of the constants.",
 ];
 
 const UNRELATED = [
@@ -35,6 +42,15 @@ const UNRELATED = [
   "The Marvel multiverse movie opens on Friday.",
   "Charles Darwin wrote a book about earthworms in his garden and nothing else.",
   "The evolution of the smartphone market continued through the holiday quarter.",
+  "The designer of the iPhone changed the holiday market in London this quarter after the earnings report.",
+  "The watchmaker repaired the clock on Baker Street before the evening concert.",
+  "Fine-tuning the guitar before the concert in London took the whole afternoon and the audience waited.",
+  "The creationist bakery sold bread in London after the holiday rush.",
+  "The phone was designed by a designer at the studio in London after the earnings call.",
+  "intelligent design aaaaaaaaaa",
+  "kkkkkkkk intelligent design kkkkkkkk",
+  "The quarterly earnings of the retail sector beat estimates. Intelligent design. The holiday season in London was busy.",
+  "Who designed the designer? The quarterly earnings of the retail sector beat estimates after the holiday season in London.",
 ];
 
 describe("debate acceptance fails closed", () => {
@@ -87,5 +103,6 @@ describe("debate acceptance fails closed", () => {
     assert.match(help, /## Debate acceptance/);
     assert.match(help, /GODLOCK-NOT-RELATIVE/);
     assert.match(help, /fails closed/);
+    assert.match(help, /Gibberish with a topic word is refused/);
   });
 });

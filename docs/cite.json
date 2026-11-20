@@ -713,6 +713,41 @@
       "id": "unseal",
       "label": "TimeToUnsealTheBook",
       "href": "https://www.timetounsealthebook.net"
+    },
+    {
+      "id": "hdj-live",
+      "label": "He Didn't Jump",
+      "href": "https://hedidntjump.com/"
+    },
+    {
+      "id": "furnace-live",
+      "label": "Furnace Isn't Free",
+      "href": "https://furnaceisntfree.com/"
+    },
+    {
+      "id": "unseal-live",
+      "label": "Time to Unseal the Book",
+      "href": "https://timetounsealthebook.net/"
+    },
+    {
+      "id": "whitestone",
+      "label": "Whitestone",
+      "href": "https://whitestone.vibelock.workers.dev/"
+    },
+    {
+      "id": "miragegrid",
+      "label": "MirageGrid",
+      "href": "https://miragegrid.vibelock.workers.dev/"
+    },
+    {
+      "id": "glama-trades",
+      "label": "Trades Runtime on Glama",
+      "href": "https://glama.ai/mcp/servers/AzielEliab/trades-runtime"
+    },
+    {
+      "id": "doors",
+      "label": "Doors",
+      "href": "https://godlock.uk/doors"
     }
   ],
   "ai_clients": [

@@ -183,7 +183,7 @@ describe("Aziel Eliab page chrome", () => {
     const nav = topNav("/verify");
     assert.match(
       nav,
-      /href="\/">Engine<\/a><span class="sep">\|<\/span><a href="\/reason">Reason<\/a><span class="sep">\|<\/span><a href="\/software">Softwares<\/a><span class="sep">\|<\/span><a href="\/runtime">Runtime<\/a><span class="sep">\|<\/span><a href="\/receipts">Receipts<\/a><span class="sep">\|<\/span><a href="\/verify"/,
+      /href="\/">Engine<\/a><span class="sep">\|<\/span><a href="\/reason">Reason<\/a><span class="sep">\|<\/span><a href="\/software">Softwares<\/a><span class="sep">\|<\/span><a href="\/doors">Doors<\/a><span class="sep">\|<\/span><a href="\/runtime">Runtime<\/a><span class="sep">\|<\/span><a href="\/receipts">Receipts<\/a><span class="sep">\|<\/span><a href="\/verify"/,
     );
     assert.match(
       nav,
@@ -450,14 +450,21 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes("<loc>" + CANON_HOST + "/who</loc>"));
     assert.ok(xml.includes("<loc>" + CANON_HOST + "/who-is</loc>"));
     assert.ok(xml.includes(CANON_HOST + "/count"));
-    assert.ok(xml.includes("https://www.azieleliab.com/donate"));
+    assert.ok(xml.includes("<loc>" + CANON_HOST + "/doors</loc>"));
+    assert.ok(xml.includes("<lastmod>" + new Date().toISOString().slice(0, 10) + "</lastmod>"));
+    const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+    assert.ok(locs.length >= 40);
+    for (const loc of locs) {
+      assert.equal(new URL(loc).hostname, "godlock.uk", loc);
+    }
+    assert.ok(!xml.includes("<loc>https://www.azieleliab.com/donate</loc>"));
     assert.ok(xml.includes(CANON_HOST + "/AzielEliab"));
     assert.ok(xml.includes("<changefreq>daily</changefreq>"));
     assert.ok(xml.includes("<priority>1.0</priority>"));
-    assert.ok((xml.match(/<loc>/g) || []).length >= 80);
+    assert.ok((xml.match(/<loc>/g) || []).length >= 40);
     assert.ok(xml.includes(CANON_HOST + "/software#godlock"));
     assert.ok(xml.includes(CANON_HOST + "/software#aziel-runtime"));
-    assert.ok(xml.includes(OFFICIAL_SOFTWARES));
+    assert.ok(!xml.includes("<loc>" + OFFICIAL_SOFTWARES + "</loc>"));
     assert.ok(!xml.includes(CANON_HOST + "/software#fraggate"));
     assert.ok(!xml.includes(CANON_HOST + "/software#trades-runtime"));
     assert.ok(!xml.includes(CANON_HOST + "/software#peacelock"));
@@ -475,7 +482,7 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/runtime/llms.txt"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/cite.json"));
     assert.ok(xml.includes(CANON_HOST + "/shelves"));
-    assert.ok(xml.includes("https://www.azielcorpuslibrary.net/shelves"));
+    assert.ok(!xml.includes("<loc>https://www.azielcorpuslibrary.net/shelves</loc>"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/mcp"));
     assert.ok(xml.includes(CANON_HOST + "/.well-known/mcp.json"));
     assert.ok(xml.includes(CANON_HOST + "/mcp.json"));
@@ -489,29 +496,29 @@ describe("Aziel Eliab SEO surfaces", () => {
     assert.ok(xml.includes(CANON_HOST + "/v1/mesh/status"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/list"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/update/check"));
-    assert.ok(xml.includes("https://github.com/AzielEliab/aziel-runtime/tree/main/docs/2.0"));
-    assert.ok(xml.includes("https://glama.ai/mcp/servers/AzielEliab/aziel-runtime"));
+    assert.ok(!xml.includes("<loc>https://github.com/AzielEliab/aziel-runtime/tree/main/docs/2.0</loc>"));
+    assert.ok(!xml.includes("<loc>https://glama.ai/mcp/servers/AzielEliab/aziel-runtime</loc>"));
     assert.ok(xml.includes(CANON_HOST + "/openapi.json"));
-    assert.ok(xml.includes("https://aziel-runtime.vibelock.workers.dev/v1/software"));
-    assert.ok(xml.includes("https://www.azielcorpuslibrary.net/runtime"));
+    assert.ok(!xml.includes("<loc>https://aziel-runtime.vibelock.workers.dev/v1/software</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.azielcorpuslibrary.net/runtime</loc>"));
     assert.ok(!xml.includes(CANON_HOST + "/AzielCorpusLibrary"));
-    assert.ok(xml.includes(LIBRARY_AZIEL));
-    assert.ok(xml.includes("https://www.hedidntjump.com/"));
-    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/"));
-    assert.ok(xml.includes("https://github.com/AzielEliab/trades-runtime"));
-    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/download"));
-    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/cite.json"));
-    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/llms.txt"));
-    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/openapi.json"));
-    assert.ok(xml.includes("https://trades-runtime.vibelock.workers.dev/mcp"));
+    assert.ok(!xml.includes("<loc>" + LIBRARY_AZIEL + "</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.hedidntjump.com/</loc>"));
+    assert.ok(!xml.includes("<loc>https://trades-runtime.vibelock.workers.dev/</loc>"));
+    assert.ok(!xml.includes("<loc>https://github.com/AzielEliab/trades-runtime</loc>"));
+    assert.ok(!xml.includes("<loc>https://trades-runtime.vibelock.workers.dev/download</loc>"));
+    assert.ok(!xml.includes("<loc>https://trades-runtime.vibelock.workers.dev/cite.json</loc>"));
+    assert.ok(!xml.includes("<loc>https://trades-runtime.vibelock.workers.dev/llms.txt</loc>"));
+    assert.ok(!xml.includes("<loc>https://trades-runtime.vibelock.workers.dev/openapi.json</loc>"));
+    assert.ok(!xml.includes("<loc>https://trades-runtime.vibelock.workers.dev/mcp</loc>"));
     assert.ok(!xml.includes("https://trades-runtime-download-tracker.vibelock.workers.dev"));
     assert.ok(!xml.includes(CANON_HOST + "/software#trades-runtime"));
     assert.ok(xml.includes(CANON_HOST + "/runtime/v1/fraggate/describe?slug=spectrallock"));
-    assert.ok(xml.includes(SPECTRALLOCK_UNREDACT));
-    assert.ok(xml.includes(SPECTRALLOCK_RECOVER));
-    assert.ok(xml.includes(SPECTRALLOCK_HANDWRITING));
-    assert.ok(xml.includes(SPECTRALLOCK_GITHUB));
-    assert.ok(xml.includes("https://spectrallock-download-tracker.vibelock.workers.dev/"));
+    assert.ok(!xml.includes("<loc>" + SPECTRALLOCK_UNREDACT + "</loc>"));
+    assert.ok(!xml.includes("<loc>" + SPECTRALLOCK_RECOVER + "</loc>"));
+    assert.ok(!xml.includes("<loc>" + SPECTRALLOCK_HANDWRITING + "</loc>"));
+    assert.ok(!xml.includes("<loc>" + SPECTRALLOCK_GITHUB + "</loc>"));
+    assert.ok(!xml.includes("<loc>https://spectrallock-download-tracker.vibelock.workers.dev/</loc>"));
     assert.ok(!xml.includes(CANON_HOST + "/software#spectrallock"));
     const cite = citeDoc();
     assert.equal(cite.specified_fit, CANON_HOST + "/reason");
@@ -958,7 +965,8 @@ describe("homepage stays a natural argument surface", () => {
     assert.doesNotMatch(html, /Use with Grok, ChatGPT, Venice/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock|paste-block|how the argument works/i);
     assert.doesNotMatch(html, /\bABAD\b/);
-    assert.doesNotMatch(html, /Whitestone/);
+    assert.doesNotMatch(html, /id="whitestone"/);
+    assert.match(html, /href="https:\/\/whitestone\.vibelock\.workers\.dev\/">Whitestone<\/a>/);
     assert.doesNotMatch(html, /The ARK/);
   });
 
@@ -1139,7 +1147,8 @@ describe("How GodLock is scored", () => {
     assert.doesNotMatch(html, /A\. Detection/);
     assert.doesNotMatch(html, /Score floor 33\.3/);
     assert.doesNotMatch(html, /\bABAD\b/);
-    assert.doesNotMatch(html, /Whitestone/);
+    assert.doesNotMatch(html, /id="whitestone"/);
+    assert.match(html, /href="https:\/\/whitestone\.vibelock\.workers\.dev\/">Whitestone<\/a>/);
     assert.doesNotMatch(html, /The ARK/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock/i);
   });
@@ -1413,7 +1422,7 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.match(html, /Score text for offline hardening and receive an ephemeral receipt/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA|bootstrap lock/i);
     assert.doesNotMatch(html, /\bABAD\b/);
-    assert.doesNotMatch(html, /Whitestone/);
+    assert.doesNotMatch(html, /id="whitestone"/);
     const extras = new Set([...EXTRA_SUITE_SLUGS, FRAGGATE_CARD.slug]);
     const invented = ids.filter((id) => !extras.has(id) && !CATALOG_SLUGS.includes(id));
     assert.deepEqual(invented, []);
@@ -1595,7 +1604,8 @@ describe("Software page hosts the full aziel-runtime catalog", () => {
     assert.doesNotMatch(html, /Catalog unavailable/);
     assert.doesNotMatch(html, /INTERNAL_CRITERIA/i);
     assert.doesNotMatch(html, /\bABAD\b/);
-    assert.doesNotMatch(html, /Whitestone/);
+    assert.doesNotMatch(html, /id="whitestone"/);
+    assert.match(html, /href="https:\/\/whitestone\.vibelock\.workers\.dev\/">Whitestone<\/a>/);
     assert.doesNotMatch(html, /The ARK/);
     assert.doesNotMatch(html, /id="trades-runtime"/);
     assert.doesNotMatch(html, /id="spectrallock"/);
@@ -2213,31 +2223,40 @@ describe("Aziel Public Entity Graph Phases B–D", () => {
   it("puts the ecosystem block in footer/nav, not between Softwares heading and list", async () => {
     const links = ecosystemLinks();
     assert.deepEqual(links.map((l) => [l.label, l.href, !!l.secondary]), [
-      ["Official site", "https://www.azieleliab.com/", false],
+      ["Aziel Eliab", "https://www.azieleliab.com/", false],
       ["Aziel Corpus Library", "https://www.azielcorpuslibrary.net/", false],
-      ["He Didn't Jump", "https://www.hedidntjump.com/", false],
-      ["Aziel Runtime on GitHub", "https://github.com/AzielEliab/aziel-runtime", false],
+      ["GodLock", "https://godlock.uk/", false],
+      ["He Didn't Jump", "https://hedidntjump.com/", false],
+      ["Furnace Isn't Free", "https://furnaceisntfree.com/", false],
+      ["Time to Unseal the Book", "https://timetounsealthebook.net/", false],
+      ["Whitestone", "https://whitestone.vibelock.workers.dev/", false],
       ["Aziel Runtime", "https://aziel-runtime.vibelock.workers.dev/", true],
+      ["Trades Runtime", "https://trades-runtime.vibelock.workers.dev/", true],
+      ["MirageGrid", "https://miragegrid.vibelock.workers.dev/", false],
       ["Try on Glama", "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime", false],
-      ["Trades-Runtime", "https://trades-runtime.vibelock.workers.dev/", true],
-      ["GodLock.uk", "https://godlock.uk/", false],
+      ["Trades Runtime on Glama", "https://glama.ai/mcp/servers/AzielEliab/trades-runtime", false],
+      ["Aziel Runtime on GitHub", "https://github.com/AzielEliab/aziel-runtime", false],
       ["Softwares", "https://www.azieleliab.com/software", false],
-      ["Furnace Isn't Free", "https://www.furnaceisntfree.com/", false],
       ["Furnace Isn't Free · Aziel", "https://furnaceisntfree.com/aziel/", false],
-      ["TimeToUnsealTheBook", "https://www.timetounsealthebook.net", false],
+      ["Doors", "https://godlock.uk/doors", false],
     ]);
     const eco = ecosystemNav();
     assert.match(eco, /Part of the Aziel Eliab ecosystem/);
-    assert.match(eco, /href="https:\/\/www\.azieleliab\.com\/">Official site<\/a>/);
+    assert.match(eco, /href="https:\/\/www\.azieleliab\.com\/">Aziel Eliab<\/a>/);
     assert.match(eco, /href="https:\/\/www\.azielcorpuslibrary\.net\/">Aziel Corpus Library<\/a>/);
-    assert.match(eco, /href="https:\/\/www\.hedidntjump\.com\/">He Didn't Jump<\/a>/);
+    assert.match(eco, /href="https:\/\/hedidntjump\.com\/">He Didn't Jump<\/a>/);
     assert.match(eco, /href="https:\/\/github\.com\/AzielEliab\/aziel-runtime">Aziel Runtime on GitHub<\/a>/);
     assert.match(eco, /href="https:\/\/aziel-runtime\.vibelock\.workers\.dev\/" class="secondary">Aziel Runtime<\/a>/);
     assert.match(eco, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/aziel-runtime">Try on Glama<\/a>/);
-    assert.match(eco, /href="https:\/\/trades-runtime\.vibelock\.workers\.dev\/" class="secondary">Trades-Runtime<\/a>/);
-    assert.match(eco, /href="https:\/\/www\.furnaceisntfree\.com\/">Furnace Isn't Free<\/a>/);
+    assert.match(eco, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/trades-runtime">Trades Runtime on Glama<\/a>/);
+    assert.match(eco, /href="https:\/\/trades-runtime\.vibelock\.workers\.dev\/" class="secondary">Trades Runtime<\/a>/);
+    assert.match(eco, /href="https:\/\/whitestone\.vibelock\.workers\.dev\/">Whitestone<\/a>/);
+    assert.match(eco, /href="https:\/\/miragegrid\.vibelock\.workers\.dev\/">MirageGrid<\/a>/);
+    assert.match(eco, /href="https:\/\/furnaceisntfree\.com\/">Furnace Isn't Free<\/a>/);
     assert.match(eco, /href="https:\/\/furnaceisntfree\.com\/aziel\/">Furnace Isn't Free · Aziel<\/a>/);
-    assert.match(eco, /href="https:\/\/www\.timetounsealthebook\.net">TimeToUnsealTheBook<\/a>/);
+    assert.match(eco, /href="https:\/\/timetounsealthebook\.net\/">Time to Unseal the Book<\/a>/);
+    assert.doesNotMatch(eco, /download-tracker/);
+    assert.doesNotMatch(eco, /thefurnaceisntfree\.com/);
     const software = softwareBody({ products: [] });
     assert.match(software, /<h2 class="soft-heading">Softwares<\/h2>\s*<div class="soft-grid">/);
     assert.doesNotMatch(software, /Part of the Aziel Eliab ecosystem/);
@@ -2705,7 +2724,7 @@ describe("crawler discovery — canonical host, HEAD, Content-Signal, cite Perso
     assert.equal(CONTENT_SIGNAL, "search=yes, ai-input=yes, ai-train=yes");
   });
 
-  it("308s www and cleartext http to https://godlock.uk and leaves other hosts", () => {
+  it("301s www and 308s cleartext http to https://godlock.uk and leaves other hosts", () => {
     assert.equal(
       canonicalHostRedirect(new URL("https://www.godlock.uk/software?x=1")),
       "https://godlock.uk/software?x=1",
@@ -2765,7 +2784,7 @@ describe("crawler discovery — canonical host, HEAD, Content-Signal, cite Perso
     assert.doesNotMatch(visible, /1 Chronicles 15:20/);
     assert.doesNotMatch(visible, /class="identity-lock"/);
     const www = await worker.fetch(new Request("https://www.godlock.uk/cite.json?keep=1", { method: "HEAD" }), mockEnv());
-    assert.equal(www.status, 308);
+    assert.equal(www.status, 301);
     assert.equal(www.headers.get("Location"), "https://godlock.uk/cite.json?keep=1");
     assert.equal(www.headers.get("Content-Signal"), CONTENT_SIGNAL);
     const httpHome = await worker.fetch(new Request("http://godlock.uk/reason"), mockEnv());
@@ -3130,6 +3149,13 @@ describe("Aziel handles pretty paths", () => {
       assert.match(html, /href="https:\/\/www\.furnaceisntfree\.com\/"/, path);
       assert.match(html, /href="https:\/\/furnaceisntfree\.com\/aziel\/"/, path);
       assert.match(html, /href="https:\/\/www\.timetounsealthebook\.net"/, path);
+      assert.match(html, /href="https:\/\/hedidntjump\.com\/"/, path);
+      assert.match(html, /href="https:\/\/furnaceisntfree\.com\/"/, path);
+      assert.match(html, /href="https:\/\/timetounsealthebook\.net\/"/, path);
+      assert.match(html, /href="https:\/\/whitestone\.vibelock\.workers\.dev\/"/, path);
+      assert.match(html, /href="https:\/\/miragegrid\.vibelock\.workers\.dev\/"/, path);
+      assert.match(html, /href="https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/trades-runtime"/, path);
+      assert.doesNotMatch(html, /thefurnaceisntfree\.com/, path);
       assert.match(html, /Cap-7 is not an ICANN registration/, path);
       assert.match(html, /Paid satellite stays HELD/, path);
       assert.doesNotMatch(visible(html), /1 Chronicles 15:20/, path);
@@ -3155,9 +3181,10 @@ describe("Aziel handles pretty paths", () => {
     assert.match(robots, /Growth-ON/);
     const xml = await sitemapXml();
     assert.ok(xml.includes("https://godlock.uk/aziel"));
-    assert.ok(xml.includes("https://www.furnaceisntfree.com/"));
-    assert.ok(xml.includes("https://furnaceisntfree.com/aziel/"));
-    assert.ok(xml.includes("https://www.timetounsealthebook.net"));
+    assert.ok(xml.includes("<loc>https://godlock.uk/doors</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.furnaceisntfree.com/</loc>"));
+    assert.ok(!xml.includes("<loc>https://furnaceisntfree.com/aziel/</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.timetounsealthebook.net</loc>"));
     assert.ok(xml.includes("https://godlock.uk/AzielEliab"));
     assert.ok(xml.includes("https://godlock.uk/receipts"));
     const cite = citeDoc();
@@ -3177,5 +3204,64 @@ describe("Aziel handles pretty paths", () => {
     assert.equal(cite.debate_acceptance.refuse_code, "GODLOCK-NOT-RELATIVE");
     assert.ok(cite.sister_mesh.includes("https://aziel-runtime.vibelock.workers.dev/"));
     assert.match(llms, /Official Aziel sites: https:\/\/www\.furnaceisntfree\.com\/ · https:\/\/furnaceisntfree\.com\/aziel\/ · https:\/\/www\.timetounsealthebook\.net/);
+    assert.match(llms, /## Live public doors/);
+    assert.match(llms, /https:\/\/hedidntjump\.com\//);
+    assert.match(llms, /https:\/\/furnaceisntfree\.com\//);
+    assert.match(llms, /https:\/\/timetounsealthebook\.net\//);
+    assert.match(llms, /https:\/\/whitestone\.vibelock\.workers\.dev\//);
+    assert.match(llms, /https:\/\/miragegrid\.vibelock\.workers\.dev\//);
+    assert.match(llms, /Glama trades-runtime: https:\/\/glama\.ai\/mcp\/servers\/AzielEliab\/trades-runtime/);
+    assert.match(llms, /live_backends: false/);
+    assert.match(llms, /public_icann: false/);
+    assert.doesNotMatch(llms, /thefurnaceisntfree\.com/);
+    assert.doesNotMatch(llms, /pilot_started/);
+  });
+
+  it("serves /doors with the ten live origins and no download-tracker doors", async () => {
+    const res = await worker.fetch(new Request("https://godlock.uk/doors"), mockEnv());
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, /<title>Ecosystem \/ Doors — GodLock<\/title>/);
+    assert.match(html, /rel="canonical" href="https:\/\/godlock\.uk\/doors"/);
+    assert.match(html, /<h2>Ecosystem \/ Doors<\/h2>/);
+    for (const href of [
+      "https://www.azieleliab.com/",
+      "https://www.azielcorpuslibrary.net/",
+      "https://godlock.uk/",
+      "https://hedidntjump.com/",
+      "https://furnaceisntfree.com/",
+      "https://timetounsealthebook.net/",
+      "https://whitestone.vibelock.workers.dev/",
+      "https://aziel-runtime.vibelock.workers.dev/",
+      "https://trades-runtime.vibelock.workers.dev/",
+      "https://miragegrid.vibelock.workers.dev/",
+      "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime",
+      "https://glama.ai/mcp/servers/AzielEliab/trades-runtime",
+    ]) {
+      assert.match(html, new RegExp('href="' + href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + '"'), href);
+    }
+    assert.match(html, /public_icann: false/);
+    assert.match(html, /live_backends: false/);
+    assert.match(html, /Mesh-only|mesh-only/);
+    assert.doesNotMatch(html, /download-tracker/);
+    assert.doesNotMatch(html, /thefurnaceisntfree\.com/);
+    assert.doesNotMatch(html, /pilot_started/);
+    assert.doesNotMatch(visible(html), /1 Chronicles 15:20/);
+    assert.doesNotMatch(visible(html), /class="identity-lock"/);
+    const json = await (await worker.fetch(new Request("https://godlock.uk/doors?format=json"), mockEnv())).json();
+    assert.equal(json.path, "/doors");
+    assert.equal(json.doors.length, 10);
+    assert.equal(json.download_trackers_are_doors, false);
+    assert.equal(json.miragegrid_public_icann, false);
+    assert.equal(json.trades_live_backends, false);
+    assert.equal(json.glama.trades_runtime, "https://glama.ai/mcp/servers/AzielEliab/trades-runtime");
+    assert.equal(json.person_id, "https://www.azieleliab.com/#aziel");
+    const www = await worker.fetch(new Request("https://www.godlock.uk/doors?x=1"), mockEnv());
+    assert.equal(www.status, 301);
+    assert.equal(www.headers.get("Location"), "https://godlock.uk/doors?x=1");
+    const robots = robotsTxt();
+    assert.match(robots, /Allow: \/doors/);
+    assert.match(robots, /Growth-ON/);
+    assert.match(robots, /Content-Signal: search=yes, ai-input=yes, ai-train=yes/);
   });
 });

@@ -17,7 +17,7 @@ import { randomBytes } from "node:crypto";
 import { json, html, corsHeaders, stampContentSignal, wantsJson, readCookie } from "./http.js";
 import {
   page, homeBody, verifyBody, receiptBody, receiptsBody, azielEliabBody, azielEliabText,
-  azielHandlesBody, azielHandlesText,
+  azielHandlesBody, azielHandlesText, doorsBody,
   whoPageHtml, reasonBody, reasonText, softwareBody, donateBody, AZIEL_ELIAB_PATH, AZIEL_HANDLES_PATH, REASON_PATH, SOFTWARE_PATH, DONATE_PATH,
   RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE,
 } from "./ui.js";
@@ -35,7 +35,8 @@ import {
   BRAND_MARK_PATH,
   personJsonLd, identityJsonLd, graphJsonLd, worksDoc, whoIsAzielEliabTxt, whyAzielEliabTxt, wellKnownAzielDoc,
   AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE, WHO_PATH, WHY_IS_PATH,
-  AZIEL_HANDLES, CAP7_PUBLIC, PAID_SAT_PUBLIC, PATTERN_HOLD_PUBLIC, DOORS_URL,
+  AZIEL_HANDLES, CAP7_PUBLIC, PAID_SAT_PUBLIC, PATTERN_HOLD_PUBLIC, DOORS_URL, DOORS_PATH,
+  LIVE_PUBLIC_DOORS, GLAMA_RUNTIME, GLAMA_TRADES,
   FURNACE_SITE, FURNACE_AZIEL, FURNACE_LABEL, FURNACE_AZIEL_LABEL, UNSEAL_DOOR, UNSEAL_LABEL, SISTER_MESH,
   searchEngineAssociation,
   WHAT_AZIEL_ELIAB_DOES, WHAT_AZIEL_ELIAB_DOES_FAQ_TITLES,
@@ -971,8 +972,9 @@ async function handleGodlock(request, env, ctx) {
     if (request.method === "GET" || request.method === "HEAD") {
       const canonical = canonicalHostRedirect(url, request);
       if (canonical) {
+        const host = String(url.hostname || "").toLowerCase().replace(/\.$/, "");
         return new Response(null, {
-          status: 308,
+          status: host === "www.godlock.uk" ? 301 : 308,
           headers: {
             Location: canonical,
             ...corsHeaders(),
@@ -1368,6 +1370,36 @@ async function handleGodlock(request, env, ctx) {
           }, 200, extraHeadersFor(nodeId));
         }
         return html(page("Aziel", azielHandlesBody(), { path: AZIEL_HANDLES_PATH, kind: "handles" }), {
+          extraHeaders: extraHeadersFor(nodeId),
+        });
+      }
+
+      if (path === DOORS_PATH) {
+        if (wantsJson(request, url)) {
+          return json({
+            ok: true,
+            product: "GodLock",
+            site: "godlock.uk",
+            author: AUTHOR,
+            title: "Ecosystem / Doors",
+            path: DOORS_PATH,
+            identity: AUTHOR,
+            person_id: AZIEL_PERSON_ID,
+            verified: "2026-11-19",
+            doors: LIVE_PUBLIC_DOORS.map((d) => ({ ...d })),
+            glama: {
+              aziel_runtime: GLAMA_RUNTIME,
+              trades_runtime: GLAMA_TRADES,
+            },
+            download_trackers_are_doors: false,
+            miragegrid_public_icann: false,
+            trades_live_backends: false,
+            cap7_is_icann: false,
+            cap7_note: CAP7_PUBLIC,
+            hub_doors: DOORS_URL,
+          }, 200, extraHeadersFor(nodeId));
+        }
+        return html(page("Ecosystem / Doors", doorsBody(), { path: DOORS_PATH, kind: "doors" }), {
           extraHeaders: extraHeadersFor(nodeId),
         });
       }

@@ -111,8 +111,10 @@ export const WHY_PATH = "/why";
 export const VERIFY_PATH = "/verify";
 /** Pretty path for the Aziel handles tab. Not a redirect to /AzielEliab. */
 export const AZIEL_HANDLES_PATH = "/aziel";
-/** Public doors list. Handles on this site match that page. */
+/** Public doors list on the identity hub. Handles on this site match that page. */
 export const DOORS_URL = "https://www.azieleliab.com/doors";
+/** Same-origin Ecosystem / Doors page. First-party. Not a download tracker. */
+export const DOORS_PATH = "/doors";
 /** Official Aziel site. Home and the /aziel door are both https links. */
 export const FURNACE_SITE = "https://www.furnaceisntfree.com/";
 export const FURNACE_AZIEL = "https://furnaceisntfree.com/aziel/";
@@ -148,6 +150,7 @@ export const TAB_PATHS = [
   { href: "/", label: "Engine" },
   { href: REASON_PATH, label: "Reason" },
   { href: SOFTWARE_PATH, label: "Softwares" },
+  { href: DOORS_PATH, label: "Doors" },
   { href: RUNTIME_PATH, label: "Runtime" },
   { href: RECEIPTS_PATH, label: "Receipts" },
   { href: VERIFY_PATH, label: "Verify" },
@@ -238,6 +241,8 @@ export const GODLOCK_PURPOSE_ONE_LINE =
   "Score text for offline hardening and receive an ephemeral receipt.";
 /** Verified Glama listing (HTTP 200). GitHub-path id AzielEliab/aziel-runtime — not an invented UUID. */
 export const GLAMA_RUNTIME = "https://glama.ai/mcp/servers/AzielEliab/aziel-runtime";
+/** Verified Glama listing for the public trades runtime. Sister cite. live_backends stays false. */
+export const GLAMA_TRADES = "https://glama.ai/mcp/servers/AzielEliab/trades-runtime";
 export const RUNTIME_DOCS_2_0 = GITHUB_RUNTIME + "/tree/main/docs/2.0";
 export const FRAGGATE_KERNEL = "https://github.com/AzielEliab/fraggate";
 export const FRAGGATE_DOWNLOAD = "https://fraggate-download-tracker.vibelock.workers.dev/download";
@@ -487,22 +492,55 @@ export function runtimeDistribution({ sameOrigin = false } = {}) {
   ];
 }
 
+/**
+ * Ten live public sites and runtimes (verified 2026-11-19).
+ * Door hrefs are the live public origins. Download-tracker hosts are not doors.
+ * MirageGrid is mesh-only (public_icann false). Trades Runtime does not claim live_backends.
+ */
+export const LIVE_PUBLIC_DOORS = Object.freeze([
+  { id: "ae", label: "Aziel Eliab", href: "https://www.azieleliab.com/", note: "Identity hub." },
+  { id: "corpus", label: "Aziel Corpus Library", href: "https://www.azielcorpuslibrary.net/", note: "Aziel Corpus Library." },
+  { id: "godlock", label: "GodLock", href: "https://godlock.uk/", note: "GodLock challenge/score product. This host." },
+  { id: "hdj", label: "He Didn't Jump", href: "https://hedidntjump.com/", note: "Marion Zioncheck archive. A handle, not a Live Node." },
+  { id: "furnace", label: "Furnace Isn't Free", href: "https://furnaceisntfree.com/", note: "Live public site." },
+  { id: "unseal", label: "Time to Unseal the Book", href: "https://timetounsealthebook.net/", note: "Time to Unseal the Book." },
+  { id: "whitestone", label: "Whitestone", href: "https://whitestone.vibelock.workers.dev/", note: "Live pro se web app." },
+  { id: "runtime", label: "Aziel Runtime", href: "https://aziel-runtime.vibelock.workers.dev/", note: "MCP/Softwares public runtime.", glama: GLAMA_RUNTIME },
+  { id: "trades", label: "Trades Runtime", href: "https://trades-runtime.vibelock.workers.dev/", note: "Public MCP runtime. Local-first BYO. live_backends false.", glama: GLAMA_TRADES },
+  { id: "miragegrid", label: "MirageGrid", href: "https://miragegrid.vibelock.workers.dev/", note: "Cap-7 mesh DNS factory Worker. Mesh-only. public_icann: false. " + CAP7_PUBLIC },
+]);
+
 /** Visible ecosystem block (footer/nav). Not inserted between Softwares heading and list. */
 export function ecosystemLinks() {
-  return [
-    { id: "official", label: "Official site", href: AZIEL_OFFICIAL },
-    { id: "library", label: "Aziel Corpus Library", href: LIBRARY_HOME },
-    { id: "hedidntjump", label: HEDIDNTJUMP_LABEL, href: HEDIDNTJUMP },
-    { id: "runtime-github", label: "Aziel Runtime on GitHub", href: GITHUB_RUNTIME },
-    { id: "runtime", label: "Aziel Runtime", href: CATALOG + "/", secondary: true },
+  const doors = LIVE_PUBLIC_DOORS.map((d) => ({
+    id: d.id,
+    label: d.label,
+    href: d.href,
+    ...(d.id === "runtime" || d.id === "trades" ? { secondary: true } : {}),
+  }));
+  return doors.concat([
     { id: "glama", label: "Try on Glama", href: GLAMA_RUNTIME },
-    { id: "trades", label: TRADES_NAME, href: TRADES_WORKER + "/", secondary: true },
-    { id: "godlock", label: "GodLock.uk", href: CANON_HOST + "/" },
+    { id: "glama-trades", label: "Trades Runtime on Glama", href: GLAMA_TRADES },
+    { id: "runtime-github", label: "Aziel Runtime on GitHub", href: GITHUB_RUNTIME },
     { id: "softwares", label: "Softwares", href: OFFICIAL_SOFTWARES },
-    { id: "furnace", label: FURNACE_LABEL, href: FURNACE_SITE },
     { id: "furnace-aziel", label: FURNACE_AZIEL_LABEL, href: FURNACE_AZIEL },
-    { id: "unseal", label: UNSEAL_LABEL, href: UNSEAL_DOOR },
-  ];
+    { id: "doors", label: "Doors", href: CANON_HOST + DOORS_PATH },
+  ]);
+}
+
+export function liveDoorsLlmsSection() {
+  const lines = LIVE_PUBLIC_DOORS.map((d) => {
+    const glama = d.glama ? " Glama: " + d.glama + "." : "";
+    return "- " + d.label + ": " + d.href + " " + d.note + glama;
+  });
+  return "## Live public doors\n\n"
+    + "Verified live 2026-11-19. Ecosystem page: " + CANON_HOST + DOORS_PATH + ".\n"
+    + lines.join("\n") + "\n"
+    + "Glama aziel-runtime: " + GLAMA_RUNTIME + "\n"
+    + "Glama trades-runtime: " + GLAMA_TRADES + "\n"
+    + "Counted download hosts stay off the door list.\n"
+    + "Trades Runtime live_backends: false.\n"
+    + "MirageGrid public_icann: false. Mesh-only. " + CAP7_PUBLIC + "\n\n";
 }
 
 /** Descriptions lead with GodLock + living Aziel Eliab. No bio. No merge tokens. */
@@ -1588,6 +1626,7 @@ export function wellKnownAzielDoc() {
 export function documentTitle(title, kind) {
   if (kind === "home" || title === SITE) return "Godlock. The Debate Site of Intelligent Design";
   if (kind === "software") return SITE + " Softwares";
+  if (kind === "doors") return "Ecosystem / Doors — " + SITE;
   if (kind === "aziel") return "About " + AUTHOR + " — " + SITE;
   if (kind === "handles") return "Aziel handles — " + SITE;
   if (kind === "reason") return "How GodLock is scored — " + SITE;
@@ -1711,6 +1750,12 @@ export function defaultDescription(kind, runtimeCite) {
         + " Author Aziel Eliab.",
     );
   }
+  if (kind === "doors") {
+    return hideInternalDetermination(
+      "Ecosystem / Doors. Ten live Aziel Eliab sites and public runtimes. Whitestone is a live pro se web app. MirageGrid is mesh-only (public_icann false). Trades Runtime is a public MCP runtime (live_backends false). "
+      + CAP7_PUBLIC + " Author Aziel Eliab.",
+    );
+  }
   if (kind === "runtime") {
     return hideInternalDetermination(
       RUNTIME_ABSTRACT
@@ -1744,6 +1789,9 @@ function defaultKeywords(kind) {
   if (kind === "receipts") return "GodLock receipts, hash-chained ledger, TRIAD_V3, Aziel Eliab, debate";
   if (kind === "software") {
     return "GodLock Softwares, GodLock, GodLock.uk, Aziel Runtime, azieleliab.com, Try on Glama, HTTPS engine";
+  }
+  if (kind === "doors") {
+    return "Aziel Eliab doors, GodLock, Whitestone, MirageGrid, Aziel Runtime, Trades Runtime, Glama";
   }
   if (kind === "runtime" || kind === "home") {
     return "GodLock, Aziel Eliab, Runtime, FragGate, MCP, OpenAPI, ChatGPT, Grok, Venice, Claude, Cursor, Glama, Perplexity, Copilot, Gemini, Mistral, Meta AI, Apple Intelligence, Amazon Q, DuckAssist, You.com, Cohere";
@@ -2305,6 +2353,7 @@ export const PUBLIC_ALLOW = [
   "/verify",
   "/reason",
   "/software",
+  "/doors",
   "/v1/software",
   "/runtime",
   "/runtime/",
@@ -2424,6 +2473,16 @@ export function robotsTxt() {
   return header.concat(star).concat(bots).concat([""]).concat(maps.map((u) => "Sitemap: " + u)).concat([""]).join("\n");
 }
 
+/** Sitemap locs stay on the canonical host. Sister sites are cross-links, not sitemap rows. */
+export function firstPartySitemapLoc(loc) {
+  try {
+    const u = new URL(String(loc || ""));
+    return u.protocol === "https:" && u.hostname === "godlock.uk";
+  } catch {
+    return false;
+  }
+}
+
 function sitemapUrl(loc, lastmod, changefreq, priority) {
   return [
     "  <url>",
@@ -2440,12 +2499,13 @@ export async function sitemapXml(env, extras = {}) {
   const seen = new Set();
   const rows = [];
   const add = (loc, priority, changefreq) => {
-    if (!loc || seen.has(loc)) return;
+    if (!loc || seen.has(loc) || !firstPartySitemapLoc(loc)) return;
     seen.add(loc);
     rows.push(sitemapUrl(loc, lastmod, changefreq || "weekly", priority || "0.5"));
   };
   add(CANON_HOST + "/", "1.0", "daily");
   add(CANON_HOST + SOFTWARE_PATH, "0.95", "daily");
+  add(CANON_HOST + DOORS_PATH, "0.9", "weekly");
   add(CANON_HOST + AZIEL_ELIAB_PATH, "0.95", "weekly");
   add(CANON_HOST + AZIEL_HANDLES_PATH, "0.9", "weekly");
   add(CANON_HOST + "/verify", "0.85", "daily");
@@ -2617,6 +2677,9 @@ export function citeDoc(sot, runtimeCite) {
     aziel_handle_list: AZIEL_HANDLES.map((h) => ({ label: h.label, href: h.href })),
     aziel_handles_note: "Same public doors as " + DOORS_URL + ". Official Aziel sites: " + FURNACE_SITE + " " + FURNACE_AZIEL + " " + UNSEAL_DOOR + ". He Didn't Jump is a handle, not a Live Node.",
     doors: DOORS_URL,
+    doors_page: CANON_HOST + DOORS_PATH,
+    live_public_doors: LIVE_PUBLIC_DOORS.map((d) => ({ ...d })),
+    glama_trades: GLAMA_TRADES,
     cap7_is_icann: false,
     cap7_note: CAP7_PUBLIC,
     paid_satellite: "HELD",
@@ -2633,6 +2696,7 @@ export function citeDoc(sot, runtimeCite) {
     priority_pages: {
       home: CANON_HOST + "/",
       software: CANON_HOST + SOFTWARE_PATH,
+      doors: CANON_HOST + DOORS_PATH,
       aziel_eliab: CANON_HOST + AZIEL_ELIAB_PATH,
       aziel_handles: CANON_HOST + AZIEL_HANDLES_PATH,
       verify: CANON_HOST + "/verify",
@@ -2901,7 +2965,9 @@ export function llmsDoc(sot, runtimeCite) {
     + "Aziel Runtime on GitHub: " + GITHUB_RUNTIME + "\n"
     + "Aziel Runtime: " + CATALOG + "/\n"
     + "Try on Glama: " + GLAMA_RUNTIME + "\n"
+    + "Glama trades-runtime: " + GLAMA_TRADES + "\n"
     + "Site: " + CANON_HOST + "/\n"
+    + liveDoorsLlmsSection()
     + "GitHub: " + GITHUB + "\n"
     + "Download: " + DOWNLOAD + "\n"
     + "License: Apache-2.0\n\n"
@@ -3218,6 +3284,7 @@ export function siteOpenApi() {
       "/reason": { get: { operationId: "godlockUkReason", summary: "How GodLock is scored (published corpus TRIAD_V3)", responses: { "200": { description: "HTML or JSON" } } } },
       "/AzielEliab": { get: { operationId: "godlockUkAzielEliab", summary: "About Aziel Eliab — living publisher of GodLock (challenge/score product)", responses: { "200": { description: "HTML or JSON" } } } },
       "/aziel": { get: { operationId: "godlockUkAzielHandles", summary: "Aziel handles — public doors. Cap-7 is not ICANN. Paid satellite stays HELD. Not LIVE until Dual CLEAR, Aziel merge OK, and Cos.", responses: { "200": { description: "HTML or JSON" } } } },
+      "/doors": { get: { operationId: "godlockUkDoors", summary: "Ecosystem / Doors — ten live public sites and runtimes. Download-tracker hosts stay off this list. MirageGrid is mesh-only (public_icann false).", responses: { "200": { description: "HTML or JSON" } } } },
       "/runtime": { get: { operationId: "godlockUkRuntime", summary: "Same-origin Aziel Runtime FragGate door", responses: { "200": { description: "OK" } } } },
       "/who": { get: { operationId: "godlockUkWho", summary: "Who is Aziel Eliab — HTML; 15:20 lock on machine FAQ / person / who-is", responses: { "200": { description: "HTML" } } } },
       "/who-is": { get: { operationId: "godlockUkWhoIsAlias", summary: "308 to /who-is-aziel-eliab.txt", responses: { "308": { description: "Permanent redirect" } } } },

@@ -16,6 +16,7 @@ GodLock.uk: https://godlock.uk/
 aziel-runtime GitHub: https://github.com/AzielEliab/aziel-runtime
 Official Runtime Worker (secondary): https://aziel-runtime.vibelock.workers.dev/
 Try on Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
+Glama trades-runtime: https://glama.ai/mcp/servers/AzielEliab/trades-runtime
 FragGate kernel: https://github.com/AzielEliab/fraggate
 GitHub: https://github.com/AzielEliab/godlock
 GitHub profile: https://github.com/AzielEliab
@@ -34,6 +35,27 @@ Paths (not hash-only):
 - https://godlock.uk/donate
 - https://godlock.uk/AzielEliab
 - https://godlock.uk/aziel
+- https://godlock.uk/doors
+
+## Live public doors
+
+Verified live 2026-11-19. Ecosystem page: https://godlock.uk/doors
+
+- Aziel Eliab: https://www.azieleliab.com/ Identity hub.
+- Aziel Corpus Library: https://www.azielcorpuslibrary.net/ Aziel Corpus Library.
+- GodLock: https://godlock.uk/ GodLock challenge/score product. This host.
+- He Didn't Jump: https://hedidntjump.com/ Marion Zioncheck archive. A handle, not a Live Node.
+- Furnace Isn't Free: https://furnaceisntfree.com/ Live public site.
+- Time to Unseal the Book: https://timetounsealthebook.net/ Time to Unseal the Book.
+- Whitestone: https://whitestone.vibelock.workers.dev/ Live pro se web app.
+- Aziel Runtime: https://aziel-runtime.vibelock.workers.dev/ MCP/Softwares public runtime. Glama: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime.
+- Trades Runtime: https://trades-runtime.vibelock.workers.dev/ Public MCP runtime. Local-first BYO. live_backends false. Glama: https://glama.ai/mcp/servers/AzielEliab/trades-runtime.
+- MirageGrid: https://miragegrid.vibelock.workers.dev/ Cap-7 mesh DNS factory Worker. Mesh-only. public_icann: false. Cap-7 is not an ICANN registration and is not a public egress address.
+Glama aziel-runtime: https://glama.ai/mcp/servers/AzielEliab/aziel-runtime
+Glama trades-runtime: https://glama.ai/mcp/servers/AzielEliab/trades-runtime
+Counted download hosts stay off the door list.
+Trades Runtime live_backends: false.
+MirageGrid public_icann: false. Mesh-only.
 
 Handles, same public doors as https://www.azieleliab.com/doors :
 

@@ -287,7 +287,7 @@ describe("AZindex COLD-MULTI-SHELF on GodLock", () => {
     const xml = await sitemapXml({});
     assert.ok(xml.includes(CANON_HOST + "/shelves"));
     assert.ok(xml.includes(CANON_HOST + "/v1/shelves"));
-    assert.ok(xml.includes("https://www.azielcorpuslibrary.net/shelves"));
+    assert.ok(!xml.includes("<loc>https://www.azielcorpuslibrary.net/shelves</loc>"));
     assert.ok(siteOpenApi().paths["/shelves"]);
     assert.ok(siteOpenApi().paths["/v1/shelves"]);
     assert.ok(siteOpenApi().paths["/ai.txt"]);

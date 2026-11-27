@@ -25,7 +25,7 @@ const LIBRARY_UA = /curl\/|wget\/|python-requests|python-urllib|aiohttp\/|httpx\
 
 const MACHINE_PATHS = new Set([
   "/count", "/stats", "/health", "/mesh",
-  "/robots.txt", "/sitemap.xml", "/cite.json", "/llms.txt", "/ai.txt",
+  "/robots.txt", "/sitemap.xml", "/rss.xml", "/rss", "/feed", "/feed.xml", "/cite.json", "/llms.txt", "/ai.txt",
   "/openapi.json", "/mcp.json", "/person.jsonld", "/identity.jsonld", "/graph.jsonld",
   "/help", "/help.txt", "/HELP.txt", "/addendum.txt",
 ]);

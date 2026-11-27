@@ -9,6 +9,7 @@ import {
   AZIEL_ELIAB_PATH, AZIEL_HANDLES_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
   DONATE_PATH, RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE,
   TAB_PATHS, AZIEL_HANDLES, DOORS_URL, DOORS_PATH, CAP7_PUBLIC, PAID_SAT_PUBLIC, PATTERN_HOLD_PUBLIC,
+  RSS_PATH,
   FURNACE_SITE, FURNACE_AZIEL, UNSEAL_DOOR, SISTER_MESH,
   runtimeDistribution, ecosystemLinks, LIVE_PUBLIC_DOORS, GLAMA_RUNTIME, GLAMA_TRADES,
   SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO,
@@ -1029,6 +1030,7 @@ ${JSON.stringify(personNode())}
 </script>
 <link rel="alternate" type="text/plain" href="/who-is-aziel-eliab.txt" title="who-is">
 <link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt">
+<link rel="alternate" type="application/rss+xml" title="GodLock RSS" href="${esc(RSS_PATH)}">
 <script type="application/ld+json">
 ${JSON.stringify(faq)}
 </script>

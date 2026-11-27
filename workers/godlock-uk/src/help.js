@@ -28,6 +28,7 @@ import {
   AZIEL_ELIAB_PATH,
   REASON_PATH,
   RUNTIME_PATH,
+  RSS_PATH,
 } from "./seo.js";
 
 export const HELP_PATH = "/help.txt";
@@ -107,6 +108,7 @@ export function helpDoc() {
     "## Machine surfaces (existing)",
     "",
     "llms.txt: " + CANON_HOST + "/llms.txt",
+    "RSS: " + CANON_HOST + RSS_PATH,
     "ai.txt: " + CANON_HOST + "/ai.txt",
     "cite.json: " + CANON_HOST + "/cite.json",
     "robots.txt: " + CANON_HOST + "/robots.txt",

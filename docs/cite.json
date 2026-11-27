@@ -519,6 +519,7 @@
   "site": "https://godlock.uk/",
   "github": "https://github.com/AzielEliab/godlock",
   "receipts": "https://godlock.uk/receipts",
+  "rss": "https://godlock.uk/rss.xml",
   "software": "https://godlock.uk/software",
   "official_softwares": "https://www.azieleliab.com/software",
   "software_note": "GodLock-first Softwares heading then list: first card is GodLock, this hub's product. Aziel Runtime is a secondary cite (Try on Glama). Software listing: https://www.azieleliab.com/software. Digital Library completeness stays on the Aziel Digital Library. /v1/software JSON is hub-local (Aziel Runtime only plus sister_cites; Trades-Runtime, engine:false) — hub-scope, not the suite catalog and not the suite's 42 Softwares cards. Authority count 42 stays on Worker GET https://aziel-runtime.vibelock.workers.dev/v1/software. HTML ItemList numberOfItems stays 2 (GodLock, then Aziel Runtime). Suite Softwares SSoT is Worker GET https://aziel-runtime.vibelock.workers.dev/v1/software (same-origin https://godlock.uk/runtime/v1/software). FragGate list is fallback only.",

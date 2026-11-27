@@ -175,15 +175,9 @@ describe("RSS 2.0", () => {
   it("is advertised from HTML, robots, sitemap, cite, llms, and OpenAPI", async () => {
     const home = headMeta({ title: "GodLock", path: "/", kind: "home" });
     assert.match(home, /rel="alternate" href="\/rss\.xml" type="application\/rss\+xml" title="GodLock RSS"/);
-    assert.match(whoPageHtml(), /<head>[\s\S]*application\/rss\+xml[\s\S]*<\/head>/);
+    assert.match(whoPageHtml(), /<head>[\s\S]*rel="alternate" type="application\/rss\+xml"[\s\S]*<\/head>/);
     const homePage = page("GodLock", "<p>Engine</p>", { path: "/", kind: "home" });
     assert.match(homePage, /<head>[\s\S]*rel="alternate" href="\/rss\.xml" type="application\/rss\+xml"[\s\S]*<\/head>/);
-    for (const html of [siteFooter(), visibleBody(homePage), visibleBody(whoPageHtml())]) {
-      assert.doesNotMatch(html, /rss\.xml/i);
-      assert.doesNotMatch(html, /href="\/rss"/);
-      assert.doesNotMatch(html, /href="\/feed/);
-      assert.doesNotMatch(html, />rss</i);
-    }
     const robots = robotsTxt();
     assert.match(robots, /Allow: \/rss\.xml/);
     assert.match(robots, /RSS 2\.0: \/rss\.xml/);
@@ -197,5 +191,37 @@ describe("RSS 2.0", () => {
     assert.equal(isMachinePresencePath("/feed"), true);
     assert.equal(isSitePresencePath("/rss.xml", "GET"), false);
     assert.equal(RSS_RECEIPT_LIMIT, 50);
+  });
+
+  it("puts no feed link in the footer or any visible HTML body", async () => {
+    const stmt = {
+      bind() { return stmt; },
+      async first() { return null; },
+      async all() { return { results: [] }; },
+      async run() { return { success: true }; },
+    };
+    const env = {
+      DB: { prepare() { return stmt; }, async batch() { return []; } },
+      MESH_PROBE_ORIGIN: false,
+    };
+    const paths = ["/", "/reason", "/software", "/doors", "/receipts", "/verify", "/donate", "/AzielEliab", "/aziel", "/who", "/no-such"];
+    assert.doesNotMatch(siteFooter(), /rss|\/feed/i);
+    for (const path of paths) {
+      const res = await worker.fetch(new Request("https://godlock.uk" + path, {
+        headers: { Accept: "text/html", "User-Agent": "Mozilla/5.0" },
+      }), env);
+      const html = await res.text();
+      assert.match(html, /<html/i, path);
+      const body = visibleBody(html);
+      assert.doesNotMatch(body, /rss\.xml/i, path);
+      assert.doesNotMatch(body, /application\/rss\+xml/i, path);
+      assert.doesNotMatch(body, /href="\/rss"/i, path);
+      assert.doesNotMatch(body, /href="\/feed/i, path);
+      assert.doesNotMatch(body, />\s*rss\s*</i, path);
+      assert.doesNotMatch(body, /GodLock RSS/i, path);
+      if (path === "/" || path === "/who") {
+        assert.match(html, /<head[\s\S]*rel="alternate"[^>]*application\/rss\+xml[\s\S]*<\/head>/i, path);
+      }
+    }
   });
 });

@@ -12,6 +12,7 @@ import {
 } from "./src/rss.js";
 import {
   CANON_HOST,
+  RSS_CANONICAL_URL,
   RSS_PATH,
   citeDoc,
   headMeta,
@@ -128,6 +129,48 @@ describe("RSS 2.0", () => {
     assert.ok(xml.includes(CANON_HOST + "/doors"));
   });
 
+  it("keeps an in-memory receipt only when isolated is strictly false or 0", () => {
+    const xml = rssXml([
+      {
+        id: "pub",
+        created_utc: "2026-11-01T00:00:00.000Z",
+        challenge_text: "public question kept",
+        label: "Yes",
+        summary: "",
+        isolated: 0,
+      },
+      {
+        id: "bool",
+        created_utc: "2026-11-02T00:00:00.000Z",
+        challenge_text: "false flag kept",
+        label: "Yes",
+        summary: "",
+        isolated: false,
+      },
+      {
+        id: "strue",
+        created_utc: "2026-11-03T00:00:00.000Z",
+        challenge_text: "string true hidden",
+        label: "No",
+        summary: "secret true",
+        isolated: "true",
+      },
+      {
+        id: "sfalse",
+        created_utc: "2026-11-04T00:00:00.000Z",
+        challenge_text: "string false hidden",
+        label: "No",
+        summary: "",
+        isolated: "false",
+      },
+    ]);
+    assert.ok(xml.includes("public question kept"));
+    assert.ok(xml.includes("false flag kept"));
+    assert.ok(!xml.includes("string true hidden"));
+    assert.ok(!xml.includes("secret true"));
+    assert.ok(!xml.includes("string false hidden"));
+  });
+
   it("serves /rss.xml and redirects the aliases", async () => {
     const rec = feedEnv([
       {
@@ -157,10 +200,48 @@ describe("RSS 2.0", () => {
     for (const alias of ["/rss", "/feed", "/feed.xml"]) {
       const redirected = await worker.fetch(new Request("https://godlock.uk" + alias), rec.env);
       assert.equal(redirected.status, 308, alias);
-      assert.equal(redirected.headers.get("Location"), RSS_PATH);
+      assert.equal(redirected.headers.get("Location"), RSS_CANONICAL_URL);
     }
     const queried = await worker.fetch(new Request("https://godlock.uk/feed?x=1"), rec.env);
-    assert.equal(queried.headers.get("Location"), RSS_PATH + "?x=1");
+    assert.equal(queried.status, 308);
+    assert.equal(queried.headers.get("Location"), RSS_CANONICAL_URL);
+  });
+
+  it("sends feed aliases to the canonical URL and nowhere else", async () => {
+    const env = {
+      DB: {
+        prepare() {
+          const stmt = {
+            bind() { return stmt; },
+            async run() { return { success: true }; },
+            async first() { return null; },
+            async all() { return { results: [] }; },
+          };
+          return stmt;
+        },
+        async batch() { return []; },
+      },
+    };
+    const cases = [
+      ["https://evil.example/rss", { Host: "evil.example" }],
+      ["https://godlock.uk/feed", { Host: "evil.example" }],
+      ["https://godlock.uk./rss", {}],
+      ["https://godlock.uk:8443/feed.xml", {}],
+      ["https://godlock.uk//evil", {}],
+      ["https://godlock.uk/\\evil", {}],
+      ["https://godlock.uk/rss\\..\\evil", {}],
+      ["https://godlock.uk/rss%5Cevil", {}],
+    ];
+    for (const [href, headers] of cases) {
+      const res = await worker.fetch(new Request(href, { headers }), env);
+      const location = res.headers.get("Location");
+      if (res.status === 308) {
+        assert.equal(location, RSS_CANONICAL_URL, href);
+      } else {
+        assert.equal(location, null, href);
+      }
+      if (location) assert.equal(location, "https://godlock.uk/rss.xml");
+    }
   });
 
   it("keeps a missing database an empty receipt list", async () => {

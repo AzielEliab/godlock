@@ -97,7 +97,7 @@ function receiptItems(rows) {
   const kept = [];
   for (const row of list) {
     if (!row || row.id == null || String(row.id).trim() === "") continue;
-    if (row.isolated === true || Number(row.isolated)) continue;
+    if (!(row.isolated === false || row.isolated === 0)) continue;
     const id = String(row.id);
     const link = CANON_HOST + "/receipt/" + encodeURIComponent(id);
     const question = row.challenge_text != null ? String(row.challenge_text) : "";

@@ -36,7 +36,7 @@ import {
   personJsonLd, identityJsonLd, graphJsonLd, worksDoc, whoIsAzielEliabTxt, whyAzielEliabTxt, wellKnownAzielDoc,
   AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE, WHO_PATH, WHY_IS_PATH,
   AZIEL_HANDLES, CAP7_PUBLIC, PAID_SAT_PUBLIC, PATTERN_HOLD_PUBLIC, DOORS_URL, DOORS_PATH,
-  RSS_PATH, RSS_ALIAS_PATHS,
+  RSS_PATH, RSS_ALIAS_PATHS, RSS_CANONICAL_URL,
   LIVE_PUBLIC_DOORS, GLAMA_RUNTIME, GLAMA_TRADES,
   FURNACE_SITE, FURNACE_AZIEL, FURNACE_LABEL, FURNACE_AZIEL_LABEL, UNSEAL_DOOR, UNSEAL_LABEL, SISTER_MESH,
   searchEngineAssociation,
@@ -1067,7 +1067,7 @@ async function handleGodlock(request, env, ctx) {
       if (RSS_ALIAS_PATHS.includes(path)) {
         return new Response(null, {
           status: 308,
-          headers: { Location: RSS_PATH + (url.search || ""), ...corsHeaders() },
+          headers: { Location: RSS_CANONICAL_URL, ...corsHeaders() },
         });
       }
       if (path === RSS_PATH) {

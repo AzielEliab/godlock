@@ -112,6 +112,8 @@ export const VERIFY_PATH = "/verify";
 /** Canonical RSS 2.0 document. /rss, /feed, and /feed.xml 308 here. */
 export const RSS_PATH = "/rss.xml";
 export const RSS_ALIAS_PATHS = ["/rss", "/feed", "/feed.xml"];
+/** Absolute Location for alias redirects. Never built from the request Host. */
+export const RSS_CANONICAL_URL = CANON_HOST + RSS_PATH;
 /** Pretty path for the Aziel handles tab. Not a redirect to /AzielEliab. */
 export const AZIEL_HANDLES_PATH = "/aziel";
 /** Public doors list on the identity hub. Handles on this site match that page. */

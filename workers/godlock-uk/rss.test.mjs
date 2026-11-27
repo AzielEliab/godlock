@@ -20,7 +20,14 @@ import {
   siteOpenApi,
   sitemapXml,
 } from "./src/seo.js";
-import { whoPageHtml } from "./src/ui.js";
+import { page, siteFooter, whoPageHtml } from "./src/ui.js";
+
+function visibleBody(html) {
+  return String(html)
+    .replace(/^[\s\S]*<body[^>]*>/i, "")
+    .replace(/<\/body>[\s\S]*$/i, "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "");
+}
 
 const QUESTION = "Specified Fit & the reader <phi> are not a \"spiral\" proof.";
 
@@ -168,7 +175,15 @@ describe("RSS 2.0", () => {
   it("is advertised from HTML, robots, sitemap, cite, llms, and OpenAPI", async () => {
     const home = headMeta({ title: "GodLock", path: "/", kind: "home" });
     assert.match(home, /rel="alternate" href="\/rss\.xml" type="application\/rss\+xml" title="GodLock RSS"/);
-    assert.match(whoPageHtml(), /application\/rss\+xml/);
+    assert.match(whoPageHtml(), /<head>[\s\S]*application\/rss\+xml[\s\S]*<\/head>/);
+    const homePage = page("GodLock", "<p>Engine</p>", { path: "/", kind: "home" });
+    assert.match(homePage, /<head>[\s\S]*rel="alternate" href="\/rss\.xml" type="application\/rss\+xml"[\s\S]*<\/head>/);
+    for (const html of [siteFooter(), visibleBody(homePage), visibleBody(whoPageHtml())]) {
+      assert.doesNotMatch(html, /rss\.xml/i);
+      assert.doesNotMatch(html, /href="\/rss"/);
+      assert.doesNotMatch(html, /href="\/feed/);
+      assert.doesNotMatch(html, />rss</i);
+    }
     const robots = robotsTxt();
     assert.match(robots, /Allow: \/rss\.xml/);
     assert.match(robots, /RSS 2\.0: \/rss\.xml/);

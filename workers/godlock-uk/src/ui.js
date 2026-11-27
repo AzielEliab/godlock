@@ -267,7 +267,7 @@ export function sisterMeshLine() {
 
 export function siteFooter() {
   const paths = TAB_PATHS.map((t) => `<a href="${esc(t.href)}">${esc(t.href)}</a>`).join(" · ");
-  return `<footer id="godlock-site-footer">Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(RECEIPTS_PATH)}">Receipts</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(AZIEL_HANDLES_PATH)}">Aziel handles</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="/cite.json">cite.json</a> · <a href="/llms.txt">llms.txt</a> · <a href="/ai.txt">ai.txt</a> · <a href="/sitemap.xml">sitemap</a> · <a href="${esc(RSS_PATH)}">rss</a> · <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache-2.0</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
+  return `<footer id="godlock-site-footer">Aziel Eliab · GodLock is a product name · <a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(RUNTIME_PATH)}">Runtime</a> · <a href="${esc(RECEIPTS_PATH)}">Receipts</a> · <a href="${esc(DONATE_PATH)}">Donate</a> · <a href="${esc(AZIEL_HANDLES_PATH)}">Aziel handles</a> · <a href="${esc(LIBRARY_AZIEL)}">Aziel Eliab — Digital Library</a> · <a href="${esc(HEDIDNTJUMP)}">${esc(HEDIDNTJUMP_LABEL)}</a> · <a href="${esc(GITHUB)}">GitHub</a> · <a href="/cite.json">cite.json</a> · <a href="/llms.txt">llms.txt</a> · <a href="/ai.txt">ai.txt</a> · <a href="/sitemap.xml">sitemap</a> · <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache-2.0</a> · <a href="${esc(CANON_HOST)}">godlock.uk</a>
 ${officialAzielSitesLine()}
 ${sisterMeshLine()}
 ${ecosystemNav()}

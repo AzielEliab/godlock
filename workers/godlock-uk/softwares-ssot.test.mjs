@@ -90,7 +90,7 @@ describe("GodLock Softwares Whitestone via Worker SSoT", () => {
     assert.match(html, /href="https:\/\/aziel-runtime\.vibelock\.workers\.dev\/v1\/software"/);
     assert.match(html, /href="\/runtime\/v1\/software"/);
     assert.match(html, /FragGate list is fallback only/);
-    assert.doesNotMatch(html, /Whitestone/);
+    assert.match(html, /href="https:\/\/whitestone\.vibelock\.workers\.dev\/">Whitestone<\/a>/);
     assert.doesNotMatch(html, /id="whitestone"/);
     assert.match(suiteSoftwaresSsotPointer(), /Worker SSoT/);
     const help = helpDoc();

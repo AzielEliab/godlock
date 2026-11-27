@@ -8,9 +8,9 @@ import {
   SOFTWARE_SSOT, SOFTWARE_SSOT_FALLBACK,
   AZIEL_ELIAB_PATH, AZIEL_HANDLES_PATH, AZIEL_CORPUS_PATH, REASON_PATH, SOFTWARE_PATH, RUNTIME_PATH,
   DONATE_PATH, RECEIPTS_PATH, HOME_PRIOR_LIMIT, RECEIPTS_PAGE_SIZE,
-  TAB_PATHS, AZIEL_HANDLES, DOORS_URL, CAP7_PUBLIC, PAID_SAT_PUBLIC, PATTERN_HOLD_PUBLIC,
+  TAB_PATHS, AZIEL_HANDLES, DOORS_URL, DOORS_PATH, CAP7_PUBLIC, PAID_SAT_PUBLIC, PATTERN_HOLD_PUBLIC,
   FURNACE_SITE, FURNACE_AZIEL, UNSEAL_DOOR, SISTER_MESH,
-  runtimeDistribution, ecosystemLinks,
+  runtimeDistribution, ecosystemLinks, LIVE_PUBLIC_DOORS, GLAMA_RUNTIME, GLAMA_TRADES,
   SPECIFIED_FIT_TITLE, SPECIFIED_FIT_MOTTO,
   ABOUT_PUBLIC_WORK_LEAD, ABOUT_DOCUMENT_OVER_DECLARE, ABOUT_UNSCORED_CLAIM,
   VISIBLE_IDENTITY_LOCK, IDENTITY_ANSWER, personNode, identityAssociationLinks,
@@ -911,6 +911,28 @@ export function azielEliabText() {
   return AZIEL_MANIFESTO.join("\n\n") + "\n\n" + AZIEL_SIGNATURE + "\n";
 }
 
+export function liveDoorsList() {
+  return LIVE_PUBLIC_DOORS.map((d) => {
+    const glama = d.glama ? ` · <a href="${esc(d.glama)}">Glama</a>` : "";
+    return `<li><a href="${esc(d.href)}">${esc(d.label)}</a> — ${esc(d.note)}${glama}</li>`;
+  }).join("");
+}
+
+export function liveDoorsSection() {
+  return `<section class="card" id="live-doors"><h2>Live public doors</h2><p>Ten live Aziel Eliab sites and public runtimes. Counted download hosts stay off this list. <a href="${esc(DOORS_PATH)}">Ecosystem / Doors</a>.</p><ul class="handles">${liveDoorsList()}</ul></section>`;
+}
+
+export function doorsBody() {
+  return `<section class="about-aziel" id="doors"><div class="card about-prose">
+<h2>Ecosystem / Doors</h2>
+<p>Ten live public sites and runtimes. Each link is the live origin. Counted download hosts stay off this list.</p>
+<ul class="handles">${liveDoorsList()}</ul>
+<p>Glama: <a href="${esc(GLAMA_RUNTIME)}">Aziel Runtime</a> · <a href="${esc(GLAMA_TRADES)}">Trades Runtime</a>.</p>
+<p class="muted">MirageGrid is mesh-only. public_icann: false. ${esc(CAP7_PUBLIC)} Trades Runtime live_backends: false. He Didn't Jump is a handle, not a Live Node.</p>
+<p><a href="${esc(SOFTWARE_PATH)}">Softwares</a> · <a href="${esc(AZIEL_HANDLES_PATH)}">Aziel handles</a></p>
+</div></section>`;
+}
+
 export function azielHandlesBody() {
   const items = AZIEL_HANDLES.map((h) => `<li><a href="${esc(h.href)}">${esc(h.label)}</a></li>`).join("");
   return `<section class="about-aziel" id="aziel-handles"><div class="card about-prose">
@@ -1069,6 +1091,7 @@ export function softwareBody({ products, extras } = {}) {
   const cards = list.map((p) => softwaresCard(p, { featured: p.slug === "godlock" })).join("");
   return `<h2 class="soft-heading">Softwares</h2>
 <div class="soft-grid">${cards}</div>
+${liveDoorsSection()}
 ${officialSoftwaresPointer()}
 ${suiteSoftwaresSsotPointer()}
 ${launchReadyHtml(extras && extras.runtimeCite)}`;

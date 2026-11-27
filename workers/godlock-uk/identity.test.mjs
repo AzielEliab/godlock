@@ -514,8 +514,8 @@ describe("AZindex identity machine", () => {
     assert.ok(xml.includes("<loc>" + CANON_HOST + "/who-is</loc>"));
     assert.ok(xml.includes(CANON_HOST + "/why-aziel-eliab.txt"));
     assert.ok(xml.includes("<loc>" + CANON_HOST + "/why</loc>"));
-    assert.ok(xml.includes("https://x.com/AzielEliab"));
-    assert.ok(xml.includes("https://www.azieleliab.com/why"));
+    assert.ok(!xml.includes("<loc>https://x.com/AzielEliab</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.azieleliab.com/why</loc>"));
     assert.ok(xml.includes(CANON_HOST + "/.well-known/aziel.json"));
     assert.ok(xml.includes(CANON_HOST + "/.well-known/person.jsonld"));
     for (const path of [
@@ -547,9 +547,9 @@ describe("AZindex identity machine", () => {
     assert.deepEqual(cite.latin_aka, LATIN_AKA);
     assert.equal(cite.identity_machine.well_known_person, CANON_HOST + "/.well-known/person.jsonld");
     assert.ok(cite.about_public_work.identity_machine.includes(CANON_HOST + "/.well-known/person.jsonld"));
-    assert.ok(xml.includes(SISTER_STATS.azieleliab));
-    assert.ok(xml.includes(SISTER_STATS.corpus));
-    assert.ok(xml.includes(SISTER_STATS.hedidntjump));
+    assert.ok(!xml.includes("<loc>" + SISTER_STATS.azieleliab + "</loc>"));
+    assert.ok(!xml.includes("<loc>" + SISTER_STATS.corpus + "</loc>"));
+    assert.ok(!xml.includes("<loc>" + SISTER_STATS.hedidntjump + "</loc>"));
     const llms = llmsDoc();
     assert.match(llms, /^# GodLock\n/);
     assert.match(llms, /Identity machine \(do not fork @id\): https:\/\/godlock\.uk\/who-is-aziel-eliab\.txt/);
@@ -1234,15 +1234,16 @@ describe("AZindex identity machine", () => {
     assert.doesNotMatch(robots, /Remain-OFF/);
     const xml = await sitemapXml({});
     assert.match(xml, /decryption_complete false/);
-    assert.ok(xml.includes("<loc>https://www.azieleliab.com/software</loc>"));
-    assert.ok(xml.includes("<loc>https://www.azieleliab.com/runtime/</loc>"));
-    assert.ok(xml.includes("<loc>https://www.azieleliab.com/</loc>"));
-    assert.ok(xml.includes("<loc>https://www.azielcorpuslibrary.net/</loc>"));
-    assert.ok(xml.includes("<loc>https://www.furnaceisntfree.com/</loc>"));
-    assert.ok(xml.includes("<loc>https://furnaceisntfree.com/aziel/</loc>"));
-    assert.ok(xml.includes("<loc>https://www.timetounsealthebook.net</loc>"));
-    assert.ok(xml.includes("<loc>https://www.hedidntjump.com/</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.azieleliab.com/software</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.azieleliab.com/runtime/</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.azieleliab.com/</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.azielcorpuslibrary.net/</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.furnaceisntfree.com/</loc>"));
+    assert.ok(!xml.includes("<loc>https://furnaceisntfree.com/aziel/</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.timetounsealthebook.net</loc>"));
+    assert.ok(!xml.includes("<loc>https://www.hedidntjump.com/</loc>"));
     assert.ok(xml.includes("<loc>https://godlock.uk/software</loc>"));
+    assert.ok(xml.includes("<loc>https://godlock.uk/doors</loc>"));
     const llms = llmsDoc();
     assert.match(llms, /## Search-engine association/);
     assert.ok(llms.includes(SEARCH_ENGINE_ASSOCIATION_NOTE));

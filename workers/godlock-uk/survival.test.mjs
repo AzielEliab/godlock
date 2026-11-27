@@ -404,7 +404,7 @@ describe("BAN-SURVIVAL hub pull", () => {
     const xml = await sitemapXml({});
     assert.ok(xml.includes(CANON_HOST + "/survival"));
     assert.ok(xml.includes(CANON_HOST + "/v1/survival"));
-    assert.ok(xml.includes(SURVIVAL_ORIGIN));
+    assert.ok(!xml.includes("<loc>" + SURVIVAL_ORIGIN + "</loc>"));
     const spec = siteOpenApi();
     assert.ok(spec.paths["/survival"]);
     assert.ok(spec.paths["/v1/survival"]);

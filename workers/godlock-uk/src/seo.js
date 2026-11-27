@@ -109,6 +109,9 @@ export const WHO_PATH = "/who";
 export const WHY_IS_PATH = "/why-aziel-eliab.txt";
 export const WHY_PATH = "/why";
 export const VERIFY_PATH = "/verify";
+/** Canonical RSS 2.0 document. /rss, /feed, and /feed.xml 308 here. */
+export const RSS_PATH = "/rss.xml";
+export const RSS_ALIAS_PATHS = ["/rss", "/feed", "/feed.xml"];
 /** Pretty path for the Aziel handles tab. Not a redirect to /AzielEliab. */
 export const AZIEL_HANDLES_PATH = "/aziel";
 /** Public doors list on the identity hub. Handles on this site match that page. */
@@ -2164,6 +2167,7 @@ export function headMeta(opts) {
   if (keywords) tags.push(meta("keywords", keywords));
   tags.push(
     linkRel("canonical", url),
+    linkRel("alternate", RSS_PATH, " type=" + Q + "application/rss+xml" + Q + " title=" + Q + "GodLock RSS" + Q),
     prop("og:title", docTitle),
     prop("og:description", description),
     prop("og:type", kind === "aziel" ? "profile" : "website"),
@@ -2390,6 +2394,10 @@ export const PUBLIC_ALLOW = [
   INDEXNOW_KEY_PATH,
   "/mcp.json",
   "/openapi.json",
+  RSS_PATH,
+  "/rss",
+  "/feed",
+  "/feed.xml",
   "/count",
   "/stats",
   "/health",
@@ -2443,6 +2451,7 @@ export function robotsTxt() {
     "# " + SEARCH_ENGINE_ASSOCIATION_NOTE,
     "# Sisters: Softwares " + SEARCH_ENGINE_SITES.softwares + " · ae " + SEARCH_ENGINE_SITES.ae + " · corpus " + SEARCH_ENGINE_SITES.corpus + " · furnace " + SEARCH_ENGINE_SITES.furnace + " · Unseal " + SEARCH_ENGINE_SITES.unseal + " · HDJ " + SEARCH_ENGINE_SITES.hdj + " · godlock " + SEARCH_ENGINE_SITES.godlock,
     "# Paths are not hash-only. Tabs: / /reason /software /runtime /receipts /verify /donate /AzielEliab /aziel.",
+    "# RSS 2.0: " + RSS_PATH + " (aliases /rss /feed /feed.xml 308 here). Public pages and public receipts. Isolated receipts are omitted.",
     "# Homepage hashes (#software #runtime #receipts #donate #reason #verify #AzielEliab #aziel) map to those paths.",
     "# Growth-ON. Allow: /.",
     "# Cap-7 is not an ICANN name. Paid satellite stays HELD. Not LIVE until Dual CLEAR, Aziel merge OK, and Cos.",
@@ -2554,6 +2563,7 @@ export async function sitemapXml(env, extras = {}) {
   add(CANON_HOST + "/v1/software", "0.7", "daily");
   add(CANON_HOST + "/openapi.json", "0.6", "weekly");
   add(CANON_HOST + "/robots.txt", "0.4", "weekly");
+  add(CANON_HOST + RSS_PATH, "0.6", "daily");
   add(CANON_HOST + "/health", "0.3", "daily");
   add(CANON_HOST + "/mesh", "0.4", "daily");
   add(CANON_HOST + "/v1/mesh", "0.45", "daily");
@@ -2701,6 +2711,7 @@ export function citeDoc(sot, runtimeCite) {
       aziel_handles: CANON_HOST + AZIEL_HANDLES_PATH,
       verify: CANON_HOST + "/verify",
       receipts: CANON_HOST + RECEIPTS_PATH,
+      rss: CANON_HOST + RSS_PATH,
       donate: CANON_HOST + DONATE_PATH,
       cite: CANON_HOST + "/cite.json",
       llms: CANON_HOST + "/llms.txt",
@@ -2942,7 +2953,8 @@ export function pathsAndHandlesLlmsSection() {
     + "He Didn't Jump is a handle. It is not a Live Node.\n"
     + "Cap-7: not an ICANN name. Paid satellite stays HELD.\n"
     + PATTERN_HOLD_PUBLIC + "\n"
-    + "Person: " + AZIEL_PERSON_ID + "\n\n";
+    + "Person: " + AZIEL_PERSON_ID + "\n"
+    + "RSS: " + CANON_HOST + RSS_PATH + "\n\n";
 }
 
 export function llmsDoc(sot, runtimeCite) {
@@ -3057,6 +3069,7 @@ export function llmsDoc(sot, runtimeCite) {
     + "How it is scored: " + CANON_HOST + REASON_PATH + "\n"
     + "Verify: " + CANON_HOST + "/verify\n"
     + "Receipts: " + CANON_HOST + RECEIPTS_PATH + "\n"
+    + "RSS: " + CANON_HOST + RSS_PATH + "\n"
     + "Donate: " + CANON_HOST + DONATE_PATH + "\n"
     + "Cite: " + CANON_HOST + "/cite.json\n"
     + "LLMs: " + CANON_HOST + "/llms.txt\n"
@@ -3296,6 +3309,10 @@ export function siteOpenApi() {
       "/mcp.json": { get: { operationId: "godlockUkMcpDiscovery", summary: "Same body as /.well-known/mcp.json — discovery only", responses: { "200": { description: "OK" } } } },
       "/cite.json": { get: { operationId: "godlockUkCite", summary: "Citation record — INGEST-AS-RECEIPT tip + cite, don't merge + RE-EXPAND-FROM-ARCHIVE + COLD-MULTI-SHELF + BAN-SURVIVAL pull + SPORE-1.0 failsafe + RE-COLD-STORE", responses: { "200": { description: "OK" } } } },
       "/llms.txt": { get: { operationId: "godlockUkLlms", summary: "LLM/crawler brief — keep the hash; cite, don't merge; crawlers don't re-expand; COLD-MULTI-SHELF + BAN-SURVIVAL + SPORE-1.0 failsafe cite", responses: { "200": { description: "OK" } } } },
+      "/rss.xml": { get: { operationId: "godlockUkRss", summary: "RSS 2.0 of public HTML pages and public receipts. Isolated receipts are omitted. Aliases /rss /feed /feed.xml 308 here.", responses: { "200": { description: "application/rss+xml" } } } },
+      "/rss": { get: { operationId: "godlockUkRssAlias", summary: "308 to /rss.xml", responses: { "308": { description: "Permanent redirect" } } } },
+      "/feed": { get: { operationId: "godlockUkFeedAlias", summary: "308 to /rss.xml", responses: { "308": { description: "Permanent redirect" } } } },
+      "/feed.xml": { get: { operationId: "godlockUkFeedXmlAlias", summary: "308 to /rss.xml", responses: { "308": { description: "Permanent redirect" } } } },
       "/ai.txt": { get: { operationId: "godlockUkAi", summary: "Alias of /llms.txt — machine crawl aid", responses: { "200": { description: "OK" } } } },
       "/shelves": { get: { operationId: "godlockUkShelves", summary: "COLD-MULTI-SHELF-1.0 challenge cite of canonical corpus /shelves (corpus#96). NO-FAN. doi null.", responses: { "200": { description: "OK" } } } },
       "/v1/shelves": { get: { operationId: "godlockUkShelvesJson", summary: "Same body as /shelves — machine alias", responses: { "200": { description: "OK" } } } },

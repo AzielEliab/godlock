@@ -36,6 +36,7 @@ import {
   personJsonLd, identityJsonLd, graphJsonLd, worksDoc, whoIsAzielEliabTxt, whyAzielEliabTxt, wellKnownAzielDoc,
   AZIEL_PERSON_ID, BIBLICAL_DISAMBIGUATION_LINE, WHO_PATH, WHY_IS_PATH,
   AZIEL_HANDLES, CAP7_PUBLIC, PAID_SAT_PUBLIC, PATTERN_HOLD_PUBLIC, DOORS_URL, DOORS_PATH,
+  RSS_PATH, RSS_ALIAS_PATHS,
   LIVE_PUBLIC_DOORS, GLAMA_RUNTIME, GLAMA_TRADES,
   FURNACE_SITE, FURNACE_AZIEL, FURNACE_LABEL, FURNACE_AZIEL_LABEL, UNSEAL_DOOR, UNSEAL_LABEL, SISTER_MESH,
   searchEngineAssociation,
@@ -45,6 +46,7 @@ import {
   spectrallockCiteFields,
   tradesCiteFields,
 } from "./seo.js";
+import { publicRssRows, rssXml } from "./rss.js";
 import { shelvesDoc } from "./shelves.js";
 import { helpDoc, isHelpPath } from "./help.js";
 import {
@@ -1061,6 +1063,21 @@ async function handleGodlock(request, env, ctx) {
         const products = softwareSuite(fetched.products, { version: fetched.version });
         const xml = await sitemapXml(env, { products });
         return new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", ...corsHeaders() } });
+      }
+      if (RSS_ALIAS_PATHS.includes(path)) {
+        return new Response(null, {
+          status: 308,
+          headers: { Location: RSS_PATH + (url.search || ""), ...corsHeaders() },
+        });
+      }
+      if (path === RSS_PATH) {
+        const xml = rssXml(await publicRssRows(env));
+        const headers = {
+          "Content-Type": "application/rss+xml; charset=utf-8",
+          ...corsHeaders(),
+        };
+        if (request.method === "HEAD") return new Response(null, { status: 200, headers });
+        return new Response(xml, { headers });
       }
       if (path === "/cite.json") {
         const products = publicSoftwaresList([], { version: RUNTIME_VERSION });

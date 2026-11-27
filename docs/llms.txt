@@ -40,6 +40,8 @@ Paths (not hash-only):
 - https://godlock.uk/aziel
 - https://godlock.uk/doors
 
+RSS: https://godlock.uk/rss.xml
+
 ## Live public doors
 
 Verified live 2026-11-19. Ecosystem page: https://godlock.uk/doors
